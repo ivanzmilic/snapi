@@ -1,0 +1,1307 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 26.48      1.03     1.03   664062     0.00     0.00  atom::freefree_op(double***, double***, double***, double)
+ 17.99      1.73     0.70   664062     0.00     0.00  atom::boundfree_op(double***, double)
+ 10.80      2.15     0.42 16222086     0.00     0.00  atom::damp_col(int, int, int, int, int, int, double, double, double)
+  6.94      2.42     0.27   330624     0.00     0.00  atom::add(double***, double***, double***, double, double)
+  5.40      2.63     0.21    47433     0.00     0.00  atmos_ppbez::formal(double***, double***, double***, double***, double, double)
+  5.40      2.84     0.21   332031     0.00     0.00  atom::boundbound_op(double***, double***, double***, double***, double***, double)
+  3.34      2.97     0.13 32493249     0.00     0.00  atom::get_pop(int, int, int, int, int)
+  3.08      3.09     0.12   332031     0.00     0.00  atom::emissivity(double***, double***, double***, double***, double***, double, double, double)
+  2.57      3.19     0.10 16222089     0.00     0.00  atom::broad_dop(double, double, double)
+  2.44      3.29     0.10 145998774     0.00     0.00  bfcs::U(double)
+  2.31      3.38     0.09   332031     0.00     0.00  atom::boundbound_em(double***, double***, double***, double***, double***, double)
+  1.54      3.44     0.06 16222086     0.00     0.00  hybf::U(double)
+  1.54      3.50     0.06  8111957     0.00     0.00  fvoigt(double, double)
+  1.29      3.55     0.05  2277097     0.00     0.00  ft3dim(int, int, int, int, int, int)
+  1.03      3.59     0.04  1328124     0.00     0.00  atom::add(double***, double***, int, int, int, int, int, int)
+  1.03      3.63     0.04   655158     0.00     0.00  trav::dU(double, double, io_class&)
+  1.03      3.67     0.04   241374     0.00     0.00  atom::ionfrc(double, double, double*&, double*&, int&)
+  1.03      3.71     0.04    94866     0.00     0.00  h_minus_mol::freefree_op(double***, double***, double***, double)
+  0.51      3.73     0.02 32486238     0.00     0.00  atmosphere::get_pop(int, int, int, int, int, int)
+  0.51      3.75     0.02 32486236     0.00     0.00  atmol::fetch_population(int, int, int, int, int, int)
+  0.51      3.77     0.02    47433     0.00     0.00  h_minus_mol::emissivity(double***, double***, double***, double***, double***, double, double, double)
+  0.51      3.79     0.02     5586     0.00     0.00  svdcmp(double**, int, int, double*, double**)
+  0.51      3.81     0.02     2394     0.00     0.00  atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int)
+  0.39      3.82     0.02                             bfcs::U(double*, int)
+  0.26      3.83     0.01  1897319     0.00     0.00  atmosphere::add(double***, double***, int, int, int, int, int, int)
+  0.26      3.84     0.01   656241     0.00     0.00  trav::U(double, double, io_class&)
+  0.26      3.85     0.01   332031     0.00     0.00  atom::opacity(double***, double***, double***, double***, double***, double, double, double)
+  0.26      3.86     0.01    94866     0.00     0.00  h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double)
+  0.26      3.87     0.01    47433     0.00     0.00  atmosphere::thomson_em(double***, double, int, int, int, int, int, int)
+  0.26      3.88     0.01                             hybf::~hybf()
+  0.13      3.89     0.01   614016     0.00     0.00  atmol::add(double***, double***, double***, double, double)
+  0.13      3.89     0.01       13     0.00     0.00  atmol::prof_clear()
+  0.00      3.89     0.00  2277086     0.00     0.00  del_ft3dim(double***, int, int, int, int, int, int)
+  0.00      3.89     0.00   616629     0.00     0.00  atmol::prof_init()
+  0.00      3.89     0.00   569196     0.00     0.00  atmol::emissivity(double***, double***, double***, double***, double***, double, double, double)
+  0.00      3.89     0.00   569196     0.00     0.00  atmol::opacity(double***, double***, double***, double***, double***, double, double, double)
+  0.00      3.89     0.00   414468     0.00     0.00  pf::U(double, double, io_class&)
+  0.00      3.89     0.00   413784     0.00     0.00  pf::dU(double, double, io_class&)
+  0.00      3.89     0.00   365034     0.00     0.00  io_class::msg(int, char const*, ...)
+  0.00      3.89     0.00   332031     0.00     0.00  atom::prof_init()
+  0.00      3.89     0.00   284604     0.00     0.00  atom::damp_rad(float**, unsigned short, unsigned short)
+  0.00      3.89     0.00   138156     0.00     0.00  cpf::U(double, double, io_class&)
+  0.00      3.89     0.00   137928     0.00     0.00  cpf::dU(double, double, io_class&)
+  0.00      3.89     0.00    94866     0.00     0.00  h_minus_mol::boundfree_op(double***, double)
+  0.00      3.89     0.00    84132     0.00     0.00  aps(double)
+  0.00      3.89     0.00    62244     0.00     0.00  mol::components(int&)
+  0.00      3.89     0.00    47880     0.00     0.00  append(atmol*, atmol**, int&)
+  0.00      3.89     0.00    47433     0.00     0.00  atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double)
+  0.00      3.89     0.00    47433     0.00     0.00  atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double)
+  0.00      3.89     0.00    42066     0.00     0.00  atom::R_ij_local_ALO(int, int, int, double, double, double, double)
+  0.00      3.89     0.00    42066     0.00     0.00  atom::C_ij(int, int, int, double, double)
+  0.00      3.89     0.00    42066     0.00     0.00  atom::C_ij_H(int, int, int, double, double)
+  0.00      3.89     0.00    31122     0.00     0.00  mol::dissoc(double, double)
+  0.00      3.89     0.00    30381     0.00     0.00  atmol::pops(atmol**, unsigned short, double, double, int, int, int)
+  0.00      3.89     0.00    28728     0.00     0.00  mol::pupdate(double, double*, int, int, int, int)
+  0.00      3.89     0.00    28728     0.00     0.00  eqc_poly::K(double, double)
+  0.00      3.89     0.00    25338     0.00     0.00  Exponential_Integral_Ei(double)
+  0.00      3.89     0.00    16758     0.00     0.00  atom::pupdate(double, double*, int, int, int, int)
+  0.00      3.89     0.00    16758     0.00     0.00  atom::abundance()
+  0.00      3.89     0.00    16758     0.00     0.00  atmol::components(int&)
+  0.00      3.89     0.00    16359     0.00     0.00  atom::pops(atmol**, unsigned short, double, double, int, int, int)
+  0.00      3.89     0.00    11913     0.00     0.00  ft2dim(int, int, int, int)
+  0.00      3.89     0.00     7182     0.00     0.00  del_i08t2dim(signed char**, int, int, int, int)
+  0.00      3.89     0.00     4788     0.00     0.00  del_ft2dim(double**, int, int, int, int)
+  0.00      3.89     0.00     2394     0.00     0.00  i08t2dim(int, int, int, int)
+  0.00      3.89     0.00     2394     0.00     0.00  h_minus_mol::pupdate(double, double*, int, int, int, int)
+  0.00      3.89     0.00     2394     0.00     0.00  eqc_hmin::K(double, double)
+  0.00      3.89     0.00     2378     0.00     0.00  max_1d(double*, int, int)
+  0.00      3.89     0.00     2337     0.00     0.00  solveCrout(int, double*, double*, double*)
+  0.00      3.89     0.00     2337     0.00     0.00  Crout(int, double*, double*)
+  0.00      3.89     0.00      533     0.00     0.00  atmol::rtinit()
+  0.00      3.89     0.00      287     0.00     0.00  atom::rtinit()
+  0.00      3.89     0.00      253     0.00     0.00  del_ft4dim(double****, int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00      253     0.00     0.00  ft4dim(int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00      247     0.00     0.00  atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int)
+  0.00      3.89     0.00      247     0.00     0.00  atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int)
+  0.00      3.89     0.00      223     0.00     0.00  unpack(unsigned char*, signed char&)
+  0.00      3.89     0.00      189     0.00     0.00  unpack(unsigned char*, double&, unsigned char)
+  0.00      3.89     0.00      185     0.00     0.00  unpack(unsigned char*, float*, int, int, unsigned char)
+  0.00      3.89     0.00      184     0.00     0.00  unpack(unsigned char*, unsigned char*, int, int)
+  0.00      3.89     0.00      142     0.00     0.00  unpack(unsigned char*, double*, int, int, unsigned char)
+  0.00      3.89     0.00       74     0.00     0.00  unpack(unsigned char*, int&, unsigned char)
+  0.00      3.89     0.00       71     0.00     0.00  ui32t2dim(int, int, int, int)
+  0.00      3.89     0.00       67     0.00     0.00  unpack(unsigned char*, unsigned char&)
+  0.00      3.89     0.00       67     0.00     0.00  unpack(unsigned char*, unsigned long&, unsigned char)
+  0.00      3.89     0.00       50     0.00     0.00  unpack(unsigned char*, char*&)
+  0.00      3.89     0.00       41     0.00     0.00  atmosphere::newpops(double***, double***, double***, double*, int)
+  0.00      3.89     0.00       37     0.00     0.00  bf_new(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00       36     0.00     0.00  del_ui32t2dim(unsigned int**, int, int, int, int)
+  0.00      3.89     0.00       35     0.00     0.00  roman(int)
+  0.00      3.89     0.00       35     0.00     0.00  pf_new(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00       35     0.00     0.00  newtrans(unsigned char, unsigned short*)
+  0.00      3.89     0.00       20     0.00     0.00  atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&)
+  0.00      3.89     0.00       20     0.00     0.00  atmol::set_parent_atmosphere(atmosphere*)
+  0.00      3.89     0.00       20     0.00     0.00  atmol::atmol(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00       19     0.00     0.00  trav::unpack(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00       14     0.00     0.00  unpack(unsigned char*, unsigned short*, int, int, unsigned char)
+  0.00      3.89     0.00       13     0.00     0.00  eqc_new(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00       13     0.00     0.00  mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&)
+  0.00      3.89     0.00       13     0.00     0.00  mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&)
+  0.00      3.89     0.00       13     0.00     0.00  atmol::prof_setup()
+  0.00      3.89     0.00       13     0.00     0.00  atmol::lte(double***, double***)
+  0.00      3.89     0.00       13     0.00     0.00  atmol::info()
+  0.00      3.89     0.00       13     0.00     0.00  atmol::rtclean(int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00       13     0.00     0.00  atmol::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int)
+  0.00      3.89     0.00       13     0.00     0.00  atmol::getlambda(double*, int&, double, double, double)
+  0.00      3.89     0.00       12     0.00     0.00  mol::popsetup(int, int, int, int, int, int)
+  0.00      3.89     0.00       12     0.00     0.00  atmol::popclean(int, int, int, int, int, int)
+  0.00      3.89     0.00       11     0.00     0.00  unpack(unsigned char*, double***, int, int, int, int, int, int, unsigned char)
+  0.00      3.89     0.00        8     0.00     0.00  parse(char*)
+  0.00      3.89     0.00        8     0.00     0.00  unpack(unsigned char*, unsigned short&, unsigned char)
+  0.00      3.89     0.00        8     0.00     0.00  fdset::rem(int)
+  0.00      3.89     0.00        7     0.00     0.00  sort(double*, int)
+  0.00      3.89     0.00        7     0.00     0.00  atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        7     0.00     0.00  atom::prof_clear()
+  0.00      3.89     0.00        7     0.00     0.00  atom::prof_setup()
+  0.00      3.89     0.00        7     0.00     0.00  atom::lte(double***, double***)
+  0.00      3.89     0.00        7     0.00     0.00  atom::info()
+  0.00      3.89     0.00        7     0.00     0.00  atom::unpack(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00        7     0.00     0.00  atom::rtclean(int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00        7     0.00     0.00  atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int)
+  0.00      3.89     0.00        7     0.00     0.00  atom::popclean(int, int, int, int, int, int)
+  0.00      3.89     0.00        7     0.00     0.00  atom::popsetup(int, int, int, int, int, int)
+  0.00      3.89     0.00        7     0.00     0.00  atom::getlambda(double*, int&, double, double, double)
+  0.00      3.89     0.00        6     0.00     0.00  atom::damp_col(double, double, double, double, double, signed char)
+  0.00      3.89     0.00        4     0.00     0.00  pack(unsigned char*, char*)
+  0.00      3.89     0.00        4     0.00     0.00  atom::atom(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        3     0.00     0.00  arg_extract(char*, char*&, char***&, char&, char&)
+  0.00      3.89     0.00        3     0.00     0.00  hybf::unpack(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00        3     0.00     0.00  cmdln::get(char const*, int&)
+  0.00      3.89     0.00        3     0.00     0.00  helium::helium(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        2     0.00     0.00  pack(unsigned char*, unsigned char&)
+  0.00      3.89     0.00        2     0.00     0.00  unpack(unsigned char*, unsigned int&, unsigned char)
+  0.00      3.89     0.00        2     0.00     0.00  sock_class::recv(int&)
+  0.00      3.89     0.00        2     0.00     0.00  id::~id()
+  0.00      3.89     0.00        2     0.00     0.00  hybf::getlambda(int&)
+  0.00      3.89     0.00        1     0.00     0.00  _GLOBAL__sub_I__ZN8atmos_pp10anglesetupERPdS1_Ri
+  0.00      3.89     0.00        1     0.00     0.00  del_ft5dim(double*****, int, int, int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  reducepath(char*)
+  0.00      3.89     0.00        1     0.00     0.00  atmos_pp_new(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  z_uncompress(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  pack(unsigned char*, int&, unsigned char)
+  0.00      3.89     0.00        1     0.00     0.00  ft5dim(int, int, int, int, int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  unpack(unsigned char*, int*, int, int, unsigned char)
+  0.00      3.89     0.00        1     0.00     0.00  get_opt(char**&, optel*)
+  0.00      3.89     0.00        1     0.00     0.00  atmos_new(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::read_atmos(char const*, char const*, unsigned char, io_class*)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::read_spinor(char const*, char const*, io_class*)
+  0.00      3.89     0.00        1     0.00     3.87  atmosphere::obs(double, double, double*, int)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::init(char const*, io_class*)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::resize(int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::unpack(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::ltepops()
+  0.00      3.89     0.00        1     0.00     3.84  atmosphere::nltepops()
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::popclean()
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::popsetup()
+  0.00      3.89     0.00        1     0.00     0.00  atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  sock_class::recv_id(id&)
+  0.00      3.89     0.00        1     0.00     0.00  sock_class::send_id(id&)
+  0.00      3.89     0.00        1     0.00     0.00  sock_class::sock_class(int)
+  0.00      3.89     0.00        1     0.00     0.00  atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  h_minus_mol::popclean(int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  h_minus_mol::popsetup(int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  id::id(sock_class*)
+  0.00      3.89     0.00        1     0.00     0.00  id::id()
+  0.00      3.89     0.00        1     0.00     0.00  reg::is_clr(unsigned long)
+  0.00      3.89     0.00        1     0.00     0.00  reg::is_set(unsigned long)
+  0.00      3.89     0.00        1     0.00     0.00  reg::unpack(unsigned char*, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  reg::reg(unsigned long)
+  0.00      3.89     0.00        1     0.00     0.00  grid::resize(int, int, int, int, int, int)
+  0.00      3.89     0.00        1     0.00     0.00  grid::unpack(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  grid::grid(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  jnfo::jnfo()
+  0.00      3.89     0.00        1     0.00     0.00  jnfo::jnfo(unsigned char*, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  jnfo::~jnfo()
+  0.00      3.89     0.00        1     0.00     0.00  node::node(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  atmos_pp::anglesetup(double*&, double*&, int&)
+  0.00      3.89     0.00        1     0.00     0.00  atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  hydrogen::hydrogen(unsigned char*, int&, unsigned char, io_class&)
+  0.00      3.89     0.00        1     0.00     0.00  io_class::io_class(char*, char*&, char const*, unsigned int, unsigned int, int, int)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.26% of 3.89 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     99.4    0.00    3.87                 activate(void*) [1]
+                0.00    3.87       1/1           atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00       1/1           atmosphere::init(char const*, io_class*) [48]
+                0.00    0.00       1/1           io_class::io_class(char*, char*&, char const*, unsigned int, unsigned int, int, int) [2464]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    3.87       1/1           activate(void*) [1]
+[2]     99.4    0.00    3.87       1         atmosphere::obs(double, double, double*, int) [2]
+                0.00    3.84       1/1           atmosphere::nltepops() [3]
+                0.00    0.01     201/47433       atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+                0.00    0.01     201/47433       atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+                0.01    0.00      13/13          atmol::prof_clear() [38]
+                0.00    0.00       1/1           atmosphere::ltepops() [39]
+                0.00    0.00     201/47433       atmos_ppbez::formal(double***, double***, double***, double***, double, double) [14]
+                0.00    0.00       1/247         atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int) [44]
+                0.00    0.00       1/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00    2613/616629      atmol::prof_init() [2339]
+                0.00    0.00    1407/332031      atom::prof_init() [2345]
+                0.00    0.00     404/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+                0.00    0.00      20/20          atmol::set_parent_atmosphere(atmosphere*) [2393]
+                0.00    0.00      13/13          atmol::prof_setup() [2400]
+                0.00    0.00       7/7           atom::prof_setup() [2415]
+                0.00    0.00       7/7           atom::prof_clear() [2414]
+                0.00    0.00       2/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00       1/1           atmosphere::popsetup() [2444]
+                0.00    0.00       1/247         atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int) [2376]
+                0.00    0.00       1/253         del_ft4dim(double****, int, int, int, int, int, int, int, int) [2374]
+                0.00    0.00       1/1           atmosphere::popclean() [2443]
+-----------------------------------------------
+                0.00    3.84       1/1           atmosphere::obs(double, double, double*, int) [2]
+[3]     98.8    0.00    3.84       1         atmosphere::nltepops() [3]
+                0.00    1.64   47232/47433       atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+                0.00    1.60   47232/47433       atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+                0.27    0.00  330624/330624      atom::add(double***, double***, double***, double, double) [13]
+                0.21    0.00   47232/47433       atmos_ppbez::formal(double***, double***, double***, double***, double, double) [14]
+                0.00    0.13      41/41          atmosphere::newpops(double***, double***, double***, double*, int) [17]
+                0.01    0.00  614016/614016      atmol::add(double***, double***, double***, double, double) [37]
+                0.00    0.00    7011/32493249     atom::get_pop(int, int, int, int, int) [15]
+                0.00    0.00       7/7           atom::getlambda(double*, int&, double, double, double) [43]
+                0.00    0.00     246/247         atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int) [44]
+                0.00    0.00       2/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00  614016/616629      atmol::prof_init() [2339]
+                0.00    0.00  330624/332031      atom::prof_init() [2345]
+                0.00    0.00   94712/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+                0.00    0.00     533/533         atmol::rtinit() [2372]
+                0.00    0.00     287/287         atom::rtinit() [2373]
+                0.00    0.00     246/247         atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int) [2376]
+                0.00    0.00     246/253         del_ft4dim(double****, int, int, int, int, int, int, int, int) [2374]
+                0.00    0.00      44/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00      13/13          atmol::getlambda(double*, int&, double, double, double) [2405]
+                0.00    0.00      13/13          atmol::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2404]
+                0.00    0.00      13/13          atmol::rtclean(int, int, int, int, int, int, int, int) [2403]
+                0.00    0.00       7/7           atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2419]
+                0.00    0.00       7/7           atom::rtclean(int, int, int, int, int, int, int, int) [2418]
+                0.00    0.00       1/1           atmos_pp::anglesetup(double*&, double*&, int&) [2462]
+-----------------------------------------------
+                0.00    0.01     201/47433       atmosphere::obs(double, double, double*, int) [2]
+                0.00    1.64   47232/47433       atmosphere::nltepops() [3]
+[4]     42.2    0.00    1.64   47433         atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+                0.01    1.60  332031/332031      atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+                0.01    0.02   47433/94866       h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+                0.01    0.00  948660/1897319     atmosphere::add(double***, double***, int, int, int, int, int, int) [34]
+                0.00    0.00   47433/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00  569196/569196      atmol::opacity(double***, double***, double***, double***, double***, double, double, double) [2341]
+-----------------------------------------------
+                0.01    1.60  332031/332031      atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+[5]     41.4    0.01    1.60  332031         atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+                0.21    0.41  332031/332031      atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+                0.52    0.01  332031/664062      atom::freefree_op(double***, double***, double***, double) [8]
+                0.35    0.08  332031/664062      atom::boundfree_op(double***, double) [9]
+                0.02    0.00  664062/1328124     atom::add(double***, double***, int, int, int, int, int, int) [27]
+-----------------------------------------------
+                0.00    0.01     201/47433       atmosphere::obs(double, double, double*, int) [2]
+                0.00    1.60   47232/47433       atmosphere::nltepops() [3]
+[6]     41.2    0.00    1.60   47433         atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+                0.12    1.42  332031/332031      atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+                0.02    0.03   47433/47433       h_minus_mol::emissivity(double***, double***, double***, double***, double***, double, double, double) [25]
+                0.01    0.00   47433/47433       atmosphere::thomson_em(double***, double, int, int, int, int, int, int) [33]
+                0.01    0.00  948659/1897319     atmosphere::add(double***, double***, int, int, int, int, int, int) [34]
+                0.00    0.00  569196/569196      atmol::emissivity(double***, double***, double***, double***, double***, double, double, double) [2340]
+-----------------------------------------------
+                0.12    1.42  332031/332031      atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+[7]     39.6    0.12    1.42  332031         atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+                0.52    0.01  332031/664062      atom::freefree_op(double***, double***, double***, double) [8]
+                0.09    0.35  332031/332031      atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.35    0.08  332031/664062      atom::boundfree_op(double***, double) [9]
+                0.02    0.00  664062/1328124     atom::add(double***, double***, int, int, int, int, int, int) [27]
+-----------------------------------------------
+                0.52    0.01  332031/664062      atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+                0.52    0.01  332031/664062      atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+[8]     26.9    1.03    0.01  664062         atom::freefree_op(double***, double***, double***, double) [8]
+                0.01    0.00  664062/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.35    0.08  332031/664062      atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+                0.35    0.08  332031/664062      atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+[9]     22.4    0.70    0.17  664062         atom::boundfree_op(double***, double) [9]
+                0.10    0.00 145998774/145998774     bfcs::U(double) [19]
+                0.06    0.00 16222086/16222086     hybf::U(double) [21]
+                0.01    0.00  664062/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.21    0.41  332031/332031      atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+[10]    16.0    0.21    0.41  332031         atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+                0.21    0.08 8111043/16222086     atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+                0.06    0.00 8111043/8111957     fvoigt(double, double) [22]
+                0.05    0.00 8111043/16222089     atom::broad_dop(double, double, double) [18]
+                0.01    0.00  332031/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00  142299/284604      atom::damp_rad(float**, unsigned short, unsigned short) [2346]
+-----------------------------------------------
+                0.21    0.08 8111043/16222086     atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.21    0.08 8111043/16222086     atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+[11]    15.2    0.42    0.17 16222086         atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+                0.13    0.00 32444172/32493249     atom::get_pop(int, int, int, int, int) [15]
+                0.02    0.00 32444172/32486238     atmosphere::get_pop(int, int, int, int, int, int) [29]
+                0.02    0.00 32444170/32486236     atmol::fetch_population(int, int, int, int, int, int) [30]
+-----------------------------------------------
+                0.09    0.35  332031/332031      atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+[12]    11.4    0.09    0.35  332031         atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.21    0.08 8111043/16222086     atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+                0.05    0.00 8111043/16222089     atom::broad_dop(double, double, double) [18]
+                0.01    0.00  332031/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00  142299/284604      atom::damp_rad(float**, unsigned short, unsigned short) [2346]
+-----------------------------------------------
+                0.27    0.00  330624/330624      atmosphere::nltepops() [3]
+[13]     6.9    0.27    0.00  330624         atom::add(double***, double***, double***, double, double) [13]
+-----------------------------------------------
+                0.00    0.00     201/47433       atmosphere::obs(double, double, double*, int) [2]
+                0.21    0.00   47232/47433       atmosphere::nltepops() [3]
+[14]     5.4    0.21    0.00   47433         atmos_ppbez::formal(double***, double***, double***, double***, double, double) [14]
+-----------------------------------------------
+                0.00    0.00    7011/32493249     atmosphere::nltepops() [3]
+                0.00    0.00   42066/32493249     atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.13    0.00 32444172/32493249     atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+[15]     3.3    0.13    0.00 32493249         atom::get_pop(int, int, int, int, int) [15]
+-----------------------------------------------
+                0.00    0.00      57/2394        atmosphere::ltepops() [39]
+                0.02    0.11    2337/2394        atmosphere::newpops(double***, double***, double***, double*, int) [17]
+[16]     3.3    0.02    0.11    2394         atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+                0.04    0.05  241374/241374      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+                0.02    0.00    5586/5586        svdcmp(double**, int, int, double*, double**) [31]
+                0.00    0.00  364854/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00   62244/62244       mol::components(int&) [2350]
+                0.00    0.00   47880/47880       append(atmol*, atmol**, int&) [2351]
+                0.00    0.00   31122/31122       mol::dissoc(double, double) [2355]
+                0.00    0.00   28728/28728       eqc_poly::K(double, double) [2358]
+                0.00    0.00   28728/28728       mol::pupdate(double, double*, int, int, int, int) [2357]
+                0.00    0.00   16758/16758       atmol::components(int&) [2362]
+                0.00    0.00   16758/16758       atom::abundance() [2361]
+                0.00    0.00   16758/16758       atom::pupdate(double, double*, int, int, int, int) [2360]
+                0.00    0.00    9576/11913       ft2dim(int, int, int, int) [2363]
+                0.00    0.00    7182/7182        del_i08t2dim(signed char**, int, int, int, int) [2364]
+                0.00    0.00    4788/4788        del_ft2dim(double**, int, int, int, int) [2365]
+                0.00    0.00    2394/2394        i08t2dim(int, int, int, int) [2366]
+                0.00    0.00    2394/2394        eqc_hmin::K(double, double) [2368]
+                0.00    0.00    2394/2394        h_minus_mol::pupdate(double, double*, int, int, int, int) [2367]
+-----------------------------------------------
+                0.00    0.13      41/41          atmosphere::nltepops() [3]
+[17]     3.3    0.00    0.13      41         atmosphere::newpops(double***, double***, double***, double*, int) [17]
+                0.02    0.11    2337/2394        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+                0.00    0.00   16359/16359       atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.00    0.00      41/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00   30381/30381       atmol::pops(atmol**, unsigned short, double, double, int, int, int) [2356]
+                0.00    0.00    2378/2378        max_1d(double*, int, int) [2369]
+                0.00    0.00      41/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00      41/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+-----------------------------------------------
+                0.00    0.00       3/16222089     atom::getlambda(double*, int&, double, double, double) [43]
+                0.05    0.00 8111043/16222089     atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.05    0.00 8111043/16222089     atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+[18]     2.6    0.10    0.00 16222089         atom::broad_dop(double, double, double) [18]
+-----------------------------------------------
+                0.10    0.00 145998774/145998774     atom::boundfree_op(double***, double) [9]
+[19]     2.4    0.10    0.00 145998774         bfcs::U(double) [19]
+-----------------------------------------------
+                0.04    0.05  241374/241374      atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[20]     2.3    0.04    0.05  241374         atom::ionfrc(double, double, double*&, double*&, int&) [20]
+                0.04    0.00  655158/655158      trav::dU(double, double, io_class&) [28]
+                0.01    0.00  655158/656241      trav::U(double, double, io_class&) [35]
+                0.00    0.00  413784/414468      pf::U(double, double, io_class&) [2342]
+                0.00    0.00  413784/413784      pf::dU(double, double, io_class&) [2343]
+                0.00    0.00  137928/138156      cpf::U(double, double, io_class&) [2347]
+                0.00    0.00  137928/137928      cpf::dU(double, double, io_class&) [2348]
+-----------------------------------------------
+                0.06    0.00 16222086/16222086     atom::boundfree_op(double***, double) [9]
+[21]     1.5    0.06    0.00 16222086         hybf::U(double) [21]
+-----------------------------------------------
+                0.00    0.00     914/8111957     atom::getlambda(double*, int&, double, double, double) [43]
+                0.06    0.00 8111043/8111957     atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+[22]     1.5    0.06    0.00 8111957         fvoigt(double, double) [22]
+-----------------------------------------------
+                0.01    0.02   47433/94866       h_minus_mol::emissivity(double***, double***, double***, double***, double***, double, double, double) [25]
+                0.01    0.02   47433/94866       atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+[23]     1.4    0.01    0.04   94866         h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+                0.04    0.00   94866/94866       h_minus_mol::freefree_op(double***, double***, double***, double) [26]
+                0.00    0.00   94866/94866       h_minus_mol::boundfree_op(double***, double) [40]
+                0.00    0.00   94866/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+-----------------------------------------------
+                0.00    0.00       1/2277097     atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00       2/2277097     atmosphere::nltepops() [3]
+                0.00    0.00      11/2277097     atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00      11/2277097     atmosphere::resize(int, int, int, int, int, int) [49]
+                0.00    0.00      41/2277097     atmosphere::newpops(double***, double***, double***, double*, int) [17]
+                0.00    0.00     247/2277097     atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int) [44]
+                0.00    0.00   47433/2277097     atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+                0.00    0.00   47433/2277097     atmosphere::thomson_em(double***, double, int, int, int, int, int, int) [33]
+                0.00    0.00   94866/2277097     h_minus_mol::boundfree_op(double***, double) [40]
+                0.00    0.00   94866/2277097     h_minus_mol::freefree_op(double***, double***, double***, double) [26]
+                0.01    0.00  332031/2277097     atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.01    0.00  332031/2277097     atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+                0.01    0.00  664062/2277097     atom::freefree_op(double***, double***, double***, double) [8]
+                0.01    0.00  664062/2277097     atom::boundfree_op(double***, double) [9]
+[24]     1.3    0.05    0.00 2277097         ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.02    0.03   47433/47433       atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+[25]     1.2    0.02    0.03   47433         h_minus_mol::emissivity(double***, double***, double***, double***, double***, double, double, double) [25]
+                0.01    0.02   47433/94866       h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+-----------------------------------------------
+                0.04    0.00   94866/94866       h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+[26]     1.1    0.04    0.00   94866         h_minus_mol::freefree_op(double***, double***, double***, double) [26]
+                0.00    0.00   94866/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.02    0.00  664062/1328124     atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [7]
+                0.02    0.00  664062/1328124     atom::opacity(double***, double***, double***, double***, double***, double, double, double) [5]
+[27]     1.0    0.04    0.00 1328124         atom::add(double***, double***, int, int, int, int, int, int) [27]
+                0.00    0.00 1328124/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+-----------------------------------------------
+                0.04    0.00  655158/655158      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[28]     1.0    0.04    0.00  655158         trav::dU(double, double, io_class&) [28]
+-----------------------------------------------
+                0.00    0.00   42066/32486238     atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.02    0.00 32444172/32486238     atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+[29]     0.5    0.02    0.00 32486238         atmosphere::get_pop(int, int, int, int, int, int) [29]
+-----------------------------------------------
+                0.00    0.00   42066/32486236     atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.02    0.00 32444170/32486236     atom::damp_col(int, int, int, int, int, int, double, double, double) [11]
+[30]     0.5    0.02    0.00 32486236         atmol::fetch_population(int, int, int, int, int, int) [30]
+-----------------------------------------------
+                0.02    0.00    5586/5586        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[31]     0.5    0.02    0.00    5586         svdcmp(double**, int, int, double*, double**) [31]
+-----------------------------------------------
+                                                 <spontaneous>
+[32]     0.4    0.02    0.00                 bfcs::U(double*, int) [32]
+-----------------------------------------------
+                0.01    0.00   47433/47433       atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+[33]     0.3    0.01    0.00   47433         atmosphere::thomson_em(double***, double, int, int, int, int, int, int) [33]
+                0.00    0.00   47433/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.01    0.00  948659/1897319     atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+                0.01    0.00  948660/1897319     atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+[34]     0.3    0.01    0.00 1897319         atmosphere::add(double***, double***, int, int, int, int, int, int) [34]
+                0.00    0.00  758928/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+-----------------------------------------------
+                0.00    0.00    1083/656241      atom::lte(double***, double***) [42]
+                0.01    0.00  655158/656241      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[35]     0.3    0.01    0.00  656241         trav::U(double, double, io_class&) [35]
+-----------------------------------------------
+                                                 <spontaneous>
+[36]     0.3    0.01    0.00                 hybf::~hybf() [36]
+-----------------------------------------------
+                0.01    0.00  614016/614016      atmosphere::nltepops() [3]
+[37]     0.1    0.01    0.00  614016         atmol::add(double***, double***, double***, double, double) [37]
+-----------------------------------------------
+                0.01    0.00      13/13          atmosphere::obs(double, double, double*, int) [2]
+[38]     0.1    0.01    0.00      13         atmol::prof_clear() [38]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::obs(double, double, double*, int) [2]
+[39]     0.1    0.00    0.00       1         atmosphere::ltepops() [39]
+                0.00    0.00      57/2394        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+                0.00    0.00       7/7           atom::lte(double***, double***) [42]
+                0.00    0.00      13/13          atmol::lte(double***, double***) [2401]
+                0.00    0.00      13/13          atmol::info() [2402]
+                0.00    0.00       7/7           atom::info() [2416]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00   94866/94866       h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+[40]     0.1    0.00    0.00   94866         h_minus_mol::boundfree_op(double***, double) [40]
+                0.00    0.00   94866/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.00    0.00   16359/16359       atmosphere::newpops(double***, double***, double***, double*, int) [17]
+[41]     0.0    0.00    0.00   16359         atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.00    0.00   42066/32493249     atom::get_pop(int, int, int, int, int) [15]
+                0.00    0.00   42066/32486236     atmol::fetch_population(int, int, int, int, int, int) [30]
+                0.00    0.00   42066/32486238     atmosphere::get_pop(int, int, int, int, int, int) [29]
+                0.00    0.00   42066/42066       atom::R_ij_local_ALO(int, int, int, double, double, double, double) [2352]
+                0.00    0.00   42066/42066       atom::C_ij(int, int, int, double, double) [2353]
+                0.00    0.00   42066/42066       atom::C_ij_H(int, int, int, double, double) [2354]
+                0.00    0.00    2337/11913       ft2dim(int, int, int, int) [2363]
+                0.00    0.00    2337/2337        Crout(int, double*, double*) [2371]
+                0.00    0.00    2337/2337        solveCrout(int, double*, double*, double*) [2370]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::ltepops() [39]
+[42]     0.0    0.00    0.00       7         atom::lte(double***, double***) [42]
+                0.00    0.00    1083/656241      trav::U(double, double, io_class&) [35]
+                0.00    0.00     684/414468      pf::U(double, double, io_class&) [2342]
+                0.00    0.00     228/138156      cpf::U(double, double, io_class&) [2347]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::nltepops() [3]
+[43]     0.0    0.00    0.00       7         atom::getlambda(double*, int&, double, double, double) [43]
+                0.00    0.00     914/8111957     fvoigt(double, double) [22]
+                0.00    0.00       3/16222089     atom::broad_dop(double, double, double) [18]
+                0.00    0.00       7/7           sort(double*, int) [2412]
+                0.00    0.00       6/284604      atom::damp_rad(float**, unsigned short, unsigned short) [2346]
+                0.00    0.00       6/6           atom::damp_col(double, double, double, double, double, signed char) [2422]
+                0.00    0.00       6/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00       2/2           hybf::getlambda(int&) [2433]
+-----------------------------------------------
+                0.00    0.00       1/247         atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00     246/247         atmosphere::nltepops() [3]
+[44]     0.0    0.00    0.00     247         atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int) [44]
+                0.00    0.00     247/2277097     ft3dim(int, int, int, int, int, int) [24]
+-----------------------------------------------
+                0.00    0.00       1/1           atmos_new(unsigned char*, int&, unsigned char, io_class&) [46]
+[45]     0.0    0.00    0.00       1         atmos_pp_new(unsigned char*, int&, unsigned char, io_class&) [45]
+                0.00    0.00       1/1           atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&) [52]
+                0.00    0.00       1/223         unpack(unsigned char*, signed char&) [2377]
+-----------------------------------------------
+                0.00    0.00       1/1           jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+[46]     0.0    0.00    0.00       1         atmos_new(unsigned char*, int&, unsigned char, io_class&) [46]
+                0.00    0.00       1/1           atmos_pp_new(unsigned char*, int&, unsigned char, io_class&) [45]
+                0.00    0.00       1/223         unpack(unsigned char*, signed char&) [2377]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::init(char const*, io_class*) [48]
+[47]     0.0    0.00    0.00       1         atmosphere::read_spinor(char const*, char const*, io_class*) [47]
+                0.00    0.00       1/1           atmosphere::resize(int, int, int, int, int, int) [49]
+                0.00    0.00      59/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00       1/1           activate(void*) [1]
+[48]     0.0    0.00    0.00       1         atmosphere::init(char const*, io_class*) [48]
+                0.00    0.00       1/1           atmosphere::read_spinor(char const*, char const*, io_class*) [47]
+                0.00    0.00       2/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00       1/1           reg::is_clr(unsigned long) [2452]
+                0.00    0.00       1/1           reg::is_set(unsigned long) [2453]
+                0.00    0.00       1/1           atmosphere::read_atmos(char const*, char const*, unsigned char, io_class*) [2442]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::read_spinor(char const*, char const*, io_class*) [47]
+[49]     0.0    0.00    0.00       1         atmosphere::resize(int, int, int, int, int, int) [49]
+                0.00    0.00      11/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00      11/2277086     del_ft3dim(double***, int, int, int, int, int, int) [2338]
+                0.00    0.00       1/1           grid::resize(int, int, int, int, int, int) [2456]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [51]
+[50]     0.0    0.00    0.00       1         atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00      11/2277097     ft3dim(int, int, int, int, int, int) [24]
+                0.00    0.00      20/20          atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2392]
+                0.00    0.00      11/11          unpack(unsigned char*, double***, int, int, int, int, int, int, unsigned char) [2408]
+                0.00    0.00       2/50          unpack(unsigned char*, char*&) [2386]
+                0.00    0.00       1/1           reg::unpack(unsigned char*, io_class&) [2454]
+                0.00    0.00       1/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00       1/8           unpack(unsigned char*, unsigned short&, unsigned char) [2410]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00       1/1           atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&) [54]
+[51]     0.0    0.00    0.00       1         atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [51]
+                0.00    0.00       1/1           atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00       1/1           grid::grid(unsigned char*, int&, unsigned char, io_class&) [2458]
+                0.00    0.00       1/1           reg::reg(unsigned long) [2455]
+-----------------------------------------------
+                0.00    0.00       1/1           atmos_pp_new(unsigned char*, int&, unsigned char, io_class&) [45]
+[52]     0.0    0.00    0.00       1         atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&) [52]
+                0.00    0.00       1/1           atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&) [54]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[53]     0.0    0.00    0.00       1         jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       1/1           atmos_new(unsigned char*, int&, unsigned char, io_class&) [46]
+                0.00    0.00       4/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00       3/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+                0.00    0.00       2/74          unpack(unsigned char*, int&, unsigned char) [2382]
+                0.00    0.00       2/2           unpack(unsigned char*, unsigned int&, unsigned char) [2430]
+                0.00    0.00       1/1           z_uncompress(unsigned char*, int&, unsigned char, io_class&) [2437]
+                0.00    0.00       1/1           unpack(unsigned char*, int*, int, int, unsigned char) [2440]
+                0.00    0.00       1/50          unpack(unsigned char*, char*&) [2386]
+-----------------------------------------------
+                0.00    0.00       1/1           atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&) [52]
+[54]     0.0    0.00    0.00       1         atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&) [54]
+                0.00    0.00       1/1           atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [51]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                                                 <spontaneous>
+[55]     0.0    0.00    0.00                 job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+                0.00    0.00       1/1           jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       3/74          unpack(unsigned char*, int&, unsigned char) [2382]
+                0.00    0.00       3/50          unpack(unsigned char*, char*&) [2386]
+                0.00    0.00       2/2           sock_class::recv(int&) [2431]
+                0.00    0.00       2/2           id::~id() [2432]
+                0.00    0.00       1/1           jnfo::jnfo() [2459]
+                0.00    0.00       1/1           id::id(sock_class*) [2450]
+                0.00    0.00       1/1           id::id() [2451]
+                0.00    0.00       1/1           sock_class::send_id(id&) [2446]
+                0.00    0.00       1/1           jnfo::~jnfo() [2460]
+-----------------------------------------------
+                0.00    0.00      11/2277086     atmosphere::resize(int, int, int, int, int, int) [49]
+                0.00    0.00      41/2277086     atmosphere::newpops(double***, double***, double***, double*, int) [17]
+                0.00    0.00     404/2277086     atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00   94712/2277086     atmosphere::nltepops() [3]
+                0.00    0.00   94866/2277086     h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [23]
+                0.00    0.00  758928/2277086     atmosphere::add(double***, double***, int, int, int, int, int, int) [34]
+                0.00    0.00 1328124/2277086     atom::add(double***, double***, int, int, int, int, int, int) [27]
+[2338]   0.0    0.00    0.00 2277086         del_ft3dim(double***, int, int, int, int, int, int) [2338]
+-----------------------------------------------
+                0.00    0.00    2613/616629      atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00  614016/616629      atmosphere::nltepops() [3]
+[2339]   0.0    0.00    0.00  616629         atmol::prof_init() [2339]
+-----------------------------------------------
+                0.00    0.00  569196/569196      atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [6]
+[2340]   0.0    0.00    0.00  569196         atmol::emissivity(double***, double***, double***, double***, double***, double, double, double) [2340]
+-----------------------------------------------
+                0.00    0.00  569196/569196      atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [4]
+[2341]   0.0    0.00    0.00  569196         atmol::opacity(double***, double***, double***, double***, double***, double, double, double) [2341]
+-----------------------------------------------
+                0.00    0.00     684/414468      atom::lte(double***, double***) [42]
+                0.00    0.00  413784/414468      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[2342]   0.0    0.00    0.00  414468         pf::U(double, double, io_class&) [2342]
+-----------------------------------------------
+                0.00    0.00  413784/413784      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[2343]   0.0    0.00    0.00  413784         pf::dU(double, double, io_class&) [2343]
+-----------------------------------------------
+                0.00    0.00       1/365034      activate(void*) [1]
+                0.00    0.00       1/365034      atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00       1/365034      atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&) [54]
+                0.00    0.00       1/365034      atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&) [52]
+                0.00    0.00       1/365034      atmosphere::ltepops() [39]
+                0.00    0.00       1/365034      node::node(unsigned char*, int&, unsigned char, io_class&) [2461]
+                0.00    0.00       2/365034      atmosphere::init(char const*, io_class*) [48]
+                0.00    0.00       2/365034      atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00       3/365034      atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+                0.00    0.00       4/365034      atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+                0.00    0.00       6/365034      atom::getlambda(double*, int&, double, double, double) [43]
+                0.00    0.00      13/365034      mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2398]
+                0.00    0.00      41/365034      atmosphere::newpops(double***, double***, double***, double*, int) [17]
+                0.00    0.00      44/365034      atmosphere::nltepops() [3]
+                0.00    0.00      59/365034      atmosphere::read_spinor(char const*, char const*, io_class*) [47]
+                0.00    0.00  364854/365034      atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2344]   0.0    0.00    0.00  365034         io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00    1407/332031      atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00  330624/332031      atmosphere::nltepops() [3]
+[2345]   0.0    0.00    0.00  332031         atom::prof_init() [2345]
+-----------------------------------------------
+                0.00    0.00       6/284604      atom::getlambda(double*, int&, double, double, double) [43]
+                0.00    0.00  142299/284604      atom::boundbound_em(double***, double***, double***, double***, double***, double) [12]
+                0.00    0.00  142299/284604      atom::boundbound_op(double***, double***, double***, double***, double***, double) [10]
+[2346]   0.0    0.00    0.00  284604         atom::damp_rad(float**, unsigned short, unsigned short) [2346]
+-----------------------------------------------
+                0.00    0.00     228/138156      atom::lte(double***, double***) [42]
+                0.00    0.00  137928/138156      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[2347]   0.0    0.00    0.00  138156         cpf::U(double, double, io_class&) [2347]
+-----------------------------------------------
+                0.00    0.00  137928/137928      atom::ionfrc(double, double, double*&, double*&, int&) [20]
+[2348]   0.0    0.00    0.00  137928         cpf::dU(double, double, io_class&) [2348]
+-----------------------------------------------
+                0.00    0.00   42066/84132       atom::C_ij(int, int, int, double, double) [2353]
+                0.00    0.00   42066/84132       atom::C_ij_H(int, int, int, double, double) [2354]
+[2349]   0.0    0.00    0.00   84132         aps(double) [2349]
+-----------------------------------------------
+                0.00    0.00   62244/62244       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2350]   0.0    0.00    0.00   62244         mol::components(int&) [2350]
+-----------------------------------------------
+                0.00    0.00   47880/47880       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2351]   0.0    0.00    0.00   47880         append(atmol*, atmol**, int&) [2351]
+-----------------------------------------------
+                0.00    0.00   42066/42066       atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+[2352]   0.0    0.00    0.00   42066         atom::R_ij_local_ALO(int, int, int, double, double, double, double) [2352]
+-----------------------------------------------
+                0.00    0.00   42066/42066       atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+[2353]   0.0    0.00    0.00   42066         atom::C_ij(int, int, int, double, double) [2353]
+                0.00    0.00   42066/84132       aps(double) [2349]
+                0.00    0.00   25338/25338       Exponential_Integral_Ei(double) [2359]
+-----------------------------------------------
+                0.00    0.00   42066/42066       atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+[2354]   0.0    0.00    0.00   42066         atom::C_ij_H(int, int, int, double, double) [2354]
+                0.00    0.00   42066/84132       aps(double) [2349]
+-----------------------------------------------
+                0.00    0.00   31122/31122       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2355]   0.0    0.00    0.00   31122         mol::dissoc(double, double) [2355]
+-----------------------------------------------
+                0.00    0.00   30381/30381       atmosphere::newpops(double***, double***, double***, double*, int) [17]
+[2356]   0.0    0.00    0.00   30381         atmol::pops(atmol**, unsigned short, double, double, int, int, int) [2356]
+-----------------------------------------------
+                0.00    0.00   28728/28728       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2357]   0.0    0.00    0.00   28728         mol::pupdate(double, double*, int, int, int, int) [2357]
+-----------------------------------------------
+                0.00    0.00   28728/28728       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2358]   0.0    0.00    0.00   28728         eqc_poly::K(double, double) [2358]
+-----------------------------------------------
+                0.00    0.00   25338/25338       atom::C_ij(int, int, int, double, double) [2353]
+[2359]   0.0    0.00    0.00   25338         Exponential_Integral_Ei(double) [2359]
+-----------------------------------------------
+                0.00    0.00   16758/16758       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2360]   0.0    0.00    0.00   16758         atom::pupdate(double, double*, int, int, int, int) [2360]
+-----------------------------------------------
+                0.00    0.00   16758/16758       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2361]   0.0    0.00    0.00   16758         atom::abundance() [2361]
+-----------------------------------------------
+                0.00    0.00   16758/16758       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2362]   0.0    0.00    0.00   16758         atmol::components(int&) [2362]
+-----------------------------------------------
+                0.00    0.00    2337/11913       atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+                0.00    0.00    9576/11913       atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2363]   0.0    0.00    0.00   11913         ft2dim(int, int, int, int) [2363]
+-----------------------------------------------
+                0.00    0.00    7182/7182        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2364]   0.0    0.00    0.00    7182         del_i08t2dim(signed char**, int, int, int, int) [2364]
+-----------------------------------------------
+                0.00    0.00    4788/4788        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2365]   0.0    0.00    0.00    4788         del_ft2dim(double**, int, int, int, int) [2365]
+-----------------------------------------------
+                0.00    0.00    2394/2394        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2366]   0.0    0.00    0.00    2394         i08t2dim(int, int, int, int) [2366]
+-----------------------------------------------
+                0.00    0.00    2394/2394        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2367]   0.0    0.00    0.00    2394         h_minus_mol::pupdate(double, double*, int, int, int, int) [2367]
+-----------------------------------------------
+                0.00    0.00    2394/2394        atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [16]
+[2368]   0.0    0.00    0.00    2394         eqc_hmin::K(double, double) [2368]
+-----------------------------------------------
+                0.00    0.00    2378/2378        atmosphere::newpops(double***, double***, double***, double*, int) [17]
+[2369]   0.0    0.00    0.00    2378         max_1d(double*, int, int) [2369]
+-----------------------------------------------
+                0.00    0.00    2337/2337        atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+[2370]   0.0    0.00    0.00    2337         solveCrout(int, double*, double*, double*) [2370]
+-----------------------------------------------
+                0.00    0.00    2337/2337        atom::pops(atmol**, unsigned short, double, double, int, int, int) [41]
+[2371]   0.0    0.00    0.00    2337         Crout(int, double*, double*) [2371]
+-----------------------------------------------
+                0.00    0.00     533/533         atmosphere::nltepops() [3]
+[2372]   0.0    0.00    0.00     533         atmol::rtinit() [2372]
+-----------------------------------------------
+                0.00    0.00     287/287         atmosphere::nltepops() [3]
+[2373]   0.0    0.00    0.00     287         atom::rtinit() [2373]
+-----------------------------------------------
+                0.00    0.00       1/253         atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00       1/253         atom::prof_clear() [2414]
+                0.00    0.00       5/253         atom::rtclean(int, int, int, int, int, int, int, int) [2418]
+                0.00    0.00     246/253         atmosphere::nltepops() [3]
+[2374]   0.0    0.00    0.00     253         del_ft4dim(double****, int, int, int, int, int, int, int, int) [2374]
+-----------------------------------------------
+                0.00    0.00       1/253         atom::prof_setup() [2415]
+                0.00    0.00       5/253         atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2419]
+                0.00    0.00     247/253         atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int) [2376]
+[2375]   0.0    0.00    0.00     253         ft4dim(int, int, int, int, int, int, int, int) [2375]
+-----------------------------------------------
+                0.00    0.00       1/247         atmosphere::obs(double, double, double*, int) [2]
+                0.00    0.00     246/247         atmosphere::nltepops() [3]
+[2376]   0.0    0.00    0.00     247         atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int) [2376]
+                0.00    0.00     247/253         ft4dim(int, int, int, int, int, int, int, int) [2375]
+-----------------------------------------------
+                0.00    0.00       1/223         atmos_new(unsigned char*, int&, unsigned char, io_class&) [46]
+                0.00    0.00       1/223         atmos_pp_new(unsigned char*, int&, unsigned char, io_class&) [45]
+                0.00    0.00      12/223         eqc_new(unsigned char*, int&, unsigned char, io_class&) [2397]
+                0.00    0.00      27/223         mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+                0.00    0.00      38/223         trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+                0.00    0.00      70/223         pf_new(unsigned char*, int&, unsigned char, io_class&) [2390]
+                0.00    0.00      74/223         bf_new(unsigned char*, int&, unsigned char, io_class&) [2387]
+[2377]   0.0    0.00    0.00     223         unpack(unsigned char*, signed char&) [2377]
+-----------------------------------------------
+                0.00    0.00       4/189         pf_new(unsigned char*, int&, unsigned char, io_class&) [2390]
+                0.00    0.00       6/189         hybf::unpack(unsigned char*, unsigned char, io_class&) [2426]
+                0.00    0.00       7/189         atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+                0.00    0.00      20/189         atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00     152/189         trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+[2378]   0.0    0.00    0.00     189         unpack(unsigned char*, double&, unsigned char) [2378]
+-----------------------------------------------
+                0.00    0.00     185/185         atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2379]   0.0    0.00    0.00     185         unpack(unsigned char*, float*, int, int, unsigned char) [2379]
+-----------------------------------------------
+                0.00    0.00       2/184         reg::unpack(unsigned char*, io_class&) [2454]
+                0.00    0.00     182/184         atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2380]   0.0    0.00    0.00     184         unpack(unsigned char*, unsigned char*, int, int) [2380]
+-----------------------------------------------
+                0.00    0.00       3/142         jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       3/142         grid::unpack(unsigned char*, unsigned char, io_class&) [2457]
+                0.00    0.00       6/142         hybf::unpack(unsigned char*, unsigned char, io_class&) [2426]
+                0.00    0.00      12/142         eqc_new(unsigned char*, int&, unsigned char, io_class&) [2397]
+                0.00    0.00      42/142         atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+                0.00    0.00      76/142         trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+[2381]   0.0    0.00    0.00     142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+-----------------------------------------------
+                0.00    0.00       1/74          sock_class::recv_id(id&) [2445]
+                0.00    0.00       2/74          z_uncompress(unsigned char*, int&, unsigned char, io_class&) [2437]
+                0.00    0.00       2/74          jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       3/74          job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+                0.00    0.00       3/74          hybf::unpack(unsigned char*, unsigned char, io_class&) [2426]
+                0.00    0.00       6/74          grid::unpack(unsigned char*, unsigned char, io_class&) [2457]
+                0.00    0.00      57/74          trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+[2382]   0.0    0.00    0.00      74         unpack(unsigned char*, int&, unsigned char) [2382]
+-----------------------------------------------
+                0.00    0.00      35/71          atom::prof_setup() [2415]
+                0.00    0.00      36/71          atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2419]
+[2383]   0.0    0.00    0.00      71         ui32t2dim(int, int, int, int) [2383]
+-----------------------------------------------
+                0.00    0.00       1/67          atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00       1/67          node::node(unsigned char*, int&, unsigned char, io_class&) [2461]
+                0.00    0.00       2/67          sock_class::recv_id(id&) [2445]
+                0.00    0.00       4/67          jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       7/67          atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+                0.00    0.00      26/67          mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+                0.00    0.00      26/67          eqc_new(unsigned char*, int&, unsigned char, io_class&) [2397]
+[2384]   0.0    0.00    0.00      67         unpack(unsigned char*, unsigned char&) [2384]
+-----------------------------------------------
+                0.00    0.00      20/67          atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2392]
+                0.00    0.00      20/67          atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00      27/67          mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+[2385]   0.0    0.00    0.00      67         unpack(unsigned char*, unsigned long&, unsigned char) [2385]
+-----------------------------------------------
+                0.00    0.00       1/50          jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+                0.00    0.00       2/50          atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00       3/50          job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+                0.00    0.00       4/50          sock_class::recv_id(id&) [2445]
+                0.00    0.00      40/50          atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+[2386]   0.0    0.00    0.00      50         unpack(unsigned char*, char*&) [2386]
+-----------------------------------------------
+                0.00    0.00      37/37          atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2387]   0.0    0.00    0.00      37         bf_new(unsigned char*, int&, unsigned char, io_class&) [2387]
+                0.00    0.00      74/223         unpack(unsigned char*, signed char&) [2377]
+                0.00    0.00       3/3           hybf::unpack(unsigned char*, unsigned char, io_class&) [2426]
+-----------------------------------------------
+                0.00    0.00      36/36          atom::rtclean(int, int, int, int, int, int, int, int) [2418]
+[2388]   0.0    0.00    0.00      36         del_ui32t2dim(unsigned int**, int, int, int, int) [2388]
+-----------------------------------------------
+                0.00    0.00      35/35          atom::info() [2416]
+[2389]   0.0    0.00    0.00      35         roman(int) [2389]
+-----------------------------------------------
+                0.00    0.00      35/35          atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2390]   0.0    0.00    0.00      35         pf_new(unsigned char*, int&, unsigned char, io_class&) [2390]
+                0.00    0.00      70/223         unpack(unsigned char*, signed char&) [2377]
+                0.00    0.00      19/19          trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+                0.00    0.00       4/189         unpack(unsigned char*, double&, unsigned char) [2378]
+-----------------------------------------------
+                0.00    0.00      35/35          atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2391]   0.0    0.00    0.00      35         newtrans(unsigned char, unsigned short*) [2391]
+-----------------------------------------------
+                0.00    0.00      20/20          atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+[2392]   0.0    0.00    0.00      20         atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2392]
+                0.00    0.00      20/67          unpack(unsigned char*, unsigned long&, unsigned char) [2385]
+                0.00    0.00      13/13          mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2398]
+                0.00    0.00       7/7           atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+-----------------------------------------------
+                0.00    0.00      20/20          atmosphere::obs(double, double, double*, int) [2]
+[2393]   0.0    0.00    0.00      20         atmol::set_parent_atmosphere(atmosphere*) [2393]
+-----------------------------------------------
+                0.00    0.00       3/20          atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+                0.00    0.00       4/20          atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+                0.00    0.00      13/20          mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2398]
+[2394]   0.0    0.00    0.00      20         atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00      40/50          unpack(unsigned char*, char*&) [2386]
+                0.00    0.00      20/67          unpack(unsigned char*, unsigned long&, unsigned char) [2385]
+                0.00    0.00      20/189         unpack(unsigned char*, double&, unsigned char) [2378]
+-----------------------------------------------
+                0.00    0.00      19/19          pf_new(unsigned char*, int&, unsigned char, io_class&) [2390]
+[2395]   0.0    0.00    0.00      19         trav::unpack(unsigned char*, unsigned char, io_class&) [2395]
+                0.00    0.00     152/189         unpack(unsigned char*, double&, unsigned char) [2378]
+                0.00    0.00      76/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+                0.00    0.00      57/74          unpack(unsigned char*, int&, unsigned char) [2382]
+                0.00    0.00      38/223         unpack(unsigned char*, signed char&) [2377]
+-----------------------------------------------
+                0.00    0.00      14/14          atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2396]   0.0    0.00    0.00      14         unpack(unsigned char*, unsigned short*, int, int, unsigned char) [2396]
+-----------------------------------------------
+                0.00    0.00      13/13          mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+[2397]   0.0    0.00    0.00      13         eqc_new(unsigned char*, int&, unsigned char, io_class&) [2397]
+                0.00    0.00      26/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00      12/223         unpack(unsigned char*, signed char&) [2377]
+                0.00    0.00      12/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+-----------------------------------------------
+                0.00    0.00      13/13          atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2392]
+[2398]   0.0    0.00    0.00      13         mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2398]
+                0.00    0.00      13/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00      13/20          atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00      13/13          mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+-----------------------------------------------
+                0.00    0.00      13/13          mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2398]
+[2399]   0.0    0.00    0.00      13         mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [2399]
+                0.00    0.00      27/67          unpack(unsigned char*, unsigned long&, unsigned char) [2385]
+                0.00    0.00      27/223         unpack(unsigned char*, signed char&) [2377]
+                0.00    0.00      26/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00      13/13          eqc_new(unsigned char*, int&, unsigned char, io_class&) [2397]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::obs(double, double, double*, int) [2]
+[2400]   0.0    0.00    0.00      13         atmol::prof_setup() [2400]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::ltepops() [39]
+[2401]   0.0    0.00    0.00      13         atmol::lte(double***, double***) [2401]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::ltepops() [39]
+[2402]   0.0    0.00    0.00      13         atmol::info() [2402]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::nltepops() [3]
+[2403]   0.0    0.00    0.00      13         atmol::rtclean(int, int, int, int, int, int, int, int) [2403]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::nltepops() [3]
+[2404]   0.0    0.00    0.00      13         atmol::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2404]
+-----------------------------------------------
+                0.00    0.00      13/13          atmosphere::nltepops() [3]
+[2405]   0.0    0.00    0.00      13         atmol::getlambda(double*, int&, double, double, double) [2405]
+-----------------------------------------------
+                0.00    0.00      12/12          atmosphere::popsetup() [2444]
+[2406]   0.0    0.00    0.00      12         mol::popsetup(int, int, int, int, int, int) [2406]
+-----------------------------------------------
+                0.00    0.00      12/12          atmosphere::popclean() [2443]
+[2407]   0.0    0.00    0.00      12         atmol::popclean(int, int, int, int, int, int) [2407]
+-----------------------------------------------
+                0.00    0.00      11/11          atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+[2408]   0.0    0.00    0.00      11         unpack(unsigned char*, double***, int, int, int, int, int, int, unsigned char) [2408]
+-----------------------------------------------
+                0.00    0.00       8/8           cmdln::cmdln(int&, char**, char const**, char const**) [3059]
+[2409]   0.0    0.00    0.00       8         parse(char*) [2409]
+-----------------------------------------------
+                0.00    0.00       1/8           atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+                0.00    0.00       7/8           atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+[2410]   0.0    0.00    0.00       8         unpack(unsigned char*, unsigned short&, unsigned char) [2410]
+-----------------------------------------------
+                0.00    0.00       8/8           cmdln::cmdln(int&, char**, char const**, char const**) [3059]
+[2411]   0.0    0.00    0.00       8         fdset::rem(int) [2411]
+-----------------------------------------------
+                0.00    0.00       7/7           atom::getlambda(double*, int&, double, double, double) [43]
+[2412]   0.0    0.00    0.00       7         sort(double*, int) [2412]
+-----------------------------------------------
+                0.00    0.00       7/7           atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [2392]
+[2413]   0.0    0.00    0.00       7         atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+                0.00    0.00       3/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00       3/20          atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00       3/7           atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+                0.00    0.00       3/3           helium::helium(unsigned char*, int&, unsigned char, io_class&) [2428]
+                0.00    0.00       1/1           hydrogen::hydrogen(unsigned char*, int&, unsigned char, io_class&) [2463]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::obs(double, double, double*, int) [2]
+[2414]   0.0    0.00    0.00       7         atom::prof_clear() [2414]
+                0.00    0.00       1/253         del_ft4dim(double****, int, int, int, int, int, int, int, int) [2374]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::obs(double, double, double*, int) [2]
+[2415]   0.0    0.00    0.00       7         atom::prof_setup() [2415]
+                0.00    0.00      35/71          ui32t2dim(int, int, int, int) [2383]
+                0.00    0.00       1/253         ft4dim(int, int, int, int, int, int, int, int) [2375]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::ltepops() [39]
+[2416]   0.0    0.00    0.00       7         atom::info() [2416]
+                0.00    0.00      35/35          roman(int) [2389]
+-----------------------------------------------
+                0.00    0.00       3/7           atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+                0.00    0.00       4/7           atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+[2417]   0.0    0.00    0.00       7         atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+                0.00    0.00     185/185         unpack(unsigned char*, float*, int, int, unsigned char) [2379]
+                0.00    0.00     182/184         unpack(unsigned char*, unsigned char*, int, int) [2380]
+                0.00    0.00      42/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+                0.00    0.00      37/37          bf_new(unsigned char*, int&, unsigned char, io_class&) [2387]
+                0.00    0.00      35/35          newtrans(unsigned char, unsigned short*) [2391]
+                0.00    0.00      35/35          pf_new(unsigned char*, int&, unsigned char, io_class&) [2390]
+                0.00    0.00      14/14          unpack(unsigned char*, unsigned short*, int, int, unsigned char) [2396]
+                0.00    0.00       7/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00       7/189         unpack(unsigned char*, double&, unsigned char) [2378]
+                0.00    0.00       7/8           unpack(unsigned char*, unsigned short&, unsigned char) [2410]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::nltepops() [3]
+[2418]   0.0    0.00    0.00       7         atom::rtclean(int, int, int, int, int, int, int, int) [2418]
+                0.00    0.00      36/36          del_ui32t2dim(unsigned int**, int, int, int, int) [2388]
+                0.00    0.00       5/253         del_ft4dim(double****, int, int, int, int, int, int, int, int) [2374]
+                0.00    0.00       1/1           del_ft5dim(double*****, int, int, int, int, int, int, int, int, int, int) [2435]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::nltepops() [3]
+[2419]   0.0    0.00    0.00       7         atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2419]
+                0.00    0.00      36/71          ui32t2dim(int, int, int, int) [2383]
+                0.00    0.00       5/253         ft4dim(int, int, int, int, int, int, int, int) [2375]
+                0.00    0.00       1/1           ft5dim(int, int, int, int, int, int, int, int, int, int) [2439]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::popclean() [2443]
+[2420]   0.0    0.00    0.00       7         atom::popclean(int, int, int, int, int, int) [2420]
+-----------------------------------------------
+                0.00    0.00       7/7           atmosphere::popsetup() [2444]
+[2421]   0.0    0.00    0.00       7         atom::popsetup(int, int, int, int, int, int) [2421]
+-----------------------------------------------
+                0.00    0.00       6/6           atom::getlambda(double*, int&, double, double, double) [43]
+[2422]   0.0    0.00    0.00       6         atom::damp_col(double, double, double, double, double, signed char) [2422]
+-----------------------------------------------
+                0.00    0.00       4/4           sock_class::send_id(id&) [2446]
+[2423]   0.0    0.00    0.00       4         pack(unsigned char*, char*) [2423]
+-----------------------------------------------
+                0.00    0.00       1/4           hydrogen::hydrogen(unsigned char*, int&, unsigned char, io_class&) [2463]
+                0.00    0.00       3/4           helium::helium(unsigned char*, int&, unsigned char, io_class&) [2428]
+[2424]   0.0    0.00    0.00       4         atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+                0.00    0.00       4/365034      io_class::msg(int, char const*, ...) [2344]
+                0.00    0.00       4/20          atmol::atmol(unsigned char*, int&, unsigned char, io_class&) [2394]
+                0.00    0.00       4/7           atom::unpack(unsigned char*, unsigned char, io_class&) [2417]
+-----------------------------------------------
+                0.00    0.00       3/3           cmdln::cmdln(int&, char**, char const**, char const**) [3059]
+[2425]   0.0    0.00    0.00       3         arg_extract(char*, char*&, char***&, char&, char&) [2425]
+-----------------------------------------------
+                0.00    0.00       3/3           bf_new(unsigned char*, int&, unsigned char, io_class&) [2387]
+[2426]   0.0    0.00    0.00       3         hybf::unpack(unsigned char*, unsigned char, io_class&) [2426]
+                0.00    0.00       6/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+                0.00    0.00       6/189         unpack(unsigned char*, double&, unsigned char) [2378]
+                0.00    0.00       3/74          unpack(unsigned char*, int&, unsigned char) [2382]
+-----------------------------------------------
+                0.00    0.00       3/3           io_class::io_class(cmdln&) [3136]
+[2427]   0.0    0.00    0.00       3         cmdln::get(char const*, int&) [2427]
+-----------------------------------------------
+                0.00    0.00       3/3           atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+[2428]   0.0    0.00    0.00       3         helium::helium(unsigned char*, int&, unsigned char, io_class&) [2428]
+                0.00    0.00       3/4           atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+-----------------------------------------------
+                0.00    0.00       2/2           sock_class::send_id(id&) [2446]
+[2429]   0.0    0.00    0.00       2         pack(unsigned char*, unsigned char&) [2429]
+-----------------------------------------------
+                0.00    0.00       2/2           jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+[2430]   0.0    0.00    0.00       2         unpack(unsigned char*, unsigned int&, unsigned char) [2430]
+-----------------------------------------------
+                0.00    0.00       2/2           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2431]   0.0    0.00    0.00       2         sock_class::recv(int&) [2431]
+-----------------------------------------------
+                0.00    0.00       2/2           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2432]   0.0    0.00    0.00       2         id::~id() [2432]
+-----------------------------------------------
+                0.00    0.00       2/2           atom::getlambda(double*, int&, double, double, double) [43]
+[2433]   0.0    0.00    0.00       2         hybf::getlambda(int&) [2433]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [3176]
+[2434]   0.0    0.00    0.00       1         _GLOBAL__sub_I__ZN8atmos_pp10anglesetupERPdS1_Ri [2434]
+-----------------------------------------------
+                0.00    0.00       1/1           atom::rtclean(int, int, int, int, int, int, int, int) [2418]
+[2435]   0.0    0.00    0.00       1         del_ft5dim(double*****, int, int, int, int, int, int, int, int, int, int) [2435]
+-----------------------------------------------
+                0.00    0.00       1/1           cmdln::cmdln(int&, char**, char const**, char const**) [3059]
+[2436]   0.0    0.00    0.00       1         reducepath(char*) [2436]
+-----------------------------------------------
+                0.00    0.00       1/1           jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+[2437]   0.0    0.00    0.00       1         z_uncompress(unsigned char*, int&, unsigned char, io_class&) [2437]
+                0.00    0.00       2/74          unpack(unsigned char*, int&, unsigned char) [2382]
+-----------------------------------------------
+                0.00    0.00       1/1           sock_class::send_id(id&) [2446]
+[2438]   0.0    0.00    0.00       1         pack(unsigned char*, int&, unsigned char) [2438]
+-----------------------------------------------
+                0.00    0.00       1/1           atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int) [2419]
+[2439]   0.0    0.00    0.00       1         ft5dim(int, int, int, int, int, int, int, int, int, int) [2439]
+-----------------------------------------------
+                0.00    0.00       1/1           jnfo::jnfo(unsigned char*, unsigned char, io_class&) [53]
+[2440]   0.0    0.00    0.00       1         unpack(unsigned char*, int*, int, int, unsigned char) [2440]
+-----------------------------------------------
+                0.00    0.00       1/1           cmdln::cmdln(int&, char**, char const**, char const**) [3059]
+[2441]   0.0    0.00    0.00       1         get_opt(char**&, optel*) [2441]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::init(char const*, io_class*) [48]
+[2442]   0.0    0.00    0.00       1         atmosphere::read_atmos(char const*, char const*, unsigned char, io_class*) [2442]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::obs(double, double, double*, int) [2]
+[2443]   0.0    0.00    0.00       1         atmosphere::popclean() [2443]
+                0.00    0.00      12/12          atmol::popclean(int, int, int, int, int, int) [2407]
+                0.00    0.00       7/7           atom::popclean(int, int, int, int, int, int) [2420]
+                0.00    0.00       1/1           h_minus_mol::popclean(int, int, int, int, int, int) [2448]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::obs(double, double, double*, int) [2]
+[2444]   0.0    0.00    0.00       1         atmosphere::popsetup() [2444]
+                0.00    0.00      12/12          mol::popsetup(int, int, int, int, int, int) [2406]
+                0.00    0.00       7/7           atom::popsetup(int, int, int, int, int, int) [2421]
+                0.00    0.00       1/1           h_minus_mol::popsetup(int, int, int, int, int, int) [2449]
+-----------------------------------------------
+                0.00    0.00       1/1           id::id(sock_class*) [2450]
+[2445]   0.0    0.00    0.00       1         sock_class::recv_id(id&) [2445]
+                0.00    0.00       4/50          unpack(unsigned char*, char*&) [2386]
+                0.00    0.00       2/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00       1/74          unpack(unsigned char*, int&, unsigned char) [2382]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2446]   0.0    0.00    0.00       1         sock_class::send_id(id&) [2446]
+                0.00    0.00       4/4           pack(unsigned char*, char*) [2423]
+                0.00    0.00       2/2           pack(unsigned char*, unsigned char&) [2429]
+                0.00    0.00       1/1           pack(unsigned char*, int&, unsigned char) [2438]
+-----------------------------------------------
+                0.00    0.00       1/1           node::node(unsigned char*, int&, unsigned char, io_class&) [2461]
+[2447]   0.0    0.00    0.00       1         sock_class::sock_class(int) [2447]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::popclean() [2443]
+[2448]   0.0    0.00    0.00       1         h_minus_mol::popclean(int, int, int, int, int, int) [2448]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::popsetup() [2444]
+[2449]   0.0    0.00    0.00       1         h_minus_mol::popsetup(int, int, int, int, int, int) [2449]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2450]   0.0    0.00    0.00       1         id::id(sock_class*) [2450]
+                0.00    0.00       1/1           sock_class::recv_id(id&) [2445]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2451]   0.0    0.00    0.00       1         id::id() [2451]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::init(char const*, io_class*) [48]
+[2452]   0.0    0.00    0.00       1         reg::is_clr(unsigned long) [2452]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::init(char const*, io_class*) [48]
+[2453]   0.0    0.00    0.00       1         reg::is_set(unsigned long) [2453]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::unpack(unsigned char*, unsigned char, io_class&) [50]
+[2454]   0.0    0.00    0.00       1         reg::unpack(unsigned char*, io_class&) [2454]
+                0.00    0.00       2/184         unpack(unsigned char*, unsigned char*, int, int) [2380]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [51]
+[2455]   0.0    0.00    0.00       1         reg::reg(unsigned long) [2455]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::resize(int, int, int, int, int, int) [49]
+[2456]   0.0    0.00    0.00       1         grid::resize(int, int, int, int, int, int) [2456]
+-----------------------------------------------
+                0.00    0.00       1/1           grid::grid(unsigned char*, int&, unsigned char, io_class&) [2458]
+[2457]   0.0    0.00    0.00       1         grid::unpack(unsigned char*, unsigned char, io_class&) [2457]
+                0.00    0.00       6/74          unpack(unsigned char*, int&, unsigned char) [2382]
+                0.00    0.00       3/142         unpack(unsigned char*, double*, int, int, unsigned char) [2381]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [51]
+[2458]   0.0    0.00    0.00       1         grid::grid(unsigned char*, int&, unsigned char, io_class&) [2458]
+                0.00    0.00       1/1           node::node(unsigned char*, int&, unsigned char, io_class&) [2461]
+                0.00    0.00       1/1           grid::unpack(unsigned char*, unsigned char, io_class&) [2457]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2459]   0.0    0.00    0.00       1         jnfo::jnfo() [2459]
+-----------------------------------------------
+                0.00    0.00       1/1           job_class::job_class(sock_class*, int, slvcfg**&, io_class&) [55]
+[2460]   0.0    0.00    0.00       1         jnfo::~jnfo() [2460]
+-----------------------------------------------
+                0.00    0.00       1/1           grid::grid(unsigned char*, int&, unsigned char, io_class&) [2458]
+[2461]   0.0    0.00    0.00       1         node::node(unsigned char*, int&, unsigned char, io_class&) [2461]
+                0.00    0.00       1/1           sock_class::sock_class(int) [2447]
+                0.00    0.00       1/67          unpack(unsigned char*, unsigned char&) [2384]
+                0.00    0.00       1/365034      io_class::msg(int, char const*, ...) [2344]
+-----------------------------------------------
+                0.00    0.00       1/1           atmosphere::nltepops() [3]
+[2462]   0.0    0.00    0.00       1         atmos_pp::anglesetup(double*&, double*&, int&) [2462]
+-----------------------------------------------
+                0.00    0.00       1/1           atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [2413]
+[2463]   0.0    0.00    0.00       1         hydrogen::hydrogen(unsigned char*, int&, unsigned char, io_class&) [2463]
+                0.00    0.00       1/4           atom::atom(unsigned char*, int&, unsigned char, io_class&) [2424]
+-----------------------------------------------
+                0.00    0.00       1/1           activate(void*) [1]
+[2464]   0.0    0.00    0.00       1         io_class::io_class(char*, char*&, char const*, unsigned int, unsigned int, int, int) [2464]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+ [2434] _GLOBAL__sub_I__ZN8atmos_pp10anglesetupERPdS1_Ri (atmos_pp_rts.cc) [48] atmosphere::init(char const*, io_class*) [2417] atom::unpack(unsigned char*, unsigned char, io_class&)
+ [2365] del_ft2dim(double**, int, int, int, int) [16] atmosphere::chemeq(atmol**, int, double, double, double&, int, int, int) [15] atom::get_pop(int, int, int, int, int)
+ [2338] del_ft3dim(double***, int, int, int, int, int, int) [49] atmosphere::resize(int, int, int, int, int, int) [5] atom::opacity(double***, double***, double***, double***, double***, double, double, double)
+ [2374] del_ft4dim(double****, int, int, int, int, int, int, int, int) [50] atmosphere::unpack(unsigned char*, unsigned char, io_class&) [2360] atom::pupdate(double, double*, int, int, int, int)
+ [2435] del_ft5dim(double*****, int, int, int, int, int, int, int, int, int, int) [29] atmosphere::get_pop(int, int, int, int, int, int) [2418] atom::rtclean(int, int, int, int, int, int, int, int)
+ [2436] reducepath(char*)     [39] atmosphere::ltepops() [2419] atom::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int)
+ [2370] solveCrout(int, double*, double*, double*) [17] atmosphere::newpops(double***, double***, double***, double*, int) [2422] atom::damp_col(double, double, double, double, double, signed char)
+ [2425] arg_extract(char*, char*&, char***&, char&, char&) [4] atmosphere::opacity(double***, double***, double***, double***, double****, double, double, double) [11] atom::damp_col(int, int, int, int, int, int, double, double, double)
+  [45] atmos_pp_new(unsigned char*, int&, unsigned char, io_class&) [44] atmosphere::project(double***, double***, double***, double, double, int, int, int, int, int, int) [2346] atom::damp_rad(float**, unsigned short, unsigned short)
+ [2364] del_i08t2dim(signed char**, int, int, int, int) [3] atmosphere::nltepops() [2420] atom::popclean(int, int, int, int, int, int)
+ [2437] z_uncompress(unsigned char*, int&, unsigned char, io_class&) [2443] atmosphere::popclean() [2421] atom::popsetup(int, int, int, int, int, int)
+ [2388] del_ui32t2dim(unsigned int**, int, int, int, int) [2444] atmosphere::popsetup() [2361] atom::abundance()
+ [2359] Exponential_Integral_Ei(double) [2376] atmosphere::transform(double***, double***, double***, double, double, int, int, int, int, int, int) [18] atom::broad_dop(double, double, double)
+ [2349] aps(double)           [51] atmosphere::atmosphere(unsigned char*, int&, unsigned char, io_class&) [43] atom::getlambda(double*, int&, double, double, double)
+ [2423] pack(unsigned char*, char*) [2431] sock_class::recv(int&) [2345] atom::prof_init()
+ [2429] pack(unsigned char*, unsigned char&) [2445] sock_class::recv_id(id&) [2424] atom::atom(unsigned char*, int&, unsigned char, io_class&)
+ [2438] pack(unsigned char*, int&, unsigned char) [2446] sock_class::send_id(id&) [32] bfcs::U(double*, int)
+ [2412] sort(double*, int)  [2447] sock_class::sock_class(int) [19] bfcs::U(double)
+ [2371] Crout(int, double*, double*) [14] atmos_ppbez::formal(double***, double***, double***, double***, double, double) [2456] grid::resize(int, int, int, int, int, int)
+ [2409] parse(char*)          [52] atmos_ppbez::atmos_ppbez(unsigned char*, int&, unsigned char, io_class&) [2457] grid::unpack(unsigned char*, unsigned char, io_class&)
+ [2389] roman(int)            [25] h_minus_mol::emissivity(double***, double***, double***, double***, double***, double, double, double) [2458] grid::grid(unsigned char*, int&, unsigned char, io_class&)
+ [2351] append(atmol*, atmol**, int&) [26] h_minus_mol::freefree_op(double***, double***, double***, double) [21] hybf::U(double)
+ [2387] bf_new(unsigned char*, int&, unsigned char, io_class&) [40] h_minus_mol::boundfree_op(double***, double) [2426] hybf::unpack(unsigned char*, unsigned char, io_class&)
+ [2363] ft2dim(int, int, int, int) [23] h_minus_mol::opacity(double***, double***, double***, double***, double***, double, double, double) [2433] hybf::getlambda(int&)
+  [24] ft3dim(int, int, int, int, int, int) [2367] h_minus_mol::pupdate(double, double*, int, int, int, int) [36] hybf::~hybf()
+ [2375] ft4dim(int, int, int, int, int, int, int, int) [2448] h_minus_mol::popclean(int, int, int, int, int, int) [2459] jnfo::jnfo()
+ [2439] ft5dim(int, int, int, int, int, int, int, int, int, int) [2449] h_minus_mol::popsetup(int, int, int, int, int, int) [53] jnfo::jnfo(unsigned char*, unsigned char, io_class&)
+  [22] fvoigt(double, double) [2450] id::id(sock_class*) [2460] jnfo::~jnfo()
+ [2369] max_1d(double*, int, int) [2451] id::id()       [2461] node::node(unsigned char*, int&, unsigned char, io_class&)
+ [2390] pf_new(unsigned char*, int&, unsigned char, io_class&) [2432] id::~id() [35] trav::U(double, double, io_class&)
+  [31] svdcmp(double**, int, int, double*, double**) [2342] pf::U(double, double, io_class&) [28] trav::dU(double, double, io_class&)
+ [2408] unpack(unsigned char*, double***, int, int, int, int, int, int, unsigned char) [2343] pf::dU(double, double, io_class&) [2395] trav::unpack(unsigned char*, unsigned char, io_class&)
+ [2381] unpack(unsigned char*, double*, int, int, unsigned char) [2347] cpf::U(double, double, io_class&) [2362] atmol::components(int&)
+ [2379] unpack(unsigned char*, float*, int, int, unsigned char) [2348] cpf::dU(double, double, io_class&) [2340] atmol::emissivity(double***, double***, double***, double***, double***, double, double, double)
+ [2440] unpack(unsigned char*, int*, int, int, unsigned char) [2350] mol::components(int&) [38] atmol::prof_clear()
+ [2396] unpack(unsigned char*, unsigned short*, int, int, unsigned char) [2355] mol::dissoc(double, double) [2400] atmol::prof_setup()
+ [2386] unpack(unsigned char*, char*&) [2399] mol::unpack(unsigned char*, unsigned char, atmol**, int, io_class&) [30] atmol::fetch_population(int, int, int, int, int, int)
+ [2377] unpack(unsigned char*, signed char&) [2357] mol::pupdate(double, double*, int, int, int, int) [2393] atmol::set_parent_atmosphere(atmosphere*)
+ [2378] unpack(unsigned char*, double&, unsigned char) [2406] mol::popsetup(int, int, int, int, int, int) [37] atmol::add(double***, double***, double***, double, double)
+ [2384] unpack(unsigned char*, unsigned char&) [2452] reg::is_clr(unsigned long) [2401] atmol::lte(double***, double***)
+ [2382] unpack(unsigned char*, int&, unsigned char) [2453] reg::is_set(unsigned long) [2402] atmol::info()
+ [2430] unpack(unsigned char*, unsigned int&, unsigned char) [2454] reg::unpack(unsigned char*, io_class&) [2356] atmol::pops(atmol**, unsigned short, double, double, int, int, int)
+ [2385] unpack(unsigned char*, unsigned long&, unsigned char) [2455] reg::reg(unsigned long) [2372] atmol::rtinit()
+ [2410] unpack(unsigned char*, unsigned short&, unsigned char) [7] atom::emissivity(double***, double***, double***, double***, double***, double, double, double) [2341] atmol::opacity(double***, double***, double***, double***, double***, double, double, double)
+ [2380] unpack(unsigned char*, unsigned char*, int, int) [2414] atom::prof_clear() [2403] atmol::rtclean(int, int, int, int, int, int, int, int)
+ [2397] eqc_new(unsigned char*, int&, unsigned char, io_class&) [2415] atom::prof_setup() [2404] atmol::rtsetup(double*, double*, int, double*, int, int, int, int, int, int, int)
+ [2441] get_opt(char**&, optel*) [8] atom::freefree_op(double***, double***, double***, double) [2407] atmol::popclean(int, int, int, int, int, int)
+ [2398] mol_new(unsigned int, unsigned char*, int&, unsigned char, atmol**, int, io_class&) [9] atom::boundfree_op(double***, double) [2405] atmol::getlambda(double*, int&, double, double, double)
+ [2413] atom_new(unsigned long, unsigned char*, int&, unsigned char, io_class&) [12] atom::boundbound_em(double***, double***, double***, double***, double***, double) [2339] atmol::prof_init()
+ [2366] i08t2dim(int, int, int, int) [10] atom::boundbound_op(double***, double***, double***, double***, double***, double) [2394] atmol::atmol(unsigned char*, int&, unsigned char, io_class&)
+ [2391] newtrans(unsigned char, unsigned short*) [2352] atom::R_ij_local_ALO(int, int, int, double, double, double, double) [2427] cmdln::get(char const*, int&)
+ [2392] atmol_new(unsigned char*, int&, unsigned char, atmol**, int, io_class&) [13] atom::add(double***, double***, double***, double, double) [2411] fdset::rem(int)
+  [46] atmos_new(unsigned char*, int&, unsigned char, io_class&) [27] atom::add(double***, double***, int, int, int, int, int, int) [2428] helium::helium(unsigned char*, int&, unsigned char, io_class&)
+ [2383] ui32t2dim(int, int, int, int) [42] atom::lte(double***, double***) [2462] atmos_pp::anglesetup(double*&, double*&, int&)
+   [6] atmosphere::emissivity(double***, double***, double***, double***, double****, double, double, double) [2353] atom::C_ij(int, int, int, double, double) [54] atmos_pp::atmos_pp(unsigned char*, int&, unsigned char, io_class&)
+ [2442] atmosphere::read_atmos(char const*, char const*, unsigned char, io_class*) [2416] atom::info() [2368] eqc_hmin::K(double, double)
+  [33] atmosphere::thomson_em(double***, double, int, int, int, int, int, int) [41] atom::pops(atmol**, unsigned short, double, double, int, int, int) [2358] eqc_poly::K(double, double)
+  [47] atmosphere::read_spinor(char const*, char const*, io_class*) [2354] atom::C_ij_H(int, int, int, double, double) [2463] hydrogen::hydrogen(unsigned char*, int&, unsigned char, io_class&)
+  [34] atmosphere::add(double***, double***, int, int, int, int, int, int) [20] atom::ionfrc(double, double, double*&, double*&, int&) [2344] io_class::msg(int, char const*, ...)
+   [2] atmosphere::obs(double, double, double*, int) [2373] atom::rtinit() [2464] io_class::io_class(char*, char*&, char const*, unsigned int, unsigned int, int, int)

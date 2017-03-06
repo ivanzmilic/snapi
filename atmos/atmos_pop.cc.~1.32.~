@@ -1,0 +1,236 @@
+#include <math.h>
+#include <string.h>
+
+#include "types.h"
+#include "io.h"
+#include "mem.h"
+#include "const.h"
+
+#include "atmol/atmol.h"
+
+#include "atmos.h"
+
+void atmosphere::popsetup(void) // setup essential quantities
+{
+  for(int a=0;a<natm;++a) atml[a]->popsetup(x1l,x1h,x2l,x2h,x3l,x3h);
+}
+
+void atmosphere::popclean(void) // release memory
+{
+  for(int a=0;a<natm;++a) atml[a]->popclean(x1l,x1h,x2l,x2h,x3l,x3h);
+}
+
+void atmosphere::ltepops(void) // compute the populations in LTE
+// **************************************************************************
+// * Compute the LTE populations consistently with the chemical equilibrium *
+// **************************************************************************
+{
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){
+//        fp_t Nti=1E5/(k*T[x1i][x2i][x3i]); // ideal gas equation of state. P(SI)=0.1*P(CGS)
+        // solve chemical and statistical equilibrium, using "known" ionization fractions and their derivatives
+        chemeq(atml,natm,T[x1i][x2i][x3i],Nt[x1i][x2i][x3i],Ne[x1i][x2i][x3i],x1i,x2i,x3i); 
+        //if (x3i == 57){
+          //for (int a = 0; a<natm; ++a){
+            //atml[a]->print_total_pop(x1i, x2i, x3i);
+          //}
+        //}
+      }
+
+  // Edited by Milic: debug line to test the concentrations of electrons:
+  FILE * test;
+  test = fopen("electrons.txt", "w");
+  for (int x3i = x3l; x3i < x3h+1; ++x3i)
+    fprintf(test, "%d %e \n", x3i, Ne[1][1][x3i]);
+  fclose(test);
+
+
+ 
+  for(int a=0;a<natm;++a)
+    atml[a]->lte(T,Ne); // Boltzmann
+
+  io.msg(IOL_INFO,"atmosphere::ltepops:\n");  
+//
+  for(int a=0;a<natm;++a) atml[a]->info();
+}
+
+int atmosphere::nltepops(void) // compute the NLTE populations (polarization free for now)
+{
+// radiative quantities
+  fp_t ***S=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h); // Monochromatic intensity in given direction
+  fp_t ***L=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h); // Monochromatic approximate operator for a given direction
+//
+  int32_t nlambda=5;
+  fp_t *lambda=new fp_t [nlambda];           // wavelengths for NLTE calculations, these are @ several pre-defined positions, for the continuum. 
+  lambda[0]=4E-5;
+  lambda[1]=5E-5;
+  lambda[2]=6E-5;
+  lambda[3]=7E-5;
+  lambda[4]=8E-5;
+
+// setup geometry specific angular quadrature, which is in 1D case gaussian quadrature, typically with 3 directions from -1,0 and viceversa.
+  int ntp;
+  fp_t *th,*ph;
+  fp_t *bin=anglesetup(th,ph,ntp); // bin - integration weights
+                                   // th - theta
+                                   // ph - phi
+                                   // ntp - number of angles, now as this is 1D, unpolarized case, it is actually only number of theta points. In general case it is N_theta x N_phi
+
+  //for (int i = 1; i<=ntp; ++i)
+   // printf("%d %f %f \n", i, th[i], ph[i]);
+//
+  io.msg(IOL_INFO,"atmosphere::nltepops:\n");
+
+//Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
+  for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
+ 
+  io.msg(IOL_INFO,"atmosphere::nltepops: lambda=%E .. %E\n",lambda[0],lambda[nlambda-1]);
+
+  //for (int l = 0; l<nlambda; ++l)
+  //  printf("%d, %e \n", l, lambda[l]);
+
+ 
+  for(int a=0;a<natm;++a) atml[a]->rtsetup(th,ph,ntp,lambda,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
+
+  io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
+
+// NLTE population loop
+  int32_t iter=0;
+  int32_t max_iter = 1;
+  
+  for (iter = 1; iter<=max_iter; ++iter){
+    io.msg(IOL_INFO,"atmosphere::nltepops: iter %d: %d %d\n",iter,nlambda,ntp);
+    
+    for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each atom
+
+    //io.msg(IOL_INFO, "I cleared transition parameters for each atom man!\n");      
+    
+    for(int tp=1;tp<=ntp;++tp){                        // angular loop (loop over the "wavefronts")
+        
+        fp_t ***Vr=project(Vx,Vy,Vz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h);   // LOS projected velocity
+        fp_t ****B=transform(Bx,By,Bz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h); // transform to (B,Inc,Az) representation
+
+        //io.msg(IOL_INFO, "I projected man!\n");      
+    
+        
+        for(int l=0;l<nlambda;++l){
+          fp_t ***op=opacity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]); // angle dependent in the scalar case -> NO, at leasst not at the moment.
+          //io.msg(IOL_INFO, "I computed opacity man!\n");      
+          
+          fp_t ***em=emissivity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
+          //io.msg(IOL_INFO, "I computed emissivity man!\n");      
+          
+          if(int rv=formal(S,L,op,em,th[tp],ph[tp])){ // solution and approximate operator
+            io.msg(IOL_ERROR,"atmosphere::nltepops: for angle (%d), wavelength %d\n",tp,l);
+            del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
+            del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
+            del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
+            del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
+            del_ft3dim(S,x1l,x1h,x2l,x2h,x3l,x3h);
+            del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
+            return rv; // pass error to parent level
+          }
+
+          //io.msg(IOL_INFO, "I did formal, man!\n");
+/*
+          if(l==0){
+            for(int x3i=x3l;x3i<=x3h;++x3i){ 
+              io.msg(IOL_INFO,"atmosphere::nltepops: %E %d %E %E %E %E\n",cos(th[t]),x3i,S[x1l][x2l][x3i],L[x1l][x2l][x3i],op[x1l][x2l][x3i],em[x1l][x2l][x3i]);
+            }
+          }
+*/
+          for(int a=0;a<natm;++a) atml[a]->add(S,L,op,T,Ne,Vr,bin[tp],lambda[l],th[tp],ph[tp]); // give each species access to radiation field, that is, add the radiation field to the mean intensity
+          del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
+          del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
+        }
+        del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
+        del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
+
+      }
+      // Before updating pops, print the mean intensity for each transition to see if it works properly:
+
+
+      // Update pops:
+
+      //for (int x3i = x3l; x3i <= x3h; ++x3i)
+        //printf("%d %e \n", x3i, atml[0]->get_pop(1, 1, x3i, 0, 0));
+      newpops(T,Nt,Ne,lambda,nlambda);      
+      //for (int x3i = x3l; x3i <= x3h; ++x3i)
+       // printf("%d %e \n", x3i, atml[0]->get_pop(1, 1, x3i, 0, 0));
+
+      
+  }
+  //while(newpops(T,Nt,Ne,lambda,nlambda)); // returns 0 when converged
+// all done...
+  
+  for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
+  delete[] lambda;
+// cleanup angular quadrature arrays
+  delete[] (bin+1);
+  delete[] (ph+1);
+  delete[] (th+1);
+// 
+  del_ft3dim(S,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h); 
+}
+
+uint08_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda)
+// *************************************************************************
+// * solve the NLTE populations consistently with the chemical equilibrium *
+// * This is necessary because the ionization fractions couple back to the *
+// * particle number densities through the electron density and thus the   *
+// * chemical equilibrium. This coupling may need to be explicitly treated *
+// * to stabilize the solution or improve efficiency                       *
+// *************************************************************************
+{
+  io.msg(IOL_INFO,"atmosphere::newpops \n");
+  uint08_t grv=0,rv;
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient
+        do{   // NLTE <-> Chemical Equilibrium (see above)
+          rv=chemeq(atml,natm,T_in[x1i][x2i][x3i],Nt_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i); // solve chemical and statistical equilibrium, using "known" ionization fractions and their derivatives
+          for(int a=0;a<natm;++a) rv|=atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i); // solve the rate equations for each atom
+        }while(rv&EC_POP_ION_DEFECT); // chemical consistency when ionization fraction is consistent
+        grv|=rv;
+// 
+        break; // calculate only one grid point for debugging
+//
+      }
+  io.msg(IOL_INFO, "Populations updated! \n");
+  return grv; // return flags concerning any remaining defects
+}
+
+int atmosphere::allocate_colliders(){
+
+  // For the moment we are only going to allocate and use N_6;
+
+  //printf("BAAAAAAAAAAM! %d %d %d %d %d %d \n", x1l, x1h, x2l, x2h, x3l, x3h);
+
+  collisional_partners.N_6 = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+  
+  return 0;
+}
+
+int atmosphere::populate_colliders(){
+
+  for (int x1i = x1l; x1i <= x1h; ++x1i)
+    for (int x2i = x2l; x2i <= x2h; ++x2i)
+      for (int x3i = x3l; x3i <= x3h; ++x3i){
+        collisional_partners.N_6[x1i][x2i][x3i] = atml[0]->get_pop(x1i, x2i, x3i, 0);
+        //printf ("Bujaga. \n");
+        //printf ("%d %d %d %e \n", x1i, x2i, x3i, collisional_partners.N_6[x1i][x2i][x3i]);
+      }
+
+  return 0;
+}
+
+int atmosphere::clear_colliders(){
+
+  del_ft3dim(collisional_partners.N_6, x1l,x1h,x2l,x2h,x3l,x3h);
+
+  return 0;
+}
+
+

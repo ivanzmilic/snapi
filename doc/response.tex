@@ -1,0 +1,246 @@
+\documentclass[a4paper]{article}
+
+\begin{document}
+
+\section{NLTE response functions}
+
+Consider the emergent Stokes vector ${\bf I}_0$:
+$$
+{\bf I}_0=\sum_{k=1}^K {\bf U}_k\cdot{\bf P}_k+{\bf Q}_K\cdot {\bf I}_{K}
+$$
+where
+$$
+{\bf U}_k=\prod_{l=1}^k {\bf Q}_l
+$$
+contains source terms ${\bf P}_k$ and transfer matrices ${\bf Q}_l$. The response function is given by
+$$
+\frac{\partial {\bf I}_0}{\partial q_i}= \sum_{k=1}^K \frac{\partial {\bf U}_k}{\partial q_i}\cdot{\bf P}_k+{\bf U}_k\cdot\frac{\partial P_k}{\partial q_i}, 
+$$
+which we expand to expose the dependence on the populations
+$$
+\frac{\partial {\bf I}_0}{\partial q_i}= \sum_{k=1}^K \sum_{l} \frac{\partial {\bf U}_k}{\partial n_l}\frac{\partial n_l}{\partial q_i}\cdot{\bf P}_k+{\bf U}_k\cdot\frac{\partial P_k}{\partial n_l}\frac{\partial n_l}{\partial q_i}.
+$$
+The dependence on the populations is not very complicated, so the derivatives can be calculated easily, yielding an expression for which only the $\frac{\partial n_l}{\partial q_i}$ are needed.
+
+The populations are in equilibrium according to
+$$
+{\bf A}\cdot{\bf n}={\bf b},
+$$
+so that for a given quantity $q$,
+$$
+\frac{\partial}{\partial q}{\bf A}\cdot{\bf n}=\frac{\partial{\bf A}}{\partial q}\cdot{\bf n}+{\bf A}\cdot\frac{\partial {\bf n}}{\partial q}=0
+$$
+rearranging
+$$
+{\bf A}\cdot\frac{\partial {\bf n}}{\partial q}=-\frac{\partial{\bf A}}{\partial q}\cdot{\bf n},
+$$
+multiplying with ${\bf A}^{-1}$ on both sides, and substituting for ${\bf n}$ yields
+$$
+\frac{\partial {\bf n}}{\partial q}=-{\bf A}^{-1}\cdot\frac{\partial{\bf A}}{\partial q}\cdot{\bf n}=-{\bf A}^{-1}\cdot\frac{\partial{\bf A}}{\partial q}\cdot{\bf A}^{-1}\cdot{\bf b}
+$$
+To obtain the $\frac{\partial {\bf n}}{\partial q_k}$, we are thus left with the calculation of $\frac{\partial{\bf A}}{\partial q}$, which is a non-linear and non-local quantity
+$$
+\left(\frac{\partial{\bf A}}{\partial q_k}\right)_{{i,l},{i^\prime,l^\prime}}=A_{i\rightarrow j} + C_{i\rightarrow j,l} + R_{i\rightarrow j,l}.
+$$
+The spontaneous emission term $A_{i\rightarrow j}$ is easily seen to be independent of the atmospheric considtions, whereas the collisional rates
+$$
+C_{i,j}=C_0 \sqrt{T}\,e^{-\frac{E_0}{k T}} \Gamma[T]
+$$
+are seen to depend only on the temperature. The derivative 
+$$
+\frac{\partial C_{i\rightarrow j,l}}{\partial q_k}=C_0\left[\left\{\frac{1}{T_l}+\frac{E_0}{k T_l^2}\right\} \Gamma[T_l] + \frac{\partial \Gamma[T_l]}{\partial T_l}\right]\sqrt{T_l}\,e^{-\frac{E_0}{k T_l}}\frac{\partial T_l}{\partial q_k}
+$$
+is clearly nonzero only for $q_k=T_l$.
+
+Unfortunately, the radiative rates
+$$
+R_{i\rightarrow j}=R_0 \overline{J}_{i\rightarrow j}
+$$
+are themselves dependent on many atmospheric parameters and must be calculated explicitly from the problem.
+
+Consider the derivative of radiative rate $R_{i\rightarrow j,l}$ at depth $l$, to quantity $q_k$ at depth point $k$.
+$$
+\frac{\partial R_{i\rightarrow j,l}}{\partial q_k}=R_0\frac{\partial\overline{J}_{i\rightarrow j,l}}{\partial q_k}=R_0\frac{\partial}{\partial q_k}\int \int \varphi_{i\rightarrow j,l}(\nu) I_l(\nu,\Omega) {\rm d}\Omega{\rm d}\nu=R_0\int \int \frac{\partial}{\partial q_k}\varphi_{i\rightarrow j,l}(\nu) I_l(\nu,\Omega) {\rm d}\Omega{\rm d}\nu
+$$
+which is comprised of two terms
+$$
+\frac{\partial\overline{J}_{i\rightarrow j,l}}{\partial q_k}=\int \int \frac{\partial\varphi_{i\rightarrow j,l}(\nu)}{\partial q_k} I_l(\nu,\Omega) {\rm d}\Omega{\rm d}\nu+\int \int \varphi_{i\rightarrow j,l}(\nu)\frac{\partial}{\partial q_k} I_l(\nu,\Omega) {\rm d}\Omega{\rm d}\nu
+$$
+The first term is local, it includes only the direct response of the radiative rates to the changes in the profile and, most importantly at this moment, it does not contain any derivative of the $n_{i,l}$ to the $q_k$. The second term, 
+$$
+\int \int \varphi_{i\rightarrow j,l}(\nu)\frac{\partial}{\partial q_k} I_l(\nu,\Omega) {\rm d}\Omega{\rm d}\nu,
+$$
+however, is a non-local contribution and represents the average over the angle $\Omega$ and transition $i\rightarrow j$ of the local response function $\frac{\partial I_l(\nu,\Omega)}{\partial q_k}$.
+
+Dropping the $\nu$ dependence, writing the formal expression for propagation in the negative $l$ direction
+$$
+I_l=I_{l+1} e^{-\Delta\tau_{l,l+1}}+\int S_{l,l+1}(t) e^{t-\Delta\tau_{l,l+1}} {\rm d}t
+$$
+and differentiating, we obtain
+$$
+\frac{\partial I_l}{\partial q_k}=\left[\frac{\partial}{\partial q_k}I_{l+1} - I_{l+1} \frac{\partial \Delta\tau_{l,l+1}}{\partial q_k}\right]e^{-\Delta\tau_{l,l+1}} +\frac{\partial}{\partial q_k}\int S_{l,l+1}(t) e^{t-\Delta\tau_{l,l+1}} {\rm d}t
+$$
+where $\Delta\tau_{l,l+1}$ and $S_{l,l+1}$ are the optical depth and the source function along the $l$ direction between indixes $l$ and $l+1$ respectively.
+
+Although representing the "local" contribution to the radiation field, the last term is only explicitly local, since $S_{l,l+1}$ itself depends on the populations and thus implicitly on the radiation field. Unfortunately, this means we cannot calculate the derivative to the $q_k$ explicitly, since this requires prior knowledge of the shift in the statistical equilibrium we are trying to quantitify in the first place. Instead, we proceed by explicitly considering all dependencies on the populations $n_{i,l}$, by writing the derivative of the local contribution as a sum over the partial derivatives to the populations of all levels at all depth points
+$$
+\frac{\partial}{\partial q_k} \int  S_{l,l+1}(t) e^{t-\Delta\tau_{l,l+1}} {\rm d}t=\sum_{i,l} {\mathcal C}_{i,l} \frac{\partial n_{i,l}}{\partial q_k}+\zeta_{i,l},
+$$
+where
+$$
+{\mathcal C}_{i,l}= \frac{\partial}{\partial n_{i,l}} \int_0^{\Delta\tau_{l,l+1}} S_{l,l+1}(t) e^{-t} {\rm d}t.
+$$
+and
+$$
+\zeta_{i,l}=\frac{\partial\varphi_{i\rightarrow j,l}}{\partial q_k}\frac{\partial}{\partial \varphi_{i\rightarrow j,l}} \int_0^{\Delta\tau_{l,l+1}} S_{l,l+1}(t) e^{-t} {\rm d}t.
+$$
+Similarly,
+$$
+\frac{\partial \Delta\tau_{l,l+1}}{\partial q_k}=\sum_{i,l} {\mathcal K}_{i,l} \frac{\partial n_{i,l}}{\partial q_k} + \xi_{i,l}.
+$$
+where
+$$
+{\mathcal K}_{i,l}=\frac{\partial \Delta\tau_{l,l+1}}{\partial n_{i,l}}
+$$
+and
+$$
+\xi_{i,l}=\frac{\partial\varphi_{i\rightarrow j,l}}{\partial q_k}\frac{\partial \Delta\tau_{l,l+1}}{\partial \varphi_{i\rightarrow j,l}}
+$$
+so that we arrive at a recursive relation for the response function
+$$
+\frac{\partial I_l}{\partial q_k}= \frac{\partial I_{l+1}}{\partial q_k} e^{-\Delta\tau_{l,l+1}} - I_{l+1} e^{-\Delta\tau_{l,l+1}}\left[ \sum_{i,l} {\mathcal K}_{i,l} \frac{\partial n_{i,l}}{\partial q_k}+ \xi_{i,l}\right]  +\sum_{i,l} {\mathcal C}_{i,l}\frac{\partial n_{i,l}}{\partial q_k}+ \zeta_{i,l}.
+$$
+If we assume a simple polynomial interpolation scheme for opacity and emissivity between the grid points, we can take the derivatives of $\Delta\tau$ and $S$ to the populations explicitly, where clearly only the derivatives to a small number of populations near depth index $l$ that are actually used in the expression for $\Delta\tau$ and $S$ yield nonzero contributions. 
+
+Since the response is recursive, and the upstream response itself is also a sum over all $n_{i,l}$, the response can be reduced to the form
+$$
+\frac{\partial I_l(\nu)}{\partial q_k}=\sum_{i,l} {\mathcal H}_{i,l} \frac{\partial n_{i,l}}{\partial q_k}+\chi
+$$
+and thus
+$$
+\frac{\partial \overline{J}_{i\rightarrow j,l}}{\partial q_k}=\sum_{i,l} \overline{\mathcal H}_{i,l} \frac{\partial n_{i,l}}{\partial q_k}+\overline{\beta}
+$$
+where all terms that do not depend on the populations were collected in $\overline{\beta}$.
+
+Every $\frac{\partial R_{i\rightarrow j,l}}{\partial q_k}$ thus contains a sum over the derivatives $\frac{\partial n_l}{\partial q_k}$ that, since there has been an integration over angle and frequency, may have nonzero coefficients in all directions. Therefore, the elements of $\frac{\partial {\bf A}}{\partial q_k}$ have the form 
+$$
+\left(\frac{\partial {\bf A}}{\partial q_k}\right)_{i,l,j,l}=\sum_{i,l} \overline{{\mathcal H}}_{i,l} \frac{\partial n_{i,l}}{\partial q_k} +\overline{\beta}
+$$
+which still is of block-diagonal form.
+
+We now try to reform this expression by multiplying it with ${\bf n}$, 
+$$
+\left(\frac{\partial {\bf A}}{\partial q_k}\cdot{\bf n}\right)_{i,l}=\sum_{j} \left(\frac{\partial {\bf A}}{\partial q_k}\right)_{i,l,j,l} n_{j,l}=\sum_{j} \left( \sum_{i,l} \overline{{\mathcal H}}_{i,l} \frac{\partial n_{i,l}}{\partial q_k} +\overline{\beta}\right) n_{j,l}
+$$
+
+$$
+\left(\frac{\partial {\bf A}}{\partial q_k}\cdot{\bf n}\right)_{i,l}=\sum_{i,l}\sum_{j}\overline{{\mathcal H}}_{i,l} \frac{\partial n_{i,l}}{\partial q_k}n_{j,l} +\sum_{j}\overline{\beta} n_{j,l}=\sum_{i,l}\left(\sum_{j}\overline{{\mathcal H}}_{i,l} n_{j,l}\right)\frac{\partial n_{i,l}}{\partial q_k} +\sum_{j}\overline{\beta} n_{j,l}
+$$
+
+
+We now need to solve
+$$
+{\bf A}\frac{\partial {\bf n}}{\partial q_k}=\frac{\partial {\bf A}}{\partial q_k}\cdot{\bf n}={\bf B}\frac{\partial {\bf n}}{\partial q_k}+\sum_{j}\overline{\beta} n_{j,l}
+$$
+to obtain $\frac{\partial {\bf n}}{\partial q_k}$. 
+$$
+\frac{\partial {\bf n}}{\partial q_k}=({\bf A-B})^{-1}\sum_{j}\overline{\beta} n_{j,l}
+$$
+
+
+\section{Slightly different formulation by Ivan}
+
+Let us go in reverse, as we are familiar with the problem already. Response function of the local ($l$) intensity to the perturbation of $q_k$ at point $k$ is:
+\begin{equation}
+\frac{\partial I_l}{\partial q_k} = \frac{\partial}{\partial q_k} \sum_{l'} \Lambda_{ll'} S_{l'}
+\end{equation}
+By using the perturbed radiative transfer equation from Jose Carlos' book, and by differentiating with respect to the line profile (we assume that there is only one line involved in each transition) and with respect to local populations we obtain:
+\begin{equation}
+\frac{\partial I_l}{\partial q_k} = \sum_{l'} \sum_{i'} \Lambda_{ll'} \frac{\partial \delta S}{\partial n_{l'i'}} \frac{\partial n_{l'i'}}{\partial q_k} + \sum_{l'} \Lambda_{ll'} \mathcal{S}_{l'k}
+\end{equation}
+Where:
+\begin{equation}
+\mathcal{S}_{l'k} = \frac{\partial \delta S}{\partial \phi_{l'}^{ij}(\lambda)} \frac{\partial \phi_{l'}^{ij}}{\partial q_k}
+\end{equation}
+is non-zero only when $k = l'$. 
+\\
+
+\textbf{Deviation: Very important}: This formulation here assumes that continuum opacity does not change. This, now, is not strictly true. Continuum opacity, in principle has the following contributors in the solar atmosphere:
+\begin{itemize}
+\item H$_2^{-}$ opacity: most important in the photosphere, but chromosphere? Temperature changes will change its abudance, and so will the change of the electron density, due to the change of the radiation field. This would lead to coupling of the rate equations and chemical equilibrium. Which is more cumbersome. 
+\item Bound-free transitions: as we will obtain the changes of the populations, in principle this should be relatively easy to account for. On the other side, are b-f and f-b opacity/emissivity so important? And especially, are they important in the spieces other then hydrogen? 
+\item F-F opacity on atoms: In principle this depends only on populations, i.e. there is no coupling with chemical equilibrium. Should be straightforward to put it.
+\item Thomson scattering: This might be the problem as electrons also couple different spieces via chemical equilibrium equations. 
+\end{itemize}
+From what we see here, it is likely that we might be driven into the problem of coupling the rate equations with chemical equilibrium, which is more complicated.
+\\
+
+
+The derivative is only with respect to the profile of the $i \rightarrow j$ transition, but in principle should be over all the profiles which overlap with $i \rightarrow j$. So we end up with (!I did not notice this before!):
+\begin{equation}
+\frac{\partial I_l}{\partial q_k} = \sum_{l'} \sum_{i'} \Lambda_{ll'} \frac{\partial \delta S}{\partial n_{l'i'}} \frac{\partial n_{l'i'}}{\partial q_k} + 
+\Lambda_{lk} \mathcal{S}_{kk}
+\end{equation}
+
+%The form of $\mathcal{S}_{l'k}$ will be shown later, as it actually depends in which $J_{ij}$ we insert this derivative of the local intensity. 
+
+We now integrate the equation above over angles and line profile to obtain the derivative of the scattering integral for transition $i\rightarrow j$ with respect to $q_k$.
+\begin{equation}
+\frac{\partial J_l^{ij}}{\partial q_k} = \oint \int \phi_l^{ij}(\lambda) d\lambda d \Omega \frac{\partial I_l}{\partial q_k} + \oint \int \frac{\partial \phi_l^{ij}(\lambda)}{\partial q_k} d \lambda d\Omega I_l
+\end{equation}
+Due to the multipllication with $\phi_l^{ij}$ in the first integral on the right hand side, in the computation of $\mathcal S_{l'}$ we only need the derivative with response to the profile $\phi^{ij}_l$. Furthermore derivative of the profile with respect to $q_k$ is nonzero only for $k=l'$. So, we can write:
+\begin{equation}
+\frac{\partial J_l^{ij}}{\partial q_k} = \oint \int \phi_l^{ij}(\lambda) d\lambda d \Omega \sum_{l'} \sum_{i'} \Lambda_{ll'} \frac{\partial \delta S}{\partial n_{l'i'}} \frac{\partial n_{l'i'}}{\partial q_k} + \mathcal{B}_l^{ij}
+\end{equation} 
+Where $\mathcal {B}_l^{ij}$ is not hard to compute, unless we seriously missed something. Now the derivative of the rate matrix $A_l^{ij}$ is:
+\begin{equation}
+\frac{\partial A_l^{ij}}{\partial q_k} = B_ij \frac{\partial J_l^{ij}}{\partial q_k} + \Gamma_l^{ij}
+\end{equation}
+where $\Gamma_l^{ij}$ contains the derivative of the collisional rates with respect to the perturbation. This is again strictly local, and can be quickly computed numerically. 
+
+\textbf{NO!} Collisions depend also on electron density. Electron density implicitly depends on temperature. This is yet another coupling with the equations of chemical equilibrium.
+
+But here we continue with the approximate treatment. We have ended up with:
+\begin{equation}
+\frac{\partial A_l^{ij}}{\partial q_k} = \sum_{l'} \sum_{i'} \psi_{ll'}^{iji'} \frac{\partial n_{l'i'}}{\partial q_k} + \beta_l^{ij}
+\end{equation}
+where:
+\begin{equation}
+\psi_{ll'}^{iji'} = \oint \int \phi_l^{ij}(\lambda) d\lambda d\Omega \, \Lambda_{ll'} \frac{\partial \delta S}{\partial n_{l'i'}}
+\end{equation}
+and $\beta_l^{ij}$ contains all strictly local contributions to the derivative. There should be three of them: collisional term, term wich contains the derivative of J due to the variation of the local profile and the term which contains the derivative of the source function with respect to the profile. I am writing this in words as I am not completely sure if all 3 of these are correctly written and if they contain everything. 
+
+We have actually started from:
+\begin{equation}
+\hat{A}_l \frac{\partial \vec{n}_l}{\partial q_k} = - -\frac{\partial \hat{A}_l}{\partial q_k} \vec{n}_l
+\end{equation}
+Now let's write it through a sum, for a population of level $i$ at point $l$:
+\begin{equation}
+\sum_{l'} \sum_j A_{lij} \delta_{ll'} \frac{\partial n_{l'j}}{\partial q_k} = - \sum_j \left ( B_{ij} \sum_{l'} \sum_{i'} \psi_{ll'}^{iji'} \frac{\partial n_{l'i'}}{\partial q_k} + \beta_l^{ij} \right )
+\end{equation}
+Now we, without feeling of remorse, swich notation for $i'$ and $j$ on the right side:
+\begin{equation}
+\sum_{l'} \sum_j A_{lij} \delta_{ll'} \frac{\partial n_{l'j}}{\partial q_k} = - \sum_{i'} \left ( B_{ii'} \sum_{l'} \sum_{j} \psi_{ll'}^{ii'j} \frac{\partial n_{l'j}}{\partial q_k} + \beta_l^{ii'} \right ),
+\end{equation}
+and then swich order of summation over $i'$ and $j$:
+\begin{equation}
+\sum_{l'} \sum_j A_{lij} \delta_{ll'} \frac{\partial n_{l'j}}{\partial q_k} = - \sum_{l'} \sum_{j} \left ( \sum_{i'} \psi_{ll'}^{ii'j} \frac{\partial n_{l'j}}{\partial q_k} + \beta_l^{ii'}  \right )
+\end{equation}
+So our linear sistem of equations looks like this:
+\begin{equation}
+\sum_{l'j} A_{lij} \delta_{ll'} \frac{\partial n_{l'j}}{\partial q_k} = - \sum_{l'j} \Psi_{ll'ij}  \frac{\partial n_{l'j}}{\partial q_k} - \beta_l^i
+\end{equation}
+Or:
+\begin{equation}
+\hat{M}\vec{x} = \vec{b},
+\end{equation}
+where matrix $M$ and vectors $x$ and $b$ are of dimension $N_{\rm levels} \times N_{\rm depths}$ and look like this:
+\begin{eqnarray}
+M_{ll'ij} & = A_{lij} \delta_{ll'} + \Psi_{ll'ij} \\
+x_{li} & = \frac{\partial n_{li}}{\partial q_k} \\
+b_{li} & = \beta_{l}^i
+\end{eqnarray}
+It can be seen that matrix $\hat{M}$ does not depend on the specific parameter which is perturbed, nor on the specific depth point where it is perturbed. The matter of finding responses of populations to the perturbations ($\frac{\partial n_{li}}{\partial q_k}$) is thus reduced to the problem of computing matrix $M$ once, inverting or decomposing it, computing $\beta_{li}$ for each $q_k$ (which should be relatively small computational work, but I am not sure) and then getting the response. 
+
+
+\end{document}

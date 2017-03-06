@@ -1,0 +1,37 @@
+#ifndef __JNFO_H__ // __JNFO_H__
+#define __JNFO_H__
+
+#include <sys/types.h>
+#include "types.h"
+#include "io.h"
+
+#include "atmos.h"
+//#include "obs.h"
+//#include "data.h"
+//#include "inv.h"
+// best make classes for each (e.g. atmos, obs, data, etc..)
+
+struct jnfo{
+  int na;
+  class atmosphere **atmos;
+//
+  int no;
+//  class observable **obs;
+//
+  fp_t *az,*el,**lambda;
+  int *nlambda;
+  char **name;
+//
+  uid_t uid;
+  gid_t gid;
+  char *uname;
+//
+  uint08_t cdcl,nmth,nsth,nsln; // chunk compression level, # master threads, # slave threads, # slaves
+//
+  jnfo(byte*,byte,io_class&);
+  jnfo(void);
+  ~jnfo(void);
+  byte *compress(int&,int,byte,io_class&);
+};
+
+#endif             // __JNFO_H__

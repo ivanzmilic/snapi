@@ -1,0 +1,29 @@
+\begin{thebibliography}{7}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{del Toro Iniesta}(2003)}]{dtibook}
+{del Toro Iniesta}, J.~C. 2003, {Introduction to Spectropolarimetry}
+
+\bibitem[{{Hubeny}(2003)}]{Hubeny03}
+{Hubeny}, I. 2003, in Astronomical Society of the Pacific Conference Series,
+  Vol. 288, Stellar Atmosphere Modeling, ed. I.~{Hubeny}, D.~{Mihalas}, \&
+  K.~{Werner}, 17
+
+\bibitem[{{Mihalas}(1978)}]{Mihalasbook}
+{Mihalas}, D. 1978, {Stellar atmospheres /2nd edition/}
+
+\bibitem[{{Olson} \& {Kunasz}(1987)}]{OK87}
+{Olson}, G.~L. \& {Kunasz}, P.~B. 1987, \jqsrt, 38, 325
+
+\bibitem[{{Press} {et~al.}(2002){Press}, {Teukolsky}, {Vetterling}, \&
+  {Flannery}}]{nr02}
+{Press}, W.~H., {Teukolsky}, S.~A., {Vetterling}, W.~T., \& {Flannery}, B.~P.
+  2002, {Numerical recipes in C++ : the art of scientific computing}
+
+\bibitem[{{Ruiz Cobo} \& {del Toro Iniesta}(1992)}]{SIR}
+{Ruiz Cobo}, B. \& {del Toro Iniesta}, J.~C. 1992, \apj, 398, 375
+
+\bibitem[{{Rybicki} \& {Hummer}(1991)}]{RH1}
+{Rybicki}, G.~B. \& {Hummer}, D.~G. 1991, \aap, 245, 171
+
+\end{thebibliography}

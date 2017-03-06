@@ -1,0 +1,66 @@
+MAKEFILE      = Makefile
+# local variables
+OPTFLAGS      = -O4 -O5 -ffast-math
+WARNFLAGS     = -Wimplicit -Wshadow
+DBGFLAGS      = -g3
+XTRAFLAGS     = -fsigned-char # -fno-stack-protector
+# global variables
+AR	      = ar
+COMPILER      = g++
+RANLIB        = ranlib
+INCLUDE       = -I. -I../ -I../../grid -I../../cmlib
+COMPFLAGS     = $(OPTFLAGS) $(WARNFLAGS) $(DBGFLAGS) $(XTRAFLAGS) $(TYPE_DEF)
+# export global variables
+export MAKE
+export COMPILER
+export INCLUDE
+export COMPFLAGS
+
+DEST	      = .
+SHELL         = /bin/sh
+
+CC	      = $(COMPILER)
+CCFLAGS	      = $(COMPFLAGS) $(INCLUDE)
+
+OBJS          = atmos_pp.o atmos_pp_rts.o atmos_ppbez.o atmos_ppbez_rts.o
+                
+LIBRARY       = libpp.a
+
+.cc.o:
+		$(CC) -c $(CCFLAGS) $<
+
+.SUFFIXES:	.o .cc
+	
+all:            
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) all -C $$subdir; done
+		$(MAKE) $(OBJS) ${LIBS} ${MAKEFILE}
+		@echo "Creating $(LIBRARY) ..."
+		@$(AR) cru $(LIBRARY) $(OBJS)
+		@echo -n "$(AR) cru $(LIBRARY) $(OBJS) "
+		@list='$(LIB_LIBS)' ; for lib in $$list ; do\
+                  echo -n `$(AR) t $$lib`" ";\
+                  $(AR) x $$lib;\
+                  $(AR) ru $(LIBRARY) `$(AR) t $$lib`;\
+                  $(RM) -f `$(AR) t $$lib`;\
+                done
+		@echo ""
+		$(RANLIB) $(LIBRARY)
+		@echo "done"
+
+clean:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) clean -C $$subdir; done
+		rm -f $(OBJS) core $(LIBRARY)
+
+distclean:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) distclean -C $$subdir; done
+		rm -f $(OBJS) core $(LIBRARY) $(MAKEFILE)
+
+dep:		depend
+
+depend:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) depend -C $$subdir; done
+		@makedepend -f $(MAKEFILE) $(SRCS)
+
+update:		$(DEST)/$(LIBRARY) 
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

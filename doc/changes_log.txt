@@ -1,0 +1,532 @@
+10/03/2016
+- Removed computation of "a" from atom::getlambda function. It is not-essential, but we should find a way to compute it. 
+- There is a seriously wierd error: running analytical and numerical responses in different order produces different results.
+
+11/03/2016
+- Using valgrind to eliminate all the errors before proceeding with debugging and testing
+- There are mostly some invalid reads and similar problems in atmosphere (and atom?!) pack/unpack/resize, destructors and constructors. Probably only Michiel can help with this
+- Removed "numerical" computation of emergent intensity. Propagating perturbations is ok, and no need to recheck it further. 
+- Think where to deallocate "rmap" <--- POSTPONED.
+- There isa a problem with lambda and tmplambda <--- POSTPONED
+- Found a problem: In the computation of norm and norm derivative, instead of computing the profile, the current value of the profile has been used, which might have try to 
+  reach for something non-existing <--- FIXED
+
+ 14/03/2016
+ - Working again on generation of atmosphere from the nodes atmos_pp::generate_from_nodes. 
+ - It does not work as intended for N_nodes >=3 (i.e. not smooth). <--- POSTPONED  <--- FIXED?! 
+
+ 15/03/2016
+ - Working on the imposing of the pressure EQ. Following SPINOR routines and Erica Bohm-Vintense book 
+ - Method is good, but my opacities are way off, what could it be? 
+
+ 16/03/2016
+ - Adding Rayleigh Scattering by H I
+ - Continuing to work on the pressure eq. There is a difference between what is suggested in Bohm-Vintense, and what we get. Choose your own path, ignore SPINOR, and follow B-V, that agrees with what you were expecting anyway.
+ - Finally agreement is not perfect, but it is not halfway bad. We can move on. 
+
+17/03/2016
+
+ - Introducing model class which holds model parameters, gets passed to the atmosphere to make the full stratified atmosphere. 
+ - However it does not work, from purely programming point of view
+ - We did it. Implemented interpolation, made a part which enforces HD equilibrium, now on to test actual procedure. Keep vt same as in the model and compute a bit.
+
+ 18/03/2016
+
+ - Some atmospheres look wierd. Ok, interpolation was wrong <--- FIXED
+ - Now we, basically have generative model of the atmosphere.
+ - Add the same for the other quantities. <--- DONE
+ - Writing the method for the atmosphere which, given "model" returns back the observable and numerically computed derivatives.
+ - Should we put derivatives in the observable too? <--- DISCUSS
+ - We need to change, B, theta_B and azimuth_B need to be separate, it is sort of awkward to put them in the same array as units are different 
+
+ 21/03/2016
+
+ - Detour: Implemented atom::zeeman_setup function which computes doppler shifts and relative strengths of zeeman components
+
+ 22/03/2016
+
+ - Repair Zeeman solver. Implemented everything from the scratch. Debugging now.
+
+ >>>>>>>>>>>>>>>>>> VACATIOOOOOOOOOOOOOOOOOOOOOOOOOOOON <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+ 07/04/2016
+
+ - Main problem is that our polarized solution is very far away from what SPINOR gives. 
+ - Repair polarized solver for 2nd order Bezier and solve for the case where we have only \eta_I
+ - For unpolarized light - seems to work. But splitting is too big! 
+
+ 08/04/2016
+
+ - Computing absorption matrix with Jose Carlos' book. Trying to reproduce plots from Fig. 8.5, 8.6, 8.7
+ - So far focusing only on eta_I
+ - I really do not like these expressions for delta_lambda in Lorenz units, I will do it the way I find understandable
+ - Ok so you made two mistakes: a) You did not understand properly how does polarized emission need to look like;
+ 								b) You COMPLETELY SKIPPED the part in the formal solution where "source function", i.e. ee/op is computed
+
+ - >>>> Now everything concerning the computation of polarized profiles works correctly. WE STILL LACK SOME OPACITY (I think), with respect to SPINOR, so investigate this. Metals and overionization! 
+
+ 11/04/2016
+
+ - Going back to the numerical computation of responses. We have implemented that and we have played around in python with LM a bit. 
+ - Also, I have changed the methods returning arrays to return the copy of the array (e.g. observable->get_S)
+
+ 12/04/2016
+
+ - Implementing the first version of the fitting in our code
+ - Implemented transpose and multiply_with_transpose function for matrices, for easier manipulation
+ - Now debugging simplest fitting procedure
+ - Fixing some other stuff in Valgrind now. 
+ - atom.cc , line 1270 : We were using "ntr" as a condition to something but it is only computed in case rtsetup is run, better use "nmap"
+ - atmos_chm.cc, line 110 (chemeq) : there was, for no reason, reference to nk[0]. We have fixed that. 
+ - To get completely self-consistent code, you should always start from the same value of the surface pressure, that is particle density, we have fixed it to 0.3 / k / 5000 K. You do not feel so well,   time to go home and play some Bonobo
+
+13/04/2016:
+
+ - Fitting works nice! What now? Play around with it more? What to implement next? I am feeling so nice. Also Gregory Porter is playing on Spotify. 
+ - Maybe go back through the stuff you have postponed?   
+ - Tested interpolation when N_nodes >= 3. Seems to be ok? See 14/03/2016. Fitting in this case also works ok. 
+ - Tried to fit spectrum computed from falc model atmosphere, fit is ok, and T stratification is very similar to that.
+ - Let's try out including microturbulent velocity. It seems to work! We need to test more on other atmospheric functions. 
+ 
+ 14/04/2016
+
+ - Quickly show convergence properties to Michiel ->>> DONE 
+ - Move back to responses computation! 2-lvl Hydrogen, FALC atmosphere, pure line transfer, gogogogogo! 
+
+15/04/2016
+
+ - I am dealing with the computation of the derivatives of the profile and I am basically stuck. 
+ - Ok, not any more! Actually, here we have a problem, and it is that the derivatives are not sooo good and it looks like I have missed something so the situation is not so good.<---- URGENT
+
+18,19/04/2016
+
+ - Mostly testing various approximation and test cases for 2 and 3- level hydrgen (see TEST 1..4 folders in pyplot). Also worked on a paper a bit. 
+
+ 20/04/2016
+
+ - Trying out Mg h&k with 3-level Mg atom, with help of Smitha and papers of Heinzel & Vial (2013) and Leenaarts et al (2013).
+
+ 21/04/2016
+
+ - Trying to make NLTE work in H + an additional atom. It works now. The problem was in Raighley scattering. I have used now better formalism from Lee (2005)
+ - Now trying to get level responses properly 
+
+ 28/04/2016
+
+ - I was away, but still we are trying to progress. Working on Responses of MgII hk to finish the paper. 
+ - I have managed to somehow set the code so, that if you define levelless ionization state underneath the one with levels, it is not accounted in transitions, and thus is treated in LTE
+ - Ok, we need to input another type of B-F specification, so called TAB. We have implemented reading that from the config file, let's see if it is properly packed/unpacked
+ - Seems like it is properly packed/unpacked, what's next? Ok, seems like there is a problem, that the function is not called. Although everything else is done.
+ - Ok it works finally. I.e. does not explode. 
+
+ 29/04/2016
+
+ - Everything is working but very annoying. Actually 3 lvl Ca is working nicely in LTE. Check!
+ - Ca_3_lvl, NLTE, only line: works well. 
+ - Ca_5_lvl, NLTE, only line: works well. 
+
+02/05/2016
+
+- Next step is to introduce the other effects into the opacity/emissivity. Let's assume that level populations are close (spoiler alert: they are probably not). And introduce other perturbations here.
+- Probably the most important thing is H- opacity. That we will treat in LTE for the moment.
+- Population response seems to be working fine. 
+- Everything is working fine, but we are lacking something in the derivative, because there is a disagreement deep in the atmosphere. I guess this is at the point where line is weak but H- is strong.
+- Now we somehow try to computing all known perturbations to opacity and emissivity and pass them to the add_response_contributions()
+
+03/05/2016
+
+- We meddled a bit with including external, lte, opacity into a proper way in the code.
+- More or less things function well. Some things need to be added, in particular responses of B-F rates. 
+
+04/05/2016
+
+- Cmon let's test 5 lvl Ca, for fun :)
+- It works really good, and we have managed to complete zeroth version of the paper. Nice.
+
+05-08/05/2016
+
+- Holiday. No touching the work at all. 
+
+09-11/05/2016
+
+- We have realized that we need to either compute dI/dh, which is supercomplicated, or to work in tau_500 scale as an independent scale. 
+
+12/05/2016
+
+- We opt for the latter, and move on to implement tau_500 and op_500 in our atmosphere object. This means that we also have to modify size/resize, pack/unpack, etc...
+- Backed up the code with this date. As we do not have cvs. Now we are going to add some functions.
+- Simplest way to proceed is to compute tau_500 and op_500, and then test ust the new formal solution.
+- Now we need to set-up the new solution. How do we do it. Either we can write down another solution, or modify this so it also takes the grid into account. 
+  The second one is simpler, less repetitive, seems to lead to smaller complications...
+- Change the formal solver so it will take the grid is is solving on as the first argument. 
+
+13/05/2016
+
+- Seems like all works as indended. 4 days holidays! 
+
+18/05/2016
+
+- We need to make the whole iterative procedure work in tau as independent quantity. And then the same but for the responses.
+
+19/05/2016
+
+ - We have now atmosphere::compute_op_referent, and atmosphere::compute_tau_referent, where direction of integration is assumed to be from the top to the bottom
+ - Now iterations also work, slightly smaller number of iterations is needed. 
+
+ 20/05/2016
+
+ - Seems like we have understood how to relate the changes in nodes to changes of temperature, thus rendering the above step unnecessary 
+ - Let's test. First we need to have responses to nodes numerically computed.
+
+ 23/05/2016
+
+ - Lets put in the analytical derivative with respect to the nodes and see if it converges. No, it does not. 
+ - Next step is to : a) Add "shifting" because of the change of tau; b) Add the response to density perturbations, because those are intimately linked with T 	   perturbations (because of the hydrostatic equilibrium)
+
+ 24/05/2016
+
+ - The latter seems to be MUCH more important. We are implementing it now. We have changed the naming from responses_Temp to level_responses[...] which goes from 	1 to 7, denoting the parameter
+ - Now on to compute and test these responses. 
+
+ 30/05/2016
+
+ - We further test derivatives to the total density (pressure) and they seem satisfactory although not totally great. 
+
+ 31/05/2016
+
+ - Day filled with running left and right. We need to change responses so they all refer to different atmospheric parameters (see entry on 24/05). 
+   This is a bit cumbersome and frustrating but it has do be done now, although that means we will have to wait a bit until we see the results. 
+ - Start by changing Ne_lte_der so it is a 4D instead of 3D array, where the first dimension corresponds to the derivative with respect to given quantity.
+ - Ok that is done, now change atmos XXX_pert functions from 4D to 5D arrays. That also seems ok. 
+ - Now atom:: functions need to be changed to return 5D arrays. Also done.
+
+ 01/06/2016
+
+ - JUNE ALREADY?
+ - Debugging.... Compile went through now we have some fun correcting these seg faults.
+ - Added density to atom:boundbound_op and _em. Agreement is really nice.
+
+ 02-12/06/2016
+
+ - Tested density made sure it works. (There are still some components there which need to be taken into account, for the continuum contribution)
+ - Tested node-based inversion. 
+ - Take 1: Just compute T and Nt, perturb, see how are T and Nt perturbed, and add -> PROBLEM: does not take into account h variations with tau 
+ - Take 2: Once T and Nt are compute, interpolate them back to the original h grid and see what is going on.
+ - Take 3: Implement the approach MvN and me derived. This is somehow unclear to me in the end again, altough it should not work. 
+ - Take 2 seems to work the best. 
+
+ 13/06/2016
+
+ - Discussion with Sami, went well. 
+ - Now we need to put some outline in the front and see what's up. To decide what we want to do first. 
+
+ 14/06/2016
+
+ - Ok now we first go repair density. 
+
+ 04/07/2016
+
+ - Last 20 days we were not on holiday. We were meddling with inversion, preparing the presentation, working with a student and finally, computing sca
+   scattering polarization in plane-parallel, illuminated atmosphere. It was fun. But now, we need to start tracking the changes immediately. 
+ - IMPORTANT: opacity_pert explodes if you use it for the continuum, wavelengths -> FIX THIS
+ - We are currently stuck solving the following problem: We have level population derivatives, but we cannot get good intensity derivatives.
+
+ 05/07/2016
+
+ - I switched back from the problem to the problem of exploding derivative to density. 
+
+ 06/07/2016
+
+ - We have somehow concluded that the problem is on r.h.s of the grand response equation. Now we will turn off all of them and see what is going on.
+ - Turned all off : Totally ok, actually consider running this as it is. -> Call this A0 (approximation zero)
+ - Turn on different parts, one by one. But let's think of importance. The most important are continuum contributions. 
+ - Non-local contributions due to the change in opacity and emissivity: Slightly worse, but basically not noticeable -> Call this A1
+ - Turn on local contribution due to the line factor: Much better now -> Call this A2
+ - Non-local contributions due to the profile derivative -> NONONONO WAIT. All this works well. 
+ - The problem is apparently in some memory allocation-dealllocation because running this in difference places in the code produces different results. 
+ - How to track this?. Let's try to pinpoint if memory leaks and in which function.
+ - We found that beta_Temp was not properly allocated and initialized, and basically valgrind helped a lot. The problem is solved now. 
+
+ 07/07/2016
+
+ - Chinmaya gave a talk. It was very good. 
+ - Spent time convincing myself what when we disable enforcement of Hydrostatic Equilibrium all works well 
+ - Spent more time computing very clumsy continuum derivative function
+
+
+ 08/07/2016
+
+ - Then tried interpolating again, that does not work. 
+ - Francisco is back! 
+ - We need to work with the continuum opacity in LTE, and to precompute it and its derivative in order to get all well. 
+ - TODO: Maybe delete old functions ? No, that is not necessary. The old one is fine. But make sure that it is computed in lte
+ - So we keep atmos::opacity_continuum(...)
+ - This is set @ the moment of atmosphere construction, but you also need to compute it any time you perturb atmosphere (you change T or N). 
+   that is sorted out now. Now the next step. 
+ - Compute numerically level responses, and then integrate it into intensity responses, on the tau grid.
+
+ 11/07/2016
+
+ - I am back from weekend. And I am lost like Alice.
+ - And I meddled around the code and I made it work. Voila! We now can work in \tau as an independent quantity.
+ - However there is the problem, that inversion written in \tau grid will not converge totally toward the original numbers. 
+
+ 12/07/2016
+
+ - This day just faded away. But we did something. 
+
+ 13/07/2016
+
+ - Replacing point-by-point derivatives with numerical ones, fixes convergence by a lot. Now the code converges down to 1E-14, which is just slightly worse
+   than the finite differences. What can we do? Well we can go a step back and see whether this discrepancy comes from the level populations or a step later.
+   My bet is on the first one.
+ - You lost the bet, it is something after level populations. Does not work in LTE either. 
+ - REMINDER; YOU DISABLED: MOLECULES, COL DAMP, e- OPACITY. NLTE POPULATIONS. <---- Return all this when you come back. 
+ - You reverted back all these actually except NLTE populations :) 
+
+ 14-17/07/2016
+
+- Super-extended weekend in Bremen. Some ideas were brewing in my head. 
+ 
+ 18/07/2016
+
+ - Test the method on the continuum. 
+ - If get_lambda returns 0 points, somehow N_lambda gets reset to 0 points and then things fail! <---- FIX
+ - There was an inaccuracy in the computation of opacity and emissivity for H- derivative to Temperature <---- FIXED
+ - There is also an inaccuracy (because you are doing stuff too approximate) in the computation of damping <---- TO FIX! 
+ - But the real reason for non-convergence was not this, it was the fact that obs_scalar_responses_tau returns slightly different spectrum with respect to 
+   obs_scalar_tau
+
+ 19/07/2016
+
+ - Turns out it was because there was an unnaccounted change in the atmosphere at the deepest point so difference was very small. 
+ - It is fixed, but there still remains very small discrepancy, which however makes things still ok. 
+
+ 20/07/2016
+
+ - Implemented responses to v_turb, works great. Inverts 4 node in T + 1 node in vt better than the finite differences
+
+ 21/07/2016
+
+ - Did nothing except to correct the paper. Let's submit this finally. 
+
+ 22/07/2016
+
+ - Ok, let's move to Sr 4607. We played with this nicely, but there is no agreement between analytical and numerical results. 
+
+ 24/07/2016 - 31/07/2016
+
+ - PSI! 
+
+ 1/08/2016 - 15/08/2016 
+
+ - VACATION! :D 
+
+ 16/08/2016
+
+ - Ok, there is disagreement between analytical and numerical level responses for Sr atom. This can be due to role of B-F transitions! Let's investigare.
+ - We start by going back to Halpha to test if all is well. 
+
+ 17/08/2016
+
+ - Yesterday we concluded that the reason is in B-F radiative rates. We were reluctant for a bit how to put it in, but after scribbling on paper for a while
+   we have to go in. Rambo style.
+
+ 18/08/2016
+
+ - Implemented everything, assuming only lte perturbations to opacity/emissivity (meaning that H- is the greatest contributor), but does not work! 
+
+ 19-24/08/2016
+
+ - Meddled with this mostly unsuccesfully, computing and testing some things on the way. Finally today (24/08) found some trivial errors so it works in the case 
+   when the background intensity which is ionizing things is in lte. We will see what happens after that....
+ - Now time to couple! b-f to b-f opacity.
+
+ 25/08/2016
+
+ - Now we are working on that.
+
+ 26/08/2016
+
+ - Sort of done it, looks good, compiles properly. But.... Basically seems that the corrections are too small.
+ - Let's sum up what we know:
+      * Fixed continuum, very weak line -> level responses are excellent
+      * Fixed continuum, very strong line -> level responses are good, but not perfect
+      * B-f continuum, self-coupling -> discrepancy is too big. Let's try and find why. How to do it? Disable molecules! 
+
+27/08/2016 - 05/09/2016 
+
+- Conference in Serbia and Petnica
+
+06/09/2016 - 09/09/2016
+
+- Fixing b-f and computing Q/I responses. It was great. 
+
+10/09/2016 - 17/09/2016 
+
+ - Conference in Florence
+
+19/09/2016 
+
+ - I am back!
+ - I want to make a design change so things can be understood more easily. In terms of partial derivatives which are simply added together. 
+   This way the code will ressemble equations more closely.
+
+20/09/2016
+
+- We formalized situation a bit and it looks good. Let's do it all the way until the end and finally solve this issue with the derivatives. 
+- For the case when perturbations to the intensity only come due to the >> known << perturbations in opacity and emissivity, it works nicely.
+
+21/09/2016:
+
+- We spent the day trying to solve this issue but alas, does not work. 
+- Then we turned to perfecting the case with Fixed background continuum, by accounting for dchi/dqk due to b-b transitions etc.
+
+22/09/2016:
+
+- VERY IMPORTANT: Changing the opacity of the line, leads to the changes in the discrepancy, and discprenacy scales exactly with condition number. 
+  This is easily seen on example with only 9 atmospheric points. Now lets test with 31. This somehow suggests that errors in Beta are amplified. 
+
+23/09/2016:
+
+- I just dug into this deeper and deeper and deeper. And I wrote a pdf about this. And I am seriously annoyed by this. And and and.... :(
+
+26/09/2016: 
+
+- And I continue working :)
+- And I find the bug. The problem was that "last line in SE" was not properly set to zero everywhere as it was supposed to. Now it looks fine. 
+
+30/01/2017:
+
+It was four months. We published a paper, made Zeeman responses and started trying to invert. What we have encountered up to now, however, is that we cannot get equally good convergence for analytical and numerical derivatives with respect to the nodes. And here we push forward!
+
+- We have tested difference between analytical and numerical response function (depth dependent) for the model which has two T nodes and one node in other parameters. Values in T nodes are 5000 and 7000 K, while in other nodes we have values of: 1.5E5, 0, 1200, pi/6 and pi/6, respectively. The relative difference between response functions is 2-3% in T and around 18% in Vt, (in I), which is wierd, because the plot does not look so.
+- To remind ourselves of the problems, let's go back to the fitting itself. Starting model is what we have before. The one we need to revert to is, 4600,6200, 1.3E5, 2E5, 1000, pi/4, pi/4. Both converge, and fast. But numerical one significantly faster. One way to deal with this is to disable model parameters other than the temperature and see. 
+- There still is a diffference. Less pronounced as both jump down very fast, but difference nevertheless. 
+- Next step is to revert line to LTE and decrease its Einstein coefficient down do 1E7, to see if there is a difference.
+- There is. LTE works properly.
+
+31/01/2017:
+- We now take the model atmosphere we descibed above and we go to compute level responses again, to see what is going on. 
+- There is <= 0.1% local difference and <=1% non-local difference (actually might be higher, as we are normalizing to maximum response). This somehow translates into 2-3% percent intensity difference, which comes from these level inaccuracies. We should hunt this down. 
+- Changing the number of wavelength points does not change the discrepancy. 
+- Changing the number of depth points does not change the discrepancy. 
+- Disabling the damping does not change the discrepancy. 
+- IMPORTANT: Disabling b-f processes decreases discrepancy significantly. Very interesting. And very wierd. Hector told us that maybe linear solver is the best?
+- It seems like linear solver is a bit better. Another thing here is that we cannot reproduce good agreement we had in the paper! Very very annoying. Go back and do that and then ivestigate thoroughly!
+- !!!!!!!!!!! There was a stupid bug which might have influenced the results. Two lines were not commented. 
+- Does not help honestly. One can clearly see horizontal line in numerical results when we compute them.
+- Repeated computation seems to show that the vertical line is a consequence of my stupidity. I made wvlgrid be model dependent and it made all the difference!
+
+01/02/2017:
+- Let's make the SLAM presentation and also re-test the fitting.
+
+02/02/2017:
+- We have not found anything interesting yesterday. But we made some nice cartoons and gifs.
+- Let's go back to the original problem and see what's up.
+- Discrepancy is obviously there. 
+- IMPORTANT: Computing level responses using finite difference DEFINITELY does not result in good convergence. Very wierd!!!!!
+- However, using finite difference, depth-dependent responses for intensity itself converges perfectly. Therefore we have to, once again compare responses computed in numerical and analytical way. 
+- NOTES: Tau grid, created atmosphere, no damping -> Poor agreement! (Density is simply bad) 
+- NOTES: h grid, no damping                       -> Good agreement!
+- NOTES: tau grid, level responses                -> Good agreement! 
+- Where is the problem? -> In level populations. 
+
+07/02/2017
+
+- During last several days basically we pinpointed the problem to be in the population perturbation computation when \tau is used as the grid. 
+- We disabled so called "line parameter" (chi_line / chi_background), that is, set it to 1
+- Agreement in the case when h is used as independent variable is two orders of magnitude better than in the case when \tau is used.
+
+13/02/2017
+
+- What is concluded. IMPORTANT:
+  * Decrease of delta_T has something to do with this. 
+  * Decreasing delta_T to 0.1 Kelvin (really little), helped a lot (an order of magnitude).
+  * After this correction for pure line transfer response functions converge in an indentical way. 
+
+- Implemented contribution of b-f transitions to B-B rates. 
+- Test fitting convergence now. 
+
+17/02/2017
+
+- You have to go back to keeping track of this. It is not informative otherwise. 
+- The conclusion is that there is something bad with B-F rates. I turned off the line (A = 1E-20) and the problem still exists.
+
+21/02/2017
+
+- We found that H2- free-free opacity responses are not in agreement with opacity itself. 
+- However, removing that does not improve things. 
+- We want to go this way, start from pure line and then add elements.
+   * LTE - 1E-8 agreement. -> Non-linearity. I think this we can live with.
+   * NLTE - Pure line, fixed doppler witdh ~ 2.5E-8 agreement. Part of this scales with the step:
+     delta_T = 0.2 K -> 5E-8
+     delta_T = 0.05K -> 2E-8. Seems like there is an inherent ~ 1E-8 discrepancy. Condition number is ~ 2E9
+   * NLTE - Pure line, doppler width depends on the temperature ~ 6E-6. 
+            With finer wlv spacing drops to                     ~ 6E-7. 
+            Condition number is the same as in previous example (why wouldn't it be? We are only changing r.h.s)
+   * This does not depend on damping. Same thing happens. 
+
+22/02/2017
+
+ - Continue. Pure line with reasonable number of points shows agreement of few times 1E-6. We want to stick to that. 
+ - Include H- : Jumps to 1E-4! FIX THIS. Again sensitive to the number of wavelength points. 
+
+ 23/02/2017
+
+- Found two errors: in one of the divisions there was a wrong norm, and at some point norm was missing. 
+- Redo the tests: Example to test on is very modest: core size = 4.0, core_step = 0.66, wing = 20, wing_step = 1.3 (total of 39 wvl points)
+- Agreement: 3xE-7. Looks nice, but still we see the non-locallity.
+- Sensitive to stepsize : NO
+
+24/02/2017:
+
+- Sensitive to the criterion used for the expansion of terms in the formal solution. This is mind-boggling. 
+- you checked them and they are good. <-- DISCUSS THIS WITH MICHIEL. In meantime, revert to the normal solution. No. 
+- Revert back to what you were studying. 
+- Solution on grid of 21 spatial points, discrepancy 2XE-6
+- Solution on a grid of 31 spatial points, should be 3E-7.... But it is not. So something is different w.r.t previous case, and we will now find what it is:
+- B-f opacity/emissivity making a fuss - NO 
+- Thomson scattering on electrons? -As expected NO. 
+- Wavelengts from b-f transitions making a fuss? - NO
+- A single wavelength transition which is set by default - NO
+- Adding/removing H- - YES
+- Go to a 21 point atmosphere: for simplicity. Agreement is ~ 6E-8. Doubling the step increases the discrepancy to ~ 8E-8
+- Back to 31 point atmosphere: Stays the same. 
+- Add H-: Increases by a factor of 20. We somewhat understand this but not really. Is it due to opacity or due to chemeq? 
+- It is NOT due to chemeq, as if I delete H- opacity but keep it in chemeq, nothing changes. 
+- Disabling H- free-free opacity decreases discrepancy by a factor of 20.
+- There was a small error in H- opacity + You need to iterate NLTE problem more and you get it. back to the desired level. Now it looks good. 
+
+27/02/2017:
+
+- Part of the things you wrote up you did today. 
+- Stokes responses look decent. You like it. 
+- Profile derivative is not satisfactory.
+
+28/02/2017:
+
+- Ly alpha was making a problem because it was insensitive to Zeeman splitting and the derivative in that case was not properly written. 
+- Now we still have some problem in the line wings in the Zeeman case. Near wings. Na D2. 
+- It dissappears if we set J=0 (Code reverts to derivatives used in scalar case)
+- If we do not do that but we do set Lande factors to zero -> Again wrong. The derivative is simply wrong. 
+- Damping related? -> True, disabling damping decreases it a bit. But it could maybe because the effect of the line is now smaller?
+- No, replacing the derivatives with numerical ones fixes the situation. But we are not going to do this. We will stick with analytical ones.
+
+01-02/03/2017:
+
+- Basically sorted this out by implementing very cool analytical perturbation for numerical voigt profile. 
+- Now found discrepancy is responses again! Let's start from the 1st principles, so to speak :) 
+- First, even in FALC case it is a problem. There is discrepancy in responses to v_t. 
+- Does it happen in LTE?
+
+03/03/2017: 
+
+- Implement our new derivative wherever is needed. 
+- In the atom::add_response_contribution - DONE. Works as a charm, saves a lot of time! 
+- In the atom::boundbound_op/em_pert - DONE. But it does not work really well. 
+- Fix compute_lte_responses (this can be done by brute force) - NOT DONE 
+- Implement level population responses to macrosopic velocity - DONE BUT AGAIN DOES NOT WORK
+- Eat Lunch :)
+
+

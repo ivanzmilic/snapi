@@ -1,0 +1,940 @@
+% This is the .bib file for all solar physics related work. It is better to keep it like this then to keep EVERYTHING IN ONE FILE:
+
+@ARTICLE{Ca_diag_Jaime,
+   author = {{Quintero Noda}, C. and {Shimizu}, T. and {de la Cruz Rodr{\'{\i}}guez}, J. and 
+	{Katsukawa}, Y. and {Ichimoto}, K. and {Anan}, T. and {Suematsu}, Y.
+	},
+    title = "{Spectropolarimetric capabilities of Ca II 8542 {\AA} line}",
+  journal = {\mnras},
+archivePrefix = "arXiv",
+   eprint = {1604.04957},
+ primaryClass = "astro-ph.SR",
+ keywords = {Sun: chromosphere, Sun: magnetic topology, techniques: polarimetric},
+     year = 2016,
+    month = apr,
+      doi = {10.1093/mnras/stw867},
+   adsurl = {http://adsabs.harvard.edu/abs/2016MNRAS.tmp..667Q},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{FALC,
+   author = {{Fontenla}, J.~M. and {Avrett}, E.~H. and {Loeser}, R.},
+    title = "{Energy balance in the solar transition region. III - Helium emission in hydrostatic, constant-abundance models with diffusion}",
+  journal = {\apj},
+ keywords = {Chromosphere, Emission Spectra, Helium, Solar Corona, Solar Radiation, Astronomical Models, Hydrostatics, Particle Diffusion, Solar Limb},
+     year = 1993,
+    month = mar,
+   volume = 406,
+    pages = {319-345},
+      doi = {10.1086/172443},
+   adsurl = {http://adsabs.harvard.edu/abs/1993ApJ...406..319F},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{JaimeBezier,
+   author = {{de la Cruz Rodr{\'{\i}}guez}, J. and {Piskunov}, N.},
+    title = "{DELO-Bezier Formal Solutions of the Polarized Radiative Transfer Equation}",
+  journal = {\apj},
+archivePrefix = "arXiv",
+   eprint = {1212.2737},
+ primaryClass = "astro-ph.SR",
+ keywords = {line: profiles, magnetic fields, polarization, radiative transfer, stars: atmospheres },
+     year = 2013,
+    month = feb,
+   volume = 764,
+      eid = {33},
+    pages = {33},
+      doi = {10.1088/0004-637X/764/1/33},
+   adsurl = {http://adsabs.harvard.edu/abs/2013ApJ...764...33D},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{SPINOR,
+   author = {{Frutiger}, C. and {Solanki}, S.~K. and {Fligge}, M. and {Bruls}, J.~H.~M.~J.
+	},
+    title = "{Properties of the solar granulation obtained from the inversion of low spatial resolution spectra}",
+  journal = {\aap},
+ keywords = {LINE: PROFILES, RADIATIVE TRANSFER, SUN: GRANULATION, SUN: PHOTOSPHERE},
+     year = 2000,
+    month = jun,
+   volume = 358,
+    pages = {1109-1121},
+   adsurl = {http://adsabs.harvard.edu/abs/2000A%26A...358.1109F},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{NICOLE,
+   author = {{Socas-Navarro}, H. and {de la Cruz Rodr{\'{\i}}guez}, J. and 
+	{Asensio Ramos}, A. and {Trujillo Bueno}, J. and {Ruiz Cobo}, B.
+	},
+    title = "{An open-source, massively parallel code for non-LTE synthesis and inversion of spectral lines and Zeeman-induced Stokes profiles}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {1408.6101},
+ primaryClass = "astro-ph.SR",
+ keywords = {radiative transfer, Sun: chromosphere, Sun: photosphere, Sun: magnetic fields, polarization, Sun: abundances},
+     year = 2015,
+    month = may,
+   volume = 577,
+      eid = {A7},
+    pages = {A7},
+      doi = {10.1051/0004-6361/201424860},
+   adsurl = {http://adsabs.harvard.edu/abs/2015A%26A...577A...7S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Hector_halpha,
+   author = {{Socas-Navarro}, H. and {Uitenbroek}, H.},
+    title = "{On the Diagnostic Potential of H{$\alpha$} for Chromospheric Magnetism}",
+  journal = {\apjl},
+ keywords = {Line: Profiles, Sun: Atmosphere, Sun: Chromosphere, Sun: Magnetic Fields},
+     year = 2004,
+    month = mar,
+   volume = 603,
+    pages = {L129-L132},
+      doi = {10.1086/383147},
+   adsurl = {http://adsabs.harvard.edu/abs/2004ApJ...603L.129S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{HectorI,
+   author = {{Socas-Navarro}, H. and {Ruiz Cobo}, B. and {Trujillo Bueno}, J.
+	},
+    title = "{Non-LTE Inversion of Line Profiles}",
+  journal = {\apj},
+ keywords = {LINE: PROFILES, RADIATIVE TRANSFER, STARS: CHROMOSPHERES, SUN: CHROMOSPHERE, Line: Profiles, Radiative Transfer, Stars: Chromospheres, Sun: Chromosphere},
+     year = 1998,
+    month = nov,
+   volume = 507,
+    pages = {470-481},
+      doi = {10.1086/306330},
+   adsurl = {http://adsabs.harvard.edu/abs/1998ApJ...507..470S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@BOOK{SAbook2014,
+   author = {{Hubeny}, I. and {Mihalas}, D.},
+    title = "{Theory of Stellar Atmospheres}",
+booktitle = {Theory of Stellar Atmospheres, by I.~Hubeny and D.~Mihalas.~Princeton, NJ: Princeton University Press, 2014},
+     year = 2014,
+   adsurl = {http://adsabs.harvard.edu/abs/2014tsa..book.....H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@INPROCEEDINGS{Han06,
+   author = {{Uitenbroek}, H.},
+    title = "{Chromospheric Diagnostics}",
+booktitle = {Solar MHD Theory and Observations: A High Spatial Resolution Perspective},
+     year = 2006,
+   series = {Astronomical Society of the Pacific Conference Series},
+   volume = 354,
+   editor = {{Leibacher}, J. and {Stein}, R.~F. and {Uitenbroek}, H.},
+    month = dec,
+    pages = {313},
+   adsurl = {http://adsabs.harvard.edu/abs/2006ASPC..354..313U},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Mein71,
+   author = {{Mein}, P.},
+    title = "{Inhomogeneities in the Solar Atmosphere from the Ca II Infra-Red Lines}",
+  journal = {\solphys},
+     year = 1971,
+    month = oct,
+   volume = 20,
+    pages = {3-18},
+      doi = {10.1007/BF00146089},
+   adsurl = {http://adsabs.harvard.edu/abs/1971SoPh...20....3M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Beckers75,
+   author = {{Beckers}, J.~M. and {Milkey}, R.~W.},
+    title = "{The line response function of stellar atmospheres and the effective depth of line formation}",
+  journal = {\solphys},
+ keywords = {Line Spectra, Optical Thickness, Spectral Line Width, Stellar Atmospheres, Stellar Spectra, Absorption Spectra, Astronomical Models, Atmospheric Turbulence, Continuous Spectra, Doppler Effect, Magnetic Effects, Stellar Magnetic Fields, Velocity Distribution},
+     year = 1975,
+    month = aug,
+   volume = 43,
+    pages = {289-292},
+      doi = {10.1007/BF00152353},
+   adsurl = {http://adsabs.harvard.edu/abs/1975SoPh...43..289B},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Landi77,
+   author = {{Landi Degl'Innocenti}, E. and {Landi Degl'Innocenti}, M.},
+    title = "{Response functions for magnetic lines}",
+  journal = {\aap},
+ keywords = {Atmospheric Models, Magnetic Effects, Polarized Light, Radiative Transfer, Solar Magnetic Field, Solar Spectra, Circular Polarization, Doppler Effect, Eigenvalues, Fraunhofer Lines, Lines Of Force, Magnetoactivity, Matrices (Mathematics), Perturbation Theory, Stokes Law Of Radiation, Velocity Distribution},
+     year = 1977,
+    month = apr,
+   volume = 56,
+    pages = {111-115},
+   adsurl = {http://adsabs.harvard.edu/abs/1977A%26A....56..111L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{StepanLyAlpha15,
+   author = {{{\v S}t{\v e}p{\'a}n}, J. and {Trujillo Bueno}, J. and {Leenaarts}, J. and 
+	{Carlsson}, M.},
+    title = "{Three-dimensional Radiative Transfer Simulations of the Scattering Polarization of the Hydrogen Ly{$\alpha$} Line in a Magnetohydrodynamic Model of the Chromosphere{\ndash}Corona Transition Region}",
+  journal = {\apj},
+archivePrefix = "arXiv",
+   eprint = {1501.06382},
+ primaryClass = "astro-ph.SR",
+ keywords = {polarization, radiative transfer, scattering, Sun: chromosphere, Sun: magnetic fields, Sun: transition region},
+     year = 2015,
+    month = apr,
+   volume = 803,
+      eid = {65},
+    pages = {65},
+      doi = {10.1088/0004-637X/803/2/65},
+   adsurl = {http://adsabs.harvard.edu/abs/2015ApJ...803...65S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{TBSr07,
+   author = {{Trujillo Bueno}, J. and {Shchukina}, N.},
+    title = "{The Scattering Polarization of the Sr I {$\lambda$}4607 Line at the Diffraction Limit Resolution of a 1 m Telescope}",
+  journal = {\apjl},
+archivePrefix = "arXiv",
+   eprint = {0706.2386},
+ keywords = {Polarization, Radiative Transfer, Scattering, Stars: Magnetic Fields, Sun: Magnetic Fields, Sun: Photosphere},
+     year = 2007,
+    month = aug,
+   volume = 664,
+    pages = {L135-L138},
+      doi = {10.1086/520838},
+   adsurl = {http://adsabs.harvard.edu/abs/2007ApJ...664L.135T},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Casini03,
+   author = {{Casini}, R. and {L{\'o}pez Ariste}, A. and {Tomczyk}, S. and 
+	{Lites}, B.~W.},
+    title = "{Magnetic Maps of Prominences from Full Stokes Analysis of the He I D3 Line}",
+  journal = {\apjl},
+ keywords = {Line: Profiles, Polarization, Sun: Magnetic Fields, Sun: Prominences},
+     year = 2003,
+    month = nov,
+   volume = 598,
+    pages = {L67-L70},
+      doi = {10.1086/380496},
+   adsurl = {http://adsabs.harvard.edu/abs/2003ApJ...598L..67C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+
+
+@ARTICLE{Frutiger00,
+   author = {{Frutiger}, C. and {Solanki}, S.~K. and {Fligge}, M. and {Bruls}, J.~H.~M.~J.
+	},
+    title = "{Properties of the solar granulation obtained from the inversion of low spatial resolution spectra}",
+  journal = {\aap},
+ keywords = {LINE: PROFILES, RADIATIVE TRANSFER, SUN: GRANULATION, SUN: PHOTOSPHERE},
+     year = 2000,
+    month = jun,
+   volume = 358,
+    pages = {1109-1121},
+   adsurl = {http://adsabs.harvard.edu/abs/2000A%26A...358.1109F},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@INPROCEEDINGS{HELIXX,
+   author = {{Lagg}, A. and {Ishikawa}, R. and {Merenda}, L. and {Wiegelmann}, T. and 
+	{Tsuneta}, S. and {Solanki}, S.~K.},
+    title = "{Internetwork Horizontal Magnetic Fields in the Quiet Sun Chromosphere: Results from a Joint Hinode/VTT Study}",
+booktitle = {The Second Hinode Science Meeting: Beyond Discovery-Toward Understanding},
+     year = 2009,
+   series = {Astronomical Society of the Pacific Conference Series},
+   volume = 415,
+   editor = {{Lites}, B. and {Cheung}, M. and {Magara}, T. and {Mariska}, J. and 
+	{Reeves}, K.},
+    month = dec,
+    pages = {327},
+   adsurl = {http://adsabs.harvard.edu/abs/2009ASPC..415..327L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+
+
+@ARTICLE{SIR,
+   author = {{Ruiz Cobo}, B. and {del Toro Iniesta}, J.~C.},
+    title = "{Inversion of Stokes profiles}",
+  journal = {\apj},
+ keywords = {Line Spectra, Solar Atmosphere, Solar Magnetic Field, Stokes Law Of Radiation, Polarized Radiation, Radiative Transfer, Signal To Noise Ratios, Stellar Models, Turbulence Effects},
+     year = 1992,
+    month = oct,
+   volume = 398,
+    pages = {375-385},
+      doi = {10.1086/171862},
+   adsurl = {http://adsabs.harvard.edu/abs/1992ApJ...398..375R},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@BOOK{dtibook,
+   author = {{del Toro Iniesta}, J.~C.},
+    title = "{Introduction to Spectropolarimetry}",
+booktitle = {Introduction to Spectropolarimetry, by Jose Carlos del Toro Iniesta, pp.~244.~ISBN 0521818273.~Cambridge, UK: Cambridge University Press, April 2003.},
+     year = 2003,
+    month = apr,
+   adsurl = {http://adsabs.harvard.edu/abs/2003isp..book.....D},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Faurobert87,
+   author = {{Faurobert}, M.},
+    title = "{Linear polarization of resonance lines in the absence of magnetic fields. I - Slabs of finite optical thickness}",
+  journal = {\aap},
+ keywords = {Computational Astrophysics, Frequency Distribution, Line Shape, Linear Polarization, Resonance Lines, Solar Atmosphere, Distribution Functions, Solar Magnetic Field},
+     year = 1987,
+    month = may,
+   volume = 178,
+    pages = {269-276},
+   adsurl = {http://adsabs.harvard.edu/abs/1987A%26A...178..269F},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Bommier97,
+   author = {{Bommier}, V.},
+    title = "{Master equation theory applied to the redistribution of polarized radiation, in the weak radiation field limit. I. Zero magnetic field case}",
+  journal = {\aap},
+ keywords = {ATOMIC PROCESSES, LINE: FORMATION, LINE: PROFILES, POLARIZATION, RADIATIVE TRANSFER},
+     year = 1997,
+    month = dec,
+   volume = 328,
+    pages = {706-725},
+   adsurl = {http://adsabs.harvard.edu/abs/1997A%26A...328..706B},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Frisch07,
+   author = {{Frisch}, H.},
+    title = "{The Hanle effect. Decomposition of the Stokes parameters into irreducible components}",
+  journal = {\aap},
+ keywords = {line: formation, polarization, magnetic fields, radiative transfer},
+     year = 2007,
+    month = dec,
+   volume = 476,
+    pages = {665-674},
+      doi = {10.1051/0004-6361:20077980},
+   adsurl = {http://adsabs.harvard.edu/abs/2007A%26A...476..665F},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{David14,
+   author = {{Orozco Su{\'a}rez}, D. and {Asensio Ramos}, A. and {Trujillo Bueno}, J.
+	},
+    title = "{The magnetic field configuration of a solar prominence inferred from spectropolarimetric observations in the He i 10 830 {\AA} triplet}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {1403.7976},
+ primaryClass = "astro-ph.SR",
+ keywords = {Sun: chromosphere, Sun: filaments, prominences},
+     year = 2014,
+    month = jun,
+   volume = 566,
+      eid = {A46},
+    pages = {A46},
+      doi = {10.1051/0004-6361/201322903},
+   adsurl = {http://adsabs.harvard.edu/abs/2014A%26A...566A..46O},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Gunar12,
+   author = {{Gun{\'a}r}, S. and {Mein}, P. and {Schmieder}, B. and {Heinzel}, P. and 
+	{Mein}, N.},
+    title = "{Dynamics of quiescent prominence fine structures analyzed by 2D non-LTE modelling of the H{$\alpha$} line}",
+  journal = {\aap},
+ keywords = {Sun: filaments, prominences, radiative transfer, line: profiles, techniques: spectroscopic, methods: data analysis, methods: statistical},
+     year = 2012,
+    month = jul,
+   volume = 543,
+      eid = {A93},
+    pages = {A93},
+      doi = {10.1051/0004-6361/201218940},
+   adsurl = {http://adsabs.harvard.edu/abs/2012A%26A...543A..93G},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Heinzel_Prom2DII,
+   author = {{Heinzel}, P. and {Anzer}, U. and {Gun{\'a}r}, S.},
+    title = "{Prominence fine structures in a magnetic equilibrium. II. A grid of two-dimensional models}",
+  journal = {\aap},
+ keywords = {Sun: prominences, magnetohydrodynamics (MHD), radiative transfer, line: profiles},
+     year = 2005,
+    month = oct,
+   volume = 442,
+    pages = {331-343},
+      doi = {10.1051/0004-6361:20053360},
+   adsurl = {http://adsabs.harvard.edu/abs/2005A%26A...442..331H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Heinzel_Prom2D,
+   author = {{Heinzel}, P. and {Anzer}, U.},
+    title = "{Prominence fine structures in a magnetic equilibrium: Two-dimensional models with multilevel radiative transfer}",
+  journal = {\aap},
+ keywords = {SUN: PROMINENCES, MAGNETOHYDRODYNAMICS, RADIATIVE TRANSFER, LINE: PROFILES},
+     year = 2001,
+    month = sep,
+   volume = 375,
+    pages = {1082-1090},
+      doi = {10.1051/0004-6361:20010926},
+   adsurl = {http://adsabs.harvard.edu/abs/2001A%26A...375.1082H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{VanNoort12,
+   author = {{van Noort}, M.},
+    title = "{Spatially coupled inversion of spectro-polarimetric image data. I. Method and first results}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {1210.4636},
+ primaryClass = "astro-ph.IM",
+ keywords = {techniques: imaging spectroscopy, techniques: polarimetric, methods: data analysis, methods: numerical},
+     year = 2012,
+    month = dec,
+   volume = 548,
+      eid = {A5},
+    pages = {A5},
+      doi = {10.1051/0004-6361/201220220},
+   adsurl = {http://adsabs.harvard.edu/abs/2012A%26A...548A...5V},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@BOOK{nr02,
+   author = {{Press}, W.~H. and {Teukolsky}, S.~A. and {Vetterling}, W.~T. and 
+	{Flannery}, B.~P.},
+    title = "{Numerical recipes in C++ : the art of scientific computing}",
+booktitle = {Numerical recipes in C++ : the art of scientific computing by William H.~Press.~xxviii, 1,002 p.~: ill.~; 26 cm.~ Includes bibliographical references and index.~ISBN :  0521750334},
+     year = 2002,
+   adsurl = {http://adsabs.harvard.edu/abs/2002nrca.book.....P},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+
+@BOOK{McKay,
+   author = {{Mackay}, D.~J.~C.},
+    title = "{Information Theory, Inference and Learning Algorithms}",
+booktitle = {Information Theory, Inference and Learning Algorithms, by David J.~C.~MacKay, pp.~640.~ISBN 0521642981.~Cambridge, UK: Cambridge University Press, October 2003.},
+     year = 2003,
+    month = oct,
+   adsurl = {http://adsabs.harvard.edu/abs/2003itil.book.....M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Hogg10,
+   author = {{Hogg}, D.~W. and {Bovy}, J. and {Lang}, D.},
+    title = "{Data analysis recipes: Fitting a model to data}",
+  journal = {ArXiv e-prints},
+archivePrefix = "arXiv",
+   eprint = {1008.4686},
+ primaryClass = "astro-ph.IM",
+ keywords = {Astrophysics - Instrumentation and Methods for Astrophysics, Physics - Data Analysis, Statistics and Probability},
+     year = 2010,
+    month = aug,
+   adsurl = {http://adsabs.harvard.edu/abs/2010arXiv1008.4686H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{HELIX,
+   author = {{Lagg}, A. and {Woch}, J. and {Krupp}, N. and {Solanki}, S.~K.
+	},
+    title = "{Retrieval of the full magnetic vector with the He I multiplet at 1083 nm. Maps of an emerging flux region}",
+  journal = {\aap},
+ keywords = {techniques: polarimetric, methods: data analysis, Sun: chromosphere, Sun: infrared, Sun: magnetic field},
+     year = 2004,
+    month = feb,
+   volume = 414,
+    pages = {1109-1120},
+      doi = {10.1051/0004-6361:20031643},
+   adsurl = {http://adsabs.harvard.edu/abs/2004A%26A...414.1109L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{HAZEL,
+   author = {{Asensio Ramos}, A. and {Trujillo Bueno}, J. and {Landi Degl'Innocenti}, E.
+	},
+    title = "{Advanced Forward Modeling and Inversion of Stokes Profiles Resulting from the Joint Action of the Hanle and Zeeman Effects}",
+  journal = {\apj},
+archivePrefix = "arXiv",
+   eprint = {0804.2695},
+ keywords = {Magnetic Fields, Methods: Data Analysis, Methods: Numerical, Polarization, Radiative Transfer, Scattering, Sun: Chromosphere},
+     year = 2008,
+    month = aug,
+   volume = 683,
+    pages = {542-565},
+      doi = {10.1086/589433},
+   adsurl = {http://adsabs.harvard.edu/abs/2008ApJ...683..542A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{VNHL02,
+   author = {{van Noort}, M. and {Hubeny}, I. and {Lanz}, T.},
+    title = "{Multidimensional Non-LTE Radiative Transfer. I. A Universal Two-dimensional Short-Characteristics Scheme for Cartesian, Spherical, and Cylindrical Coordinate Systems}",
+  journal = {\apj},
+ keywords = {Line: Formation, Methods: Numerical, Radiative Transfer},
+     year = 2002,
+    month = apr,
+   volume = 568,
+    pages = {1066-1094},
+      doi = {10.1086/338949},
+   adsurl = {http://adsabs.harvard.edu/abs/2002ApJ...568.1066V},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{IRIS13,
+   author = {{Ibgui}, L. and {Hubeny}, I. and {Lanz}, T. and {Stehl{\'e}}, C.
+	},
+    title = "{IRIS: a generic three-dimensional radiative transfer code}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {1211.4870},
+ primaryClass = "astro-ph.IM",
+ keywords = {methods: numerical, radiative transfer},
+     year = 2013,
+    month = jan,
+   volume = 549,
+      eid = {A126},
+    pages = {A126},
+      doi = {10.1051/0004-6361/201220468},
+   adsurl = {http://adsabs.harvard.edu/abs/2013A%26A...549A.126I},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Smith05,
+   author = {{Smith}, J.~E. and {Robinson}, A. and {Young}, S. and {Axon}, D.~J. and 
+	{Corbett}, E.~A.},
+    title = "{Equatorial scattering and the structure of the broad-line region in Seyfert nuclei: evidence for a rotating disc}",
+  journal = {\mnras},
+   eprint = {astro-ph/0501640},
+ keywords = {polarization, scattering, galaxies: active, galaxies: Seyfert},
+     year = 2005,
+    month = may,
+   volume = 359,
+    pages = {846-864},
+      doi = {10.1111/j.1365-2966.2005.08895.x},
+   adsurl = {http://adsabs.harvard.edu/abs/2005MNRAS.359..846S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{AnushaIII,
+   author = {{Anusha}, L.~S. and {Nagendra}, K.~N.},
+    title = "{Polarized Line Formation in Multi-dimensional Media. III. Hanle Effect with Partial Frequency Redistribution}",
+  journal = {\apj},
+archivePrefix = "arXiv",
+   eprint = {1105.4052},
+ primaryClass = "astro-ph.SR",
+ keywords = {line: formation, magnetic fields, polarization, radiative transfer, scattering, Sun: atmosphere},
+     year = 2011,
+    month = sep,
+   volume = 738,
+      eid = {116},
+    pages = {116},
+      doi = {10.1088/0004-637X/738/1/116},
+   adsurl = {http://adsabs.harvard.edu/abs/2011ApJ...738..116A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@BOOK{Milonebook,
+   author = {{Kallrath}, J. and {Milone}, E.~F.},
+    title = "{Eclipsing Binary Stars: Modeling and Analysis}",
+booktitle = {Eclipsing Binary Stars: Modeling and Analysis: Astronomy and Astrophysics Library.~ISBN 978-1-4419-0698-4.~Springer-Verlag New York, 2009},
+     year = 2009,
+      doi = {10.1007/978-1-4419-0699-1},
+   adsurl = {http://adsabs.harvard.edu/abs/2009ebs..book.....K},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@article{Faurobert88,
+	Adsnote = {Provided by the SAO/NASA Astrophysics Data System},
+	Adsurl = {http://adsabs.harvard.edu/abs/1988A%26A...194..268F},
+	Author = {{Faurobert}, M.},
+	Journal = {A\&A},
+	Keywords = {CHROMOSPHERE, LINEAR POLARIZATION, POLARIZATION CHARACTERISTICS, RESONANCE LINES, ASYMPTOTIC METHODS, DOPPLER EFFECT, ITERATIVE SOLUTION, MAGNETIC FIELDS, TRANSFER FUNCTIONS},
+	Month = apr,
+	Pages = {268-278},
+	Title = {{Linear polarization of resonance lines in the absence of magnetic fields. II - Semi-infinite atmospheres}},
+	Volume = 194,
+	Year = 1988}
+
+@INPROCEEDINGS{TB03,
+   author = {{Trujillo Bueno}, J.},
+    title = "{The Generation and Transfer of Polarized Radiation in Stellar Atmospheres}",
+booktitle = {Stellar Atmosphere Modeling},
+     year = 2003,
+   series = {Astronomical Society of the Pacific Conference Series},
+   volume = 288,
+   editor = {{Hubeny}, I. and {Mihalas}, D. and {Werner}, K.},
+    month = jan,
+    pages = {551},
+   adsurl = {http://adsabs.harvard.edu/abs/2003ASPC..288..551T},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{RH1,
+   author = {{Rybicki}, G.~B. and {Hummer}, D.~G.},
+    title = "{An accelerated lambda iteration method for multilevel radiative transfer. I - Non-overlapping lines with background continuum}",
+  journal = {\aap},
+ keywords = {Iterative Solution, Local Thermodynamic Equilibrium, Radiative Transfer, Stellar Atmospheres, Computational Astrophysics, Helium Atoms, Statistical Analysis},
+     year = 1991,
+    month = may,
+   volume = 245,
+    pages = {171-181},
+   adsurl = {http://adsabs.harvard.edu/abs/1991A%26A...245..171R},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@INPROCEEDINGS{Hubeny03,
+   author = {{Hubeny}, I.},
+    title = "{Accelerated Lambda Iteration: An Overview}",
+booktitle = {Stellar Atmosphere Modeling},
+     year = 2003,
+   series = {Astronomical Society of the Pacific Conference Series},
+   volume = 288,
+   editor = {{Hubeny}, I. and {Mihalas}, D. and {Werner}, K.},
+    month = jan,
+    pages = {17},
+   adsurl = {http://adsabs.harvard.edu/abs/2003ASPC..288...17H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Prom_review_I,
+   author = {{Labrosse}, N. and {Heinzel}, P. and {Vial}, J.-C. and {Kucera}, T. and 
+	{Parenti}, S. and {Gun{\'a}r}, S. and {Schmieder}, B. and {Kilper}, G.
+	},
+    title = "{Physics of Solar Prominences: I{\mdash}Spectral Diagnostics and Non-LTE Modelling}",
+  journal = {\ssr},
+archivePrefix = "arXiv",
+   eprint = {1001.1620},
+ primaryClass = "astro-ph.SR",
+ keywords = {Solar prominences, Spectroscopy, Radiative transfer, Diagnostics, Modelling},
+     year = 2010,
+    month = apr,
+   volume = 151,
+    pages = {243-332},
+      doi = {10.1007/s11214-010-9630-6},
+   adsurl = {http://adsabs.harvard.edu/abs/2010SSRv..151..243L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Prom_review_II,
+   author = {{Mackay}, D.~H. and {Karpen}, J.~T. and {Ballester}, J.~L. and 
+	{Schmieder}, B. and {Aulanier}, G.},
+    title = "{Physics of Solar Prominences: II{\mdash}Magnetic Structure and Dynamics}",
+  journal = {\ssr},
+archivePrefix = "arXiv",
+   eprint = {1001.1635},
+ primaryClass = "astro-ph.SR",
+ keywords = {Solar magnetic fields, Solar prominences, Oscillations, MHD waves},
+     year = 2010,
+    month = apr,
+   volume = 151,
+    pages = {333-399},
+      doi = {10.1007/s11214-010-9628-0},
+   adsurl = {http://adsabs.harvard.edu/abs/2010SSRv..151..333M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Leger09,
+   author = {{L{\'e}ger}, L. and {Paletou}, F.},
+    title = "{2D non-LTE radiative modelling of He I spectral lines formed in solar prominences}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {0811.4753},
+ keywords = {Sun: prominences, line: profiles, radiative transfer},
+     year = 2009,
+    month = may,
+   volume = 498,
+    pages = {869-875},
+      doi = {10.1051/0004-6361/200810296},
+   adsurl = {http://adsabs.harvard.edu/abs/2009A%26A...498..869L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+
+@ARTICLE{Bommier_89,
+   author = {{Bommier}, V. and {Landi Degl'Innocenti}, E. and {Sahal-Brechot}, S.
+	},
+    title = "{Linear polarization of the hydrogen H-alpha line in filaments. I - Theoretical investigation}",
+  journal = {\aap},
+ keywords = {H Alpha Line, Linear Polarization, Solar Prominences, Solar Spectra, Line Of Sight, Optical Thickness, Perturbation Theory, Radiation Distribution, Radiative Transfer, Solar Magnetic Field},
+     year = 1989,
+    month = feb,
+   volume = 211,
+    pages = {230-238},
+   adsurl = {http://adsabs.harvard.edu/abs/1989A%26A...211..230B},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{PORTA13,
+   author = {{{\v S}t{\v e}p{\'a}n}, J. and {Trujillo Bueno}, J.},
+    title = "{PORTA: A three-dimensional multilevel radiative transfer code for modeling the intensity and polarization of spectral lines with massively parallel computers}",
+  journal = {\aap},
+archivePrefix = "arXiv",
+   eprint = {1307.4217},
+ primaryClass = "astro-ph.SR",
+ keywords = {line: formation, magnetic fields, methods: numerical, polarization, radiative transfer},
+     year = 2013,
+    month = sep,
+   volume = 557,
+      eid = {A143},
+    pages = {A143},
+      doi = {10.1051/0004-6361/201321742},
+   adsurl = {http://adsabs.harvard.edu/abs/2013A%26A...557A.143S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{AnushaI,
+   author = {{Anusha}, L.~S. and {Nagendra}, K.~N.},
+    title = "{Polarized Line Formation in Multi-dimensional Media. I. Decomposition of Stokes Parameters in Arbitrary Geometries}",
+  journal = {\apj},
+ keywords = {line: formation, polarization, radiative transfer, scattering, Sun: atmosphere},
+     year = 2011,
+    month = jan,
+   volume = 726,
+      eid = {6},
+    pages = {6},
+      doi = {10.1088/0004-637X/726/1/6},
+   adsurl = {http://adsabs.harvard.edu/abs/2011ApJ...726....6A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Milic13,
+   author = {{Mili{\'c}}, I.},
+    title = "{Transfer of polarized line radiation in 2D cylindrical geometry}",
+  journal = {\aap},
+ keywords = {methods: numerical, line: formation, radiative transfer, polarization},
+     year = 2013,
+    month = jul,
+   volume = 555,
+      eid = {A130},
+    pages = {A130},
+      doi = {10.1051/0004-6361/201321212},
+   adsurl = {http://adsabs.harvard.edu/abs/2013A%26A...555A.130M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@INPROCEEDINGS{TB09,
+   author = {{Trujillo Bueno}, J.},
+    title = "{The Second Stellar Spectrum and the non-LTE Problem of the 2nd Kind}",
+ keywords = {radiative transfer, stellar atmospheres, magnetic fields, Radiative transfer, scattering, Stellar atmospheres, radiative transfer, opacity and line formation, Gravitational radiation magnetic fields and other observations},
+booktitle = {American Institute of Physics Conference Series},
+     year = 2009,
+   series = {American Institute of Physics Conference Series},
+   volume = 1171,
+archivePrefix = "arXiv",
+   eprint = {0911.4669},
+ primaryClass = "astro-ph.SR",
+   editor = {{Hubeny}, I. and {Stone}, J.~M. and {MacGregor}, K. and {Werner}, K.
+	},
+    month = sep,
+    pages = {27-42},
+      doi = {10.1063/1.3250067},
+   adsurl = {http://adsabs.harvard.edu/abs/2009AIPC.1171...27T},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{OK87,
+   author = {{Olson}, G.~L. and {Kunasz}, P.~B.},
+    title = "{Short characteristic solution of the non-LTE transfer problem by operator perturbation. I. The one-dimensional planar slab.}",
+  journal = {\jqsrt},
+ keywords = {Radiative Transfer:Non-LTE Models},
+     year = 1987,
+   volume = 38,
+    pages = {325-336},
+      doi = {10.1016/0022-4073(87)90027-6},
+   adsurl = {http://adsabs.harvard.edu/abs/1987JQSRT..38..325O},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@BOOK{Mihalasbook,
+   author = {{Mihalas}, D.},
+    title = "{Stellar atmospheres /2nd edition/}",
+ keywords = {Absorption Cross Sections, Atmospheric Models, Gray Gas, Radiative Transfer, Stellar Atmospheres, Stellar Spectra, Stellar Winds, Absorption Spectra, Atmospheric Physics, Equilibrium Equations, Line Spectra, Radiation Distribution, Stellar Radiation, Thermodynamic Equilibrium},
+booktitle = {San Francisco, W.~H.~Freeman and Co., 1978.~650 p.},
+     year = 1978,
+   adsurl = {http://adsabs.harvard.edu/abs/1978stat.book.....M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Halonen13,
+   author = {{Halonen}, R.~J. and {Mackay}, F.~E. and {Jones}, C.~E.},
+    title = "{Computing the Continuum Polarization from Thomson Scattering in Gaseous Circumstellar Disks}",
+  journal = {\apjs},
+ keywords = {circumstellar matter, methods: numerical, polarization, scattering, stars: emission-line, Be },
+     year = 2013,
+    month = jan,
+   volume = 204,
+      eid = {11},
+    pages = {11},
+      doi = {10.1088/0067-0049/204/1/11},
+   adsurl = {http://adsabs.harvard.edu/abs/2013ApJS..204...11H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@PROCEEDINGS{LL04,
+    title = "{Polarization in Spectral Lines}",
+booktitle = {Astrophysics and Space Science Library},
+     year = 2004,
+   series = {Astrophysics and Space Science Library},
+   volume = 307,
+   editor = {{Landi Degl'Innocenti}, E. and {Landolfi}, M.},
+    month = aug,
+   adsurl = {http://adsabs.harvard.edu/abs/2004ASSL..307.....L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{TB_Nature_04,
+   author = {{Trujillo Bueno}, J. and {Shchukina}, N. and {Asensio Ramos}, A.
+	},
+    title = "{A substantial amount of hidden magnetic energy in the quiet Sun}",
+  journal = {\nat},
+   eprint = {astro-ph/0409004},
+     year = 2004,
+    month = jul,
+   volume = 430,
+    pages = {326-329},
+      doi = {10.1038/nature02669},
+   adsurl = {http://adsabs.harvard.edu/abs/2004Natur.430..326T},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{EAC12,
+   author = {{Elitzur}, M. and {Asensio Ramos}, A. and {Ceccarelli}, C.},
+    title = "{Rotating discs and non-kinematic double peaks}",
+  journal = {\mnras},
+archivePrefix = "arXiv",
+   eprint = {1202.1450},
+ primaryClass = "astro-ph.GA",
+ keywords = {line: formation, line: profiles, radiative transfer, ISM: lines and bands, galaxies: active, quasars: emission lines},
+     year = 2012,
+    month = may,
+   volume = 422,
+    pages = {1394-1402},
+      doi = {10.1111/j.1365-2966.2012.20711.x},
+   adsurl = {http://adsabs.harvard.edu/abs/2012MNRAS.422.1394E},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Vink05,
+   author = {{Vink}, J.~S. and {Harries}, T.~J. and {Drew}, J.~E.},
+    title = "{Polarimetric line profiles for scattering off rotating disks}",
+  journal = {\aap},
+   eprint = {astro-ph/0409512},
+ keywords = {polarization, scattering, line: profiles, circumstellar matter, stars: formation, stars: emission-line, Be},
+     year = 2005,
+    month = jan,
+   volume = 430,
+    pages = {213-222},
+      doi = {10.1051/0004-6361:20041463},
+   adsurl = {http://adsabs.harvard.edu/abs/2005A%26A...430..213V},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Ignace00,
+   author = {{Ignace}, R.},
+    title = "{Resonance line scattering polarization in optically thin planar equatorial disks}",
+  journal = {\aap},
+ keywords = {LINE: PROFILES, POLARIZATION, STARS: EARLY-TYPE, STARS: EMISSION-LINE, BE, STARS: ROTATION},
+     year = 2000,
+    month = nov,
+   volume = 363,
+    pages = {1106-1114},
+   adsurl = {http://adsabs.harvard.edu/abs/2000A%26A...363.1106I},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Papkalla95,
+   author = {{Papkalla}, R.},
+    title = "{Line formation in accretion disks 3D comoving frame calculations}",
+  journal = {\aap},
+ keywords = {Accretion Disks, Active Galactic Nuclei, Astronomical Models, Cataclysmic Variables, Line Spectra, Radiative Transfer, Three Dimensional Models, Velocity Distribution, Computerized Simulation, Conjugate Gradient Method, Hydrodynamics, Interpolation, Mathematical Models},
+     year = 1995,
+    month = mar,
+   volume = 295,
+    pages = {551-564},
+   adsurl = {http://adsabs.harvard.edu/abs/1995A%26A...295..551P},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Adam90,
+   author = {{Adam}, J.},
+    title = "{Line formation in accretion disks}",
+  journal = {\aap},
+ keywords = {Accretion Disks, Finite Volume Method, Line Spectra, Radiative Transfer, Stellar Atmospheres, Active Galaxies, Atomic Energy Levels, Cataclysmic Variables, Doppler Effect, Light Scattering, Stark Effect},
+     year = 1990,
+    month = dec,
+   volume = 240,
+    pages = {541-550},
+   adsurl = {http://adsabs.harvard.edu/abs/1990A%26A...240..541A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Carlsson_review_09,
+   author = {{Carlsson}, M.},
+    title = "{Hydrodynamics and radiative transfer of 3D model atmospheres.  Current status, limitations, and how to make headway}",
+  journal = {\memsai},
+ keywords = {Methods: numerical, hydrodynamics, MHD, radiative transfer, Stars: atmospheres},
+     year = 2009,
+   volume = 80,
+    pages = {606},
+   adsurl = {http://adsabs.harvard.edu/abs/2009MmSAI..80..606C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{AM85,
+   author = {{Antonucci}, R.~R.~J. and {Miller}, J.~S.},
+    title = "{Spectropolarimetry and the nature of NGC 1068}",
+  journal = {\apj},
+ keywords = {Galactic Nuclei, Polarimetry, Seyfert Galaxies, Balmer Series, Circular Polarization, Emission Spectra, Iron, Line Spectra, Oxygen},
+     year = 1985,
+    month = oct,
+   volume = 297,
+    pages = {621-632},
+      doi = {10.1086/163559},
+   adsurl = {http://adsabs.harvard.edu/abs/1985ApJ...297..621A},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Be_review_13,
+   author = {{Rivinius}, T. and {Carciofi}, A.~C. and {Martayan}, C.},
+    title = "{Classical Be stars. Rapidly rotating B stars with viscous Keplerian decretion disks}",
+  journal = {\aapr},
+archivePrefix = "arXiv",
+   eprint = {1310.3962},
+ primaryClass = "astro-ph.SR",
+ keywords = {Stars: emission-line, Be, Stars: rotation, Stars: oscillations, Stars: winds, outflows, Stars: circumstellar matter},
+     year = 2013,
+    month = oct,
+   volume = 21,
+    pages = {69},
+      doi = {10.1007/s00159-013-0069-0},
+   adsurl = {http://adsabs.harvard.edu/abs/2013A%26ARv..21...69R},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+

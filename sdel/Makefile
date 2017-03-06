@@ -1,0 +1,65 @@
+MAKEFILE      = Makefile
+# local variables
+OPTFLAGS      = -O4 -O5 -ffast-math
+WARNFLAGS     = -Wimplicit -Wshadow
+DBGFLAGS      = -g3
+XTRAFLAGS     = -fsigned-char
+# global variables
+AR	      = ar
+COMPILER      = g++
+INCLUDE       = -I../cmlib
+COMPFLAGS     = $(OPTFLAGS) $(WARNFLAGS) $(DBGFLAGS) $(XTRAFLAGS) $(TYPE_DEF)
+# export global variables
+export MAKE
+export COMPILER
+export INCLUDE
+export COMPFLAGS
+# ...
+LIBPATH       = -L../cmlib
+LIBS	      = -lcm
+DEST	      = .
+PROGRAM       = sdel
+SHELL         = /bin/sh
+
+CC	      = $(COMPILER)
+CCFLAGS	      = $(COMPFLAGS) $(INCLUDE) $(INCPATH)
+LD	      = $(COMPILER)
+LDFLAGS	      = $(LIBPATH) $(DBGFLAGS)
+
+OBJS	      = sdel.o
+
+.cc.o:
+	${CC} -c ${CCFLAGS} $< 
+
+.SUFFIXES: .o .cc
+
+all:
+	@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) all -C $$subdir ; done
+	$(MAKE) $(OBJS) $(HEADERS)
+	@echo "Linking $(PROGRAM) ..."
+	$(LD) -o $(PROGRAM) $(LDFLAGS) $(OBJS) $(LIBS)
+	@echo "done"
+
+clean:
+	@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) clean -C $$subdir ; done
+	rm -f $(OBJS) core
+
+distclean: 
+	@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) distclean -C $$subdir ; done
+	rm -f $(OBJS) core $(PROGRAM) $(MAKEFILE).bak $(MAKEFILE)
+
+install:
+	cp -v $(PROGRAM) /usr/local/bin/
+
+
+dep:
+	@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) dep -C $$subdir ; done
+	$(MAKE) makedepend
+
+makedepend:
+	@makedepend -f$(MAKEFILE) $(OBJS:.o=.cc) $(INCLUDE)
+
+update:
+	$(DEST)/$(PROGRAM) 
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

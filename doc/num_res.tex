@@ -1,0 +1,94 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+%opening
+\title{Extracting response of numerical solution of RTE to opacity and emissivity in an analytical way}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{}
+
+Given values of opacity ($\chi$) and emissivity ($\eta$) on 1D discrete mesh, the aim is to:
+\begin{itemize}
+ \item Solve RTE, that is, find intensity in each point, $I_i$ ($i=1..ND$).
+ \item Find response of intensity in each point to each opacity and emissivity, that is $\frac{\partial I_i}{\partial \chi_j}$ and $\frac{\partial I_i}{\partial \eta_j}$.
+\end{itemize}
+We will use Bezier formal solver of the second order. That is, when integrating RTE on segmen $[i-1,i]$ we assume that source function behaves as a Bezier spline of the second order. The same holds for the integration of opacity in order to obtain optical depth scale. Complications arise due to the nature of Bezier splines, which will become clear from the following. 
+
+Intensity at point $i$ is computed from:
+\begin{equation}
+ I_i = I_{i-1} e^{-\Delta_i} + w_{i,i-1} S_{i-1} + w_{i,i} S_i + w_{i,C} S_C
+\end{equation}
+where $\Delta_i = \int_{i-1}^{i} \chi(h) dh$ is optical path between pooints $i-1$ and $i$, $S=\eta/\chi$ and weights $w$ are functions of $\Delta_i$. We now take the derivative with respect to opacity: 
+\begin{eqnarray}
+ \frac{\partial I_i}{\partial \chi_j} = & \frac{\partial I_{i-1}}{\partial \chi_j} e^{-\Delta_i} - I_{i-1} e^{-\Delta_i} \frac{\partial \Delta_i}{\partial \chi_j} + w_{i,i-1} \frac{\partial S_{i-1}}{\partial \chi_j} + w_{i,i} \frac{\partial S_i}{\partial \chi_j} + w_{i,C} \frac{\partial S_C}{\partial \chi_j} \nonumber \\
+ & + \left ( \frac{\partial w_{i,i-1}}{\partial \Delta_i} S_{i-1} + \frac{\partial w_{i,i}}{\partial \Delta_i} S_i + \frac{\partial w_{i,C}}{\partial \Delta_i} S_C \right ) \frac{\partial \Delta_i}{\partial \chi_j}
+ \label{original}
+ \end{eqnarray}
+Now, $\frac{\partial w}{\partial \Delta_i}$ follows from analytical expressions for weights. Our aim now is to find $\frac{\partial \Delta_i}{\partial \chi_j}$. From the integration of Bezier spline it follows that: 
+\begin{equation}
+ \Delta_i = \frac{\delta h}{2} (\chi_{i-1} + \chi_i + \frac{\delta h}{6} \chi_{i-1}' - \frac{\delta h}{6} \chi_{i-1}'),
+\end{equation}
+We now need the derivative of the above expression with respect to $\chi_j$. While:
+\begin{equation}
+ \frac{\partial \chi_i}{\partial \chi_j} = \delta_{ij},
+\end{equation}
+derivative is more complicated, as it is generally non-local: 
+\begin{equation}
+  \chi_i' = \frac{d_i d_{i+1}}{\alpha d_i + (1-\alpha) d_{i+1}} = \frac{d_i d_{i+1}}{D}
+\end{equation}
+ where
+\begin{equation}
+ d_i = \frac{\chi_i - \chi_{i-1}}{h_i}
+\end{equation}
+So, there are three non-zero responses:
+\begin{equation}
+ \frac{\partial \chi_i'}{\partial \chi_{i-1}} = \frac{\frac{-d_{i+1}}{h_i}D + \frac{\alpha}{h_i}d_i d_{i+1}}{D^2}
+\end{equation}
+Then:
+\begin{equation}
+ \frac{\partial \chi_i'}{\partial \chi_i} = \frac{\frac{d_{i+1}}{h_i}D - \frac{d_{i}}{h_{i+1}}D - \frac{\alpha}{h_i}d_i d_{i+1} + \frac{1-\alpha}{h_{i+1}}d_i d_{i+1}}{D^2}
+\end{equation}
+And:
+\begin{equation}
+ \frac{\partial \chi_i'}{\partial \chi_{i+1}} = \frac{\frac{d_{i}}{h_{i+1}}D - \frac{1-\alpha}{h_{i+1}}d_i d_{i+1}}{D^2}
+\end{equation}
+As Bezier spline requires monotonicity, derivative is computed only if $d_i d_{i+1} > 0$, otherwise, derivative is set to zero, and in that case $\frac{\partial \chi'_i}{\partial \chi_j} = 0$.
+Procedure so far is like this:
+\begin{itemize}
+ \item Compute opacity derivative at each point, and subsequently $\frac{\partial \chi'_i}{\partial \chi_j}$.
+ \item Using the response of the derivative, compute $\frac{\partial \Delta_i}{\partial \chi_j}$
+ \item From there compute $\frac{\partial w_i}{\partial \chi_j}$. 
+ \item Insert these in Eq.\,\ref{original}.
+\end{itemize}
+What remains to be computed is $\frac{\partial S_i}{\partial \chi_j}$ and $\frac{\partial S_C}{\partial \chi_j}$. The first one is trivial:
+\begin{equation}
+ \frac{\partial S_i}{\partial \chi_j} = \delta_{ij} \frac{-\eta_i}{\chi_i^2}.
+\end{equation}
+While the second is again slightly more complicated as it is non-local:
+\begin{equation}
+\frac{\partial S_C}{\partial \chi_j} = \frac{\partial}{\partial \chi_j}\left (\frac{1}{2} (S_i + S_{i-1} + \frac{\Delta_i}{2} S_{i-1}' \frac{\Delta_i}{2} S_i')\right ) 
+\end{equation}
+Where we again have to compute $\frac{\partial S_i'}{\partial \chi_j}$, which is similar to the procedure above. I do not write down all the expressions specifically, but just outline the procedure: 
+\begin{itemize}
+ \item Using the responses of $\Delta$ and of the source function, as well as $\frac{\partial S_i'}{\partial \Delta_j}$, compute $\frac{\partial S_i'}{\partial \chi_j}$. 
+ \item From there follows $\frac{\partial S_{i,C}}{\partial \chi_j}$, which is the last ingredient for $\frac{\partial I_i}{\partial \chi_j}$.
+\end{itemize}
+
+Response to emissivity is much simpler, as emissivity only influences values of source functions and the optical depth grid.
+
+
+
+
+
+
+
+
+\end{document}

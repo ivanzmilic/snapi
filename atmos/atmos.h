@@ -1,0 +1,393 @@
+#ifndef __ATMOS_H__  // __ATMOS_H__
+#define __ATMOS_H__
+
+class model;
+
+#include <string.h>
+#include "types.h"
+#include "io.h"
+#include "flags.h"
+#include "obs.h"
+
+#include "../grid/grid.h"
+
+class atmosphere;
+
+#include "atmol/atmol.h"
+
+#include "acfg.h"
+
+
+#define ATMOS_FLAG_DEF       0x01UL
+#define ATMOS_FLAG_INIT      0x02UL
+
+#define ATMOS_FLAG_MASK      (ATMOS_FLAG_DEF|ATMOS_FLAG_INIT)
+
+struct typemap{
+  const char *type_name;
+  uint08_t type_code;
+  uint08_t equals(const char *type_in){ return (strcmp(type_in,type_name))?0:type_code; };
+};
+
+#define ATMOS_TYPE_SPINOR  1
+#define ATMOS_TYPE_MHD     2
+#define ATMOS_TYPE_MURAM   3
+
+#define ATMOS_GEOM_PP      1
+#define ATMOS_GEOM_2D      2
+#define ATMOS_GEOM_3D      3
+
+#define ATMOS_RTS_QSC      1
+#define ATMOS_RTS_BEZ      2
+
+#define FILETYPES {{"SPINOR",ATMOS_TYPE_SPINOR},{"MHD",ATMOS_TYPE_MHD},{"MuRAM",ATMOS_TYPE_MURAM},{0,0}}
+
+
+class atmosphere:public grid{
+protected:
+  class reg flags;
+  int08_t rtstype; // RT solver type
+//
+//  class param *parm; // parameterization: external?
+//
+  class atmol **atml;
+  uint16_t natm;
+//
+  char *id,*fname;
+  uint08_t ftype,gtype;
+//
+  fp_t ***T;              // temperature
+  fp_t ***rho;            // mass density
+  fp_t ***Nt,***Ne;       // electron pressure
+  fp_t **** Ne_lte_der; // response of electron density in lte to all the perturbations
+  fp_t ***Bx,***By,***Bz; // magnetic field
+  fp_t ***Vx,***Vy,***Vz; // velocity field
+  fp_t ***Vt;             // turbulent velocity
+  fp_t ***tau_referent; // referent optical depth scale, from the top of the atmosphere down. 
+  
+  fp_t ***op_referent; // referent opacity, usually @ 500 nm, but can be any sort of mean opacity, this is by definition in LTE
+  fp_t *****op_referent_derivative; // derivative (strictry local), of the referent opacity. It is strictly local because it is in LTE
+
+  fp_t boundary_condition_for_rt; // I am not sure that this is the best solution for an atmosphere, but this i easiest to work with at the moment.
+  bool tau_grid; // This is a 'switch' which determines whether we use tau grid as a coordinate grid. If we do, it is a grid in continuum optical
+                 // depth at lambda=500. If we do not, we use h which is given in the input atmosphere. 
+  fp_t * rt_grid; // This is grid we use to perform radiative transfer solution. It will either be geometrical grid (x3) or it will be optical depth grid
+                  // (tau_referent)
+//
+//
+//
+  virtual int08_t resize(int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+//
+//
+  fp_t* add(fp_t*,fp_t*,int32_t);
+  fp_t** add(fp_t**,fp_t**,int32_t,int32_t,int32_t,int32_t);
+  fp_t*** add(fp_t***,fp_t***,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+  fp_t ****add(fp_t ****, fp_t ****, int32_t,int32_t,int32_t,int32_t,int32_t,int32_t, int32_t, int32_t);
+  fp_t***** add(fp_t*****, fp_t*****, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+  fp_t****** add(fp_t******, fp_t******, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+  fp_t******* add(fp_t*******, fp_t*******, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+
+
+// general utilities
+  fp_t ***project(fp_t***,fp_t***,fp_t***,fp_t,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+  fp_t ****transform(fp_t***,fp_t***,fp_t***,fp_t,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+  void transform_responses(fp_t ****, fp_t, fp_t, int, int);
+// atmos_rad.cc: radiative quantities
+// frequency-by-frequency
+  fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+  fp_t ***opacity_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  
+  fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
+  fp_t ** opacity_continuum_derivative(fp_t, fp_t, fp_t, int, int, int);
+
+  fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***thomson_sc(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+  fp_t ***thomson_em(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+// And then their corresponding sister functions:
+  fp_t ***** opacity_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***** emissivity_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***** opacity_pert_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***** emissivity_pert_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***** thomson_sc_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+  fp_t ***** thomson_em_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
+
+  int op_em_pert_numerical_scalar(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t,fp_t *****, fp_t *****);
+  
+// Vector versions, frequency by frequency:
+  fp_t *****opacity_vector(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ****emissivity_vector(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ******* opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ****** emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+// Referent optical depth scale related functions:
+  virtual int compute_op_referent();
+  virtual int compute_tau_referent();
+  virtual int compute_op_referent_derivative(){};
+  virtual void delete_op_referent_derivative();
+  virtual void normalize_to_referent_opacity(fp_t ***, fp_t ***);
+  virtual void normalize_to_referent_opacity(fp_t *****, fp_t ****); // Overloaded vector vesion
+  virtual void normalize_to_referent_opacity(fp_t *****, fp_t ****, fp_t *******, fp_t ******); // Overloaded for perturbations of vector quantities
+  virtual void de_normalize(fp_t ***, fp_t ***); // Basically undo what the function above does
+  virtual void de_normalize(fp_t *****, fp_t ****); // Overloaded vector version
+
+// point-by-point
+  fp_t *opacity(fp_t*,int32_t,int32_t,int32_t,int32_t);
+  fp_t *emissivity(fp_t*,int32_t,int32_t,int32_t,int32_t);
+  fp_t *thomson_op(fp_t,fp_t*,int32_t);
+  fp_t *thomson_em(fp_t,fp_t,fp_t*,int32_t);
+// atmos_chm.cc: chemistry
+  uint08_t chemeq(class atmol**,int,fp_t,fp_t,fp_t&,int32_t,int32_t,int32_t);  
+// atmos_pop.cc: populations
+  
+  fp_t newpops(fp_t***,fp_t***,fp_t***,fp_t*,int32_t);
+  // ^
+  //changed so it returns the greatest relative difference between new and old pops
+  int nltepops(void);
+  int nltepops_taugrid(void);
+  void ltepops(void);
+  void popsetup(void);
+  void popclean(void);
+  void respsetup(void);
+  void respclean(void);
+  fp_t ne_derivative(int, int, int);
+  void ne_lte_derivatives();
+  void clear_ne_lte_derivatives();
+
+// atmos_rts.cc: radiative transfer solver[s]
+  virtual fp_t *anglesetup(fp_t*&,fp_t*&,int&);
+  virtual int formal(fp_t*, fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t, fp_t);
+  virtual int formal_with_lambda_operator(fp_t*, fp_t***,fp_t**,fp_t***,fp_t***,fp_t,fp_t, fp_t);
+  virtual int formal_with_responses(fp_t*, fp_t ***, fp_t ***, fp_t **, fp_t **, fp_t ***, fp_t ***, fp_t,fp_t,fp_t);
+  // polarized:
+  virtual int formal(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****,fp_t ,fp_t , fp_t ); // Formal for polarized
+  // radiative transfer solver for perturbations:
+  virtual int formal_pert_numerical(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
+  virtual int formal_pert_analytical(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
+  virtual int formal_pert_jcdti(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
+  // polarized radiative transfer solver for perturbations
+  virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
+  {return 0;};
+   virtual int formal_pert_analytical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
+  {return 0;};
+  virtual int formal_with_responses_jcdti(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t )
+  {return 0;};
+  virtual int formal_with_responses_full(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t )
+  {return 0;};
+
+  virtual int formal_pert_analytical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
+  virtual int formal_pert_numerical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****,fp_t ***, fp_t ****, fp_t, fp_t, fp_t){};
+// atmos_fio.cc: file I/O
+  int08_t read_atmos(const char*,const char*,uint08_t,io_class*);
+  int08_t read_spinor(const char*,const char*,io_class*);
+  int08_t read_mhd(const char*,const char*,io_class*);
+  int08_t read_muram(const char*,const char*,io_class*);
+public:
+  atmosphere(acfg*,io_class&);
+  atmosphere(uint08_t*,int32_t&,uint08_t,io_class&);
+  virtual int build_from_nodes(model *);
+  virtual ~atmosphere(void);
+//
+  virtual int32_t size(io_class&);
+  virtual int32_t pack(uint08_t*,uint08_t,io_class&);
+  virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
+//
+  virtual int08_t init(const char*,io_class*);
+//  obs observable(lamda,prm);
+//  void restruct(obs *difference,fp_t *meritfunc());
+  virtual void set_grid(int);
+  virtual bool is_tau_grid(){
+    return tau_grid; 
+  };
+//
+// atmos_obs.cc: generate observable
+  virtual observable *obs_scalar(fp_t,fp_t,fp_t*,int32_t);
+  virtual observable *obs_scalar_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
+  virtual observable *obs_scalar_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
+// These are now responses to nodes.
+  virtual observable *obs_scalar_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **); // The same as before,except it will also return the derivatives to nodes (written in the last argument)
+  virtual observable *obs_scalar_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **);
+
+// Duplicated, where tau is an independent variable:
+  virtual observable *obs_scalar_tau(fp_t,fp_t,fp_t*,int32_t);
+  virtual observable *obs_scalar_num_responses_tau(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
+  virtual observable *obs_scalar_responses_tau(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
+// Responses to nodes:
+  virtual observable *obs_scalar_num_responses_to_nodes_tau(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **); // The same as before,except it will also return the derivatives to nodes (written in the last argument)
+  virtual observable *obs_scalar_responses_to_nodes_tau(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **);
+
+// Vector case. Here we have already generalized. So no need to split between "tau" and "geometrical" functions. This should be cleaned up in 
+// the 'final' version of the code
+  virtual observable *obs_stokes_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
+                                                                                                         // hence the 3D vector in last argument
+  virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
+                                                                                                         // hence the 3D vector in last argument
+//
+  virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
+  virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
+  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
+  virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
+  
+  // Debug:
+  virtual int optical_depth_scale(fp_t ***, fp_t ***, fp_t, fp_t);
+  virtual fp_t * compute_full_lambda_operator(fp_t ***, int, int){
+    return 0;
+  };
+
+// atmos_fit.cc various fitting examples, routines and testing:
+  virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
+  virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
+  
+  fp_t get_pop(int, int, int, int, int, int);
+  fp_t get_pop(int, int, int, int, int);
+  fp_t get_T(int, int, int);
+  fp_t get_Ne(int, int, int);
+  fp_t get_Nt(int, int, int);
+  fp_t get_ne_lte_derivative(int, int, int, int);
+  fp_t get_neutral_H_derivative_lte(int, int, int);
+  fp_t get_vt(int, int, int);
+  fp_t * get_magnetic_field(int, int, int);
+  int execute_chemeq_for_point(int, int, int); // Just to execture chemeq in point x1i, x2i, x3i, populations will be automatically updated
+  int set_Temp(int, int, int, fp_t); // We might have merged this with the previous one, but it might be handy to "remotely" change the atmospheric parameters
+  int set_Nt(int, int, int, fp_t);
+  fp_t get_x1(int index){
+    return x1[index];
+  }
+  fp_t get_x2(int index){
+    return x2[index];
+  }
+  fp_t get_x3(int index){
+    return x3[index];
+  }
+  fp_t get_op_referent(int x1i, int x2i, int x3i){
+    return op_referent[x1i][x2i][x3i];
+  };
+  fp_t get_op_referent_der(int p, int x3k, int x1i, int x2i, int x3i){
+    return op_referent_derivative[p][x3k][x1i][x2i][x3i];
+  };
+//
+// ----------------------------------------------------------------------------------------------------------------
+// -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------
+
+void compute_responses(){
+
+} // Compute complete set of nlte responses
+void compute_lte_population_responses(){
+
+}
+int compute_nlte_population_responses(int lvl_of_approximation);
+void compute_nlte_population_responses_numerical(int from, int to);
+void compute_anisotropy_responses();
+
+void compute_nlte_population_responses_taugrid(int lvl_of_approximation);
+void compute_nlte_population_responses_numerical_taugrid(int from, int to);
+
+
+fp_t **** compute_intensity_response_numerical(int from, int to, fp_t theta, fp_t phi, fp_t lambda);
+};
+
+atmosphere *atmos_new(acfg*,io_class&);
+atmosphere *atmos_new(uint08_t*,int32_t&,uint08_t,io_class&);
+
+// ---------------------------------------------------------------------------------------------------------------
+
+class model{
+
+private:
+  int N_nodes_temp;
+  int N_nodes_vt;
+  int N_nodes_vs;
+  int N_nodes_B; 
+  int N_nodes_theta;
+  int N_nodes_phi;
+
+  // Does it make sense to have separate number of nodes for different components of velocity/magnetic field? 
+  // To me it does not. But maybe we want to allow for possibillity for that in the code?
+  // Let's leave this as a starting point. If we get things working we will code new one.
+
+  // Lets define nodes. For each "couple" of arrays, first ones are x coordinates of nodes, second ones are values of nodes.
+
+  // Temperature nodes
+  fp_t * temp_nodes_tau;
+  fp_t * temp_nodes_temp;
+
+  // Microturbulent velocity nodes
+  fp_t * vt_nodes_tau;
+  fp_t * vt_nodes_vt;
+
+  // Systematic velocity nodes
+
+  fp_t * vs_nodes_tau;
+  fp_t * vs_nodes_vs;
+
+  // Magnetic field nodes
+
+  fp_t * B_nodes_tau;
+  fp_t * B_nodes_B;
+
+  // Theta nodes 
+
+  fp_t * theta_nodes_tau;
+  fp_t * theta_nodes_theta;
+
+  // Phi nodes: 
+
+  fp_t * phi_nodes_tau;
+  fp_t * phi_nodes_phi;
+
+public:
+
+  // We will keep these virtual so we can make some derived class from this
+
+  model(); // Creates default values with zero free parameters
+  model(int, int, int, int); // Creates model with values of nodes 
+  model(int, int, int, int, int, int); // Creates model with nodes for all 6 parameters
+  ~model(void);
+
+  // Now methods which set nodes
+  int set_temp_nodes(fp_t *, fp_t *);
+  int set_vt_nodes(fp_t *, fp_t *);
+  int set_vs_nodes(fp_t *, fp_t *);
+  int set_B_nodes(fp_t *, fp_t *);
+  int set_theta_nodes(fp_t *, fp_t *);
+  int set_phi_nodes(fp_t *, fp_t *);
+
+  int get_N_nodes_temp();
+  fp_t * get_temp_nodes_tau();
+  fp_t * get_temp_nodes_temp();
+
+  int get_N_nodes_vt();
+  fp_t * get_vt_nodes_tau();
+  fp_t * get_vt_nodes_vt();
+
+  int get_N_nodes_vs();
+  fp_t * get_vs_nodes_tau();
+  fp_t * get_vs_nodes_vs();
+
+  int get_N_nodes_B();
+  fp_t * get_B_nodes_tau();
+  fp_t * get_B_nodes_B();
+
+  int get_N_nodes_theta();
+  fp_t * get_theta_nodes_tau();
+  fp_t * get_theta_nodes_theta();
+
+  int get_N_nodes_phi();
+  fp_t * get_phi_nodes_tau();
+  fp_t * get_phi_nodes_phi();
+
+
+  int get_N_nodes_total();
+  int perturb_node_value(int, fp_t);
+  int get_parameter(int);
+
+  int print();
+  int print_to_file(FILE *);
+
+
+};
+
+model * model_new(int, int, int, int);
+model * model_new(int, int, int, int, int, int);
+
+#endif              // __ATMOS_H__

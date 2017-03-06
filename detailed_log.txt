@@ -1,0 +1,316 @@
+Starting model:
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 5.000000000000000e+03 
+2 -3.100000000000000e+00 5.500000000000000e+03 
+3 -1.300000000000000e+00 6.000000000000000e+03 
+4 5.000000000000000e-01 6.500000000000000e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 1.000000000000000e+05 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 -0.000000000000000e+00 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 1.200000000000000e+03 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 3.000000000000000e+01 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 3.000000000000000e+01 
+Start of iteration # : 1 Chisq : 4.990924e+07 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 7.500000000000000e+03 
+2 -3.100000000000000e+00 7.616529182022022e+03 
+3 -1.300000000000000e+00 4.255617546075293e+03 
+4 5.000000000000000e-01 7.412352180661605e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 5.000000000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 4.577133840902804e+04 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.560804351910549e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 1.324930975070973e+01 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 2.947530590162153e+01 
+Iteration # 1 .Current spectrum:
+Iteration # 1 chisq after correction 1.119943e+07 
+Good step! Decreasing lm parameter.
+Start of iteration # : 2 Chisq : 1.119943e+07 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 1.125000000000000e+04 
+2 -3.100000000000000e+00 6.657448551922167e+03 
+3 -1.300000000000000e+00 4.235202722573547e+03 
+4 5.000000000000000e-01 7.265143489496279e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.500000000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.477835364879142e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 1.862688335711969e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.930189935739333e+02 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 -2.010303108684298e+01 
+Iteration # 2 .Current spectrum:
+Iteration # 2 chisq after correction 1.342057e+06 
+Good step! Decreasing lm parameter.
+Start of iteration # : 3 Chisq : 1.342057e+06 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 1.017838515716142e+04 
+2 -3.100000000000000e+00 5.892210283193936e+03 
+3 -1.300000000000000e+00 4.397632251132823e+03 
+4 5.000000000000000e-01 7.202861540523201e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 1.250000000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 2.004207869735966e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 1.964033369383524e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.442617345906518e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 2.518682007430324e+03 
+Iteration # 3 .Current spectrum:
+Iteration # 3 chisq after correction 3.338729e+05 
+Good step! Decreasing lm parameter.
+Start of iteration # : 4 Chisq : 3.338729e+05 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 7.349468963835661e+03 
+2 -3.100000000000000e+00 5.782058861640574e+03 
+3 -1.300000000000000e+00 4.374115347698649e+03 
+4 5.000000000000000e-01 7.212044831588277e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 1.875000000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 2.002287445696215e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.605050904939262e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.804785168890200e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.785762878131307e+05 
+Iteration # 4 .Current spectrum:
+Iteration # 4 chisq after correction 1.549753e+04 
+Good step! Decreasing lm parameter.
+Start of iteration # : 5 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.361641742002106e+03 
+2 -3.100000000000000e+00 5.687441575952415e+03 
+3 -1.300000000000000e+00 4.384222153585109e+03 
+4 5.000000000000000e-01 7.207506239974190e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.996528590271643e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.156723474831772e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.908847428857563e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.814137125039095e+05 
+Iteration # 5 .Current spectrum:
+Iteration # 5 chisq after correction 1.158311e+06 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 6 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.361632728560695e+03 
+2 -3.100000000000000e+00 5.687441943308568e+03 
+3 -1.300000000000000e+00 4.384221502380341e+03 
+4 5.000000000000000e-01 7.207506548565150e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.996528738421663e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.156679182990296e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.908844063717534e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.814137099530431e+05 
+Iteration # 6 .Current spectrum:
+Iteration # 6 chisq after correction 1.158203e+06 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 7 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.361542320053981e+03 
+2 -3.100000000000000e+00 5.687445623986126e+03 
+3 -1.300000000000000e+00 4.384214962069209e+03 
+4 5.000000000000000e-01 7.207509648717991e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.996530455815210e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.156235743615514e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.908810378542354e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.814136844547018e+05 
+Iteration # 7 .Current spectrum:
+Iteration # 7 chisq after correction 1.157124e+06 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 8 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.360648637100716e+03 
+2 -3.100000000000000e+00 5.687482345943115e+03 
+3 -1.300000000000000e+00 4.384149963172988e+03 
+4 5.000000000000000e-01 7.207540457253389e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.996547446777591e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.151825170562571e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.908475313135487e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.814134295175642e+05 
+Iteration # 8 .Current spectrum:
+Iteration # 8 chisq after correction 1.146417e+06 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 9 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.352886835928914e+03 
+2 -3.100000000000000e+00 5.687839049148480e+03 
+3 -1.300000000000000e+00 4.383543868554518e+03 
+4 5.000000000000000e-01 7.207828105321162e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.996706537733714e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.110503943442341e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.905335203095102e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.814108825483724e+05 
+Iteration # 9 .Current spectrum:
+Iteration # 9 chisq after correction 1.048473e+06 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 10 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.341822405483593e+03 
+2 -3.100000000000000e+00 5.690759143961148e+03 
+3 -1.300000000000000e+00 4.380034845966812e+03 
+4 5.000000000000000e-01 7.209515987892892e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.997662613727298e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.860570680777537e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.886275775186439e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.813856578118136e+05 
+Iteration # 10 .Current spectrum:
+Iteration # 10 chisq after correction 5.301573e+05 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 11 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.796369830903961e+03 
+2 -3.100000000000000e+00 5.707027681581632e+03 
+3 -1.300000000000000e+00 4.375883967763034e+03 
+4 5.000000000000000e-01 7.211847035999883e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.999212487586963e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.466636998267340e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.854495442527505e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.811559653717925e+05 
+Iteration # 11 .Current spectrum:
+Iteration # 11 chisq after correction 9.533208e+04 
+Bad step! Undoing modification and increasing lm parameter.
+Start of iteration # : 12 Chisq : 1.549753e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 7.607579892027652e+03 
+2 -3.100000000000000e+00 5.745601361795569e+03 
+3 -1.300000000000000e+00 4.375078180685312e+03 
+4 5.000000000000000e-01 7.212535343805692e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 2.812500000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 2.001590170109185e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.387357806290386e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.831659360375673e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.799951805371638e+05 
+Iteration # 12 .Current spectrum:
+Iteration # 12 chisq after correction 1.207982e+04 
+Good step! Decreasing lm parameter.
+Start of iteration # : 13 Chisq : 1.207982e+04 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.772950843879854e+03 
+2 -3.100000000000000e+00 5.698793427036543e+03 
+3 -1.300000000000000e+00 4.377307951923133e+03 
+4 5.000000000000000e-01 7.211652614153236e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 4.218750000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 2.000078406705876e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.700632479555829e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.826784831393319e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.800793698648748e+05 
+Iteration # 13 .Current spectrum:
+Iteration # 13 chisq after correction 4.105896e+03 
+Good step! Decreasing lm parameter.
+Start of iteration # : 14 Chisq : 4.105896e+03 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.543121630542724e+03 
+2 -3.100000000000000e+00 5.699419891984298e+03 
+3 -1.300000000000000e+00 4.384433468015367e+03 
+4 5.000000000000000e-01 7.207526877873252e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 6.328100000000000e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.998545433900084e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 8.188246226067525e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.833011463158675e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.799773544721778e+05 
+Iteration # 14 .Current spectrum:
+Iteration # 14 chisq after correction 4.102080e+03 
+Good step! Decreasing lm parameter.
+Start of iteration # : 15 Chisq : 4.102080e+03 
+Model after the correction.
+atmos::model : temp. nodes: 
+1 -5.000000000000000e+00 6.596971352904537e+03 
+2 -3.100000000000000e+00 5.704793130580610e+03 
+3 -1.300000000000000e+00 4.385630861352794e+03 
+4 5.000000000000000e-01 7.206653299035409e+03 
+atmos::model : vt nodes: 
+1 -5.500000000000000e+00 9.446214773826889e+04 
+atmos::model : vs nodes: 
+1 0.000000000000000e+00 1.999087736258614e+05 
+atmos::model : B nodes: 
+1 0.000000000000000e+00 7.436599468218958e+02 
+atmos::model : theta nodes: 
+1 0.000000000000000e+00 -1.824877240177999e+03 
+atmos::model : phi nodes: 
+1 0.000000000000000e+00 1.800256435883587e+05 
+Iteration # 15 .Current spectrum:
+Iteration # 15 chisq after correction 2.861870e+03 
+Good step! Decreasing lm parameter.

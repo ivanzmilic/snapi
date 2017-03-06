@@ -1,0 +1,360 @@
+\documentclass[a4paper]{article}
+
+\begin{document}
+
+\section{Hydrogenic energy levels}
+Principal part:
+$$
+E_n=\frac{-m_p e^4Z^2}{2n^2 \hbar^2}
+$$
+Fine splitting:
+$$
+E_{n,l}=E_n(1-\alpha^2\frac{Z^2}{4n^2}[3-4nl(l+\frac{1}{2})])
+$$
+$$
+\alpha=\frac{e^2}{\hbar c}
+$$
+
+\section{Partition functions}
+\subsection{MULTI}
+MULTI follows a multi-part extention to Schlender \& Traving 1965ZA.....61...92S approximation using Chebychev polynomials:
+$$
+U(x)\approx g0 + \sum_{j=1}^n \left[ \sum_{i=1}^{m} \alpha_i 10^{-\gamma_i x} + g2_j 10^{-\chi_j x} U_a(...)\right]
+$$
+where $U_a$ is an approximation of the asymptotic part (high energy levels) of the partition function. Coeffs are given in the MULTI absdat file.
+
+Asymptotic approximations: Baschek et al.(Abh. Hamb. VIII, 26, 1966):
+$$ U_a=\frac{1}{3}(lh*(lh+1)*(lh+\frac{1}{2})-ll*(ll+1)*(ll+\frac{1}{2}))+\alpha(lh-ll)+\frac{1}{2}\alpha^2\frac{lh-ll}{lh ll}
+$$
+where $\alpha=31.321(z+1)^2 5040.0/T$, $ll$ is tabulated and 
+$$
+lh=\sqrt{\frac{\chi_H (z+1)T}{4.98\cdot 10^{-4} 5040.0 \sqrt{Pe}}}
+$$
+analogue to Mihalas p69.
+
+Asymptotic approximations: Fischel \& Sparks (1971ApJ...164..359F):
+Eq. 26:
+$$
+U_a=((\frac{4}{3}p+\frac{1}{2})p+\frac{1}{6}+\frac{4}{3}Dz)p-\frac{2}{5}Dz^2/p-
+    ((\frac{1}{3}r-\frac{1}{2})r-\frac{1}{6}-Dz)r+\frac{1}{2}Dz^2/ll;
+$$
+with $r=ll-1$; Eq. 27:
+$$
+U_a=\frac{1}{ll}(1+\frac{Dz}{ll^2}(\frac{1}{3}+\frac{Dz}{10 ll^2}))p^4;
+$$
+$W_{ijk}(T,Pe)$ is the probability that a level $i,j,k$ exists:
+$$
+W_{ijk}(T,Pe)\approx \frac{6.14\cdot 10^5}{F_0} \left( \frac{Z^*_{ijk}}{n}\right)^4
+$$
+$$
+F_0(T,Pe)=2.61 \left( \sum_{ij} N_{ij}(j)^\frac{3}{2}+ fN_e \right)^\frac{3}{2}
+$$
+The start point for the asymptotic part is where the probability is 1:
+$$
+\log(W_{ijk}(T,Pe))\approx \log(\frac{6.14\cdot 10^5}{2.61}) - \frac{3}{2}\log(N_e) +
+4 \log(Z^*_{ijk}) - 4 \log(n) = 0
+$$
+This reduces to 
+$$
+n=Z^*_{ijk}\frac{6.14\cdot 10^5}{2.61}N_e^{-\frac{1}{6}}
+$$
+MULTI uses
+$p=4200(z+1)(\frac{Pe}{k_B T})^{-\frac{1}{6}}$ which is not the same (no idea why). It must be scaled 
+to work in CGS, for which the factor
+$$
+f=\frac{4\pi\epsilon_0}{e^2 R_\infty^4}
+$$
+can be used, which scales by the desired factor 10. Since the origin of the number is not clear, a 
+properly dimensioned factor is missing!
+
+\section{Saha}
+LTE Ionization equilibruim follows Mihalas 2nd ed. 
+$$
+N_{i+1}=N_i C \frac{U_{i+1}}{U_i}e^\frac{-\chi_i}{k T}
+$$
+where
+$$
+C=\frac{2}{n_e}\left(\frac{h^2}{2\pi m_e k T}\right)^{-\frac{3}{2}}
+$$
+Random unit issue: $P_{SI}=\frac{1}{10} P_{CGS}$
+
+\section{Bound-Free opacity}
+SI corrected form of Mihalas 2nd ed. p.99, setting $\epsilon_0(CGS)=\frac{1}{4\pi}$ and using ${\cal R}=h c R_\infty$:
+$$
+  \alpha_{bf}=\left(\frac{\pi e^2}{4\pi\epsilon_0 m_e c}\right) \left(\frac{h k^3}{2 h c R_\infty}\right) \left(\frac{32}{\sqrt{27}}\right) \left(\frac{1}{n^5 k^3}\right)
+  \frac{Z^4 g{\rm II}}{\left(\frac{h \nu}{h c R_\infty}\right)^3}
+$$
+$$
+  \alpha_{bf}=\left(\frac{e^2}{4\epsilon_0 m_e c}\right) \left(\frac{1}{2 c R_\infty}\right) \left(\frac{32}{\sqrt{27}}\right)
+  \frac{\lambda^3 R_\infty^3 Z^4 g{\rm II}}{n^5}
+$$
+$$
+  \alpha_{bf}=\left(\frac{32 e^2R_\infty^2}{8\sqrt{27}\epsilon_0 m_e c^2}\right)
+  \frac{\lambda^3 Z^4 g{\rm II}}{n^5}
+$$
+$$
+  \alpha_{bf}=\left(\frac{4 e^2 R_\infty^2}{\sqrt{27} \epsilon_0 m_e c^2}\right)
+  \frac{\lambda^3 Z^4 g{\rm II}}{n^5}
+$$
+for $\lambda\ge \lambda_0$
+$$
+ \lambda_0=\frac{h c}{\chi_i-\eta_{i,j}}
+$$
+
+\subsection{MULTI}
+H tabulated crossection data contains $g{\rm II}$ values, with the last wavelength (in \AA) the ionization edge. Crossections for elements other than H are given directly in the ABSDAT input file. 
+
+H:
+$$
+\alpha_{bf}=1.045\cdot 10^{-26} N_n \frac{\lambda^3 g{\rm II}}{n^5}
+$$
+for $n\le 5$ and
+$$
+\alpha_{bf}=1.045\cdot 10^{-26}\frac{2e^{-TETA31 (1-\frac{1}{n^2})}}{U_0(T,ne)} N_n \frac{\lambda^3 g{\rm II}}{n^3}
+$$
+for $n > 5$
+
+Actually, MULTI uses the factor $\frac{1.0}{M_H F_Y F_H N_H}$, to produce the absorption crossection in cm$^2$ per gram, where $M_H$=mass Hydrogen atom, $F_Y$=total density to hydrogen density ratio, $F_H$= the hydrogen fraction in neutral hydrogen and $N_H$ the total hyrdogen number density.
+
+\section{Free-Free opacity}
+$$
+  \alpha_{ff}=\left(\frac{e^2 h R_\infty}{6 \pi^3 \epsilon_0 m_e c}\right)\left(\frac{2 \pi}{3 m_e^3 k T}\right)^{-\frac{1}{2}}\frac{\lambda^3 Z^4 g{\rm II}}{c^3}
+$$
+
+\section{Molecules}
+Molecular equilibria:
+$$
+A + B \rightleftharpoons AB
+$$
+are described by reaction constants:
+$$
+K(T)_{AB}=\frac{N_AN_B}{N_{AB}}
+$$
+We must then solve the system
+$$
+N_A N_B \rightleftharpoons N_{AB} K(T)_{AB}
+$$
+This could be conveniently done taking the logarithmic form
+$$
+log(N_A)+log(N_B)-log(N_{AB})=log(K(T)_{AB}),
+$$
+which can be conveniently solved using any linear solver of the form
+$$
+{\bf A} \cdot {\bf n} = {\bf k}
+$$
+where ${\bf n}$ are the logarithmic component number densities and the ${\bf k}$ are the dissociation constants,
+if it wasn't for the additional requirements that all atomic species numbers are conserved,
+$$
+\sum_k \alpha_k N_{i,k} = N_k
+$$
+needed to close the system of equations. This leads to an incompatible set of equations, which is inherently non-linear. The most popular form is to keep the chemical equilibrium in its original form and minimize the mismatch, or defect, $d$ of the current best guess of the number densities:
+$$
+d_{i,j}=N_i N_j - K(T)_{i,j}N_{i,j}
+$$
+One can choose to optimize the $N_{i,j,}$, or the atomic number densities $N_i$, where the latter is preferable, since the number of atoms can be much smaller than the possible number of molecules.
+
+Both cases result in a problem of the form
+$$
+{\bf J}\cdot v - {\bf d} = 0
+$$
+where ${\bf J}$ is the Jacobian matrix of partial derivatives of each fit parameter to all other fit parameters and $v$ is the vector of corrections that, at least in the linear approximation, eliminates the defect ${\bf d}$, the non-linear part is then iteratively solved for.
+
+It is important to take into account the change in electron density due to the change in the atomic densities. In NLTE this is difficult, as in general the ionization balance of the elements depends in a non-linear way on the number density. One possible way to deal with this problem is to keep the ionization fraction fixed while calculating the chemical equilibrium, and deal with the dependency iteratively. 
+
+\subsection{MULTI}
+MULTI separately calculates $H^-$ and $H_2$, then treats only $H$,$C$,$N$ and $O$ molecules 
+
+The expression for the conservation of electrons that is used should be:
+$$
+\delta(5)=F_H(G_H+K_{H_2^+} G_H F_H-K_{H^-}F_E)+G_C F_C+G_O F_O+G_N F_N-F_E+XN_E/P_H
+$$
+but MULTI uses:
+$$
+\delta(5)=F_H(G_H+K_{H_2^+} G_H F_H/F_E-K_{H^-})+G_C F_C+G_O F_O+G_N F_N-F_E+XN_E
+$$
+which is due to the $K_x$ including the electron pressure $P_E$. This is not taken into account in the partial derivative of the defect to the electron pressure, which is pretty odd.
+
+\subsection{SPINOR}
+Is much more generic and treats 287 chemical components. Not so clear if it handles $H^-$ and $H_2^+$, but it looks like it doesn't. The electron density is not explicitly included in the Newton-Raphson solver but is iteratively updated at the end of each N-R step. 
+
+\section{Particle conservation}
+[Magneto] Hydrodynamically, the relevant quantity is the total gas pressure, the gradient of which is in equilibrium with all other forces (gravity, inertia, magnetic, etc.). The equation of state (ideal gas in this case)
+$$
+P_g=N_t k_B T
+$$
+applies then to the total particle density. We therefore want to solve the ionization and chemical equilibria simultaneously for a given total particle density
+$$
+N_t=N_e + \sum_a \sum_k N_{a,k} + \sum_m N_m,
+$$
+where $N_{a,k}$ is the number density of "free" atoms of element $a$, ionization stage $k$, not tied up in molecules.
+
+The molecular dissociation equilibrium (in LTE?) can be expressed as a Saha-like equation over the partial pressures of the $i$ 
+components of the molecule
+$$
+\frac{\prod_i P_{(a,k)_i}}{P_m} = \frac{\prod_i N_{(a,k)_i} k_B T}{N_m k_B T} = K_m(T),
+$$
+where the ideal gas equation of state was used with $N_{(a,k)_i}$ the number density of the relevant 
+ionization stage $k$ of element $a_i$, so that 
+$$
+N_t=N_e +  \sum_a \sum_k N_{a,k} + \sum_m  \left[k_B T K_m(T) \right]^{-1}\prod_i k_B T N_{(a,k)_i}
+$$
+which can be written as
+$$
+N_t = N_e +  \sum_a N_a \sum_k f_{a,k} + \sum_m \left[k_B T K_m(T)\right]^{-1} \prod_{c=\{i,k\}} k_B T \left( N_i N_e^{-k} f_{i,k}\right)^{\kappa_c}
+$$
+where we defined the ionization fraction $f_{a,k}$ of ionization stage $k$ of element $a$
+$$
+N_{a,k} = N_a f_{a,k},
+$$
+where clearly we must have
+$$
+ \sum_k f_{a,k} = 1
+$$
+and consequently
+$$
+\frac{\partial}{\partial N_e} \sum_k f_{a,k} = 0
+$$
+so that
+$$
+N_t = N_e +  \sum_a N_a + \sum_m \left[k_B T K_m(T)\right]^{-1} \prod_{c=\{i,k\}} k_B T \left( N_i N_e^{-k} f_{i,k}\right)^{\kappa_c}
+$$
+
+Although the ionization fraction can be a complicated function of the populations, if we assume LTE, we can 
+express the ionization equilibrium using the Saha equation:
+$$
+\frac{N_{a,k} N_e}{N_{a,k-1}} = C \frac{U_{k}(T)}{U_{k-1}(T)}e^\frac{-\chi_{k-1}}{k_B T} \equiv K_{a,k}(T,N_e)
+$$
+so that
+$$
+N_{a,k} = K_{a,k}(T) N_{a,k-1} N_e^{-1} = K_{a,k}(T,N_e) K_{a,k-1}(T,N_e) N_{a,k-2} N_e^{-2} = ... = N_{a,0} N_e^{-k} \prod_{i=1}^{k-1} K_{a,i}(T,N_e)
+$$
+giving the properly normalized
+$$
+f_{a,k}=\frac{\prod_{i=1}^{k} K_{a,i}(T,N_e)}{\sum_a \prod_{i=1}^{k} K_{a,i}(T,N_e)}
+$$
+
+
+In addition to the total number density determined by the gas pressure, the abundance 
+ratios of all elements to a appropriately selected reference element $N_r$ must be conserved
+$$
+\frac{N_a + \sum_m \kappa_{m,a} N_{m}}{\alpha_a}=\frac{N_r + \sum_m \kappa_{m,r} N_{m}}{\alpha_r}
+$$
+where $\alpha_a$ is the abundance fraction by number and $\kappa_{m,a}$ is the multiplicity of element 
+$a$ in molecule $m$.
+
+Finally the total electric charge must be conserved
+$$
+N_e=\sum_a \sum_k k N_{a,k} + \sum_m q_m N_{m}=\sum_a  N_a\sum_k k f_{a,k} + \sum_m q_m N_{m}
+$$
+so that the system of equations is exactly closed.
+
+Traditionally, this non-linear set of equations is solved using an iterative approximation method, such as 
+a Newton-Raphson scheme. Such methods rely on a linear approximation of the dependencies, which requires 
+knowledge of the partial derivatives of the conservation equations to the $N_a$ and, if the electron 
+density is not substituted, $N_e$.
+
+If we fix $N_e$, we can write the molecular equilibrium in logarithmic form
+$$
+log(N_A)+log(N_B)-log(N_{AB})=log(K(T)_{AB}),
+$$
+
+$$
+n_1 n_2 = K_{12} n_{12}
+$$
+and
+$$
+\alpha_2 (n_1 + \sum_k n_{1k}) = \alpha_1(n_2 + \sum_k n_{2k})
+$$
+gives 
+$$
+\alpha_2 n_1 (1 + \sum_k K_{1k}^{-1} n_k) = \alpha_1 n_2(1 + \sum_k K_{2k}^{-1} n_k)
+$$
+$$
+\frac{n_2}{n_1}=\frac{\alpha_2 (1 + \sum_k K_{1k}^{-1} n_k)}{\alpha_1(1 + \sum_k K_{2k}^{-1} n_k)}
+$$
+specifically for only 2 elements and one molecule, we have 
+$$
+n_1 n_2 =K_{12} \frac{\alpha_2 n_1 - \alpha_1 n_2}{\alpha_1-\alpha_2}
+$$
+$$
+(\alpha_1-\alpha_2) n_1 n_2 = K_{12} \alpha_2  n_1 - K_{12} \alpha_1 n_2
+$$
+using $n_2=f n_1$
+$$
+f = \frac{K_{12} \alpha_2}{(\alpha_1-\alpha_2) n_1 + K_{12} \alpha_1}
+$$
+
+TODO: This is NOT very satisfactory. How can we solve this problem general and approximately correct without risk of instability?
+
+\section{Rate equations}
+The solution of the rate equations is of the form:
+$$
+{\bf M} \cdot {\bf n} = 0
+$$
+
+The matrix ${\bf M}$ contains the transition rates between the levels $i$, with population density $n_i$.
+
+Since simultaneously we must have chemical and ionization equilibrium for all species, we have the need to solve the above system self-consistently with the chemical equilibrium equations. Since the electron density is determined by the chemical equilibrium, we cannot use it here to close the system of equations. We can, however, calculate the ionization fractions iteratively using the rate equations, assuming a current value for the electron density and total particle density for each element and solve the rate equations. 
+
+We thus have a closed system of equations for each element, which is globally kept in equilibrium with all other element through the chemical equilibirum. For that, we must not only provide the NLTE ionization fractions, but also the derivative of that fraction to the electron density.
+
+Following the MALI scheme we write:
+
+Do we use a $\Psi$ or a $\Lambda$ variant...?
+
+Populations should be linearized?
+
+How to do the Full Stokes transfer? An integrated vector approach would be best, but how to do that efficiently?
+
+$$
+\sum_j R_{j,i} + \sum_j C_{j,i} - \sum_j R_{i,j} - \sum_j C_{i,j}=0
+$$
+The $R_{i,j}$ are directly proportional to the angular integrated intensity $\overline{J}_{i,j}$, the 
+
+\section{Transitions}
+
+$$
+\frac{\pi e^2}{m_e c} f_{ij}=\frac{h\nu}{4\pi} B_{lu} = \frac{h\nu}{4\pi} \frac{g_u}{g_l}B_{ul} = \frac{h\nu}{4\pi} \frac{g_u}{g_l}  \frac{2 h\nu^3}{c^2} A_{ul} 
+$$
+
+$$
+ f_{lu} =  \frac{g_u}{g_l} \frac{m_e c}{\pi e^2} \frac{h\nu}{4\pi} \frac{2 h\nu^3}{c^2} A_{ul} 
+$$
+$$
+ f_{lu} =  \frac{g_u}{g_l} \frac{2 m_e h^2\nu^4}{4\pi^2 e^2 c} A_{ul} 
+$$
+$$
+ A_{ul} =  \frac{8\pi^2 e^2 \nu^2}{m_e c^3} \frac{g_l}{g_u} f_{lu} 
+$$
+$$
+ g_l f_{lu}  = g_u \frac{\lambda^2 m_e c}{8\pi^2 e^2} A_{ul}
+$$
+
+The rates:
+$$
+\hspace*{-2.00cm}\frac{\partial n_i}{\partial t}=\sum_{j > i} A_{j,i} n_j - \sum_{j < i} A_{i,j} n_i 
+                              - \sum_{j > i} B_{i,j} n_i \overline{J}_{i,j} 
+                              + \sum_{j < i} B_{j,i} n_j \overline{J}_{j,i} 
+                              + \sum_{j > i} B_{j,i} n_j \overline{J}_{i,j} 
+                              - \sum_{j < i} B_{i,j} n_i \overline{J}_{j,i} 
+                              - \sum_{j > i} C_{i,j} n_i + \sum_{j > i} C_{j,i} n_j
+$$
+must vanish:
+$$
+\hspace*{-2.00cm}\sum_{j > i} A_{j,i} n_j - \sum_{j < i} A_{i,j} n_i 
+                              - \sum_{j > i} B_{i,j} n_i \overline{J}_{i,j} 
+                              + \sum_{j < i} B_{j,i} n_j \overline{J}_{j,i} 
+                              + \sum_{j > i} B_{j,i} n_j \overline{J}_{i,j} 
+                              - \sum_{j < i} B_{i,j} n_i \overline{J}_{j,i} 
+                              - \sum_{j > i} C_{i,j} n_i + \sum_{j > i} C_{j,i} n_j = 0
+$$
+The radiation field is the only factor that can be used directly to eliminate the defect, as all other factors are only dependent on the local conditions. The electron density, however, is a function of the ionization balance and as such depends also on the radiation field, but is altered by the chemical and ionization equilibria.
+
+Unfortunately, the populations depend on the inverse of the rate matrix, so that an analytical, differentiable expression cannot be easily obtained.
+
+\section{Radiative Rates}
+
+For the radiative rates to be computed, the radiation field must be computed at all wavelengths that interact with any level involved in any NLTE transistion. This does not necessarily cover any particular range of interest to the observer, but rather the range of interest to the atom. The quadratic dependence of the numbe rof transitions on the number of levels very quickly results in a large number of wavelengths needed to describe all transitions and across the whole spectrum, as well as a less dense but considerably more extended wavelength grid to treat continuum transitions. Some automated placement procedure is therefore needed to generate a sensible wavelength grid covering all NLTE transitions, without considering the emergent spectrum. This then needs to be calculated afterwards using all transitions.
+
+Strong overlapping LTE lines must be included in the NLTE wavelength grid to ensure the correct background opacity is used. 
+\end{document}

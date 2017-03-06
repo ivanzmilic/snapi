@@ -1,0 +1,47 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+%opening
+\title{Total derivative of I with respect to T}
+\author{XXX XXX}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+XXX XXX
+\end{abstract}
+
+As the issue from Monday kept me thinking two full days I think it deserves to be put on paper, simply to clear up confusion. So, given $h$ and $T$ grids (arrays), which do not depend on each other, and come very complicated mapping $I(T,h)$ (which is actually complete NLTE solution) we are able to compute $dI / dT_i$. However, we have the following issue: for the purpose of inversion, we can to use $\tau$ as our independent grid. If $\tau$ and $T$ grids are given as the input to the problem, we have:
+\begin{equation}
+ h = h(T,\tau)
+\end{equation}
+\begin{equation}
+ I=I\left (T, h(T,\tau) \right )
+\end{equation}
+In this case, we have:
+\begin{equation}
+ \frac{dI}{dT_i} = \frac{\partial I}{\partial T_i} + \sum_j \frac{\partial I}{\partial h_j} \frac{\partial h_j}{\partial T_i}.
+\end{equation}
+While the derivative of height to the temperature can be found relatively straightforwardly, the derivative of intensity with respect to height grid is pretty non-trivial especially in the NLTE case, as height grid influences both the formal solution (directly) and level populations (indirectly). 
+
+A question I immediately asked myself was: should things not be simpler if I just set $\tau$ (actually, this is $\tau_{500}$), as the independent variable?
+\begin{align}
+ \frac{dI}{dT_i} = & \frac{\partial I}{\partial T_i} + \sum_j \frac{\partial I}{\partial \tau_j} \frac{\partial \tau_j}{\partial T_i} = \\
+ & \frac{\partial I}{\partial T_i} + \sum_j \sum_k \frac{\partial I}{\partial \tau_j} \frac{\partial \tau_j}{\partial \chi_k} \frac{\partial \chi_k}{\partial T_i} 
+\end{align}
+
+While derivatives of $\tau$ with respect to opacity are easy, and the derivative of opacity with respect to temperature we already have, the derivative of intensity with respect to $\tau$ is equally non-trivial as before as $\tau$, again, influences both the formal solution and the level populations. 
+
+I come back, again, to the convergence problems in SPINOR, is it possible that this second term here has not been taken into account? I did not see any discussion of this kind in any of the papers, nor in the book of Jose Carlos. I discussed a bit with Anusha and I will discuss with Rafa, but is seems to me that in the completely consistent approach, computing the derivative of $I$ with respect to either $h$ or $tau$ grid is totally unavoidable. Or am I missing something completely? 
+
+
+
+
+
+
+
+
+\end{document}

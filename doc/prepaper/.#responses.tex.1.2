@@ -1,0 +1,300 @@
+%\documentclass{aa}
+\documentclass[referee]{aa}
+
+\usepackage{color}
+
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{graphicx}
+\bibpunct{(}{)}{;}{a}{}{,}
+%------------------------------------------------------------------------
+%Added by language editor to facilitate margin notes.
+%------------------------------------------------------------------------
+%\usepackage{marginnote}
+\usepackage{color}
+\setlength{\marginparwidth}{40mm}
+\setlength{\marginparsep}{5mm}
+\newcommand{\aamarginnote}[1]{{\boldmath$\color{red}\bigvee$}
+\marginpar{\baselineskip3ex{\color{red}#1}}}
+%------------------------------------------------------------------------
+\begin{document}
+
+   \title{Response functions in NLTE I. Unpolarized case}
+
+   \subtitle{}
+
+   \author{H. Wolf\inst{1,2}
+   \and
+   M. Waters\inst{1}}
+   
+   \institute{Max-Planck Institut f\"{u}r Sonnersystemforschung, Justus-von-Liebig-Weg 3, 37075 G\"{o}ttingen, Germany\\
+   \email{wolf@mps.mpg.de}
+         \and
+         Astronomical observatory Belgrade, Volgina 7, 11060 Belgrade, Serbia\\
+             }
+
+   \date{}
+   \titlerunning{Response functions in NLTE I}
+   \authorrunning{Chess Records}
+
+% \abstract{}{}{}{}{} % 5 {} token are mandatory
+
+  \abstract
+  % context heading (optional)
+  % {} leave it empty if necessary
+   {Only source of quantitative information on physical parameters in solar atmosphere are so called ``inversions'' of spectropolarimetric data. To obtain information on higher layers (i.e. chromosphere) one has to interpret observations of polarization of lines which are formed in non-local thermodynamic approximation.}
+  % aims heading (mandatory)
+  {We demonstrate how to analytically compute so called response functions, that is responses of the emergent spectrum to perturbation of a given physical quantity at given depth in the atmosphere.}
+   % methods heading (mandatory)
+   {We develop a NLTE code based on accelerated lambda iterator (ALI) and compare analytical and numerical response functions on three test of increasing complexity: two level atom line formation in homogeneous slab, two level + continuum atom line formation in semi-empirical model atmosphere and multilevel atom formation in semi-empirical model atmosphere. }
+  % results heading (mandatory)
+   {We find that... } 
+  % conclusions heading (optional), leave it empty if necessary
+   {This method enables fast evaluation of the response of the emergent spectrum to perturbations of given quantity at given depth and enables more efficient NLTE inversions.}
+
+   \keywords{Line: formation; Radiative transfer;}
+
+   \maketitle
+
+%___________________________________________________________________________________
+
+\section{Introduction}
+
+NLTE inversions are important because... 
+
+
+\section{Response functions}
+
+Spectropolarimetric inversions are nothing else but the fitting of the observed spectra with a given model, with purpose of inferring height stratification of atmospheric parameters: Temperature, gas pressure, microturbulent and systematic velocity and magnetic field vector. If we were to treat full depth-dependence of all the parameters, this would lead to a model with $O(N_{\rm depths})$ atmospheric parameters. This large number of parameters would result in a severely ill-posed problem. Hence, the idea of using ``nodes'' emerged some two decades ago \citep{SIR} in order to reduce the number of free parameters in model atmosphere. We defer the discussion of nodes and inversion itself to a future paper and discuss only the response functions. The necessity of using response functions comes from the need to minimize merit function, i.e. the quadratic distance between synthetic and observed Stokes spectrum, also known as $\chi^2$:
+\begin{equation}
+ \chi^2(\textbf{q}) = \sum_{s=0}^3 \sum_{i}^N (I_s^{\rm O}(\lambda_i) - I_s^{\rm C}(\lambda_i; \textbf{q}))^2 w_{s,i}
+\end{equation}
+where superscripts O and C stand for observed and computed (synthetic) spectrum, index $s$ denotes different components of the Stokes vector ($I$,\,$Q$\,$U$,$V$), index $i$ counts different wavelength points, $\textbf{q}$ stands for the vector of parameters and $w_{s,i}$ are weights for different Stokes parameter and wavelength points. In general, weights follow from errors obtained from the signal-to-noise ratio but in practice, it is not uncommon to give greater weights to last three Stokes components as they carry information about magnetic field vector (which is of the most interest in this kind of investigation).
+
+The aim of the inversion process is to find vector $\textbf{q}$ which minimizes $\chi^2$. As the the computation of $\hat{I}(\lambda, \textbf{q})$ ($\hat{I} = (I,Q,U,V)^T$) is computationally expensive, most minimization techniques rely on some sort of gradient or Levenberg-Marquardt\citep[see, e.g.\,][]{nr02} method as these methods are usually most rapidly converging. This also means that, in order to correct the proposed solution, one needs to be able to compute derivative of $\chi^2$ with respect to model parameters, which, in our particular case means computing derivative of the emergent intensity with respect to atmospheric quantities at dept point $k$, for all the atmospheric parameters, at all depths.
+
+From now on we will restrict to the unpolarized problem. We want to compute:
+\begin{equation}
+R_{q_k}= \frac{d I_0(\lambda; \textbf{q})}{d q_k} = \frac{I_0(\lambda; \textbf{q} + \Delta q_k) - I_0(\lambda; \textbf{q})}{\Delta q_k}
+\end{equation}
+when $\Delta q_k \rightarrow 0$. $I_0$ stands for the radiation emerging from the top of the atmosphere. Right hand side of the above equation tempts one to use numerical approach to solve the problem. While this is, without doubt, possible, it is computationally problematic for the reasons which will become clear in the following discussion.
+
+In semi-infinite, one-dimensional atmosphere the emergent intensity is completely determined by the values of opacity and emissivity throughout the atmosphere, through the solution of the radiative transfer equation:
+\begin{equation}
+ \cos\theta\,\frac{d I(z, \lambda)}{d z} = -\chi(z,\lambda) I(z,\lambda) + \eta(z, \lambda)
+ \label{RTE1}
+\end{equation}
+where $z$ is spatial coordinate measured along the atmospheric vertical, $\theta$ is the angle between the direction of the propagation of the light and the positive direction of $z$, and $\chi$ and $\eta$ are the coefficients of emission and absorption which depend on the physical conditions of the atmosphere\citep[for the detailed description of physical processes governing radiative transfer see classic work of ][]{Mihalasbook}. It is common to introduce $d\,\tau_{\lambda} = -d\,z \chi(z,\lambda)$ (monochromatic optical depth) and $S(z,\lambda) = \eta(z,\lambda) / \chi(z, \lambda)$ (the source function). Eq.\,\ref{RTE1} now reads:
+\begin{equation}
+ \cos\theta\,\frac{d I(\tau_{\lambda}, \lambda)}{d\tau_{\lambda}} = I(\tau_{\lambda},\lambda) - S(\tau_{\lambda},\lambda)
+ \label{RTE2}
+\end{equation}
+If opacity and emissivity coefficients are known, the solution of Eq.\,\ref{RTE2} can be written as:
+\begin{equation}
+ I_0(\lambda) = \Lambda(\tau_{\lambda},\lambda)[S(\tau_{\lambda}, \lambda)]
+\end{equation}
+where $\Lambda$ stands for the so called ``Lambda operator'' which can be understood as the process of the formal solution of the radiative transfer equation, i.e. the solution of the integral:
+\begin{equation}
+ I_0(\lambda) = \int_0^{\infty} S(t,\lambda) e^{-t} dt.
+\end{equation}
+In practice, radiative transfer equation is almost exclusively solved numerically. If we represent the atmosphere as a 1D discrete mesh with $L$ points, and assume piecewise polynomial or spline behavior of the source function on each of the intervals $[\tau_{l-1},\tau_l]$ (we have omitted the dependence on $\lambda$ for simplicity) we can write:
+\begin{equation}
+ I_l = I_{l+1} e^{-\Delta_l} + w_{l,l+1} S_{l+1} + w_{l,l} S_{l} + \omega_{l} S'_{l}
+ \label{SC}
+\end{equation}
+where $l$ is a depth index and primed quantities refer to the derivative with respect to the optical depth. This is the essence of so called short characteristics approach to to the numerical solution of the radiative transfer equation\citep{OK87}. Coefficients $w$ and $\omega$ depend on $\Delta_l = (\tau_{l+1} - \tau_l)/\cos\theta$, the optical depth distance between points $l$ and $l+1$. For given angle $\theta$, starting from the bottom boundary, where the intensity is given, one proceeds from $l = L-1$ up to $l=0$ by computing the intensity at each depth point and at each frequency to finally compute the emergent spectrum. This process, of course, requires knowledge of the values of $\chi$ and $\eta$ throughout the atmosphere. The contribution of the source functions to the emergent intensity is given by the so called Lambda matrix $\hat{L} = L_{l,l'}$
+\begin{equation}
+ I_0 = \sum_l \Lambda_{0,l'} S_{l'}.
+ \label{lambdamatrix}
+\end{equation}
+$\hat{L}$ depends only on the optical distances between the consecutive points, that is on the values of opacity on the spatial grid. Source function $S_{l'}$ also depends on the opacity as well as on the emissivity on the spatial grid. 
+
+After this discussion it should be clear that, to compute response function $R_{q_k}$, that is, the response of the emergent spectrum to the infinitesimal perturbation of a physical quantity $q$ at depth point $k$, one needs to compute the responses (or, if the reader prefers, derivatives) $\partial \chi_l / \partial q_k$ and $\partial \eta_l / \partial q_k$ for the all depths $l$ in the atmosphere.
+
+In UV, optical and near IR, most important contributors to emissivity and opacity are:
+\begin{itemize}
+ \item Atoms, through bound-bound (i.e. spectral lines), bound-free (photoionization) and free-free (three-body) processes, as well as through Raighley scattering.
+ \item Molecules through bound-free and free processes. Probably the most important contributor of all is negative ion of hydrogen (H-).
+ \item Free electrons, through processes of Thomson scattering. 
+\end{itemize}
+Obviously, to find the response functions of the opacity and emissivity in the atmosphere, one needs to find the responses of the populations of the above species. Remainder of the paper will be devoted precisely to this: finding the response of the populations to the infinitesimal perturbation at given depth $k$.
+
+\subsection{LTE response functions}
+
+Under the assumption of local thermodynamic equilibrium (LTE), all number densities of atoms and molecules as well as level populations are given by the local value of temperature (hence ``local'' in LTE). If we are to assume hydrostatic equilibrium (which is almost always assumed in one-dimensional stellar atmosphere modeling), and equation of state of the ideal gas, structure of the atmosphere is uniquely specified by the temperature run. Then, at each point in the atmosphere, all the populations (i.e. number densities) needed to compute opacity and emissivity are given by the coupling of three laws of statistical physics:
+\begin{enumerate}
+ \item Chemical equilibrium, which relates partial pressure of species constituting the molecule with the partial pressure due to molecule in question. 
+ \item Saha ionization equation which relates number densities of two consecutive ionization states with local Temperature and local electron density.
+ \item Boltzmann distribution of discrete states in the atoms (and molecules) which enables us to compute number densities of each of the discrete states corresponding to different electron configurations. 
+\end{enumerate}
+A lot has already be written on LTE response functions \citep{SIR, dtibook} and we will keep the discussion to the bare minimum here. Let us consider a profile of the spectral line. Assuming that opacity and emissivity is known throughout the atmosphere, we can compute the emergent intensity and compare it with observed one, to compute the merit function ($\chi^2$) and then correct the parameters (i.e. the model atmosphere). Now, the two contributors to emissivity and opacity at wavelengths in question are:
+\begin{itemize}
+ \item Line opacity/emissivity, which has sharp dependence on wavelength (that is why spectral lines are useful after all). For the transition $i\rightarrow j,\,i>j$. They are given by:
+ \begin{align}
+  &\chi_{\rm L}(\lambda) = \frac{hc}{4\pi\lambda} (n_j B_{ji}- n_i{B_ij}) \phi_{ij} (\lambda)\\
+  &\eta_{\rm L}(\lambda) = \frac{hc}{4\pi\lambda} n_i A_{ij} \phi_{ij} (\lambda)
+  \label{chieta}
+ \end{align}
+ where $\phi_{ij}$ is so called line absorption (emission) profile (from now on: absorption profile) which describes the dependence of the opacity/emissivity on the wavelength. Here we assume that absorption and emission profiles are identical (so called assumption of complete frequency redistribution). Absorption profile depends on the random and systematic velocities (Doppler effect), collisional damping (Stark and van der Waals broadening) and on magnetic field (Zeeman effect). 
+ \item Continuum processes. These are all the processes which slowly wary with wavelength. B-f and fee opacity due to atomic and molecular (H-) processes as well as Raighley and Thomson scattering. Over the wavelength range of interest, all these processes can be assumed to be wavelength independent. 
+\end{itemize}
+Finally, we can write:
+\begin{equation}
+ \chi(\lambda) = \chi_{\rm c} + \chi_{0} \phi_{ij}(\lambda).
+\end{equation}
+Similar expression is valid for the emissivity. Then:
+\begin{equation}
+ \frac{\partial \chi_l(\lambda)}{\partial q_k} = \frac{\partial \chi_{{\rm c}, l}}{\partial q_k} + \frac{\partial \chi_{0,l}}{\partial q_k} \phi^{ij}_l (\lambda) + \chi_{0,l}\frac{\partial \phi^{ij}_l (\lambda)}{\partial q_k}
+\end{equation}
+(And the same for emissivity). Here $\chi_{0}$ is so called line-integrated line opacity. Now, $\frac{\partial \chi_{{\rm c}, l}}{\partial q_k}$ and $\frac{\partial \chi_{0,l}}{\partial q_k}$ depend on the responses (derivatives) of the level populations. $\frac{phi^{ij}_l (\lambda)}{\partial q_k}$ depends on the derivative of the line profile with respect to temperature, velocity, magnetic field, etc. \citep{SIR}.
+
+Under the assumption of LTE, level populations and atomic and molecular number densities depend only on the local values and thus the derivative $\frac{\partial \chi_l(\lambda)}{\partial q_k}$ is non-zero only for $l=k$. The perturbation (derivative) of the emergent spectrum can be found in the following way:
+\begin{itemize}
+ \item Using the analytic expressions \citep{SIR, dtibook}, for perturbation at the point $k$ find responses of all the relevant number densities (populations of levels $i$ and $j$, number densities of species responsible for continuum processes, such as H- molecules, electrons, etc...). These follow from molecular equilibrium, Saha and Boltzmann equilibrium equations and are strictly local (i.e. perturbation in $k$ only changes opacity and emissivity in $k$).
+ \item Using computed perturbations for level populations, compute perturbations in $\chi_{\rm c}$ ($\eta_{\rm c}$), $\chi_0$ ($\eta_0$) and $\phi^{ij}$ and thus perturbations in $\chi(\lambda)$ and $\eta(\lambda)$. These are, again, strictly local.
+ \item Using perturbations in opacity and emissivity compute the perturbations to the emergent intensity.
+\end{itemize}
+The last step is not so trivial as it sounds. Therefore we dedicate following subsection to it. 
+
+\subsubsection{Formal solution for opacity/emissivity perturbation}
+
+The problem posed is like this: Given an infinitesimal perturbation in opacity and/or emissivity at one or more points in the atmosphere compute the perturbation of the emergent spectrum. Emergent intensity is related to run of opacity and emissivity throughout the atmosphere via radiative transfer equation:
+\begin{equation}
+ \cos\theta\,\frac{d I(\tau_{\lambda}, \lambda)}{d\tau_{\lambda}} = I(\tau_{\lambda},\lambda) - S(\tau_{\lambda},\lambda). 
+ \label{RTE2a}
+\end{equation}
+Now, after we discretize the atmosphere, we can understand the formal solution of the RTE as: 
+\begin{equation}
+ I_0 = \sum_{l'} \Lambda_{0,l'} S_{l'}.
+ \label{lambdamatrixa}
+\end{equation}
+\citet{dtibook} proposed that we write a radiative transfer equation for the perturbation $\delta I$, which would then read:
+\begin{equation}
+ \cos\theta\,\frac{d \delta I(\tau_{\lambda}, \lambda)}{d\tau_{\lambda}} = \delta I(\tau_{\lambda},\lambda) - \tilde{S}(\tau_{\lambda},\lambda). 
+ \label{RTE2a}
+\end{equation}
+where $\tilde S = \frac{\delta \eta}{\chi} - \frac{\delta \chi}{\chi} I$, where $\delta$ denotes perturbation and $\chi$, $\eta$ and $I$ are unperturbed quantities. It is easy to see that the perturbation in intensity and intensity then follow the same RTE, with the same formal solution:
+\begin{equation}
+ \delta I_0 = \sum_{l'} \Lambda_{0,l'} \tilde{S}_{l'}.
+ \label{fspert}
+\end{equation}
+\textbf{This approach gives us a way of numerically solving an analytical solution to the perturbation. However, strictly speaking, what we need is: The perturbation of the numerical solution of the RTE. Which (ultimately, I am skipping from perturbations to derivatives freely here) means:}
+\begin{equation}
+ \frac{\partial}{\partial \chi_k} \sum_{l'} \Lambda_{0,l'} S_{l'}
+ \label{num_pert}
+\end{equation}
+and 
+\begin{equation}
+ \frac{\partial}{\partial \eta_k} \sum_{l'} \Lambda_{0,l'} S_{l'}.
+ \label{pert_em}
+\end{equation}
+Perturbations in emissivity affect only the source function, therefore Eq.\,\ref{pert_em} simplifies to:
+\begin{equation}
+ \frac{\partial}{\partial \eta_k} \sum_{l'} \Lambda_{0,l'} S_{l'} = \sum_{l'} \Lambda_{0,l'} \frac{\partial S_{l'}}{\partial \eta_k} = \Lambda_{0,k}\frac{1}{\chi_k}.
+\end{equation}
+The derivative with respect to the opacity, however, is not so simple. Formally speaking, it should look like:
+\begin{equation}
+ \frac{\partial}{\partial \chi_k} \sum_{l'} \Lambda_{0,l'} S_{l'} = \sum_{l'} \left ( \frac{\partial \Lambda_{0,l'}}{\partial \chi_k} S_{l'} + \Lambda_{0,l'} \frac{-\eta_{l'}}{\chi_{l'}^2} \right ).
+\end{equation}
+But, there are number of issues:
+\begin{itemize}
+ \item $\Lambda$ operator is never explicitly computed. 
+ \item $\Lambda$ operator is non-local, therefore perturbation at $k$ will affect all the elements of $\Lambda_{0,l'}$ downwind of $k$ ($l' \le k$). Therefore, partial derivative of $\Lambda_{0,'l}$ with respect to perturbation at $k$ is going to be nonzero whenever $k$ is upwind of $l'$. 
+ \item For the schemes used today, short characteristics solution (Eq.\,\ref{SC}) uses strictly monotonous Bezier splines which introduce further complications in the whole process because it is not evident what are the contributions of upwind ($S_{l'+1}$), local ($S_{l'}$) and downwind ($S_{l'-1}$) source functions. \emph{I witnessed today, this is more awkwardness than a real problem.}
+\end{itemize}
+
+For now we will assume that we know how to compute the derivative of intensity given perturbations in emissivity and opacity and defer the writing of the discussion for a later moment. Let us just say that differences between applying Eq.\,\ref{fspert} and utilizing a ``brute force'' approach suggested by Eq.\,\ref{num_pert} is, in general small but can be noticeable. 
+ 
+\subsection{NLTE response functions}
+
+Non-local thermodynamic equilibrium (NLTE) implies that number densities of atoms and molecules are not completely determined by the local temperature but are also influenced by the radiation field. Now, if the local radiation field is Plankian, that is isotropic and equal to the local value of the Planck function, populations are still governed by the same laws as in LTE. This is, however, not the case in general as the radiation field can severely deviate from the local Planck function simply because radiative transfer is non-local process. To illustrate the non-locality, note the Eq.\,\ref{lambdamatrixa}. In general case, the whole atmosphere contributes to the intensity at the given point (in this particular case, point $l=0$). Now, this non-local radiation field influences the level populations which, in turn, influence the opacity and emissivity and ultimately the radiation field again. This coupling is well known as the NLTE problem and is well covered in modern literature \citep[probably the most thorough and well known is monograph by][]{Mihalasbook}. For the sake of the paper, we will present it on an example of line formation problem, without the presence of the continuum. Intensity is given by run of opacity and emissivity (or, if one prefers, optical depth and the source function) through the equation:
+\begin{equation}
+ I = \Lambda[S]
+\end{equation}
+where opacity and emissivity in the spectral line are given by:
+\begin{align}
+ &\chi_{\rm L}(\lambda) = \frac{hc}{4\pi\lambda} (n_j B_{ji}- n_i{B_ij}) \phi_{ij} (\lambda)\\
+ &\eta_{\rm L}(\lambda) = \frac{hc}{4\pi\lambda} n_i A_{ij} \phi_{ij} (\lambda).
+\end{align}
+Finally, populations $n_i$ ($i=1..N_{\rm levels}$) are given as the solution of the equation of statistical equilibrium:
+\begin{equation}
+ \frac{d\,n_i}{d\,t} = \sum_j n_j T_{ji} - n_i \sum_j T_{ij} = 0.
+ \label{SE}
+\end{equation}
+Here $T_{ij} = C_{ij} + R_{ij}$ where $C$ denotes collisional and $R$ radiative transitions from level $i$ to level $j$. Explicitly written $R_{ij} = A_{ij} + B_{ij} J_{ij}$. Here, $J_{ij}$ is so called scattering integral:
+\begin{equation}
+ J_{ij} = \oint \frac{\sin \theta d\theta\,d\phi}{4\pi} \int_{-\infty}^{\infty} \phi_{ij}(\lambda) I(\theta,\phi,\lambda)\,d\lambda.
+\end{equation}
+The nature of NLTE problem should be clear from the last three equations. It is routinely solved in a numerical way by a variety of techniques. Here we use accelerated lambda iteration (ALI), as formulated by \citet{RH1} \citep[for an excellent review see also][]{Hubeny03}. The detailed discussion of the numerical procedures would take us too far away from the scope of the paper but what should be clear is that, after the iterative solution of NLTE problem we are left with populations of discrete atomic levels, which, in general case, deviate (a lot) from the LTE case. It is very important to mention here that the NLTE solution is extremely demanding in terms of computing time. For example, it takes several orders of magnitude ($10^3 - 10^5$) more time then a simple formal solution (i.e. computation of the specific intensity with known values of opacity and emissivity). It is then immediately clear why numerical computation of response functions is extremely painful. Say that we want to find:
+\begin{equation}
+ \frac{\partial\vec{n}_l}{\partial q_k} = \frac{\vec{n}_l(q_k + \Delta q_k) - \vec{n}_l(q_k)}{\Delta q_k},\,\Delta q_k \rightarrow 0.
+\end{equation}
+Here $\vec{n}_l$ stands for population vector at point $l$ (i.e. populations of all the levels in question). There are three problematic aspects of this:
+\begin{enumerate}
+ \item Numerical computation of populations has to be done for the whole atmosphere (because NLTE problem is non local) for perturbation at each point $k$. This means that NLTE problem needs to be solved a lot of times to get all the numerical derivatives. \emph{This is in a way mitigated as we are not really computing numerical derivatives in each point when we do inversion, but ok.} 
+ \item To make things worse, it has been shown (Jaime, private communication) that numerical computation of NLTE response functions requires centered computation of derivatives, that is:
+ \begin{equation}
+ \frac{\partial\vec{n}_l}{\partial q_k} = \frac{\vec{n}_l(q_k + \Delta q_k/2) - \vec{n}_l(q_k - \Delta q_k /2)}{\Delta},\,\Delta q_k \rightarrow 0,
+  \end{equation}
+which means, again, twice as many NLTE solutions.
+\item Probably most fundamental problem of all is that perturbation $\Delta q_k$ needs to be small enough to avoid non-linearity (NLTE problem is, also, highly non-linear). This, in turn means that convergence of the NLTE problem must be assured which means more iterations. Needless to say that finding the optimal ``sweet spot'' for the value of $\Delta q_k$ and the number of iterations/ convergence criterion has not really been a topic of discussion is radiative transfer literature. 
+\end{enumerate}
+This means that finding analytical response functions (derivatives) $\frac{\partial \vec{n}_l}{\partial q_k}$ will result in faster, more precise and more elegant spectropolarimetric inversions. Let us stress now that although that ultimately we need the response of the emergent intensity, the essential problem is finding responses of the level populations. Well, let's begin.
+
+To find $\frac{\partial \vec{n}_l}{\partial q_k}$ we start by taking the derivative of statistical equilibrium equation (Eq.\,\ref{SE}). For depth point $l$ and level $i$ it reads:
+\begin{equation}
+ \sum_j \left ( \frac{\partial n_{l,j}}{\partial q_k} T_{ji} - \frac{\partial n_{l,i}}{\partial q_k} T_{ij} + n_{l,j} \frac{\partial T_{ji}}{\partial q_k} - n_{i,j} \frac{\partial T_{ij}}{\partial q_k} \right ) = 0.
+ \label{SEderI}
+\end{equation}
+It is important to note that the whole system is complemented with a sort of conversation equation: $\sum_j n_j = N_t$. Its derivative is:
+\begin{equation}
+ \sum_j \frac{\partial n_{l,j}}{\partial q_k} = \frac{\partial N_t}{\partial q_k}
+\end{equation}
+where right hand side can, in the first approximation be found numerically, from the equation of chemical equilibrium. This might be problematic for the species for which the number density is heavily influenced by the radiation field. This discussion we, however, defer for subsequent work. 
+
+In Eq.\,\ref{SEderI} we know the populations and transition rates. Obviously, to find the responses of the populations what we miss are the derivatives of the transition rates (now explicitly stating that the rates depend on the depth point $l$):
+\begin{equation}
+ \frac{\partial T_{l,ij}}{\partial q_k} = \frac{\partial C_{l,ij}}{\partial q_k} + \frac{\partial R_{l,ij}}{\partial q_k} = \frac{\partial C_{l,ij}}{\partial q_k} + B_{ij} \frac{\partial J_{l,ij}}{\partial q_k}.
+\end{equation}
+Rearranging and taking into account that $J_{ij} = J_{ji}$, we get:
+\begin{equation}
+ \sum_j \left ( \frac{\partial n_{l,j}}{\partial q_k} T_{ji} - \frac{\partial n_{l,i}}{\partial q_k} T_{ij} + (n_{l,j}B_{ji} - n_{l,i}B_{ij}) \frac{\partial J_{ij}}{\partial q_k} \right ) = \Gamma_{l,i},
+\end{equation}
+where we have defined $\Gamma_{l,i}$ as a ``net'' derivative of collisional transitions, that is:
+\begin{equation}
+ \Gamma_{l,i} = \sum_j (n_{l,i} \frac{\partial C_{l,ij}}{\partial q_k} - n_{l,j} \frac{\partial C_{l,ji}}{\partial q_k}).
+\end{equation}
+In first approximation, the derivatives of collisional rates are nonzero only when $l=k$ and can be easily computed numerically as the collisional rates themselves depend only on the temperature and the dependence is given through simple polynomial expressions \citep{Mihalasbook}. 
+
+Now, taking the derivative of $J_{l,ij}$ by the definition we have:
+\begin{align}
+ & \frac{\partial J_{ij}}{\partial q_k} = \frac{1}{\partial q_k} \oint \frac{d\Omega}{4\pi} \int_{-\infty}^{\infty} \phi_{l,ij}(\lambda) I_l(\Omega,\lambda)\,d\lambda \nonumber \\
+ & \oint \frac{d\Omega}{4\pi} \int_{-\infty}^{\infty} \left (\frac{\partial\phi_{l,ij}(\lambda)}{\partial q_k} I_l(\Omega,\lambda) +  \phi_{l,ij}(\lambda) \frac{\partial I_l(\Omega,\lambda)}{\partial q_k} \right)d\lambda.
+\end{align}
+Again, computing the derivative of the profile is strictly local (i.e. nonzero only when $l=k$) and relatively simple to compute \citep[see][]{dtibook}. We thus define:
+\begin{equation}
+ \Phi_{l,i} = \sum_j \left ( (n_{l,j} B_{ij} - n_{l,i} B_{ji}) \oint \frac{d\Omega}{4\pi} \int_{-\infty}^{\infty} \frac{\partial\phi_{l,ij}(\lambda)}{\partial q_k} I_l(\Omega,\lambda) d\lambda \right )
+\end{equation}
+and move this part to the r.h.s. along with $\Gamma_{l,i}$. Concerning the derivative of the intensity... (to be continued).
+
+ 
+
+\section{Tests}
+
+\subsection{Two level atom spectral line formation in homogeneous slab}
+
+\subsection{Two level atom in FALC model atmosphere}
+
+\subsection{Multilevel atom in FALC model atmosphere}
+
+\section{Conclusions}
+
+ 
+
+
+
+\bibliographystyle{aa}  % A&A bibliography style file (aa.bst)
+\bibliography{responses} % your references in file: Yourfile.bib
+
+
+\end{document}

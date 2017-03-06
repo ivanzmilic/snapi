@@ -1,0 +1,1000 @@
+ 1096  make -j4
+ 1097  make  - j4
+ 1098  make -j4
+ 1099  naje 
+ 1100  make 
+ 1101  ./master/imaster -v
+ 1102  make 
+ 1103  ./master/imaster -v
+ 1104  make 
+ 1105  ./master/imaster -v
+ 1106  make 
+ 1107  ./master/imaster -v
+ 1108  make clean
+ 1109  make -j4
+ 1110  make 
+ 1111  ./master/imaster -v
+ 1112  make 
+ 1113  ./master/imaster -v
+ 1114  make 
+ 1115  ./master/imaster -v
+ 1116  make 
+ 1117  ./master/imaster -v
+ 1118  make 
+ 1119  ./master/imaster -v
+ 1120  make 
+ 1121  make clean
+ 1122  make -j4
+ 1123  make 
+ 1124  make clean
+ 1125  make 
+ 1126  ./master/imaster -v
+ 1127  make 
+ 1128  ./master/imaster -v
+ 1129  make 
+ 1130  ./master/imaster -v
+ 1131  make 
+ 1132  ./master/imaster -v
+ 1133  make 
+ 1134  ./master/imaster -v
+ 1135  make 
+ 1136  ./master/imaster -v
+ 1137  make clean
+ 1138  ./master/imaster -v
+ 1139  make clean
+ 1140  make -j4
+ 1141  make 
+ 1142  ./master/imaster -v
+ 1143  rm *.o
+ 1144  make clean
+ 1145  make -j4
+ 1146  ./master/imaster -v
+ 1147  make clean
+ 1148  make -j4
+ 1149  ./master/imaster -v
+ 1150  make clean
+ 1151  ./master/imaster -v
+ 1152  make clean
+ 1153  make -j4
+ 1154  ./master/imaster -v
+ 1155  make 
+ 1156  ./master/imaster -v
+ 1157  make 
+ 1158  ./master/imaster -v
+ 1159  make 
+ 1160  ./master/imaster -v
+ 1161  make clean
+ 1162  make -j4
+ 1163  ./master/imaster -v
+ 1164  make 
+ 1165  ./master/imaster -v
+ 1166  make 
+ 1167  ./master/imaster -v
+ 1168  make clean
+ 1169  ./master/imaster -v
+ 1170  make clean
+ 1171  ./master/imaster -v
+ 1172  make clean
+ 1173  make -j4
+ 1174  ./master/imaster -v
+ 1175  make 
+ 1176  ./master/imaster -v
+ 1177  make clean
+ 1178  make -j4
+ 1179  ./master/imaster -v
+ 1180  ls *.txt
+ 1181  make clean
+ 1182  make -j4
+ 1183  ./master/imaster -v
+ 1184  make clean
+ 1185  make -j4
+ 1186  ./master/imaster -v
+ 1187  make clean
+ 1188  make -j4
+ 1189  ./master/imaster -v
+ 1190  make 
+ 1191  ./master/imaster -v
+ 1192  ls *.txt
+ 1193  rm *.txt
+ 1194  ./master/imaster -v
+ 1195  ls *.txt
+ 1196  cp milic_testing.txt fe_6301_old.txt
+ 1197  make 
+ 1198  ./master/imaster -v
+ 1199  ls *.txt
+ 1200  make clean
+ 1201  make -j4
+ 1202  make 
+ 1203  ./master/imaster -v
+ 1204  make clean
+ 1205  make -j4
+ 1206  ./master/imaster -v
+ 1207  make clean
+ 1208  make -j4
+ 1209  make 
+ 1210  ./master/imaster -v
+ 1211  make 
+ 1212  autoconf
+ 1213  make 
+ 1214  make distclean
+ 1215  autoconf
+ 1216  make 
+ 1217  ./configure
+ 1218  /configure --with-cfitsio=../cfitsio   --with-fftw3=../fftw3
+ 1219  ./configure --with-cfitsio=../cfitsio   --with-fftw3=../fftw3
+ 1220  make 
+ 1221  cd ..
+ 1222  ls 
+ 1223  ./configure --with-cfitsio=../cfitsio   --with-fftw3=../fft
+ 1224  cd invert
+ 1225  ./configure --with-cfitsio=../cfitsio   --with-fftw3=../fft
+ 1226  make clean
+ 1227  make -j4
+ 1228  make 
+ 1229  ./configure --with-cfitsio=../cfitsio/   --with-fftw3=../fft/
+ 1230  make 
+ 1231  make distclean
+ 1232  autoconf
+ 1233  ./configure --with-cfitsio=../cfitsio/   --with-fftw3=../fft/
+ 1234  make -j4
+ 1235  cd ../cfitsio/
+ 1236  make distclean
+ 1237  autoconf
+ 1238  cd ..
+ 1239  make distclean
+ 1240  cd invert/
+ 1241  ls 
+ 1242  cd ..
+ 1243  cd cfitsio
+ 1244  ls 
+ 1245  ./config
+ 1246  autoconf
+ 1247  ./config
+ 1248  make install
+ 1249  make 
+ 1250  install
+ 1251  ls 
+ 1252  make distclean
+ 1253  autoconf
+ 1254  clear
+ 1255  sublime Makefile.in 
+ 1256  subl Makefile.in 
+ 1257  ls 
+ 1258  sublime configure.ac
+ 1259  subl configure.ac
+ 1260  ./config --with-cfitsio=~/cfitsio/
+ 1261  autoconf
+ 1262  ./configure --with-cfitsio=~/cfitsio/
+ 1263  ./configure --with-cfitsio=~/cfitsio
+ 1264  cd ~/cfitsio/
+ 1265  ./configure
+ 1266  make 
+ 1267  make install
+ 1268  cd ~/invert
+ 1269  ls 
+ 1270  make distclean
+ 1271  autoconf
+ 1272  ./configure --with-cfitsio=~/cfitsio
+ 1273  ./configure
+ 1274  ./configure --with-cfitsio=~/cfitsio --with-fftw3=~/fft
+ 1275  ./configure --with-cfitsio=../cfitsio
+ 1276  cd cmlib/
+ 1277  ls make
+ 1278  ls Makefile
+ 1279  subl Makefile
+ 1280  ./configure --with-cfitsio=/cfitsio
+ 1281  cd ..
+ 1282  ./configure --with-cfitsio=/cfitsio
+ 1283  ./configure --with-cfitsio=home/milic/cfitsio
+ 1284  ./configure --with-cfitsio='
+ 1285  ./configure --with-cfitsio=~/cfitsio
+ 1286  ./configure --with-cfitsio= ~/cfitsio
+ 1287  ./configure --with-cfitsio=../cfitsio
+ 1288  cd master/
+ 1289  ls 
+ 1290  sublime Makefile
+ 1291  subl Makefile
+ 1292  cd ~/cfitsio/
+ 1293  pwd
+ 1294  ./configure --with-cfitsio=/home/milic/cfitsio
+ 1295  ./configure
+ 1296  make 
+ 1297  make install
+ 1298  cd ~/invert/
+ 1299  ls 
+ 1300  make distclean
+ 1301  autoconf
+ 1302  ./configure --with-ciftsio=/home/milic/cfitsio
+ 1303  ./configure --with-cfitsio=/home/milic/cfitsio/
+ 1304  make 
+ 1305  ./master/imaster -v
+ 1306  make distclean
+ 1307  autoconf
+ 1308  ./configure --with-cfitsio=/home/milic/cfitsio/
+ 1309  make -j4
+ 1310  make clean
+ 1311  make -j4
+ 1312  ./master/imaster -v
+ 1313  make clean
+ 1314  make -j4
+ 1315  ./master/imaster -v
+ 1316  make clean
+ 1317  make -j4
+ 1318  ./master/imaster -v
+ 1319  make clean
+ 1320  make -j4
+ 1321  ./master/imaster -v
+ 1322  make clean
+ 1323  make -j4\
+ 1324  make -j4
+ 1325  ./master/imaster -v
+ 1326  MAKE CLEAN
+ 1327  make clean
+ 1328  make -j4
+ 1329  ./master/imaster -v
+ 1330  make clean
+ 1331  make -j4
+ 1332  ./master/imaster -v
+ 1333  make clean
+ 1334  make -j4
+ 1335  ./master/imaster -v
+ 1336  make clean
+ 1337  ./master/imaster -v
+ 1338  make 
+ 1339  ./master/imaster -v
+ 1340  $ ls *.txt
+ 1341  ls *.txt
+ 1342  make clean
+ 1343  make -j4
+ 1344  ./master/imaster -v
+ 1345  make clean
+ 1346  make -j4
+ 1347  ./master/imaster -v
+ 1348  make 
+ 1349  ./master/imaster -v
+ 1350  make clean
+ 1351  make -j4
+ 1352  ./master/imaster -v
+ 1353  ls *.txt
+ 1354  make 
+ 1355  ./master/imaster -v
+ 1356  rm milic_testing.txt 
+ 1357  make clean
+ 1358  make -j4
+ 1359  make 
+ 1360  ./master/imaster -v
+ 1361  make clean
+ 1362  make -j4
+ 1363  ./master/imaster -v
+ 1364  make clean
+ 1365  ./master/imaster -v
+ 1366  make -j4
+ 1367  ./master/imaster -v
+ 1368  make clean
+ 1369  make -j4
+ 1370  ./master/imaster -v
+ 1371  make clean
+ 1372  ./master/imaster -v
+ 1373  make clean
+ 1374  make -j4
+ 1375  make 
+ 1376  make clean
+ 1377  make -j4
+ 1378  make 
+ 1379  ./master/imaster -v
+ 1380  make clean
+ 1381  make -j4
+ 1382  ./master/imaster -v
+ 1383  make clean
+ 1384  make -j4
+ 1385  ./master/imaster -v
+ 1386  make clean
+ 1387  make -j4
+ 1388  ./master/imaster -v
+ 1389  make clean
+ 1390  make -j4
+ 1391  ./master/imaster -v
+ 1392  make clean
+ 1393  make -j4
+ 1394  ./master/imaster -v
+ 1395  make clean
+ 1396  make -j4
+ 1397  ./master/imaster -v
+ 1398  make 
+ 1399  ./master/imaster -v
+ 1400  make 
+ 1401  ./master/imaster -v
+ 1402  cvs commit
+ 1403  clear
+ 1404  make clean
+ 1405  make -j4
+ 1406  ./master/imaster -v
+ 1407  make -j4
+ 1408  ./master/imaster -v
+ 1409  make clean
+ 1410  make -j4
+ 1411  ./master/imaster -v
+ 1412  make clean
+ 1413  make -j4
+ 1414  ./master/imaster -v
+ 1415  make 
+ 1416  ./master/imaster -v
+ 1417  make clean
+ 1418  make -j4
+ 1419  make 
+ 1420  ./master/imaster -v
+ 1421  maek 
+ 1422  make 
+ 1423  ./master/imaster -v
+ 1424  make 
+ 1425  ./master/imaster -v
+ 1426  make 
+ 1427  make make 
+ 1428  make 
+ 1429  ./master/imaster -v
+ 1430  make clean
+ 1431  make -j4
+ 1432  ./master/imaster -v
+ 1433  make clean
+ 1434  make -j4
+ 1435  ./master/imaster -v
+ 1436  make clean
+ 1437  make -j4
+ 1438  ./master/imaster -v
+ 1439  make clean
+ 1440  make -j4
+ 1441  ./master/imaster -v
+ 1442  make clean
+ 1443  make -j4
+ 1444  ./master/imaster -v
+ 1445  make clean
+ 1446  ./master/imaster -v
+ 1447  make clean
+ 1448  make -j4
+ 1449  make 
+ 1450  ./master/imaster -v
+ 1451  make clean
+ 1452  make -j4
+ 1453  ./master/imaster -v
+ 1454  make clean
+ 1455  make -j4
+ 1456  ./master/imaster -v
+ 1457  make clean
+ 1458  make -j4
+ 1459  ./master/imaster -v
+ 1460  make clean
+ 1461  make -j4
+ 1462  ./master/imaster -v
+ 1463  make clean
+ 1464  make -j4
+ 1465  ./master/imaster -v
+ 1466  make clean
+ 1467  make -j4
+ 1468  ./master/imaster -v
+ 1469  make clean
+ 1470  make 
+ 1471  make -j4
+ 1472  ./master/imaster -v
+ 1473  make 
+ 1474  ./master/imaster -v
+ 1475  make clean
+ 1476  make -j4
+ 1477  ./master/imaster -v
+ 1478  make clean
+ 1479  make -j4
+ 1480  ./master/imaster -v
+ 1481  make clean
+ 1482  make -j4
+ 1483  ./master/imaster -v
+ 1484  make clean
+ 1485  ./master/imaster -v
+ 1486  make clean
+ 1487  make -j4
+ 1488  make 
+ 1489  ./master/imaster -v
+ 1490  make clean
+ 1491  ./master/imaster -v
+ 1492  make clean
+ 1493  make -j4
+ 1494  ./master/imaster -v
+ 1495  make 
+ 1496  ./master/imaster -v
+ 1497  make 
+ 1498  ./master/imaster -v
+ 1499  make clean
+ 1500  make -j4
+ 1501  ./master/imaster -v
+ 1502  make clean
+ 1503  ./master/imaster -v
+ 1504  make clean
+ 1505  make -j4
+ 1506  ./master/imaster -v
+ 1507  make 
+ 1508  ./master/imaster -v
+ 1509  make clena
+ 1510  make clean
+ 1511  make -j4
+ 1512  ./master/imaster -v
+ 1513  make clean
+ 1514  make -j4
+ 1515  ./master/imaster -v
+ 1516  make clean
+ 1517  make -j4
+ 1518  ./master/imaster -v
+ 1519  make clean
+ 1520  make -j4
+ 1521  make clena
+ 1522  make clean
+ 1523  make -j4
+ 1524  ./master/imaster -v
+ 1525  make 
+ 1526  ./master/imaster -v
+ 1527  make 
+ 1528  ./master/imaster -v
+ 1529  make clean
+ 1530  make -j4
+ 1531  ./master/imaster -v
+ 1532  make clean
+ 1533  make -j4
+ 1534  ./master/imaster -v
+ 1535  make clean
+ 1536  make -j4
+ 1537  ./master/imaster -v
+ 1538  make clean
+ 1539  make -j4
+ 1540  make 
+ 1541  make clean
+ 1542  make -j4
+ 1543  make 
+ 1544  make clean
+ 1545  make -j4
+ 1546  make 
+ 1547  ./master/imaster -v
+ 1548  make 
+ 1549  ./master/imaster -v
+ 1550  make clean
+ 1551  make -j4
+ 1552  make 
+ 1553  ./master/imaster -v
+ 1554  make clean
+ 1555  make -j4
+ 1556  ./master/imaster -v
+ 1557  make clean
+ 1558  ./master/imaster -v
+ 1559  make clean
+ 1560  make -j4
+ 1561  ./master/imaster -v
+ 1562  make clean
+ 1563  make -j4
+ 1564  clean
+ 1565  make 
+ 1566  make clean
+ 1567  make -j4
+ 1568  ./master/imaster -v
+ 1569  make clean
+ 1570  make -j4
+ 1571  make clean
+ 1572  make -j4
+ 1573  ./master/imaster -v
+ 1574  make clean
+ 1575  make -j4
+ 1576  make 
+ 1577  ./master/imaster -v
+ 1578  make 
+ 1579  ./master/imaster -v
+ 1580  make clean
+ 1581  make -j4
+ 1582  make 
+ 1583  ./master/imaster -v
+ 1584  make 
+ 1585  ./master/imaster -v
+ 1586  make 
+ 1587  ./master/imaster -v
+ 1588  make clean
+ 1589  make -j4
+ 1590  make clean
+ 1591  make -j4
+ 1592  ./master/imaster -v
+ 1593  make clean
+ 1594  make -j4 
+ 1595  ./master/imaster -v
+ 1596  make clean
+ 1597  ./master/imaster -v
+ 1598  make clean
+ 1599  make -j4
+ 1600  ./master/imaster -v
+ 1601  make clean
+ 1602  ./master/imaster -v
+ 1603  make clean
+ 1604  make -j4
+ 1605  ./master/imaster -v
+ 1606  make clean
+ 1607  make -j4
+ 1608  ./master/imaster -v
+ 1609  make clean
+ 1610  ./master/imaster -v
+ 1611  make clean
+ 1612  make -j4
+ 1613  ./master/imaster -v
+ 1614  make clean
+ 1615  make -j4
+ 1616  ./master/imaster -v
+ 1617  make clean
+ 1618  ./master/imaster -v
+ 1619  make clean
+ 1620  make -j4
+ 1621  ./master/imaster -v
+ 1622  make clean
+ 1623  make -j4
+ 1624  ./master/imaster -v
+ 1625  make clean
+ 1626  ./master/imaster -v
+ 1627  make -j4
+ 1628  ./master/imaster -v
+ 1629  make 
+ 1630  ./master/imaster -v
+ 1631  make 
+ 1632  ./master/imaster -v
+ 1633  make 
+ 1634  ./master/imaster -v
+ 1635  make 
+ 1636  ./master/imaster -v
+ 1637  make 
+ 1638  ./master/imaster -v
+ 1639  cvs commit
+ 1640  make 
+ 1641  ./master/imaster -v
+ 1642  make 
+ 1643  ./master/imaster -v
+ 1644  make clean
+ 1645  make -j4
+ 1646  make clean
+ 1647  make -j4
+ 1648  make 
+ 1649  make clean
+ 1650  make -j4
+ 1651  ./master/imaster -v
+ 1652  make 
+ 1653  ./master/imaster -v
+ 1654  make clean
+ 1655  ./master/imaster -v
+ 1656  ls *.txt
+ 1657  make clean
+ 1658  make -j4
+ 1659  make 
+ 1660  make clean
+ 1661  make -j4
+ 1662  make 
+ 1663  ./master/imaster -v
+ 1664  ls *.txt
+ 1665  make 
+ 1666  ./master/imaster -v
+ 1667  make 
+ 1668  ./master/imaster -v
+ 1669  make clean
+ 1670  make -j4
+ 1671  ./master/imaster -v
+ 1672  make 
+ 1673  ./master/imaster -v
+ 1674  make 
+ 1675  ./master/imaster -v
+ 1676  make 
+ 1677  ./master/imaster -v
+ 1678  make 
+ 1679  ./master/imaster -v
+ 1680  make 
+ 1681  ./master/imaster -v
+ 1682  make 
+ 1683  ./master/imaster -v
+ 1684  make clean
+ 1685  ./master/imaster -v
+ 1686  make -j4
+ 1687  ./master/imaster -v
+ 1688  make 
+ 1689  ./master/imaster -v
+ 1690  make 
+ 1691  ./master/imaster -v
+ 1692  make 
+ 1693  ./master/imaster -v
+ 1694  make 
+ 1695  ./master/imaster -v
+ 1696  make 
+ 1697  ./master/imaster -v
+ 1698  make clean
+ 1699  make -j4
+ 1700  ./master/imaster -v
+ 1701  make clean
+ 1702  make -j4
+ 1703  ./master/imaster -v
+ 1704  make -j4
+ 1705  ./master/imaster -v
+ 1706  clear
+ 1707  make clean
+ 1708  make -j4
+ 1709  make 
+ 1710  ./master/imaster -v
+ 1711  make clean
+ 1712  make -j4
+ 1713  make clean
+ 1714  make -j4
+ 1715  make 
+ 1716  ./master/imaster -v
+ 1717  make 
+ 1718  ./master/imaster -v
+ 1719  make clean
+ 1720  make -j4
+ 1721  ./master/imaster -v
+ 1722  make clean
+ 1723  make -j4
+ 1724  ./master/imaster -v
+ 1725  make 
+ 1726  ./master/imaster -v
+ 1727  make clean
+ 1728  make -j4
+ 1729  ./master/imaster -v
+ 1730  make 
+ 1731  ./master/imaster -v
+ 1732  make clean
+ 1733  make -j4
+ 1734  make 
+ 1735  make clean
+ 1736  make -j4
+ 1737  make clean
+ 1738  make -j4
+ 1739  ./master/imaster -v
+ 1740  make clean
+ 1741  make -j4
+ 1742  make clean
+ 1743  make -j4
+ 1744  make 
+ 1745  ./master/imaster -v
+ 1746  make 
+ 1747  ./master/imaster -v
+ 1748  make clean
+ 1749  make 
+ 1750  make clean
+ 1751  make -j4
+ 1752  ./master/imaster -v
+ 1753  make 
+ 1754  ./master/imaster -v
+ 1755  clear
+ 1756  sudo apt-get install texlive-full
+ 1757  su milic_ad 
+ 1758  top
+ 1759  ls 
+ 1760  clear
+ 1761  subl Entrier
+ 1762  subl Entries
+ 1763  subl Repository 
+ 1764  ls 
+ 1765  subl Root
+ 1766  cd ..
+ 1767  ls 
+ 1768  cd ..
+ 1769  ls 
+ 1770  cd ..
+ 1771  ls 
+ 1772  cd etc/hos
+ 1773  cd etc
+ 1774  subl hosts
+ 1775  clear
+ 1776  ls 
+ 1777  cd\
+ 1778  cd/
+ 1779  ls 
+ 1780  cd ..
+ 1781  ls 
+ 1782  cd home/
+ 1783  ls 
+ 1784  cd milic
+ 1785  ls 
+ 1786  cd invert/
+ 1787  ls 
+ 1788  cd atmos
+ 1789  ls 
+ 1790  cd CVS
+ 1791  ls 
+ 1792  cd Root
+ 1793  subl Root
+ 1794  ls 
+ 1795  cd ..
+ 1796  ls 
+ 1797  cd plpar
+ 1798  ls 
+ 1799  subl CVS/Root
+ 1800  cd ..
+ 1801  ls 
+ 1802  cd atmol
+ 1803  ls 
+ 1804  cd CVS
+ 1805  subl Root 
+ 1806  ls 
+ 1807  subl Root 
+ 1808  ls 
+ 1809  cd ..
+ 1810  ls 
+ 1811  cd atom/
+ 1812  subl CVS/Root
+ 1813  cd ..
+ 1814  subl mol/CVS/Root
+ 1815  cd ..
+ 1816  ls 
+ 1817  cvs comit 
+ 1818  cvs commit
+ 1819  cd jstat/
+ 1820  subl CVS/Root
+ 1821  cvs commit
+ 1822  cd ..
+ 1823  cvs commit
+ 1824  ls 
+ 1825  idl
+ 1826  cd ..
+ 1827  cd Downloads/
+ 1828  ls 
+ 1829  subl sps_abem.f90 
+ 1830  cd ..
+ 1831  cd invert/
+ 1832  ls 
+ 1833  cd cmlib/
+ 1834  ls 
+ 1835  subl profiles.cc
+ 1836  cd ..
+ 1837  idl
+ 1838  ls 
+ 1839  cd idl_pieces_by_milic/
+ 1840  ls 
+ 1841  subl milic_plots
+ 1842  subl milic_plots.pro 
+ 1843  idl
+ 1844  su milic_ad 
+ 1845  cd Downloads/
+ 1846  ls 
+ 1847  cd libspectre-0.2.7/
+ 1848  ./configure
+ 1849  su milic_ad 
+ 1850  ./configure
+ 1851  sudo apt-get update
+ 1852  cd ..
+ 1853  ls *.deb
+ 1854  su milic_ad
+ 1855  su milic_ad 
+ 1856  cd Dropbox/Codes/Spherical_generic/
+ 1857  ls 
+ 1858  make 
+ 1859  subl main.cpp opac_con_4000_lte3000_25.dat 
+ 1860  subl test.dat 
+ 1861  make 
+ 1862  ./runme 
+ 1863  sublime atmos.
+ 1864  subl atmos.cpp
+ 1865  su milic_ad 
+ 1866  $ ls 
+ 1867  cd Dropbox/Codes/Spherical_generic/
+ 1868  ls 
+ 1869  idl
+ 1870  cd Drob
+ 1871  cd Dropbox/
+ 1872  cd Codes/Spherical_generic/
+ 1873  ls 
+ 1874  subl opac_con_4000_lte3000_25.dat 
+ 1875  subl model_test.dat 
+ 1876  cd Dropbox/Codes/Spherical_generic/
+ 1877  ls 
+ 1878  make 
+ 1879  ./runme 
+ 1880  make 
+ 1881  ./runme 
+ 1882  ls *.txt
+ 1883  ls *.dat
+ 1884  subl test.dat
+ 1885  make 
+ 1886  ./runme 
+ 1887  ls *.dat
+ 1888  ls *.txt
+ 1889  make 
+ 1890  ./runme 
+ 1891  ls *.txt
+ 1892  make 
+ 1893  ./runme 
+ 1894  make 
+ 1895  ./runme 
+ 1896  make 
+ 1897  ./runme 
+ 1898  cd invert/idl_pieces_by_milic/
+ 1899  ls 
+ 1900  clear
+ 1901  idl
+ 1902  cd cfg
+ 1903  cd invert/cfg/
+ 1904  ls 
+ 1905  clear
+ 1906  ls 
+ 1907  cd ..
+ 1908  ls 
+ 1909  cd cfg/
+ 1910  ./../jsub/jsub -invert.cfg
+ 1911  ./../jsub/jsub -v -invert.cfg
+ 1912  ./../jsub/jsub -o -invert.cfg
+ 1913  ./../jsub/jsub invert.cfg
+ 1914  history
+ 1915  history ~/noob.txt
+ 1916  history > ~/noob.txt
+ 1917  gedit ~/noob.txt 
+ 1918  ./../jsub/jsub -i invert.cfg
+ 1919  ls 
+ 1920  ./../jsub/jsub -i invert.cfg
+ 1921  ls 
+ 1922  cd ..
+ 1923  cd jsub/
+ 1924  ;s 
+ 1925  ls 
+ 1926  ./jsub ../cfg/invert.cfg
+ 1927  cd ..
+ 1928  cd cfg
+ 1929  ls 
+ 1930  ./../jsub/jsub 
+ 1931  ./../jsub/jsub -v invert.cfg
+ 1932  ./../jsub/jsub -m invert.cfg
+ 1933  cd ..
+ 1934  cd jsub/
+ 1935  ls 
+ 1936  sublime jsub.cc
+ 1937  subl jsub.cc
+ 1938  ./../jsub/jsub --help
+ 1939  ./../jsub/jsub -cfg invert.cfg
+ 1940  cd ..
+ 1941  cd cfg
+ 1942  ./../jsub/jsub -cfg invert.cfg
+ 1943  subl hydrogen*.cfg
+ 1944  cp hydrogen_3lvl.cfg hydrogen_5lvl.cfg
+ 1945  subl invert.cfg 
+ 1946  subl atoms.cfg 
+ 1947  ./../jsub/jsub -cfg invert.cfg
+ 1948  clear
+ 1949  sudo reboot now 
+ 1950  reboot now 
+ 1951  cd invert/atmos/atmol/atom/
+ 1952  ls 
+ 1953  subl
+ 1954  history
+ 1955  dropbox start
+ 1956  ~/.dropbox-dist/dropboxd
+ 1957  ~/.dropbox-dist/dropboxd &
+ 1958  cd ..
+ 1959  ls 
+ 1960  cd cmlib/
+ 1961  ls 
+ 1962  sublime mathtools.h mathtools.cc
+ 1963  subl mathtools.h mathtools.cc
+ 1964  subl const.h 
+ 1965  cd ~/
+ 1966  ls 
+ 1967  cd Downloads/
+ 1968  ls 
+ 1969  cd ..
+ 1970  ls 
+ 1971  cd cfitsio/
+ 1972  ls 
+ 1973  cd include
+ 1974  ls 
+ 1975  cd ..
+ 1976  pwd
+ 1977  cd ../invert/
+ 1978  ls 
+ 1979  cd atmos/
+ 1980  ls 
+ 1981  subl atmos.h
+ 1982  cd atmol/
+ 1983  cd ../../grid/
+ 1984  subl grid.h
+ 1985  cd ..
+ 1986  cd atmos/
+ 1987  ls 
+ 1988  cd atmol/
+ 1989  ls *.h
+ 1990  ls ../*.h
+ 1991  cd ~/Downloads/
+ 1992  ls 
+ 1993  sudo dpkg -i libspectre1-dbg_0.2.6-1build1_amd64.deb 
+ 1994  su milic_ad 
+ 1995  ls
+ 1996  ls 
+ 1997  su milic_ad 
+ 1998  cd invert/idl_pieces_by_milic/
+ 1999  idl
+ 2000  cd ../
+ 2001  make clean
+ 2002  make -j4
+ 2003  ./master/imaster -v
+ 2004  make 
+ 2005  ./master/imaster -v
+ 2006  make clean
+ 2007  make -j4
+ 2008  ./master/imaster -v
+ 2009  make clean
+ 2010  make -j4
+ 2011  make clean
+ 2012  make -j4
+ 2013  make clean
+ 2014  make -j4
+ 2015  make 
+ 2016  make clean
+ 2017  make -j4
+ 2018  make clean
+ 2019  make -j4
+ 2020  make clean
+ 2021  make -j4
+ 2022  ./master/imaster 0v
+ 2023  ./master/imaster -v
+ 2024  make clean
+ 2025  make -j4
+ 2026  ./master/imaster -v
+ 2027  make clean
+ 2028  make -j4
+ 2029  make 
+ 2030  ./master/imaster -v
+ 2031  make clean
+ 2032  make -j4
+ 2033  make clean
+ 2034  make -j4
+ 2035  ./master/imaster -v
+ 2036  make clean
+ 2037  make -j4
+ 2038  ./master/imaster -v
+ 2039  make clean
+ 2040  make -j4
+ 2041  ./master/imaster -v
+ 2042  make clean
+ 2043  make -j4
+ 2044  ./master/imaster -v
+ 2045  make -j4
+ 2046  ./master/imaster -v
+ 2047  make clean
+ 2048  make -j4
+ 2049  ./master/imaster -v
+ 2050  make clean
+ 2051  make -j4
+ 2052  make clean
+ 2053  make -j4
+ 2054  ./master/imaster -v
+ 2055  make clean
+ 2056  make -j4
+ 2057  ./master/imaster -v
+ 2058  clear
+ 2059  cvs commit
+ 2060  clear
+ 2061  make clean
+ 2062  make -j4
+ 2063  ./master/imaster -v
+ 2064  make clean
+ 2065  make -j4
+ 2066  make clean
+ 2067  make -j4
+ 2068  make clean
+ 2069  make -j4
+ 2070  ./master/imaster -v
+ 2071  make clean
+ 2072  make -j4
+ 2073  ./master/imaster -v
+ 2074  make clean
+ 2075  make -j4
+ 2076  ./master/imaster -v
+ 2077  make clean
+ 2078  make -j4
+ 2079  make clean
+ 2080  make -j4
+ 2081  ./master/imaster -v
+ 2082  make clean
+ 2083  make -j4
+ 2084  ./master/imaster -v
+ 2085  make clean
+ 2086  make -j4
+ 2087  make 
+ 2088  ./master/imaster -v
+ 2089  make distclean
+ 2090  autoconf
+ 2091  ./configure
+ 2092  ./configure --with-cfitsio=../cfitsio
+ 2093  make 
+ 2094  make -j4
+ 2095  history > history.log

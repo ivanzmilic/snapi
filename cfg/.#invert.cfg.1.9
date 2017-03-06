@@ -1,0 +1,32 @@
+atmos{
+  ID=Simple Atmosphere
+  TYPE=SPINOR
+  FILE=falc.dat
+  GEOMETRY=PLANEPARALLEL
+  RTSOLVER=Bezier
+#  ID=MuRAM snapshot
+#  TYPE=MuRAM
+#  FILE=000000
+#  GEOMETRY=CARTESIAN3D
+#  NX=288
+#  NY=192
+#  NZ=288
+#  DX=20E3
+#  DY=12E3
+#  DZ=20E3
+  
+  ATOM=atoms.cfg
+#  ATOM=hydrogen.cfg
+#  MOL=mol_part.cfg
+  MOL=mol.cfg
+}
+
+obs{
+  ID=Obs 1
+  EL=0.0
+  AZ=0.0
+  LAMBDA=6536.0-6642.0
+  DLAMBDA=0.02
+  NAME=h_alpha.dat
+}
+

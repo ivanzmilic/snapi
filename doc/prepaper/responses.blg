@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: responses.aux
+The style file: aa.bst
+Database file #1: responses.bib
+Warning--empty publisher in dtibook
+Warning--empty publisher in Mihalasbook
+Warning--empty publisher in nr02
+You've used 7 entries,
+            2947 wiz_defined-function locations,
+            694 strings with 5909 characters,
+and the built_in function-call counts, 2737 in all, are:
+= -- 221
+> -- 149
+< -- 7
++ -- 49
+- -- 42
+* -- 198
+:= -- 501
+add.period$ -- 7
+call.type$ -- 7
+change.case$ -- 41
+chr.to.int$ -- 7
+cite$ -- 10
+duplicate$ -- 132
+empty$ -- 207
+format.name$ -- 64
+if$ -- 545
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 6
+newline$ -- 25
+num.names$ -- 29
+pop$ -- 52
+preamble$ -- 1
+purify$ -- 41
+quote$ -- 0
+skip$ -- 123
+stack$ -- 0
+substring$ -- 111
+swap$ -- 6
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 54
+warning$ -- 3
+while$ -- 26
+width$ -- 0
+write$ -- 70
+(There were 3 warnings)
