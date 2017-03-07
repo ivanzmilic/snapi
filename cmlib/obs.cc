@@ -67,6 +67,10 @@ fp_t * observable::get_lambda(){
   return lambda_copy;
 }
 
+int observable::get_n_lambda(){
+  return nlambda;
+}
+
 void observable::write(const char *name,io_class &io)
 {
   if(FILE *f=fopen(name,"w")){

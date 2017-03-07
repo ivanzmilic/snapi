@@ -524,9 +524,15 @@ It was four months. We published a paper, made Zeeman responses and started tryi
 
 - Implement our new derivative wherever is needed. 
 - In the atom::add_response_contribution - DONE. Works as a charm, saves a lot of time! 
-- In the atom::boundbound_op/em_pert - DONE. But it does not work really well. 
+- In the atom::boundbound_op/em_pert - DONE. But it does not work really well. - FIXED, something was not allocated to zero. 
 - Fix compute_lte_responses (this can be done by brute force) - NOT DONE 
 - Implement level population responses to macrosopic velocity - DONE BUT AGAIN DOES NOT WORK
-- Eat Lunch :)
+
+06-07/03/2017:
+
+- Tried fitting real data - does not work really. 
+- Fitting very sensitive to the choice of wavelength samplling in the data. For example 50mA much slower than 25mA. 
+- Comparisons can be seen in invert/tests/Na_fitting/....
+- 
 
 

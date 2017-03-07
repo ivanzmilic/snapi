@@ -183,7 +183,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   // This is a starting model
   int N_temp_nodes = 4;
-  int N_vt_nodes = 1;
+  int N_vt_nodes = 2;
   int N_vs_nodes = 1;
   int N_B_nodes = 1;
   int N_theta_nodes = 1;
@@ -212,16 +212,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
   fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
   vt_nodes_tau[1] = -5.5;
-  //vt_nodes_tau[2] = 0.5;
+  vt_nodes_tau[2] = 0.5;
   vt_nodes_vt[1] = 1.0E5;
-  //vt_nodes_vt[2] = 0.5E5;
+  vt_nodes_vt[2] = 0.5E5;
   current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
   
   // Vs nodes:
   fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
   fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-  vs_nodes_tau[1] = 0.0;
-  vs_nodes_vs[1] = -0.0E5;
+  vs_nodes_tau[1] = -5.5;
+  //vs_nodes_tau[2] = 0.5;
+  vs_nodes_vs[1] = 1.0E5;
+  //vs_nodes_vs[2] = 0.5E5;
   current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
   
   // B nodes:
@@ -249,8 +251,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 15;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 4.0; ws[3] = 4.0;
+  int MAX_ITER = 1;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.1; ws[3] = 4.0;
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
@@ -274,7 +276,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    observable *current_obs = obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
        
     fp_t ** S = current_obs->get_S();
@@ -283,7 +285,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / 1E22;
+      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / 1E25;
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
     
@@ -894,7 +896,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * local_perturbations = new fp_t [x3h-x3l+1] - x3l;
     
     atmos_model->perturb_node_value(i, step * 0.5);
-    build_from_nodes(atmos_model); // <------- Can be done better but cannot be bothered now. FIX! 
+    interpolate_from_nodes(atmos_model); // <------- Can be done better but cannot be bothered now. FIX! 
 
     for (int x3i=x3l;x3i<=x3h;++x3i){
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
@@ -906,7 +908,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }
     
     atmos_model->perturb_node_value(i, -1.0 * step);
-    build_from_nodes(atmos_model);
+    interpolate_from_nodes(atmos_model);
 
     for (int x3i=x3l;x3i<=x3h;++x3i){
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
@@ -920,7 +922,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }
 
     atmos_model->perturb_node_value(i, 0.5 * step);
-    build_from_nodes(atmos_model);
+    interpolate_from_nodes(atmos_model);
   
     // Now you need everything together:
     int param = 0; // Which parameter are we accounting for? 

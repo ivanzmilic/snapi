@@ -245,3 +245,91 @@ int atmos_pp::build_from_nodes(model * atmos_model){
 
   return 0;
 }
+
+int atmos_pp::interpolate_from_nodes(model * atmos_model){
+  
+  // This is a working version which modifies the atmosphere with respect to given 'model'
+
+  io.msg(IOL_INFO, "atmos_pp::interpolating from nodes \n");
+  
+  // First you need to make a grid in tau. This is like this by default
+  int N_depths = x3h-x3l+1;
+  fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
+  // Uniform in log_tau from -6 to 1.5 in tau500
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    logtau[x3i] = -5.0 + 5.5 / (x3h-x3l) * (x3i-x3l);
+
+  for (int x1i=x1l;x1i<=x1h;++x1i)
+    for (int x2i=x2l;x2i<=x2h;++x2i)
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        tau_referent[x1i][x2i][x3i] = -pow(10.0,logtau[x3i]);
+
+  // Then we need to interpolate all the quantities to this tau grid:
+
+  // Temperature:
+  int N_nodes_temp = atmos_model->get_N_nodes_temp();
+  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
+  fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
+  atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h);
+
+  // Microturbulent velocity:
+  int N_nodes_vt = atmos_model->get_N_nodes_vt();
+  fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
+  fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
+  atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h);
+  
+  // Systematic velocity: 
+  int N_nodes_vs = atmos_model->get_N_nodes_vs();
+  fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
+  fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
+  atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h);
+
+  // Magnetic field:
+  fp_t * B = new fp_t[x3h-x3l] - x3l;
+  fp_t * theta = new fp_t[x3h-x3l] - x3l;
+  fp_t * phi = new fp_t[x3h-x3l] - x3l;
+
+  int N_nodes_B = atmos_model->get_N_nodes_B();
+  fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
+  fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
+  int N_nodes_theta = atmos_model->get_N_nodes_theta();
+  fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
+  fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
+  int N_nodes_phi = atmos_model->get_N_nodes_phi();
+  fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
+  fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();
+  
+  atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h);
+  atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h);
+  atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h);
+
+  if (N_nodes_B && N_nodes_theta && N_nodes_phi){
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
+      By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
+      Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
+      //printf("%d %e %e %e \n", x3i, Bx[x1l][x2l][x3i], By[x1l][x2l][x3i], Bz[x1l][x2l][x3i]);
+    }
+  }
+
+  // We do not need the nodes any more.
+  delete[](temp_nodes_tau+1);
+  delete[](temp_nodes_temp+1);
+  delete[](vt_nodes_tau+1);
+  delete[](vt_nodes_vt+1);
+  delete[](vs_nodes_tau+1);
+  delete[](vs_nodes_vs+1);
+  delete[](B_nodes_tau+1);
+  delete[](B_nodes_B+1);
+  delete[](theta_nodes_tau+1);
+  delete[](theta_nodes_theta+1);
+  delete[](phi_nodes_tau+1);
+  delete[](phi_nodes_phi+1);
+  delete[](B+x3l);
+  delete[](theta+x3l);
+  delete[](phi+x3l);
+  delete[](logtau+x3l);
+
+  return 0;
+}
+

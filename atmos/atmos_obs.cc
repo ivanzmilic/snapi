@@ -483,6 +483,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
         
     fp_t ******* op_pert = opacity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
     fp_t ******  em_pert = emissivity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
+    //fp_t ******* op_pert = ft7dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+    //fp_t ****** em_pert = ft6dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
     //printf("Hahahahahah!\n");
     
