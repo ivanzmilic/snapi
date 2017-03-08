@@ -69,6 +69,12 @@ public:
   // perturbations of vector quantities:
   virtual fp_t ******* opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
   virtual fp_t ******  emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
+  // Then the synth versions:
+  virtual fp_t **** opacity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){return 0;};
+  virtual fp_t ***  emissivity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){return 0;};
+  //virtual fp_t ***** opacity_vector_pert_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){return 0;};
+  //virtual fp_t ****  emissivity_vector_pert_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){return 0;};
+  
 // compute populations
   virtual void popsetup(int32_t,int32_t,int32_t,int32_t,int32_t,int32_t){};
   virtual void popclean(int32_t,int32_t,int32_t,int32_t,int32_t,int32_t){};

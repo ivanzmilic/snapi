@@ -455,6 +455,18 @@ fp_t **** h_minus_mol::emissivity_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t 
   return em;
 }
 
+fp_t *** h_minus_mol::emissivity_vector_synth(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,
+  fp_t* lambda, fp_t nlambda){
+
+  fp_t *** em_vector = ft3dim(1,nlambda,x3l,x3h,1,4);
+  fp_t lambda_m = (lambda[1] + lambda[nlambda]) * 0.5;
+
+  fp_t **** em_vector_mean = emissivity_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda_m);
+
+  
+
+}
+
 fp_t ***** h_minus_mol::opacity_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,fp_t lambda){
 
   fp_t ***** op;

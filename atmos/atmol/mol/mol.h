@@ -104,6 +104,9 @@ public:
   virtual fp_t ****emissivity_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t *******opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ******emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+
+  virtual fp_t **** opacity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int);
+  virtual fp_t ***  emissivity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int);
   
   // And specific kinds of opacity and emissivity:
   virtual fp_t ***freefree_op(fp_t***,fp_t***,fp_t***,fp_t);
