@@ -15,6 +15,7 @@ public:
   void write(const char*,io_class&);
   fp_t ** get_S();
   fp_t * get_lambda();
+  int get_n_lambda();
 };
 
 #endif          // __OBS_H__
