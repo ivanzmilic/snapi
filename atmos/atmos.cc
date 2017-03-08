@@ -336,4 +336,8 @@ fp_t atmosphere::get_vt(int x1i, int x2i, int x3i){
 int atmosphere::build_from_nodes(model *){
   return 0;
 }
+
+int atmosphere::interpolate_from_nodes(model *){
+  return 0;
+}
   
