@@ -23,7 +23,7 @@ CC	      = $(COMPILER)
 CCFLAGS	      = $(COMPFLAGS) $(INCLUDE)
 
 OBJS          = atmos.o atmos_pop.o atmos_rad.o atmos_chm.o atmos_rts.o\
-		atmos_obs.o atmos_fio.o acfg.o atmos_responses.o atmos_model.o atmos_fit.o atmos_obs_tau.o
+		atmos_obs.o atmos_fio.o acfg.o atmos_responses.o atmos_model.o atmos_fit.o atmos_obs_tau.o atmos_rad_synthesis.o
 SUBDIRS       = atmol
 LIB_LIBS      = atmol/libatmol.a
                 

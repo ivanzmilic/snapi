@@ -152,7 +152,6 @@ protected:
   
   fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
   fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
-
 //
   // Overloaded versions of b-b functions, which also take magnetic field. 
   // Oringally they took the concentration of the collisional partner but we have dumped them. 
@@ -176,7 +175,9 @@ protected:
   fp_t bb_em_derivative_to_level(int x1i, int x2i, int x3i, int i, fp_t lambda);
   fp_t * bb_op_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
   fp_t * bb_em_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
-                          // |
+
+// ==============================================================================================================================
+
 // ---------------------------------------------------------------------------------------------- |
 //
 // -----------------------------------------------------------------------------------------------|
@@ -293,7 +294,7 @@ public:
   // Then the perturbations:
   virtual fp_t *******opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ******emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-  
+ 
   // The only relevant ones for the vector case are b-b opacity and emissivity:
   fp_t ****boundbound_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t ****, fp_t);
   fp_t *****boundbound_op_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t ****, fp_t);

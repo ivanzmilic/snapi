@@ -455,21 +455,6 @@ fp_t **** h_minus_mol::emissivity_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t 
   return em;
 }
 
-fp_t ***  h_minus_mol::emissivity_vector_synth(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta, fp_t phi,
-  fp_t* lambda,int nlambda){
-
-  fp_t *** em = ft3dim(1,nlambda,x3l,x3h,1,4);
-  memset(em[1][x3l]+1,0,nlambda*(x3h-x3l+1)*4*sizeof(fp_t));
-
-  fp_t lambda_mean = (lambda[nlambda] + lambda[1]) * 0.5;
-  fp_t *** em_mean = emissivity(T,Ne,Vlos,Vt,B,theta,phi,lambda_mean);
-  for (int l=1;l<=nlambda;++l)
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      em[l][x3i][1] = em_mean[x1l][x2l][x3i];
-  del_ft3dim(em_mean,x1l,x1h,x2l,x2h,x3l,x3h);
-  return em;
-}
-
 fp_t ***** h_minus_mol::opacity_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,fp_t lambda){
 
   fp_t ***** op;
@@ -484,22 +469,6 @@ fp_t ***** h_minus_mol::opacity_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t **
 
   del_ft3dim(op_scalar,x1l,x1h,x2l,x2h,x3l,x3h);
 
-  return op;
-}
-
-fp_t ****  h_minus_mol::opacity_vector_synth(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta, fp_t phi,
-  fp_t* lambda,int nlambda){
-
-  fp_t **** op = ft4dim(1,nlambda,x3l,x3h,1,4,1,4);
-  memset(op[1][x3l][1]+1,0,nlambda*(x3h-x3l+1)*16*sizeof(fp_t));
-
-  fp_t lambda_mean = (lambda[nlambda] + lambda[1]) * 0.5;
-  fp_t *** op_mean = opacity(T,Ne,Vlos,Vt,B,theta,phi,lambda_mean);
-  for (int l=1;l<=nlambda;++l)
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      for (int s=1;s<=4;++s)
-        op[l][x3i][s][s] = op_mean[x1l][x2l][x3i];
-  del_ft3dim(op_mean,x1l,x1h,x2l,x2h,x3l,x3h);
   return op;
 }
 

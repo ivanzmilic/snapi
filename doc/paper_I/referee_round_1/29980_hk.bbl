@@ -1,0 +1,77 @@
+\begin{thebibliography}{19}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Beck} {et~al.}(2015){Beck}, {Choudhary}, {Rezaei}, \&
+  {Louis}}]{Beck_inversion_2015}
+{Beck}, C., {Choudhary}, D.~P., {Rezaei}, R., \& {Louis}, R.~E. 2015, \apj,
+  798, 100
+
+\bibitem[{{Beckers} \& {Milkey}(1975)}]{Beckers75}
+{Beckers}, J.~M. \& {Milkey}, R.~W. 1975, \solphys, 43, 289
+
+\bibitem[{{de la Cruz Rodr{\'{\i}}guez} \& {Piskunov}(2013)}]{JaimeBezier}
+{de la Cruz Rodr{\'{\i}}guez}, J. \& {Piskunov}, N. 2013, \apj, 764, 33
+
+\bibitem[{{del Toro Iniesta}(2003)}]{dtibook}
+{del Toro Iniesta}, J.~C. 2003, {Introduction to Spectropolarimetry}
+
+\bibitem[{{Fontenla} {et~al.}(1993){Fontenla}, {Avrett}, \& {Loeser}}]{FALC}
+{Fontenla}, J.~M., {Avrett}, E.~H., \& {Loeser}, R. 1993, \apj, 406, 319
+
+\bibitem[{{Hubeny}(2003)}]{Hubeny03}
+{Hubeny}, I. 2003, in Astronomical Society of the Pacific Conference Series,
+  Vol. 288, Stellar Atmosphere Modeling, ed. I.~{Hubeny}, D.~{Mihalas}, \&
+  K.~{Werner}, 17
+
+\bibitem[{{Hubeny} \& {Mihalas}(2014)}]{SAbook2014}
+{Hubeny}, I. \& {Mihalas}, D. 2014, {Theory of Stellar Atmospheres}
+
+\bibitem[{{Landi Degl'Innocenti} \& {Landi Degl'Innocenti}(1977)}]{Landi77}
+{Landi Degl'Innocenti}, E. \& {Landi Degl'Innocenti}, M. 1977, \aap, 56, 111
+
+\bibitem[{{Landi Degl'Innocenti} \& {Landolfi}(2004)}]{LL04}
+{Landi Degl'Innocenti}, E. \& {Landolfi}, M., eds. 2004, Astrophysics and Space
+  Science Library, Vol. 307, {Polarization in Spectral Lines}
+
+\bibitem[{{Mein}(1971)}]{Mein71}
+{Mein}, P. 1971, \solphys, 20, 3
+
+\bibitem[{{Mihalas}(1978)}]{Mihalasbook}
+{Mihalas}, D. 1978, {Stellar atmospheres /2nd edition/}
+
+\bibitem[{{Quintero Noda} {et~al.}(2016){Quintero Noda}, {Shimizu}, {de la Cruz
+  Rodr{\'{\i}}guez}, {Katsukawa}, {Ichimoto}, {Anan}, \&
+  {Suematsu}}]{Ca_diag_Jaime}
+{Quintero Noda}, C., {Shimizu}, T., {de la Cruz Rodr{\'{\i}}guez}, J., {et~al.}
+  2016, \mnras
+
+\bibitem[{{Ruiz Cobo} \& {del Toro Iniesta}(1992)}]{SIR}
+{Ruiz Cobo}, B. \& {del Toro Iniesta}, J.~C. 1992, \apj, 398, 375
+
+\bibitem[{{Ruiz Cobo} \& {del Toro Iniesta}(1994)}]{RFs94}
+{Ruiz Cobo}, B. \& {del Toro Iniesta}, J.~C. 1994, \aap, 283, 129
+
+\bibitem[{{Rybicki} \& {Hummer}(1991)}]{RH1}
+{Rybicki}, G.~B. \& {Hummer}, D.~G. 1991, \aap, 245, 171
+
+\bibitem[{{Socas-Navarro} {et~al.}(2015){Socas-Navarro}, {de la Cruz
+  Rodr{\'{\i}}guez}, {Asensio Ramos}, {Trujillo Bueno}, \& {Ruiz
+  Cobo}}]{NICOLE}
+{Socas-Navarro}, H., {de la Cruz Rodr{\'{\i}}guez}, J., {Asensio Ramos}, A.,
+  {Trujillo Bueno}, J., \& {Ruiz Cobo}, B. 2015, \aap, 577, A7
+
+\bibitem[{{Socas-Navarro} {et~al.}(1998){Socas-Navarro}, {Ruiz Cobo}, \&
+  {Trujillo Bueno}}]{HectorI}
+{Socas-Navarro}, H., {Ruiz Cobo}, B., \& {Trujillo Bueno}, J. 1998, \apj, 507,
+  470
+
+\bibitem[{{Socas-Navarro} \& {Uitenbroek}(2004)}]{Hector_halpha}
+{Socas-Navarro}, H. \& {Uitenbroek}, H. 2004, \apjl, 603, L129
+
+\bibitem[{{Uitenbroek}(2006)}]{Han06}
+{Uitenbroek}, H. 2006, in Astronomical Society of the Pacific Conference
+  Series, Vol. 354, Solar MHD Theory and Observations: A High Spatial
+  Resolution Perspective, ed. J.~{Leibacher}, R.~F. {Stein}, \&
+  H.~{Uitenbroek}, 313
+
+\end{thebibliography}

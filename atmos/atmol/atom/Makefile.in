@@ -22,7 +22,7 @@ SHELL         = /bin/sh
 CC	      = $(COMPILER)
 CCFLAGS	      = $(COMPFLAGS) $(INCLUDE)
 
-OBJS          = atom.o atomcfg.o partf.o bfcs.o colr.o atom_rad.o atom_pop_broyden.o atom_responses.o
+OBJS          = atom.o atomcfg.o partf.o bfcs.o colr.o atom_rad.o atom_pop_broyden.o atom_responses.o atom_rad_synthesis.o
 
 SUBDIRS       = H
 LIB_LIBS      = H/libhydrogen.a

@@ -30,15 +30,3 @@
 
 // A separate file for "synthesise" versions of functions which compute opacity, emissivity, and their perturbation variants. 
 // The file contains following methods: 
-// fp_t **** atom:: opacity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int);
-// fp_t ***  atom::emissivity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int);
-
-fp_t **** atom:: opacity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){
-  
-
-  return 0;
-}
-
-fp_t ***  atom::emissivity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int){
-  return 0;
-}

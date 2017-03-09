@@ -122,10 +122,8 @@ protected:
 
 // ======================================================================================================================
   // Special, 1D versions of functions which compute opacity and emissivity for full wavelength grid in one go.
-  fp_t **** opacity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t *, int);
-  fp_t ***  emissivity_vector_synth(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t *, int);
-  fp_t *****  opacity_vector_pert_synth(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t *, int);
-  fp_t ****  emissivity_vector_pert_synth(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t *, int);
+
+  int op_em_vector(fp_t,fp_t,fp_t*,int,fp_t***,fp_t**); // With less arguments as most are already contained in the atmosphere
 
 // =======================================================================================================================
 
