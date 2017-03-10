@@ -29,7 +29,6 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
   // so we will just compute it for the middle wavelenght here:
   fp_t lambda_m = (lambda[nlambda] + lambda[1]) * 0.5;
 
-  
   for (int x1i=x1l;x1i<=x1h;++x1i)
 	for (int x2i=x2l;x2i<=x2h;++x2i)
 	  for (int x3i=x3l;x3i<=x3h;++x3i){
