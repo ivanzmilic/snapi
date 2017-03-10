@@ -29,6 +29,10 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
   // so we will just compute it for the middle wavelenght here:
   fp_t lambda_m = (lambda[nlambda] + lambda[1]) * 0.5;
 
+  //memset input arrays to zero:
+  memset(op_vector[1][x1l][x2l][x3l][1]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
+  memset(em_vector[1][x1l][x2l][x3l]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
+
   for (int x1i=x1l;x1i<=x1h;++x1i)
 	for (int x2i=x2l;x2i<=x2h;++x2i)
 	  for (int x3i=x3l;x3i<=x3h;++x3i){
@@ -40,17 +44,11 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
 		}
   }
 
-  // Then add all the contributors from opacity and emissivity
-  fp_t ****** op_atmol = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-  fp_t *****  em_atmol = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  // Then add all the contributors from opacity and emissivity from atoms and molecules
+  
   for (int a=0;a<=natm;++a){
-  	atml[a]->op_em_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op_atmol,em_atmol);
-  	op_vector = add(op_atmol,op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-  	em_vector = add(em_atmol,em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-
+  	atml[a]->op_em_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op_vector,em_vector);
   }
-  del_ft6dim(op_atmol,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-  del_ft5dim(em_atmol,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
   // Before exiting, reorder the opacity, so absorption matrix is properly set-up:
   for (int l=1;l<=nlambda;++l)
