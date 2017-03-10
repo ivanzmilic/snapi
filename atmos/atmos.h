@@ -121,9 +121,10 @@ protected:
   fp_t ****** emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
 // ======================================================================================================================
-  // Special, 1D versions of functions which compute opacity and emissivity for full wavelength grid in one go.
+  // Special versions of functions which compute opacity and emissivity for full wavelength grid in one go.
+  // We still account for the atmosphere as if it were 3D, although we might not need it like that.
 
-  int op_em_vector(fp_t,fp_t,fp_t*,int,fp_t***,fp_t**); // With less arguments as most are already contained in the atmosphere
+  int op_em_vector(fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****); // With less arguments as most are already contained in the atmosphere
 
 // =======================================================================================================================
 
