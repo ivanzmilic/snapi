@@ -15,10 +15,12 @@
 // This source file contains following functions/methods:
 // int int op_em_vector(fp_t,fp_t,fp_t*,int,fp_t***,fp_t**); - op and em for the 1D atmosphere, all wavelengths at once
 
-int atmosphere::op_em_vector(fp_t theta,fp_t phi,fp_t* lambda,int nlambda,fp_t****** op_vector,fp_t***** em_vector){
+int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_t* lambda,int nlambda,fp_t****** op_vector,fp_t***** em_vector){
   // This function computes opacity and emissivity for atmosphere, all wavelengths at once. 
   // Returns 0 for success, 1 for error. 
   // Arguments:
+  // fp_t *** Vlos - l.o.s. velocity
+  // fp_t **** B - projected magnetic field in the reference frame of the ray
   // fp_t theta, phi - emergent angle for radiation
   // fp_t * lambda, int nlambda - wavelength array and number of wavelengths 
   // fp_t *** op_vector, NDx4x4 array of opacities, fp_t ** em_vector, ND x 4 array of emissivities
@@ -42,9 +44,12 @@ int atmosphere::op_em_vector(fp_t theta,fp_t phi,fp_t* lambda,int nlambda,fp_t**
   // Then add all the contributors from opacity and emissivity
   fp_t ****** op_atmol = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_atmol = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  //for (int a=0;a<=natm;++a){
+  for (int a=0;a<=natm;++a){
+  	atml[a]->op_em_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op_atmol,em_atmol);
+  	op_vector = add(op_atmol,op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  	em_vector = add(em_atmol,em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
-  //}
+  }
   del_ft6dim(op_atmol,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft5dim(em_atmol,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
