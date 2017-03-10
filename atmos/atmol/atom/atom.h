@@ -176,6 +176,10 @@ protected:
   fp_t * bb_op_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
   fp_t * bb_em_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
 
+  // Now the boundbound, boundfree, freefree and Raileygh scattering functions.
+  virtual int boundbound_op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int boundfree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+
 // ==============================================================================================================================
 
 // ---------------------------------------------------------------------------------------------- |
@@ -294,6 +298,9 @@ public:
   // Then the perturbations:
   virtual fp_t *******opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ******emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+
+  // Method which computes both op and em, at the whole wavelength grid at once:
+  virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
  
   // The only relevant ones for the vector case are b-b opacity and emissivity:
   fp_t ****boundbound_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t ****, fp_t);
