@@ -69,7 +69,9 @@ public:
   // perturbations of vector quantities:
   virtual fp_t ******* opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
   virtual fp_t ******  emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
-  // Then the synth versions:
+  
+  // Merged version with all wavelength points at once:
+  virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****){return 0;};
  
   
 // compute populations
