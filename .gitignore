@@ -2,7 +2,11 @@
 **/*.dat
 **/*.log
 **/*.o
+**/*.a
 *.o
 *.txt
 *.dat
 *.log
+*.a
+master/imaster
+slave/islave
