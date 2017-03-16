@@ -477,11 +477,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
     fp_t ******* op_pert = opacity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
     fp_t ******  em_pert = emissivity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    
-    //fp_t ******* op_pert = ft7dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-    //fp_t ****** em_pert = ft6dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-
-    
+      
     if (tau_grid){
       normalize_to_referent_opacity(op,em,op_pert,em_pert);
       normalize_to_referent_opacity(op,em);
@@ -505,7 +501,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
 
     for (int param=1;param<=7;++param){
-      //formal_pert_numerical(dS, op, em, op_pert[param], em_pert[param], theta, phi, boundary_condition_for_rt);
+      formal_pert_numerical(dS, op, em, op_pert[param], em_pert[param], theta, phi, boundary_condition_for_rt);
 
       if (param == 2)
         for (int x3i=x3l;x3i<=x3h;++x3i)
@@ -548,7 +544,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   }
   clock_t end = clock();
   double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("Time spent on op/em + pert = %e \n", time_spent);
+  printf("Time spent on op/em + pert = %f \n", time_spent);
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
     // Write down the intensity perturbations:

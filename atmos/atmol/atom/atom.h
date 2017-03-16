@@ -250,6 +250,7 @@ protected:
 
   virtual fp_t derivative_collisions_Temp(int, int, int, int, int);
   virtual fp_t collisional_rates(int, int, int, int, int);
+  virtual fp_t collisional_rates_der_ne(int, int, int, int, int, fp_t);
   virtual fp_t derivative_collisions_full_temp(int, int, int, int, int);
   virtual fp_t derivative_collisions_full_density(int, int, int, int, int);
 

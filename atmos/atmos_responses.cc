@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <cmath>
 #include "types.h"
 #include "io.h"
@@ -73,7 +74,8 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
     else if (nlambda)
       lambda_w[0] = 1.0;  
 
-	// Perform the angular integration:    
+	// Perform the angular integration: 
+	clock_t begin = clock();  
 	for(int tp=1;tp<=ntp;++tp){
 
 		fp_t ***Vr=project(Vx,Vy,Vz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h);   // LOS projected velocity
@@ -105,30 +107,6 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	            del_ft2dim(response_to_op,x3l, x3h, x3l, x3h);
 	            del_ft2dim(response_to_em,x3l, x3h, x3l, x3h); 
 	        }
-	        fp_t *** S_test = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-	        formal(rt_grid,S_test,0,op,em,th[tp],ph[tp],boundary_condition_for_rt);
-	        /*fp_t * d_I_d_op_num = new fp_t [x3h-x3l+1]-x3l; 
-	        fp_t * d_I_d_em_num = new fp_t [x3h-x3l+1]-x3l;
-	        for (int x3i=x3l;x3i<=x3h;++x3i){
-	        	fp_t op_step = op[x1l][x2l][x3i] * 1E-7;
-	        	fp_t em_step = em[x1l][x2l][x3i] * 1E-7;
-	        	op[x1l][x2l][x3i] += op_step * 0.5;
-	        	formal(rt_grid,S,0,op,em,th[tp],ph[tp],boundary_condition_for_rt);
-	        	d_I_d_op_num[x3i] = S[x1l][x2l][27];
-	        	op[x1l][x2l][x3i] -= op_step;
-	        	formal(rt_grid,S,0,op,em,th[tp],ph[tp],boundary_condition_for_rt);
-	        	d_I_d_op_num[x3i] -= S[x1l][x2l][27];
-	        	d_I_d_op_num[x3i] /= op_step;
-	        	op[x1l][x2l][x3i] += op_step * 0.5;
-	        	fprintf(response_testing, "%d %e %e %e %e \n", x3i, lambda[l], response_to_op[27][x3i], d_I_d_op_num[x3i], 
-	        		(d_I_d_op_num[x3i] - response_to_op[27][x3i])/d_I_d_op_num[x3i]);
-	        }
-	        delete [](d_I_d_op_num+x3l);*/
-
-
-	        del_ft3dim(S_test,x1l,x1h,x2l,x2h,x3l,x3h);
-
-	        
 	        if (tau_grid) de_normalize(op,em);
 
 	        for(int a=0;a<natm;++a){ 
@@ -143,7 +121,10 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	    }
 	    del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
 	    del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
-	}  
+	} 
+	clock_t end = clock();
+  	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  	printf("Time spent on adding contributions = %f \n", time_spent); 
 	
 	delete[] lambda;
 	// cleanup angular quadrature arrays
@@ -507,8 +488,6 @@ void atmosphere::ne_lte_derivatives(){
 
 				Nt[x1i][x2i][x3i] += Nt_step * 0.5;
 				execute_chemeq_for_point(x1i,x2i,x3i);
-
-
 			}
 }
 

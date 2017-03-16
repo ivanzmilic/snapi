@@ -29,8 +29,6 @@
 #include "atom.h"
 // --------------------------------------------------------------------------------------------------------------------------------------------------
 
-fp_t turn_on_damping = 1.0;
-
 // Total opacity and emissivity functions. They both simply add three different contributions from three kinds of processes:
 
 fp_t ***atom::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_vec, fp_t theta,fp_t phi,fp_t lambda)
@@ -1003,6 +1001,7 @@ fp_t ******* atom::opacity_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t **
   memset(op_pert[1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
 
   fp_t ***** op_scalar_pert = boundfree_op_pert(Vlos,lambda);
+  
 
   for (int p=1;p<=7;++p)
     for (int x3k=x3l;x3k<=x3h;++x3k)
@@ -1854,14 +1853,6 @@ fp_t atom::C_i_cont(int z, int i, fp_t T, fp_t n_e){
 	fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda) : -1.0;
   fp_t rate = 1.55E13 / sqrt(T) * g_i * sigma * exp(-u0) / u0 * n_e;
 
-  /*if (Z > 1 ){
-    if (i==0)
-      rate = 3E-17 * n_e * exp(-u0) * sqrt(T) * 1E6;
-
-    if (i==1)
-      rate = 3E-17 * n_e * exp(-u0) * sqrt(T) * 1E6;
-  }*/
-
 	return rate;
 
 }
@@ -1877,14 +1868,5 @@ fp_t atom::C_cont_i(int z, int i, fp_t T, fp_t n_e){
 	return rate;
 }
 
-fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) // absorption
-// *************************************************************************
-// * Bound-Free opacities as specified for each level...                   *
-// *************************************************************************
-{
- 
-  return 0;
-}
-
-
+fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) {};
 

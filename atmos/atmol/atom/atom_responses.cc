@@ -35,6 +35,7 @@ void atom::compute_nlte_population_responses(){
 
   if(ntr){
 
+    clock_t begin = clock();
     io.msg(IOL_INFO, "atom::now computing nlte population responses in analytical way \n ---- version in progress --- \n");
 
     // Small test, we put it here because why not:
@@ -87,25 +88,9 @@ void atom::compute_nlte_population_responses(){
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    // Now we move on to the adjustments in the large coupling matrix.
-    // Write down the matrix so we can analyze this further:
-    FILE * output;
-    output = fopen("response_matrix_only_radiative.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-    
+   
     // Now we manipulate a bit the left hand side, what remains to be added, are the rates:
     fp_t * J_lu, * J_ul, * nrm;
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------
-    //memset(response_matrix[1]+1,0,N_responses*N_responses*sizeof(fp_t));
 
     for (int l=x3l; l<=x3h; ++l){ // At each depth of the atmosphere.
 
@@ -170,6 +155,11 @@ void atom::compute_nlte_population_responses(){
           else 
             response_matrix[(l-x3l) * nmap + nmap][(ll-x3l) * nmap + ii] = 0.0;
     }
+// ------------------------------------------------------------------------------------------------------------------------------------------------
+  
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time spent on setting up linear system = %f \n", time_spent);
 
     // Finally we need to compute all the responses and that really means invert response matrix and then multiply by the right hand side:
    
@@ -177,44 +167,12 @@ void atom::compute_nlte_population_responses(){
     fp_t * M_LU = new fp_t [N_depths * N_depths * nmap * nmap];
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
-   
-    // Before the solution you can print the response matrix:
-    output = fopen("response_matrix.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // We also have to output beta, too...
-    output = fopen("response_beta.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int ll = x3l;ll<=x3h;++ll)
-        for (int i=1;i<=nmap;++i){
-            fprintf(output, "%15.15e", beta_Temp[l][(ll-x3l) * nmap + i]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // And also get us populations, please:
-    output = fopen("pops.txt", "w");
-    for (int l = x3l; l<=x3h; ++l){
-      fprintf(output, "%d %5.15e ", l, parent_atm->get_x3(l));
-      for (int i=0;i<nmap;++i)
-        fprintf(output, "%5.15e ", pop[x1l][x2l][l].n[zmap[i]][lmap[i]]);
-      fprintf(output, "\n");
-    }
-    fclose(output);
-// ------------------------------------------------------------------------------------------------------------------------------------------------
+    
     printf(">> Now solving via LU decomposition << \n");
 
     Crout(nmap * N_depths,M_to_solve, M_LU);
 
+    begin = clock();
     for (int x3i = x3l; x3i <= x3h; ++x3i){
 
       b = beta_Temp[x3i] + 1;
@@ -244,16 +202,10 @@ void atom::compute_nlte_population_responses(){
         for (int i = 1; i<=nmap; ++i){
           level_responses[3][(x3ii - x3l) * nmap + i][x3i] = solution[(x3ii-x3l) * nmap + i -1];
       }
-
-      // Macroscopic velocity
-      b = beta_v_r[x3i] + 1;
-      solveCrout(nmap * N_depths,M_LU,b,solution);
-      // Write down the solution for microturbulent velocity
-      for (int x3ii = x3l;x3ii<=x3h; ++x3ii)
-        for (int i = 1; i<=nmap; ++i){
-          level_responses[4][(x3ii - x3l) * nmap + i][x3i] = solution[(x3ii-x3l) * nmap + i -1];
-      }
     }
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time spent on solving linear system = %f \n", time_spent);
     io.msg(IOL_INFO, "responses computed for the atom with Z = %d using analytical approximation \n", Z);
     delete []M_LU;
     delete []solution;
@@ -280,8 +232,7 @@ void atom::compute_lte_population_responses(){
     memset(beta_Temp[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
     memset(beta_density[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
     memset(beta_v_micro[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
-    
-    
+     
     // Lets us start with 'beta' coefficients. We stick to the temperature so far.
     for (int x3i = x3l; x3i<= x3h; ++x3i){ // For each depth point.
       // You are perturbing the temperature @ k and looking @ what is happening:
@@ -393,40 +344,6 @@ void atom::compute_lte_population_responses(){
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
    
-    FILE * output;
-    // Before the solution you can print the response matrix:
-    output = fopen("response_matrix.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // We also have to output beta, too...
-    output = fopen("response_beta.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int ll = x3l;ll<=x3h;++ll)
-        for (int i=1;i<=nmap;++i){
-            fprintf(output, "%15.15e", beta_Temp[l][(ll-x3l) * nmap + i]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-    
-    // And also get us populations, please:
-    
-    output = fopen("pops.txt", "w");
-    for (int l = x3l; l<=x3h; ++l){
-      fprintf(output, "%d %5.15e ", l, parent_atm->get_x3(l));
-      for (int i=0;i<nmap;++i)
-        fprintf(output, "%5.15e ", pop[x1l][x2l][l].n[zmap[i]][lmap[i]]);
-      fprintf(output, "\n");
-    }
-    fclose(output);
 // ------------------------------------------------------------------------------------------------------------------------------------------------
     printf(">> Now solving via LU decomposition << \n");
 
@@ -487,17 +404,19 @@ fp_t atom::derivative_collisions_full_temp(int x1i, int x2i, int x3i, int from ,
 
   // Increase the temperature:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T + 0.5 * delta_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
   // Decrease the temperature:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T - 0.5 * delta_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
   
   derivative /= delta_T;
 
   parent_atm->set_Temp(x1i, x2i, x3i, local_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
+  derivative += parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
   return derivative;
 }
@@ -511,19 +430,21 @@ fp_t atom::derivative_collisions_full_density(int x1i, int x2i, int x3i, int fro
   fp_t Ne = fetch_Ne(x1i,x2i,x3i);
   // Increase the temperature:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt + 0.5 * Nt_step);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   //printf(">>>> %e \n",fetch_Ne(x1i,x2i,x3i)/Ne);
 
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
   // Decrease the temperature:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt - 0.5 * Nt_step);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
   
   derivative /= Nt_step;
 
   parent_atm->set_Nt(x1i, x2i, x3i, Nt);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
+  derivative += parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
   return derivative;
 }
@@ -548,6 +469,29 @@ fp_t atom::collisional_rates(int x1i, int x2i, int x3i, int from, int to){
 
   else if (z_from - z_to == 1 && l_from == 0)
     return C_cont_i(z_to, l_to, Temp, Ne);
+
+  return 0;
+}
+
+fp_t atom::collisional_rates_der_ne(int x1i, int x2i, int x3i, int from, int to, fp_t rate_value){
+
+  int z_from = zmap[from];
+  int l_from = lmap[from];
+
+  int z_to = zmap[to];
+  int l_to = lmap[to];
+
+  fp_t Ne = fetch_Ne(x1i, x2i, x3i);
+  
+  // If they are from the same ionization state:
+  if (z_from == z_to)
+    return rate_value/Ne;
+
+  else if (z_from - z_to == -1 && l_to == 0)
+    return rate_value/Ne;
+
+  else if (z_from - z_to == 1 && l_from == 0)
+    return rate_value*2.0/Ne;
 
   return 0;
 }
@@ -724,12 +668,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
             delete [](x_der+1);
             delete [](a_der+1);
             delete [](dld_der+1);
-            //profile_derivative_T[x1l][x2l][x3i][tr] = voigt_der_T(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-            //profile_derivative_density[x1l][x2l][x3i][tr] = voigt_der_density(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-            //profile_derivative_vt[x1l][x2l][x3i][tr] = voigt_der_vt(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-
           }
-  }
+    }
     
     // Lets deal with the "response matrix" separately:
 
@@ -747,10 +687,13 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
               int l_ii = lmap[ii];
 
               int is_bf = 0; // 0 if it is not, 1 if it is bound->free and -1 if it is free->bound
+
               if (z_i == z_ii-1 && l_ii == 0)
-                is_bf = 1; // bound-free
+                if (lambda <= bf[z_i][l_i]->getlambda_crit()) // We only care if it can actually ionize
+                  is_bf = 1; // bound-free
               else if (z_i == z_ii+1 && l_i == 0)
-                is_bf = -1; // free-bound
+                if (lambda <= bf[z_ii][l_ii]->getlambda_crit()) // Same here
+                  is_bf = -1; // free-bound
 
               fp_t op_ref = 1.0;
               if (parent_atm->is_tau_grid())
@@ -762,7 +705,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 int tr = tmap[z_i][l_i][l_ii];
                 int z_state = inverse_tmap[tr][2];
                 int lower_level = inverse_tmap[tr][3];
-                int upper_level = inverse_tmap[tr][4]; 
+                int upper_level = inverse_tmap[tr][4];
+                if (A[z_state][upper_level][lower_level] > 1.0){ 
 
                 // Lets first write it in the column where upper is i and lower is ii
             
@@ -884,7 +828,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                   beta_v_micro[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;
 
                   // ---------- MACROSCOPIC VELOCITY ---------------------------------------------------------------------------------
-                  
+                  /*
                   derivative = profile_derivative_vr[x1l][x2l][l][tr];
 
                   derived_part = 0.0;
@@ -893,7 +837,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                     / norm[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * norm_derivative[4][x1l][x2l][l][tr];
                   derived_part += I[x1l][x2l][l] * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * (1.0 - line_factor) * line_opacity / opp[x1l][x2l][l]
                     * derivative;
-                  beta_v_r[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;           
+                  beta_v_r[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;           */
                 }
                 // ========================================================================================================================
 
@@ -959,7 +903,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
 
                 // ---------------- MACROSCOPIC VELOCITY ---------------------------------------------------------------------------------------------------
 
-                fp_t derivative_vr = profile_derivative_vr[x1l][x2l][ll][tr];
+                /*fp_t derivative_vr = profile_derivative_vr[x1l][x2l][ll][tr];
 
                 J_chunk = derivative_vr * (response_to_op[l][ll] * (pop[x1l][x2l][ll].n[z_i][lower_level] * B[z_i][lower_level][upper_level] - pop[x1l][x2l][ll].n[z_i][upper_level] * B[z_i][upper_level][lower_level])   
                   + response_to_em[l][ll] * pop[x1l][x2l][ll].n[z_i][upper_level] * A[z_i][upper_level][lower_level]) * line_energy * 0.25 / pi * elementary_contribution 
@@ -968,7 +912,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 J_chunk /= op_ref;
 
                 beta_v_r[ll][(l-x3l) * nmap +i + 1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) * J_chunk;
-
+*/
                 // Here there is not an additional contribution as we assume that other speices are not influenced by the microturbutlent velocity, i.e. that other sources 
                 // are basically continuum sources.
 
@@ -993,7 +937,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 }
                 delete[](bf_op_derivative_ex+1);
                 delete[](bf_em_derivative_ex+1);
-                
+              }  
             }
 
             // Otherwise it has to be a b-f transition, f-b transition:
@@ -1201,7 +1145,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
     } 
     del_ft4dim(profile_derivative_T,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
     del_ft4dim(profile_derivative_density,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
-    del_ft4dim(profile_derivative_vt,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);         
+    del_ft4dim(profile_derivative_vt,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
+    del_ft4dim(profile_derivative_vr,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);          
   }
   return 0;
 }
