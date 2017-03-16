@@ -50,6 +50,14 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
 int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
 
+  for (int z=0;z<Z;++z) // For each stage that can be ionized (i.e. not the last one)
+    for (int i=0;i<nl[z];++i){ // for each level
+
+    // Check whether at least one lambda in our grid can ionize the atom
+    fp_t sigma_max = (bf[z][i]) ? bf[z][i]->U(lambda[1]) : 0.0;
+    
+  } 
+
   return 0;
 }
 

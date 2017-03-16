@@ -176,7 +176,8 @@ protected:
   fp_t * bb_op_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
   fp_t * bb_em_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
 
-  // Now the boundbound, boundfree, freefree and Raileygh scattering functions.
+  // Now the boundbound, boundfree, freefree and Raileygh scattering functions. These ones compute the 
+  // opacity and emissivity at once.
   virtual int boundbound_op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int boundfree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
 
