@@ -399,22 +399,14 @@ fp_t atom::derivative_collisions_Temp(int x1i, int x2i, int x3i, int from, int t
 fp_t atom::derivative_collisions_full_temp(int x1i, int x2i, int x3i, int from , int to){
 
   fp_t derivative = 0.0;
-
   fp_t local_T = fetch_temperature(x1i, x2i, x3i);
-
-  // Increase the temperature:
+  // Numerically compute the derivative of the rates for fixed Ne density:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T + 0.5 * delta_T);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
-  // Decrease the temperature:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T - 0.5 * delta_T);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
-  
   derivative /= delta_T;
-
   parent_atm->set_Temp(x1i, x2i, x3i, local_T);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
   derivative += parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
@@ -424,25 +416,16 @@ fp_t atom::derivative_collisions_full_temp(int x1i, int x2i, int x3i, int from ,
 fp_t atom::derivative_collisions_full_density(int x1i, int x2i, int x3i, int from , int to){
 
   fp_t derivative = 0.0;
-
   fp_t Nt = fetch_Nt(x1i, x2i, x3i);
   fp_t Nt_step = delta_Nt_frac*Nt;
   fp_t Ne = fetch_Ne(x1i,x2i,x3i);
-  // Increase the temperature:
+  // Numerically compute the derivative of the rates for fixed Ne density:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt + 0.5 * Nt_step);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
-  //printf(">>>> %e \n",fetch_Ne(x1i,x2i,x3i)/Ne);
-
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
-  // Decrease the temperature:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt - 0.5 * Nt_step);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
-  
   derivative /= Nt_step;
-
   parent_atm->set_Nt(x1i, x2i, x3i, Nt);
-  //parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
   derivative += parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
