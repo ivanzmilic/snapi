@@ -107,6 +107,8 @@ public:
 
   // And now also 'joint' opacity emissivity function for all wavelengths at once
   virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,
+    fp_t ******, fp_t *****, fp_t********,fp_t*******);
   
   // And specific kinds of opacity and emissivity:
   virtual fp_t ***freefree_op(fp_t***,fp_t***,fp_t***,fp_t);
