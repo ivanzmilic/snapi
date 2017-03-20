@@ -98,12 +98,12 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i){
         fp_t op = Ne[x1i][x2i][x3i] * 6.65E-25;
-        fp_t op_pert[2]; // Only for temperature and density
+        fp_t *op_pert = new fp_t[2]-1; // Only for temperature and density
         op_pert[1] = Ne_lte_der[1][x1i][x2i][x3i] * 6.65E-25;
         op_pert[2] = Ne_lte_der[2][x1i][x2i][x3i] * 6.65E-25;
         
         fp_t em = op * Planck_f(lambda_m, T[x1i][x2i][x3i]);
-        fp_t em_pert[2]; // Only for temperature and density
+        fp_t *em_pert = new fp_t[2]-1; // Only for temperature and density
         em_pert[1] = em/op * op_pert[1] + Ne[x1i][x2i][x3i] * 6.65E-25 * Planck_f_derivative(lambda_m,T[x1i][x2i][x3i]);
         em_pert[2] = em/op * op_pert[2];
         
@@ -114,7 +114,8 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
             op_vector_pert[l][p][x3i][x1i][x2i][x3i][1][1] = op_pert[p];
             em_vector_pert[l][p][x3i][x1i][x2i][x3i][1] = em_pert[p];
           }
-    }
+        }
+        delete[](op_pert+1); delete[](em_pert+1);
   }
 
   // Then add all the contributors from opacity and emissivity from atoms and molecules
