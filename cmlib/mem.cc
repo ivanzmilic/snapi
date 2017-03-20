@@ -1163,6 +1163,138 @@ void del_ft7dim(fp_t *******p,int x1l,int x1h,int x2l,int x2h,int x3l,int x3h,in
   delete[] (p+x1l);
 } 
 
+fp_t ******** ft8dim(int x1l,int x1h,int x2l,int x2h,int x3l,int x3h,int x4l,int x4h,int x5l,int x5h,
+  int x6l,int x6h, int x7l, int x7h, int x8l, int x8h)
+{
+  int nx1=x1h-x1l+1,nx2=x2h-x2l+1,nx3=x3h-x3l+1,nx4=x4h-x4l+1,nx5=x5h-x5l+1,nx6=x6h-x6l+1, nx7=x7h-x7l+1, nx8=x8h-x8l+1;
+  
+  // Actually allocate all the memory. 
+  fp_t ********p;
+  p=new fp_t******* [nx1] - x1l;
+  p[x1l]=new fp_t****** [nx1*nx2] - x2l;
+  p[x1l][x2l]=new fp_t***** [nx1*nx2*nx3] - x3l;
+  p[x1l][x2l][x3l]=new fp_t**** [nx1*nx2*nx3*nx4] - x4l;
+  p[x1l][x2l][x3l][x4l]=new fp_t*** [nx1*nx2*nx3*nx4*nx5] - x5l;
+  p[x1l][x2l][x3l][x4l][x5l]=new fp_t** [nx1*nx2*nx3*nx4*nx5*nx6] - x6l;
+  p[x1l][x2l][x3l][x4l][x5l][x6l]=new fp_t * [nx1*nx2*nx3*nx4*nx5*nx6*nx7] - x7l;
+  p[x1l][x2l][x3l][x4l][x5l][x6l][x7l]=new fp_t [nx1*nx2*nx3*nx4*nx5*nx6*nx7*nx8] - x8l;
+
+  // We start with pointers to  ****** 
+
+  for (int x1 = x1l+1; x1<=x1h; ++x1)
+    p[x1] = p[x1-1] + nx2;
+
+  // Then the pointer to  *****
+
+  for (int x1 = x1l+1; x1<=x1h; ++x1)
+    p[x1][x2l] = p[x1-1][x2l] + nx2 * nx3;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l+1; x2<=x2h; ++x2)
+      p[x1][x2] = p[x1][x2-1] + nx3;
+
+  // We then continue further witn the pointers to ****
+
+  for (int x1 = x1l+1; x1<=x1h; ++x1)
+    p[x1][x2l][x3l] = p[x1-1][x2l][x3l] + nx2 * nx3 * nx4;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l+1; x2<=x2h; ++x2)
+      p[x1][x2][x3l] = p[x1][x2-1][x3l] + nx3 * nx4;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l; x2<=x2h; ++x2)
+      for (int x3 = x3l+1; x3<=x3h; ++x3)
+        p[x1][x2][x3] = p[x1][x2][x3-1] + nx4;
+
+  // Then the pointers to ***
+
+  for (int x1 = x1l+1; x1<=x1h; ++x1)
+    p[x1][x2l][x3l][x4l] = p[x1-1][x2l][x3l][x4l] + nx2 * nx3 * nx4 * nx5;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l+1; x2<=x2h; ++x2)
+      p[x1][x2][x3l][x4l] = p[x1][x2-1][x3l][x4l] + nx3 * nx4 * nx5;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l; x2<=x2h; ++x2)
+      for (int x3 = x3l+1; x3<=x3h; ++x3)
+        p[x1][x2][x3][x4l] = p[x1][x2][x3-1][x4l] + nx4 * nx5;
+  for (int x1 = x1l; x1<=x1h; ++x1)
+    for (int x2 = x2l; x2<=x2h; ++x2)
+      for (int x3 = x3l; x3<=x3h; ++x3)
+        for (int x4 = x4l+1; x4<=x4h; ++x4)
+          p[x1][x2][x3][x4] = p[x1][x2][x3][x4-1] + nx5;
+
+  // The next ones are the pointers to ** 
+  for (int x1 = x1l; x1<=x1h; ++x1){
+    if (x1>x1l) p[x1][x2l][x3l][x4l][x5l] = p[x1-1][x2l][x3l][x4l][x5l] + nx2*nx3*nx4*nx5*nx6;
+    for (int x2=x2l;x2<=x2h;++x2){
+      if (x2>x2l) p[x1][x2][x3l][x4l][x5l] = p[x1][x2-1][x3l][x4l][x5l] + nx3*nx4*nx5*nx6;
+      for (int x3=x3l;x3<=x3h;++x3){
+        if (x3>x3l) p[x1][x2][x3][x4l][x5l] = p[x1][x2][x3-1][x4l][x5l] + nx4*nx5*nx6;
+        for (int x4=x4l;x4<=x4h;++x4){
+          if(x4>x4l) p[x1][x2][x3][x4][x5l] = p[x1][x2][x3][x4-1][x5l] + nx5*nx6;
+          for (int x5=x5l+1;x5<=x5h;++x5)
+            p[x1][x2][x3][x4][x5] = p[x1][x2][x3][x4][x5-1] + nx6;
+        }
+      }
+    }
+  }
+
+  // The pointers to fp_t *
+
+  for (int x1=x1l;x1<=x1h;++x1){
+    if (x1>x1l) p[x1][x2l][x3l][x4l][x5l][x6l] = p[x1-1][x2l][x3l][x4l][x5l][x6l] + nx2*nx3*nx4*nx5*nx6*nx7;
+    for (int x2=x2l;x2<=x2h;++x2){
+      if (x2>x2l) p[x1][x2][x3l][x4l][x5l][x6l] = p[x1][x2-1][x3l][x4l][x5l][x6l] + nx3*nx4*nx5*nx6*nx7;
+      for (int x3=x3l;x3<=x3h;++x3){
+        if (x3>x3l) p[x1][x2][x3][x4l][x5l][x6l] = p[x1][x2][x3-1][x4l][x5l][x6l] + nx4*nx5*nx6*nx7;
+        for (int x4=x4l;x4<=x4h;++x4){
+          if (x4>x4l) p[x1][x2][x3][x4][x5l][x6l] = p[x1][x2][x3][x4-1][x5l][x6l] + nx5*nx6*nx7;
+          for (int x5=x5l;x5<=x5h;++x5){
+            if (x5>x5l) p[x1][x2][x3][x4][x5][x6l] = p[x1][x2][x3][x4][x5-1][x6l] + nx6*nx7;
+            for (int x6=x6l+1;x6<=x6h;++x6)
+              p[x1][x2][x3][x4][x5][x6] = p[x1][x2][x3][x4][x5][x6-1] + nx7;
+          }
+        }
+      }
+    }
+  }
+
+  // And finally the pointers to fp_t
+  for (int x1=x1l;x1<=x1h;++x1){
+    if (x1>x1l) p[x1][x2l][x3l][x4l][x5l][x6l][x7l] = p[x1-1][x2l][x3l][x4l][x5l][x6l][x7l] + nx2*nx3*nx4*nx5*nx6*nx7*nx8;
+    for (int x2=x2l;x2<=x2h;++x2){
+      if (x2>x2l) p[x1][x2][x3l][x4l][x5l][x6l][x7l] = p[x1][x2-1][x3l][x4l][x5l][x6l][x7l] + nx3*nx4*nx5*nx6*nx7*nx8;
+      for (int x3=x3l;x3<=x3h;++x3){
+        if (x3>x3l) p[x1][x2][x3][x4l][x5l][x6l][x7l] = p[x1][x2][x3-1][x4l][x5l][x6l][x7l] + nx4*nx5*nx6*nx7*nx8;
+        for (int x4=x4l;x4<=x4h;++x4){
+          if (x4>x4l) p[x1][x2][x3][x4][x5l][x6l][x7l] = p[x1][x2][x3][x4-1][x5l][x6l][x7l] + nx5*nx6*nx7*nx8;
+          for (int x5=x5l;x5<=x5h;++x5){
+            if (x5>x5l) p[x1][x2][x3][x4][x5][x6l][x7l] = p[x1][x2][x3][x4][x5-1][x6l][x7l] + nx6*nx7*nx8;
+            for (int x6=x6l+1;x6<=x6h;++x6){
+              p[x1][x2][x3][x4][x5][x6][x7l] = p[x1][x2][x3][x4][x5][x6-1][x7l] + nx7*nx8;
+                for (int x7=x7l+1;x7<=x7h;++x7)
+                  p[x1][x2][x3][x4][x5][x6][x7] = p[x1][x2][x3][x4][x5][x6][x7-1] + nx8;
+            }
+          }
+        }
+      }
+    }
+  }
+  return p;
+}
+
+void del_ft8dim(fp_t ********p,int x1l,int x1h,int x2l,int x2h,int x3l,int x3h,int x4l,int x4h,int x5l,int x5h,
+  int x6l,int x6h,int x7l, int x7h, int x8l, int x8h)
+{
+  delete[] (p[x1l][x2l][x3l][x4l][x5l][x6l][x7l]+x8l);
+  delete[] (p[x1l][x2l][x3l][x4l][x5l][x6l]+x7l);
+  delete[] (p[x1l][x2l][x3l][x4l][x5l]+x6l);
+  delete[] (p[x1l][x2l][x3l][x4l]+x5l);
+  delete[] (p[x1l][x2l][x3l]+x4l);
+  delete[] (p[x1l][x2l]+x3l);
+  delete[] (p[x1l]+x2l);
+  delete[] (p+x1l);
+}  
+
+
 complex_t **ct2dim(int x1l,int x1h,int x2l,int x2h)
 {
   int nx1=x1h-x1l+1,nx2=x2h-x2l+1;

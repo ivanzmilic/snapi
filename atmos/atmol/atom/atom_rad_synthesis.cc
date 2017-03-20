@@ -47,6 +47,7 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
   return 0;
 }
 
+
 int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
 
@@ -172,7 +173,7 @@ int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, 
 	                op_vector[l][x1i][x2i][x3i][1][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*sp * op_loc;
 	                op_vector[l][x1i][x2i][x3i][1][4] += 0.5 * (H_r - H_b) * ct * op_loc;
 	                op_vector[l][x1i][x2i][x3i][3][4] += 0.5*(F_p-0.5*(F_r+F_b))*st*st*cp * op_loc	;
-		            op_vector[l][x1i][x2i][x3i][4][2] += 0.5*(F_p-0.5*(F_r+F_b))*st*st*sp * op_loc;
+		              op_vector[l][x1i][x2i][x3i][4][2] += 0.5*(F_p-0.5*(F_r+F_b))*st*st*sp * op_loc;
 	                op_vector[l][x1i][x2i][x3i][2][3] += 0.5*(F_r-F_b)*st * op_loc;
 	                // And to emissivity:
 	                em_vector[l][x1i][x2i][x3i][1] += 0.5 * (H_p * st*st + 0.5 * (H_r + H_b) * (1.0+ct*ct)) * em_loc;              

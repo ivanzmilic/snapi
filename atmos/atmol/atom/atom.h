@@ -181,6 +181,9 @@ protected:
   virtual int boundbound_op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int boundfree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
 
+  //virtual int boundbound_op_em_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  //virtual int boundfree_op_em_vector_pert(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+
 // ==============================================================================================================================
 
 // ---------------------------------------------------------------------------------------------- |

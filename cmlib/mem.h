@@ -65,6 +65,8 @@ fp_t ******ft6dim(int,int,int,int,int,int,int,int,int,int,int,int);
 void del_ft6dim(fp_t******,int,int,int,int,int,int,int,int,int,int,int,int);
 fp_t *******ft7dim(int,int,int,int,int,int,int,int,int,int,int,int,int,int);
 void del_ft7dim(fp_t*******,int,int,int,int,int,int,int,int,int,int,int,int,int,int);
+fp_t ********ft8dim(int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int);
+void del_ft8dim(fp_t********,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int);
 
 // variable dimension arrays
 fp_t **ft2dim(int,int,int,int*);

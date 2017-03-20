@@ -112,6 +112,7 @@ protected:
   fp_t ***** thomson_sc_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ***** thomson_em_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
 
+  
   int op_em_pert_numerical_scalar(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t,fp_t *****, fp_t *****);
   
 // Vector versions, frequency by frequency:
@@ -125,6 +126,8 @@ protected:
   // We still account for the atmosphere as if it were 3D, although we might not need it like that.
 
   int op_em_vector(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****); // With less arguments as most are already contained in the atmosphere
+  int op_em_vector_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t********,fp_t*******){return 0;}; // Basically the same as the one above, except taking different arguments
+  int op_em_vector_plus_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****,fp_t********,fp_t*******);
 
 // =======================================================================================================================
 
