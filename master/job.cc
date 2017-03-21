@@ -381,13 +381,13 @@ int job_class::start(void)
       clock_t t1=times(&t_strt);
       io->msg(IOL_INFO,"nlambda=%d, lambda[0]=%E, lambda[%d]=%E\n",ji.nlambda[o],ji.lambda[o][0],ji.nlambda[o]-1,ji.lambda[o][ji.nlambda[o]-1]);
       
-      class observable *obs = ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);
+      class observable *obs = ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0,0);
 
       //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
-      /*class observable * obs;
-      obs = new observable(4);
-      obs->readsingle("spectrum_to_fit_short.dat");
-      obs->write(ji.name[o],*io);*/
+      //class observable * obs;
+      //obs = new observable(4);
+      //obs->readsingle("spectrum_to_fit_short.dat");
+      obs->write(ji.name[o],*io);
       
       // Here we execute the fitting procedure
       //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);

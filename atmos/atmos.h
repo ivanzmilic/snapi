@@ -238,6 +238,7 @@ public:
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
+  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****, model*); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
   
   // Debug:
