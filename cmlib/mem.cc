@@ -1268,8 +1268,8 @@ fp_t ******** ft8dim(int x1l,int x1h,int x2l,int x2h,int x3l,int x3h,int x4l,int
           if (x4>x4l) p[x1][x2][x3][x4][x5l][x6l][x7l] = p[x1][x2][x3][x4-1][x5l][x6l][x7l] + nx5*nx6*nx7*nx8;
           for (int x5=x5l;x5<=x5h;++x5){
             if (x5>x5l) p[x1][x2][x3][x4][x5][x6l][x7l] = p[x1][x2][x3][x4][x5-1][x6l][x7l] + nx6*nx7*nx8;
-            for (int x6=x6l+1;x6<=x6h;++x6){
-              p[x1][x2][x3][x4][x5][x6][x7l] = p[x1][x2][x3][x4][x5][x6-1][x7l] + nx7*nx8;
+            for (int x6=x6l;x6<=x6h;++x6){
+              if (x6>x6l) p[x1][x2][x3][x4][x5][x6][x7l] = p[x1][x2][x3][x4][x5][x6-1][x7l] + nx7*nx8;
                 for (int x7=x7l+1;x7<=x7h;++x7)
                   p[x1][x2][x3][x4][x5][x6][x7] = p[x1][x2][x3][x4][x5][x6][x7-1] + nx8;
             }

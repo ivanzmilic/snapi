@@ -468,6 +468,9 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
 
   clock_t begin = clock();
+  clock_t end = clock();
+  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  
   for(int l=0;l<nlambda;++l){
 
     for (int a = 0; a<natm; ++a)
@@ -542,8 +545,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // of reference of the atmosphere
     
   }
-  clock_t end = clock();
-  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  end = clock();
+  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
   printf("Time spent on op/em + pert = %f \n", time_spent);
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
