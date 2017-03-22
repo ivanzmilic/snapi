@@ -1739,16 +1739,29 @@ void atom::zeeman_setup(){
 
 void atom::zeeman_clear(){
 
-  /*if(ntr){
+  if(ntr){
     for (int tr=1;tr<=ntr;++tr){
-      delete[]S_p[tr];
-      delete[]S_b[tr];
-      delete[]S_r[tr];
-      delete[]delta_lambda_p[tr];
-      delete[]delta_lambda_b[tr];
-      delete[]delta_lambda_r[tr];
+      int z_state = inverse_tmap[tr][2];
+      int lower_level = inverse_tmap[tr][3];
+      int upper_level = inverse_tmap[tr][4];
+      if (upper_level < nl[z_state]){
+        delete[]delta_lambda_p[tr];
+        delete[]delta_lambda_b[tr];
+        delete[]delta_lambda_r[tr];
+        delete[]S_p[tr];
+        delete[]S_b[tr];
+        delete[]S_r[tr];
+        delete[]nm[tr];
+      }
+      //delete[](delta_lambda_p+1);
+      //delete[](delta_lambda_b+1);
+      //delete[](delta_lambda_r+1);
+      //delete[](S_p+1);
+      //delete[](S_b+1);
+      //delete[](S_r+1);
+      //delete[](nm+1);
     }
-  }*/
+  }
 }
 
 void atom::rtinit(void)

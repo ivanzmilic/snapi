@@ -315,7 +315,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     atml[a]->rtclean(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
   }
 //
-  //for(int a=0;a<natm;++a) alltml[a]->radiation_moments_clean();
   respclean();
   popclean(); // all done
 
