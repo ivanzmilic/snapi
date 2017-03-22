@@ -100,7 +100,7 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
 int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector, fp_t********op_vector_pert,fp_t*******em_vector_pert){
 
-  for (int z=0;z<Z;++z) // For each stage that can be ionized (i.e. not the last one)
+  for (int z=0;z<=Z;++z) // For each stage that can be ionized (i.e. not the last one)
     for (int i=0;i<nl[z];++i){ // for each level
 
     fp_t lambda_crit = (bf[z][i]) ? bf[z][i]->getlambda_crit() : 0.0;
@@ -127,37 +127,38 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 		    	  
 		          // And then local derivative of the popmod:
 		          
-		    	  fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod);
-		    	  fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_crit/k/T[x1i][x2i][x2i])) * Planck_f(lambda_crit, T[x1i][x2i][x3i]);
+		    	  	fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod);
+		    	  	fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_crit/k/T[x1i][x2i][x2i])) * Planck_f(lambda_crit, T[x1i][x2i][x3i]);
 
-		    	  fp_t * op_explicit_pert = op_derivative_explicit(x3i,0,0,lambda_crit);
-		    	  fp_t * em_explicit_pert = em_derivative_explicit(x3i,0,0,lambda_crit);
+		    	  	fp_t * op_explicit_pert = op_derivative_explicit(x3i,0,0,lambda_crit);
+		    	  	fp_t * em_explicit_pert = em_derivative_explicit(x3i,0,0,lambda_crit);
 		    	  
-		    	  for (int l=1;l<=nlambda_crit;++l){
-		    		op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
-		    		em_vector[l][x1i][x2i][x3i][1] += em_loc;
-		    		op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_explicit_pert[1];
-		    		em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_explicit_pert[1];
-		    		op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_explicit_pert[2];
-		    		em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_explicit_pert[2];
-		    	  }
-		    	  delete[](op_explicit_pert+1);delete[](em_explicit_pert+1);
-	    		}	
-	    		// But now also responses of opacity and emissivity due to the responses of the levels
-	    		fp_t* pop_mod_der = new fp_t[7]-1;
-	    		memset(pop_mod_der+1,0,7*sizeof(fp_t));
-	    		fp_t* op_pert_loc = new fp_t[7]-1;
-	    		fp_t* em_pert_loc = new fp_t[7]-1;
-	    		for (int p=1;p<=4;++p){
-	    		  pop_mod_der[p] = level_responses[p][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0]*pop_mod;
-	    		  op_pert_loc[p] = sigma*(level_responses[p][(x3i-x3l)*nmap+rmap[z][i]+1][x3k] - pop_mod_der[p]);
-	    		  em_pert_loc[p] = em_vector[1][x1i][x2i][x3i][1] / pop_mod * pop_mod_der[p];
-	    		}
-	    		for (int l=1;l<=nlambda;++l)
-	    		  for (int p=1;p<=4;++p){
-	    		  	op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += op_pert_loc[p];
-	    		  	em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += em_pert_loc[p];
-	    		}
+		    	  	for (int l=1;l<=nlambda_crit;++l){
+		    				op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
+		    				em_vector[l][x1i][x2i][x3i][1] += em_loc;
+		    				op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_explicit_pert[1];
+		    				em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_explicit_pert[1];
+		    				op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_explicit_pert[2];
+		    				em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_explicit_pert[2];
+		    	  	}
+		    	  	delete[](op_explicit_pert+1);delete[](em_explicit_pert+1);
+	    			}	
+	    			// But now also responses of opacity and emissivity due to the responses of the levels
+	    			fp_t* op_pert_loc = new fp_t[7]-1;
+	    			fp_t* em_pert_loc = new fp_t[7]-1;
+	    			fp_t op_der_to_level = op_derivative_to_level(x3i, rmap[z][i], lambda_crit);
+            fp_t em_der_to_level = op_derivative_to_level(x3i, rmap[z][i], lambda_crit); 
+	    			for (int p=1;p<=4;++p){
+	    				op_pert_loc[p] = op_der_to_level * level_responses[p][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+	    				em_pert_loc[p] = em_der_to_level * level_responses[p][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+	    		  	
+	    			}
+	    			for (int l=1;l<=nlambda_crit;++l)
+	    		  	for (int p=1;p<=4;++p){
+	    		  		op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += op_pert_loc[p];
+	    		  		em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += em_pert_loc[p];
+	    			}
+	    			delete[](op_pert_loc+1); delete[](em_pert_loc+1);
       }
  		}
   } 
@@ -203,7 +204,7 @@ int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, 
             	st = sin(theta_B); ct = cos(theta_B); 
 
               // Check if the line is sensitive to zeeman effect
-            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){
+            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){ // If not sensitive:
             	  for (int l=1;l<=nlambda;++l){
             	  	fp_t x=(lam-lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
             	  	fp_t profile = fvoigt(x,a) / dld;
@@ -312,7 +313,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
             	fp_t *x_der, *a_der, *dld_der;
 
             	// Check if the line is sensitive to zeeman effect
-            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){
+            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){ // If not sensitive
             	  for (int l=1;l<=nlambda;++l){
             	  	fp_t x=(lam-lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
             	  	fp_t H,F,dH,dF;
@@ -326,16 +327,18 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 	dld_der = new fp_t[7]-1;
                 	compute_xa_der_scalar(x1i, x2i, x3i, z, i, ii, lambda[l], Vlos, x, a, x_der, a_der, dld_der);
                 	for (int p=1;p<=4;++p){
-                	  op_vector_pert[l][p][x3i][x1i][x2i][x3i][1][1] += op_loc * (dH*x_der[1] - dF*a_der[1] - H/dld*dld_der[1])/dld;
-                	  em_vector_pert[l][p][x3i][x1i][x2i][x3i][1] += em_loc * (dH*x_der[1] - dF*a_der[1] - H/dld*dld_der[1])/dld;
+                	  op_vector_pert[l][p][x3i][x1i][x2i][x3i][1][1] += op_loc * (dH*x_der[p] - dF*a_der[p] - H/dld*dld_der[p])/dld;
+                	  em_vector_pert[l][p][x3i][x1i][x2i][x3i][1] += em_loc * (dH*x_der[p] - dF*a_der[p] - H/dld*dld_der[p])/dld;
                 	}
 
                 	// But then also depth dependent responses coming from level responses.
                 	for (int p=1;p<=5;++p)
                 		for (int x3k=x3l;x3k<=x3h;++x3k){
-                		op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += (level_responses[p][(x3i-x3l) * nmap+lower_map+1][x3k] * Blu - 
-                			level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k] * Bul) * constant_factor * H;
-                		em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Aul*constant_factor * H;
+                		//if(p<=2) printf("p = %d x3i = %d x3k = %d per_lower = %e, per_higher = %e\n", p, x3i,x3k,
+                			//level_responses[p][(x3i-x3l)*nmap+lower_map+1][x3k],level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]);
+                		op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += (level_responses[p][(x3i-x3l)*nmap+lower_map+1][x3k]*Blu - 
+                			level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Bul) * constant_factor * H/dld;
+                		em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Aul*constant_factor * H/dld;
                 	}
                 	delete[](x_der+1);delete[](a_der+1);delete[](dld_der+1);
               	}

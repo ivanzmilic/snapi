@@ -157,6 +157,11 @@ void atom::compute_nlte_population_responses(){
     }
 // ------------------------------------------------------------------------------------------------------------------------------------------------
   
+    /*for (int ll=x3l;ll<=x3h;++ll)
+      for (int l=x3l;l<=x3h;++l)
+        for (int i=1;i<=nmap;++i)
+          printf("%d %d %d %e \n", ll,l,i, beta_Temp[ll][(l-x3l)*nmap+i]);*/
+
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Time spent on setting up linear system = %f \n", time_spent);
@@ -555,6 +560,12 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
   // The same way we are handling the NLTE problem itself, we are going to try to handle the problem of finding response functions.
   // In principle you should compute all the quantities which are needed for the computation of radiative rates, but then also some other stuff.
 
+  /*for (int ll=x3l;ll<=x3h;++ll)
+            if (isnan(em_pert_lte[1][ll][x1l][x2l][ll])){
+              printf("BBBBBBBBBBBB inside of the function!\n");
+                exit(1);
+          }*/
+
    int ncmp = 1; // total number of Stokes components
 
   // If this is the proper transition, i.e. if it has mean intensiy, approximate operator and `norm' 
@@ -777,7 +788,6 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                   derived_part -= I[x1l][x2l][l] * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * line_factor * op_pert_lte[1][l][x1l][x2l][l] / opp[x1l][x2l][l];
 
                   beta_Temp[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;
-
                   
                   // ------------ DENSITY -----------------------------------------------------------------------------------------------
 
@@ -838,9 +848,19 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 beta_Temp[ll][(l-x3l) * nmap +i + 1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) * J_chunk;
 
                 // Finally there is additional contribution from other species that we know:
-                beta_Temp[ll][(l-x3l) * nmap +i +1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
+                fp_t chunk = (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
                   * elementary_contribution * (response_to_op[l][ll] * op_pert_lte[1][ll][x1l][x2l][ll] + response_to_em[l][ll] * em_pert_lte[1][ll][x1l][x2l][ll]) / op_ref/ norm[x1l][x2l][l][tr];
+                beta_Temp[ll][(l-x3l) * nmap +i +1] += chunk;
 
+                //if (isnan(em_pert_lte[1][ll][x1l][x2l][ll])){
+                //  printf("AAAAAAAAAAA!\n");
+                  //exit(1);
+                //}
+                /*if (isnan(chunk)){
+                    printf("%e %e %e %e %e %e \n", elementary_contribution,response_to_op[l][ll],op_pert_lte[1][ll][x1l][x2l][ll],response_to_em[l][ll],em_pert_lte[1][ll][x1l][x2l][ll],norm[x1l][x2l][l][tr]);
+                    printf("!3! %d %d %d \n", ll,l,i);
+                    exit(1);
+                  }*/
                 // Then, an additional term if we are using taugrid as a primary grid:
                 if (parent_atm->is_tau_grid()){
                   

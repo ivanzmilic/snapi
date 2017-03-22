@@ -94,6 +94,12 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        
 	        fp_t ***** op_pert_lte = opacity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
 	        fp_t ***** em_pert_lte = emissivity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
+	        // Here is a nan! 
+	        /*for (int x3i=x3l;x3i<=x3h;++x3i)
+	        	if (em_pert_lte[1][x3i][x1l][x2l][x3i] != em_pert_lte[1][x3i][x1l][x2l][x3i]){
+	        		printf("We have em_pert_lte equal to NaNa at point %d wvl %d \n", x3i,l);
+	        		exit(1);
+	        	}*/
 
 	       	if (tau_grid) normalize_to_referent_opacity(op,em);
 
@@ -109,22 +115,22 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        }
 	        if (tau_grid) de_normalize(op,em);
 
-	        for(int a=0;a<natm;++a){ 
-	        	atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
-	        	op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity
-	        }
+	      for(int a=0;a<natm;++a){ 
+	        atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
+	        op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity        
+	      }
 
-	       	del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
-	        del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
-	        del_ft5dim(op_pert_lte,1,7, x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-			del_ft5dim(em_pert_lte,1,7, x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+	      del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
+	      del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
+	      del_ft5dim(op_pert_lte,1,7, x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+				del_ft5dim(em_pert_lte,1,7, x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
 	    }
 	    del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
 	    del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
 	} 
 	clock_t end = clock();
-  	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  	printf("Time spent on adding contributions = %f \n", time_spent); 
+  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  printf("Time spent on adding contributions = %f \n", time_spent); 
 	
 	delete[] lambda;
 	// cleanup angular quadrature arrays
