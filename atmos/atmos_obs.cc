@@ -378,40 +378,46 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
-  for (int a = 0; a<natm; ++a)
-    atml[a]->prof_setup();
+  //for (int a = 0; a<natm; ++a)
+  //  atml[a]->prof_setup();
 
   for (int a=0;a<natm;++a)
     atml[a]->zeeman_setup();
 
   class observable *o=new observable(4);
-  
+
+  fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  op_em_vector(Vr,B,theta,phi,lambda-1,nlambda,op_vector,em_vector);
+
   for (int l = 0; l<nlambda; ++l){
 
-    for (int a = 0; a<natm; ++a)
-      atml[a]->prof_init();
+    //for (int a = 0; a<natm; ++a)
+    //  atml[a]->prof_init();
 
-    fp_t *****op = opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);   
-    fp_t ****em = emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    if (tau_grid) normalize_to_referent_opacity(op, em);
+    //fp_t *****op = opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);   
+    //fp_t ****em = emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
+    if (tau_grid) normalize_to_referent_opacity(op_vector[l+1], em_vector[l+1]);
 
-    formal(rt_grid, S,0,op,em,theta,phi,boundary_condition_for_rt); 
+    formal(rt_grid, S,0,op_vector[l+1],em_vector[l+1],theta,phi,boundary_condition_for_rt); 
 
     // Prior to printing convert wavelength to air again:
     fp_t lambda_air = vactoair(lambda[l]);
 
     o->add(S[x1l][x2l][x3l],lambda_air);
 
-    del_ft5dim(op, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4, 1, 4);
-    del_ft4dim(em, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
+    //del_ft5dim(op, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4, 1, 4);
+    //del_ft4dim(em, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   }
 
-  for (int a = 0; a<natm; ++a)
-    atml[a]->prof_clear();
+  //for (int a = 0; a<natm; ++a)
+  //  atml[a]->prof_clear();
 
   del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   popclean();
   
   io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");

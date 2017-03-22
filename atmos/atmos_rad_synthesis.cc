@@ -35,21 +35,20 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
   memset(em_vector[1][x1l][x2l][x3l]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
 
   for (int x1i=x1l;x1i<=x1h;++x1i)
-	for (int x2i=x2l;x2i<=x2h;++x2i)
-	  for (int x3i=x3l;x3i<=x3h;++x3i){
-	    fp_t op = Ne[x1i][x2i][x3i] * 6.65E-25;
-		fp_t em = op * Planck_f(lambda_m, T[x1i][x2i][x3i]);
-		for (int l=1;l<=nlambda;++l){
-		  em_vector[l][x1i][x2i][x3i][1] = em;
-		  op_vector[l][x1i][x2i][x3i][1][1] = op;
-		}
+	  for (int x2i=x2l;x2i<=x2h;++x2i)
+	    for (int x3i=x3l;x3i<=x3h;++x3i){
+	      fp_t op = Ne[x1i][x2i][x3i] * 6.65E-25;
+		    fp_t em = op * Planck_f(lambda_m, T[x1i][x2i][x3i]);
+		    for (int l=1;l<=nlambda;++l){
+		      em_vector[l][x1i][x2i][x3i][1] = em;
+		      op_vector[l][x1i][x2i][x3i][1][1] = op;
+		    }
   }
   // Then add all the contributors from opacity and emissivity from atoms and molecules
-  
-  for (int a=0;a<=natm;++a){
-  	atml[a]->op_em_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op_vector,em_vector);
-  }
 
+  for (int a=0;a<natm;++a)
+  	atml[a]->op_em_vector(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op_vector,em_vector);
+  
   // Before exiting, reorder the opacity, so absorption matrix is properly set-up:
   for (int l=1;l<=nlambda;++l)
   	for (int x1i=x1l;x1i<=x1h;++x1i)
@@ -311,7 +310,10 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   del_ft8dim(op_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft7dim(em_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   delete []lambda_air;
-
+  for(int a=0;a<natm;++a){
+    atml[a]->zeeman_clear();
+    atml[a]->rtclean(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  }
 //
   //for(int a=0;a<natm;++a) alltml[a]->radiation_moments_clean();
   respclean();
