@@ -383,7 +383,7 @@ int job_class::start(void)
       
       class observable *obs = ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0,0);
 
-      //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
+      // /ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
       //class observable * obs;
       //obs = new observable(4);
       //obs->readsingle("spectrum_to_fit_short.dat");
