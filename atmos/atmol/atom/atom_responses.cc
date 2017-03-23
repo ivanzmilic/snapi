@@ -662,6 +662,27 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
     }
     
     // Lets deal with the "response matrix" separately:
+    for (int l=x3l;l<=x3h;++l) // For each depth point
+      for (int tr=1;tr<=ntr;++tr){ // For each posible transition
+
+        // Look up what levels we are talking about:
+        int z = inverse_tmap[tr][2];
+        int ii = inverse_tmap[tr][3];
+        int i = inverse_tmap[tr][4];
+        int type = 0; // 0 don't account, 1 b-f, 2-bb
+        if (i == nl[z]){
+          if (lambda <= bf[z][ii]->getlambda_crit())
+            type = 1;
+        }
+        else {
+          if (A[z][i][ii] > 1.0)
+          type = 2;
+        }
+        
+
+    }
+    //exit(1);
+
 
     for (int l = x3l; l<=x3h; ++l){
       for (int ll = x3l; ll <= x3h; ++ll){
