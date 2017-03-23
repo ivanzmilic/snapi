@@ -847,7 +847,6 @@ fp_t * atom::a_derivative(int x1i, int x2i, int x3i, int z, int i, int ii, fp_t 
   derivative[1] = -a/dld * d_dld;
   derivative[1] += damp_col_der_T(x1i, x2i, x3i, z, i, ii, Temp, ne, lam)  / dld * (lam*lam)/(4.0*pi*c) * turn_on_damping;
 
-
   // Then the density:
   fp_t Nt = fetch_Nt(x1i,x2i,x3i);
   fp_t delta_Nt = delta_Nt_frac * Nt;

@@ -1752,15 +1752,15 @@ void atom::zeeman_clear(){
         delete[]S_b[tr];
         delete[]S_r[tr];
         delete[]nm[tr];
-      }
-      //delete[](delta_lambda_p+1);
-      //delete[](delta_lambda_b+1);
-      //delete[](delta_lambda_r+1);
-      //delete[](S_p+1);
-      //delete[](S_b+1);
-      //delete[](S_r+1);
-      //delete[](nm+1);
+      }      
     }
+    delete[](nm+1);
+    delete[](delta_lambda_p+1);
+    delete[](delta_lambda_b+1);
+    delete[](delta_lambda_r+1);
+    delete[](S_p+1);
+    delete[](S_b+1);
+    delete[](S_r+1);
   }
 }
 

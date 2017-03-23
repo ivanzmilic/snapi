@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include <math.h>
 
 #include "types.h"
 #include "uts.h"
@@ -334,8 +335,6 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 	// But then also depth dependent responses coming from level responses.
                 	for (int p=1;p<=5;++p)
                 		for (int x3k=x3l;x3k<=x3h;++x3k){
-                		//if(p<=2) printf("p = %d x3i = %d x3k = %d per_lower = %e, per_higher = %e\n", p, x3i,x3k,
-                			//level_responses[p][(x3i-x3l)*nmap+lower_map+1][x3k],level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]);
                 		op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += (level_responses[p][(x3i-x3l)*nmap+lower_map+1][x3k]*Blu - 
                 			level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Bul) * constant_factor * H/dld;
                 		em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Aul*constant_factor * H/dld;
@@ -345,19 +344,21 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
               }
               else {
             	  // Derivative of a and allocating memory for all the derivatives of the profiles:
-            	  a_der = a_derivative(x1i,x2i,x3i,z,i,ii,lam,Vlos,B_vec,0,0);
+            	  a_der = a_derivative(x1i,x2i,x3i,z,i,ii,(lambda[nlambda]+lambda[1])*0.5,Vlos,B_vec,0,0);
             	  fp_t * H_p_der, * H_b_der, * H_r_der; // Voigt Profiles, derivatives
                 fp_t * F_p_der, * F_b_der, * F_r_der; // Faraday Voigt profiles, derivatives
                 H_p_der = new fp_t [7] - 1; H_b_der = new fp_t [7] - 1; H_r_der = new fp_t [7] - 1;
                 F_p_der = new fp_t [7] - 1; F_b_der = new fp_t [7] - 1; F_r_der = new fp_t [7] - 1;
-                memset(H_p_der+1,0,7*sizeof(fp_t));
-                memset(H_b_der+1,0,7*sizeof(fp_t));
-                memset(H_r_der+1,0,7*sizeof(fp_t));
-                memset(F_p_der+1,0,7*sizeof(fp_t));
-                memset(F_b_der+1,0,7*sizeof(fp_t));
-                memset(F_r_der+1,0,7*sizeof(fp_t));
+                
 		          	for (int l=1;l<=nlambda;++l){
-			          	fp_t x = 0.0;
+
+		          		memset(H_p_der+1,0,7*sizeof(fp_t));
+	                memset(H_b_der+1,0,7*sizeof(fp_t));
+	                memset(H_r_der+1,0,7*sizeof(fp_t));
+	                memset(F_p_der+1,0,7*sizeof(fp_t));
+	                memset(F_b_der+1,0,7*sizeof(fp_t));
+	                memset(F_r_der+1,0,7*sizeof(fp_t));
+				          fp_t x = 0.0;
 			          	fp_t H_p, H_b, H_r; // Voigt Profiles
 			          	fp_t F_p, F_b, F_r; // Faraday Voigt profiles
 			          	H_p = H_b = H_r = 0.0; // Initial values
@@ -378,6 +379,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                       H_p_der[p] += (Hder * x_der[p] - Fder * a_der[p]) * S_p[tr][mi];
                       F_p_der[p] += (Fder * x_der[p] + Hder * a_der[p]) * S_p[tr][mi];
                     }
+                    
                     delete[](x_der+1);
                   }
                   // Sigma B component:
@@ -389,10 +391,10 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 	  F_b += F_temp * S_b[tr][mi];
 
                 	  // The derivative:
-                    x_der = x_derivative(x1i,x2i,x3i,z,i,ii,lambda[l],Vlos,B_vec,0,mi);
+                    x_der = x_derivative(x1i,x2i,x3i,z,i,ii,lambda[l],Vlos,B_vec,1,mi);
                     for (int p=1;p<=7;++p){
-                      H_p_der[p] += (Hder * x_der[p] - Fder * a_der[p]) * S_p[tr][mi];
-                      F_p_der[p] += (Fder * x_der[p] + Hder * a_der[p]) * S_p[tr][mi];
+                      H_b_der[p] += (Hder * x_der[p] - Fder * a_der[p]) * S_b[tr][mi];
+                      F_b_der[p] += (Fder * x_der[p] + Hder * a_der[p]) * S_b[tr][mi];
                     }
                     delete[](x_der+1);
                 	}
@@ -405,13 +407,18 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 	  F_r += F_temp * S_r[tr][mi];
 
                 	  // The derivative:
-                    x_der = x_derivative(x1i,x2i,x3i,z,i,ii,lambda[l],Vlos,B_vec,0,mi);
+                    x_der = x_derivative(x1i,x2i,x3i,z,i,ii,lambda[l],Vlos,B_vec,2,mi);
                     for (int p=1;p<=7;++p){
-                      H_p_der[p] += (Hder * x_der[p] - Fder * a_der[p]) * S_p[tr][mi];
-                      F_p_der[p] += (Fder * x_der[p] + Hder * a_der[p]) * S_p[tr][mi];
+                      H_r_der[p] += (Hder * x_der[p] - Fder * a_der[p]) * S_r[tr][mi];
+                      F_r_der[p] += (Fder * x_der[p] + Hder * a_der[p]) * S_r[tr][mi];
                     }
                     delete[](x_der+1);
                 	}
+
+                	//if (x3i==x3h){
+                	//	printf("Atom %s wavelength %e ", id, lambda[l]);
+                	//	printf("%e %e %e %e %e %e \n",H_p_der[1],H_b_der[1],H_r_der[1],F_p_der[1],F_b_der[1],F_r_der[1]);
+                	//}
 
                 	// Normalize with dld
                 	H_p /= dld; H_b /= dld; H_r /= dld;
@@ -503,6 +510,9 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
 	               	em_vector_pert[l][7][x3i][x1i][x2i][x3i][2] += -0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*sp * em_loc;
                 	em_vector_pert[l][7][x3i][x1i][x2i][x3i][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*cp * em_loc;        
 		          }
+		          delete[](H_p_der+1);delete[](H_r_der+1);delete[](H_b_der+1);
+		          delete[](F_p_der+1);delete[](F_r_der+1);delete[](F_b_der+1);
+		          delete[](a_der+1);
             }
               
           }

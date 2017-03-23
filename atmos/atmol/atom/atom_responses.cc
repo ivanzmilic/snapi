@@ -560,13 +560,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
   // The same way we are handling the NLTE problem itself, we are going to try to handle the problem of finding response functions.
   // In principle you should compute all the quantities which are needed for the computation of radiative rates, but then also some other stuff.
 
-  /*for (int ll=x3l;ll<=x3h;++ll)
-            if (isnan(em_pert_lte[1][ll][x1l][x2l][ll])){
-              printf("BBBBBBBBBBBB inside of the function!\n");
-                exit(1);
-          }*/
-
-   int ncmp = 1; // total number of Stokes components
+  int ncmp = 1; // total number of Stokes components
 
   // If this is the proper transition, i.e. if it has mean intensiy, approximate operator and `norm' 
   if (Jb && norm && NLTE){
@@ -649,16 +643,18 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
             memset(x_der+1,0,7*sizeof(fp_t));
             memset(a_der+1,0,7*sizeof(fp_t));
             memset(dld_der+1,0,7*sizeof(fp_t));
-            compute_xa_der_scalar(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos, x, a, x_der, a_der, dld_der);
-            fp_t F,H,dF,dH;
-            fvoigtn(x,a,H,F,dH,dF);
-            fp_t lam=fabs(h*c/(ee[z_i][l_i]-ee[z_i][l_ii]));
-            fp_t dld = broad_dop(lam, fetch_temperature(x1l,x2l,x3i),fetch_vt(x1l,x2l,x3i));
+            if (A[z_i][l_i][l_ii] > 1.0){
+              compute_xa_der_scalar(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos, x, a, x_der, a_der, dld_der);
+              fp_t F,H,dF,dH;
+              fvoigtn(x,a,H,F,dH,dF);
+              fp_t lam=fabs(h*c/(ee[z_i][l_i]-ee[z_i][l_ii]));
+              fp_t dld = broad_dop(lam, fetch_temperature(x1l,x2l,x3i),fetch_vt(x1l,x2l,x3i));
 
-            profile_derivative_T[x1l][x2l][x3i][tr] = dH * x_der[1] / dld - dF * a_der[1] / dld - H/dld/dld*dld_der[1];
-            profile_derivative_density[x1l][x2l][x3i][tr] = dH * x_der[2] / dld - dF * a_der[2] / dld - H/dld/dld*dld_der[2];
-            profile_derivative_vt[x1l][x2l][x3i][tr] = dH * x_der[3] / dld - dF * a_der[3] / dld - H/dld/dld*dld_der[3];
-            profile_derivative_vr[x1l][x2l][x3i][tr] = (dH * x_der[4] / dld - dF * a_der[4] / dld - H/dld/dld*dld_der[4])*0.0*(cos(theta));
+              profile_derivative_T[x1l][x2l][x3i][tr] = dH * x_der[1] / dld - dF * a_der[1] / dld - H/dld/dld*dld_der[1];
+              profile_derivative_density[x1l][x2l][x3i][tr] = dH * x_der[2] / dld - dF * a_der[2] / dld - H/dld/dld*dld_der[2];
+              profile_derivative_vt[x1l][x2l][x3i][tr] = dH * x_der[3] / dld - dF * a_der[3] / dld - H/dld/dld*dld_der[3];
+              profile_derivative_vr[x1l][x2l][x3i][tr] = (dH * x_der[4] / dld - dF * a_der[4] / dld - H/dld/dld*dld_der[4])*0.0*(cos(theta));
+            }
             delete [](x_der+1);
             delete [](a_der+1);
             delete [](dld_der+1);
@@ -1320,7 +1316,7 @@ fp_t * atom::em_derivative_explicit(int depth, int, int, fp_t lambda){
   //return derivative;
   fp_t T = fetch_temperature(x1l, x2l, depth);
   fp_t ne = fetch_Ne(x1l,x2l,depth);
-
+  
   for(int z=0;z<Z;++z) // skip final stage: it cannot be ionized
     for(int l=0;l<nl[z];++l){
       
@@ -1334,12 +1330,10 @@ fp_t * atom::em_derivative_explicit(int depth, int, int, fp_t lambda){
         fp_t pop_mod = pop[x1l][x2l][depth].n[z+1][0] * ne * 2.07E-16 * pow(T, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp(delta_E / k /  T);
         
         derivative[1] += sigma *  (-pop_mod * exp(- h * c / lambda / k / T) * h*c/lambda/k/T/T) * B_planck;
-
         fp_t constant_part = pop[x1l][x2l][depth].n[z+1][0] * 2.07E-16 * fp_t(g[z][l]) / fp_t(g[z+1][0]) * B_planck * sigma * (1.0 - exp(-h*c/lambda/k/T));
-
+        
         derivative[1] += constant_part * (parent_atm->get_ne_lte_derivative(1,x1l,x2l,depth) * pow(T,-1.5) * exp(delta_E/k/T) +
           ne * (-1.5 * pow(T,-2.5)) * exp(delta_E/k/T) + ne * pow(T,-1.5) * exp(delta_E/k/T) * -delta_E/k/T/T);
-
         // Finally, additional part because of Planck function:
         derivative[1] += pop_mod * sigma * (1.0 - exp(-h*c/lambda/k/T)) * Planck_f_derivative(lambda, T);
           

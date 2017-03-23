@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <cmath>
+#include <math.h>
 #include "types.h"
 #include "io.h"
 #include "mem.h"
@@ -95,12 +95,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        fp_t ***** op_pert_lte = opacity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
 	        fp_t ***** em_pert_lte = emissivity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
 	        // Here is a nan! 
-	        /*for (int x3i=x3l;x3i<=x3h;++x3i)
-	        	if (em_pert_lte[1][x3i][x1l][x2l][x3i] != em_pert_lte[1][x3i][x1l][x2l][x3i]){
-	        		printf("We have em_pert_lte equal to NaNa at point %d wvl %d \n", x3i,l);
-	        		exit(1);
-	        	}*/
-
+	        
 	       	if (tau_grid) normalize_to_referent_opacity(op,em);
 
 	        if(formal_with_responses(rt_grid, S,0,response_to_op,response_to_em,op,em,th[tp],ph[tp], boundary_condition_for_rt)){ // solution and approximate operator
@@ -115,9 +110,15 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        }
 	        if (tau_grid) de_normalize(op,em);
 
-	      for(int a=0;a<natm;++a){ 
-	        atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
-	        op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity        
+	        /*for (int x3i=x3l;x3i<=x3h;++x3i)
+    				if (isnan(em_pert_lte[1][x3i][x1l][x2l][x3i])){
+      			printf("We have em_pert_lte equal to nan at point OUTSIDE %d.\n", x3i);
+      			exit(1);
+  				}
+  				printf("Entering add reponse contributions for wavelength %d \n",l);*/
+	      	for(int a=0;a<natm;++a){ 
+	        	atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
+	        	op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity        
 	      }
 
 	      del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections

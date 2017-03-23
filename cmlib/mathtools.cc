@@ -1009,8 +1009,9 @@ fp_t Planck_f(fp_t lambda, fp_t T){
 }
 
 fp_t Planck_f_derivative(fp_t lambda, fp_t T){
-  fp_t exponent = exp(1.4387769/lambda/T);
-  return Planck_f(lambda, T) / (exponent - 1.0) * exponent * 1.4387769/lambda/T/T;
+  fp_t exponent = (1.4387769/lambda/T);
+  fp_t temp = (exponent > 5.0) ? 1.0 : exp(exponent)/(exp(exponent) - 1.0);
+  return Planck_f(lambda, T) * temp * 1.4387769/lambda/T/T;
 }
 
 fp_t compute_E(fp_t y0, fp_t y1, fp_t y2, fp_t h1, fp_t h2){
