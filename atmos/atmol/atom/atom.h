@@ -259,7 +259,7 @@ protected:
   virtual fp_t derivative_collisions_full_temp(int, int, int, int, int);
   virtual fp_t derivative_collisions_full_density(int, int, int, int, int);
 
-  // More derivative related functions, but now related to collisional rates:
+  // More derivative related functions, but now related to radiative rates:
 
   virtual fp_t * dR_i_cont_dqk(int z, int i, int x1i, int x2i, int x3i, fp_t Temp, fp_t Ne, fp_t I, fp_t lambda);
   virtual fp_t * dR_cont_i_dqk(int z, int i, int x1i, int x2i, int x3i, fp_t Temp, fp_t Ne, fp_t I, fp_t lambda);
@@ -393,6 +393,7 @@ public:
   virtual int responses_init();
   virtual int responses_clear();
   virtual int add_response_contributions(fp_t***, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
+  virtual int add_response_contributions_new(fp_t***, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
   virtual int add_response_contributions_taugrid(fp_t***, fp_t ***, fp_t *****, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
   virtual int add_pops_to_response(int , int);
   virtual int subtract_pops_from_response(int, int);

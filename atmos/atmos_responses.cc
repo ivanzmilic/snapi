@@ -94,7 +94,6 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        
 	        fp_t ***** op_pert_lte = opacity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
 	        fp_t ***** em_pert_lte = emissivity_pert_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
-	        // Here is a nan! 
 	        
 	       	if (tau_grid) normalize_to_referent_opacity(op,em);
 
@@ -109,14 +108,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	            del_ft2dim(response_to_em,x3l, x3h, x3l, x3h); 
 	        }
 	        if (tau_grid) de_normalize(op,em);
-
-	        /*for (int x3i=x3l;x3i<=x3h;++x3i)
-    				if (isnan(em_pert_lte[1][x3i][x1l][x2l][x3i])){
-      			printf("We have em_pert_lte equal to nan at point OUTSIDE %d.\n", x3i);
-      			exit(1);
-  				}
-  				printf("Entering add reponse contributions for wavelength %d \n",l);*/
-	      	for(int a=0;a<natm;++a){ 
+  				for(int a=0;a<natm;++a){ 
 	        	atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
 	        	op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity        
 	      }
