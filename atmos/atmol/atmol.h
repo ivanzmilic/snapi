@@ -111,6 +111,9 @@ public:
   virtual int add_response_contributions(fp_t***, fp_t**, fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****){
     return 0;
   }
+   virtual int add_response_contributions_new(fp_t***, fp_t**, fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****){
+    return 0;
+  }
 
   virtual int add_response_contributions_taugrid(fp_t***, fp_t ***, fp_t *****, fp_t**, fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****){
     return 0;

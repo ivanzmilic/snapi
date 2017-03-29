@@ -30,6 +30,8 @@ model::model(){
   phi_nodes_tau = 0;
   phi_nodes_phi = 0;
 
+  response_to_parameters = 0;
+
 }
 
 model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){
@@ -99,6 +101,7 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   } 
   N_nodes_theta = 0;
   N_nodes_phi = 0;
+  response_to_parameters = 0;
 }
 
 model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in, int N_nodes_theta_in, int N_nodes_phi_in){
@@ -199,7 +202,8 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   else{
     printf("model::cannot create model with negative number of nodes in phi \n");
     exit(1);
-  } 
+  }
+  response_to_parameters = 0; 
 }
 
 model::~model(void){
@@ -547,6 +551,30 @@ int model::print_to_file(FILE * output){
     fprintf(output,"atmos::mode : no phi nodes \n");
 
   return 0;
+}
+
+int model::set_response_to_parameters(fp_t *** responses_in, int Nd_in){
+
+  N_depths = Nd_in;
+  int N_parameters = N_nodes_temp + N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta + N_nodes_phi;
+  if (response_to_parameters==0){
+    response_to_parameters = ft3dim(1,N_parameters,1,7,1,Nd_in);
+  }
+  memset(response_to_parameters[1][1]+1,0,N_parameters*7*N_depths*sizeof(fp_t));
+
+  for (int p=1;p<=N_parameters;++p)
+    for (int q=1;q<=7;++q)
+      for (int x3k=1;x3k<=N_depths;++x3k)
+        response_to_parameters[p][q][x3k] = responses_in[p][q][x3k];
+
+}
+
+fp_t *** model::get_response_to_parameters(){
+
+  int N_parameters = N_nodes_temp + N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta + N_nodes_phi;
+  fp_t *** response_to_parameters_cpy = ft3dim(1,N_parameters,1,7,1,N_depths);
+  memcpy(response_to_parameters_cpy[1][1]+1,response_to_parameters[1][1]+1,N_parameters*7*N_depths*sizeof(fp_t));
+  return response_to_parameters_cpy;
 }
 
 model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){

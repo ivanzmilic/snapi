@@ -154,7 +154,7 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
 
 // Now we will put the function whih synthesizes spectrum and responses and returns them back here:
 
-observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t **** intensity_responses, model* input_model)
+observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** intensity_responses, model* input_model)
   // This function synthesises the spectrum, and computes the response functions of the 
   // unpolarized intensity. It can compute the derivatives of populations and number densities
   // analyticaly or numerically, but the final computation of perturbation is computed analyticaly.
@@ -194,8 +194,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   class observable *o=new observable(4);
 
-  if (intensity_responses) // If provided, copy the intensity to the input array
-    memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
+  //if (intensity_responses) // If provided, copy the intensity to the input array
+    //memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
 
   clock_t begin = clock();
   clock_t end = clock();
@@ -214,6 +214,14 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       normalize_to_referent_opacity(op[l],em[l]);
   }
 
+
+  fp_t *** atm_resp_to_parameters;
+  int N_parameters = 0;
+  if (input_model){
+    atm_resp_to_parameters =  input_model->get_response_to_parameters();
+    N_parameters = input_model->get_N_nodes_total();
+  }
+  
   for(int l=0;l<nlambda;++l){
 
     // Now we formally solve for each wavelength:
@@ -236,28 +244,24 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
               em_pert[l+1][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
     }
 
-    for (int param=1;param<=7;++param){
-      formal_pert_numerical(dS, op[l+1], em[l+1], op_pert[l+1][param], em_pert[l+1][param], theta, phi, boundary_condition_for_rt);
+    if (input_model == 0){
+      for (int param=1;param<=7;++param){
+        formal_pert_numerical(dS, op[l+1], em[l+1], op_pert[l+1][param], em_pert[l+1][param], theta, phi, boundary_condition_for_rt);
   
-      if (param == 2)
-        for (int x3i=x3l;x3i<=x3h;++x3i)
-          for (int s=1;s<=4;++s)
-            dS[x3i][x1l][x2l][x3l][s] /= Nt[x1l][x2l][x3i]*delta_Nt_frac;
+        if (param == 2)
+          for (int x3i=x3l;x3i<=x3h;++x3i)
+            for (int s=1;s<=4;++s)
+              dS[x3i][x1l][x2l][x3l][s] /= Nt[x1l][x2l][x3i]*delta_Nt_frac;
 
-      if (param == 6 || param == 7)
-        for (int x3i=x3l;x3i<=x3h;++x3i)
-          for (int s=1;s<=4;++s)
-            dS[x3i][x1l][x2l][x3l][s] /= delta_angle;
+        if (param == 6 || param == 7)
+          for (int x3i=x3l;x3i<=x3h;++x3i)
+            for (int s=1;s<=4;++s)
+              dS[x3i][x1l][x2l][x3l][s] /= delta_angle;
       
-      for (int x3i=x3l;x3i<=x3h;++x3i)
-        for (int s=1;s<=4;++s)
-          d_obs_a[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
-
-      if (intensity_responses)
         for (int x3i=x3l;x3i<=x3h;++x3i)
           for (int s=1;s<=4;++s)
-            intensity_responses[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
-
+            d_obs_a[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
+      }
     }
     
     // Go to lambda_air
@@ -265,36 +269,35 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
     // Add it to the observable
     o->add(S[x1l][x2l][x3l],lambda_air[l]);
-
-    // Finally, after all responses for each of the parameters are known, 
-    // we need to 'rotate' the responses to \theta and \phi, because they are calculate for \theta and \phi where the 
-    // system of reference is given w.r.t. the light ray. What we want are the responses to \theta and \phi in the frame
-    // of reference of the atmosphere
-    // THIS IS NOT IMPLEMENTED, DO THIS! 
     
   }
   
   end = clock();
   time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
   printf("Time spent on op/em + pert = %f \n", time_spent);
+
+  // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
     // Write down the intensity perturbations:
-  FILE * out;
-  out = fopen("stokes_intensity_responses_analytical.txt", "w");
-  for (int param=1;param<=7;++param){
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      for (int l=1;l<=nlambda;++l){
-        fp_t loc = 0;
-        if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
-        fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
-        for (int s=1;s<=4;++s)
-          fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
-        fprintf(out," \n");
+  if (!intensity_responses){
+    FILE * out;
+    out = fopen("stokes_intensity_responses_analytical.txt", "w");
+      for (int param=1;param<=7;++param){
+      for (int x3i=x3l;x3i<=x3h;++x3i){
+        for (int l=1;l<=nlambda;++l){
+          fp_t loc = 0;
+          if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
+          fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
+          for (int s=1;s<=4;++s)
+            fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
+          fprintf(out," \n");
+        }
       }
     }
+    fclose(out);
   }
-  fclose(out);
+  
     
   del_ft4dim(S,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft3dim(Lambda_approx,x1l,x1h,x2l,x2h,x3l,x3h);

@@ -949,3 +949,116 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   return o;
 
  }
+
+ // Same as the above except for polarized radiation (Zeeman mode so far):
+ observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
+
+  // We first need to create the atmosphere from the model and compute the observable:
+  build_from_nodes(atmos_model);
+  
+  int N_parameters = atmos_model->get_N_nodes_total();
+  int N_nodes_T = atmos_model->get_N_nodes_temp();
+  int N_nodes_vt = atmos_model->get_N_nodes_vt();
+  int N_nodes_vs = atmos_model->get_N_nodes_vs();
+  int N_nodes_B = atmos_model->get_N_nodes_B();
+  int N_nodes_theta = atmos_model->get_N_nodes_theta();
+  int N_nodes_phi = atmos_model->get_N_nodes_phi();
+
+  memset(response_to_parameters[1][1]+1, 0, N_parameters*nlambda*4*sizeof(fp_t));
+
+  int N_depths = x3h-x3l+1;
+  fp_t *** resp_atm_to_parameters = ft3dim(1,N_parameters,1,7,1,N_depths);
+  memset(resp_atm_to_parameters[1][1]+1,0,N_parameters*7*N_depths*sizeof(fp_t));
+  
+  fp_t step = delta_T; // We still need step because we want to numerically study the derivative of the interpolation scheme. It does not matter a lot.
+     
+  for (int i=1;i<=N_nodes_T;++i){
+    
+    atmos_model->perturb_node_value(i, step * 0.5);
+    build_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      resp_atm_to_parameters[i][1][x3i-x3l+1] = T[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][2][x3i-x3l+1] = Nt[x1l][x2l][x3i];
+    }
+    
+    atmos_model->perturb_node_value(i, -1.0 * step);
+    build_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      resp_atm_to_parameters[i][1][x3i-x3l+1] -= T[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][2][x3i-x3l+1] -= Nt[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][1][x3i-x3l+1] /= (1.0 * step);
+      resp_atm_to_parameters[i][2][x3i-x3l+1] /= (1.0 * step); 
+    }
+
+    atmos_model->perturb_node_value(i, 0.5 * step);
+    build_from_nodes(atmos_model);
+  }
+  
+  int param = 0;
+  // Then for all other parameters it is much simpler as we do not have to build atmosphere, we can just interpolate.
+  for (int i=N_nodes_T+1;i<=N_parameters;++i){
+
+    if (i<=N_nodes_T+N_nodes_vt){
+      step = delta_vt;
+      param = 3;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs){
+      step = delta_vr;
+      param = 4;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B){
+      step = delta_B;
+      param = 5;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta){
+      step = delta_angle;
+      param = 6;
+    }
+    else {
+      step = delta_angle;
+      param = 7;
+    }
+    // First perturb to the one side
+    fp_t * local_perturbations = new fp_t [x3h-x3l+1] - x3l;
+    
+    atmos_model->perturb_node_value(i, step * 0.5);
+    interpolate_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
+      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      //if (i>N_nodes_T+N_nodes_vt+N_nodes_vs)
+      //  printf("%d %e %e %e",B_mag, theta_B, phi_B);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] = Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B;
+    }
+    
+    atmos_model->perturb_node_value(i, -1.0 * step);
+    interpolate_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
+      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] -= (Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] /= step;
+    }
+
+    atmos_model->perturb_node_value(i, 0.5 * step);
+    interpolate_from_nodes(atmos_model);
+  
+  }
+
+  // Now we start the responses part.
+
+  atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
+
+  observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model);
+
+  del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
+
+  return o;
+  
+ }

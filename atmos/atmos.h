@@ -231,6 +231,7 @@ public:
 // Vector case. Here we have already generalized. So no need to split between "tau" and "geometrical" functions. This should be cleaned up in 
 // the 'final' version of the code
   virtual observable *obs_stokes_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
+  virtual observable *obs_stokes_responses_to_nodes_new(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // 'New' version
                                                                                                          // hence the 3D vector in last argument
   virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
                                                                                                          // hence the 3D vector in last argument
@@ -238,7 +239,8 @@ public:
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
-  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****, model*); // Same as obs_scalar_responses, except it works for full Stokes vector
+  
+  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
   
   // Debug:
@@ -314,6 +316,8 @@ private:
   int N_nodes_theta;
   int N_nodes_phi;
 
+  int N_depths; // This depends on the specific atmosphere we are using:
+  
   // Does it make sense to have separate number of nodes for different components of velocity/magnetic field? 
   // To me it does not. But maybe we want to allow for possibillity for that in the code?
   // Let's leave this as a starting point. If we get things working we will code new one.
@@ -347,6 +351,9 @@ private:
 
   fp_t * phi_nodes_tau;
   fp_t * phi_nodes_phi;
+
+  // Mapping matrix which describes how is every parameter mapped onto perturbations of other ones:
+  fp_t *** response_to_parameters;
 
 public:
 
@@ -396,6 +403,9 @@ public:
 
   int print();
   int print_to_file(FILE *);
+
+  int set_response_to_parameters(fp_t ***, int);
+  fp_t *** get_response_to_parameters();
 
 
 };
