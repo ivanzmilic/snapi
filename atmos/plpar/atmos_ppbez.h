@@ -29,6 +29,7 @@ protected:
   // Polarized versions:
   virtual int formal (fp_t*, fp_t ****S,fp_t ***L,fp_t *****op,fp_t ****em,fp_t t,fp_t p, fp_t boundary); // Formal for polarized
   virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary);
+  virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary, int N_parameters);
   virtual int formal_pert_analytical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary);
   virtual int formal_with_responses_jcdti(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t );
   virtual int formal_with_responses_full(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t );

@@ -1871,7 +1871,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         fp_t JJ=(tmap[z][l][nl[z]])?J_lu[tmap[z][l][nl[z]]]:-1.0;     // angular and frequency integrated intensity
         
         // Transitions from this level:
-        fp_t Radiative_rates = 1.0 * R_i_cont(z, l, JJ, Temp);
+        fp_t Radiative_rates = 0.0 * R_i_cont(z, l, JJ, Temp);
         fp_t Collisional_rates = C_i_cont(z, l, Temp, ne);
         //if (x3i==x3h && l==0)
           //printf("Level: %d C_b->f = %e R_b->f %e \n", l+1, Collisional_rates, Radiative_rates);
@@ -1882,7 +1882,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         
         JJ=(tmap[z][l][nl[z]])?J_ul[tmap[z][l][nl[z]]]:-1.0;     // angular and frequency integrated intensity
         
-        Radiative_rates = 1.0 * R_cont_i(z, l, JJ, Temp, ne);
+        Radiative_rates = 0.0 * R_cont_i(z, l, JJ, Temp, ne);
         Collisional_rates = C_cont_i(z, l, Temp, ne);
         
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);

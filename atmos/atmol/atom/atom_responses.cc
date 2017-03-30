@@ -120,7 +120,7 @@ void atom::compute_nlte_population_responses(){
           // ionization out of level z,l
           fp_t JJ=(tmap[z][l_i][nl[z]])?J_lu[tmap[z][l_i][nl[z]]]:-1.0;     // angular and frequency integrated intensity 
           // Transitions from this level:
-          fp_t Radiative_rates = 1.0 * R_i_cont(z, l_i, JJ, Temp);
+          fp_t Radiative_rates = 0.0 * R_i_cont(z, l_i, JJ, Temp);
           fp_t Collisional_rates = C_i_cont(z, l_i, Temp, ne);
           
           response_matrix[(l-x3l) * nmap + i][(l-x3l) * nmap + i] -= (Radiative_rates + Collisional_rates); 
@@ -128,7 +128,7 @@ void atom::compute_nlte_population_responses(){
           
           JJ=(tmap[z][l_i][nl[z]])?J_ul[tmap[z][l_i][nl[z]]]:-1.0;     // angular and frequency integrated intensity
     
-          Radiative_rates = 1.0 * R_cont_i(z, l_i, JJ, Temp, ne);
+          Radiative_rates = 0.0 * R_cont_i(z, l_i, JJ, Temp, ne);
           Collisional_rates = C_cont_i(z, l_i, Temp, ne);
 
           response_matrix[(l-x3l) * nmap + i][(l-x3l) * nmap + i+ dl] += (Radiative_rates + Collisional_rates);
@@ -829,7 +829,7 @@ int atom::add_response_contributions_new(fp_t *** I, fp_t ** response_to_op, fp_
 
           // Then, an additional term if we are using taugrid as a primary grid:
           if (istaugrid){      
-            fp_t op_ref_der = parent_atm->get_op_referent_der(2,ll,x1l,x2l,ll);
+            fp_t op_ref_der = parent_atm->get_op_referent_der(3,ll,x1l,x2l,ll);
             beta_v_micro[ll][(l-x3l) * nmap +rmap[z][i] +1] += dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
               response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
             beta_v_micro[ll][(l-x3l) * nmap +rmap[z][ii] +1] -= dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
@@ -870,7 +870,7 @@ int atom::add_response_contributions_new(fp_t *** I, fp_t ** response_to_op, fp_
         }
       }
 
-      else if (type == 1){ // Else it is the f-b transition (i->ii):
+      else if (type == 11){ // Else it is the f-b transition (i->ii):
 
         // Keep in mind that ii -> lower level 
         // i is equal to nl[z], z is z corresponding to ii
@@ -941,7 +941,7 @@ int atom::add_response_contributions_new(fp_t *** I, fp_t ** response_to_op, fp_
               (response_to_op[l][ll]*op_ref_der*opp[x1l][x2l][ll]+response_to_em[l][ll]*op_ref_der*em[x1l][x2l][ll])/op_ref/op_ref;
             beta_Temp[ll][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI*angular_weight*lambda_w *
               (response_to_op[l][ll]*op_ref_der*opp[x1l][x2l][ll]+response_to_em[l][ll]*op_ref_der*em[x1l][x2l][ll])/op_ref/op_ref;
-                     
+              
             // And then the good old density:
             op_ref_der = parent_atm->get_op_referent_der(2,ll,x1l,x2l,ll);
             beta_density[ll][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z+1][i]*ddR_cont_i_dI*angular_weight*lambda_w* 
@@ -1357,7 +1357,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
             }
 
             // Otherwise it has to be a b-f transition, f-b transition:
-            else if (is_bf == 1){ // Such elegant very wow
+            else if (is_bf == 11){ // Such elegant very wow
         
               // Separate known perturbations to intensity. These come from known perturbations of chi and eta
               fp_t * dI_dqk_lte = new fp_t [7]-1;
@@ -1454,7 +1454,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                   (response_to_op[l][ll] * d_op_d_n + response_to_em[l][ll] * d_em_d_n) * lambda_w * angular_weight/op_ref;
               }
             }
-            else if (is_bf == -1){ // Even more elegant even more wow
+            else if (is_bf == -11){ // Even more elegant even more wow
 
              // This is all practically the same as in the case of b-f transitions, except that we have to take the opposite level
              // That is l_i is now continuum while l_ii is bound.

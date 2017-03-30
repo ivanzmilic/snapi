@@ -445,6 +445,24 @@ int model::perturb_node_value(int parameter_no, fp_t perturbation){
 
 }
 
+int model::which_parameter(int i){
+
+  if (i<=N_nodes_temp)
+    return 1;
+  else if (i<=N_nodes_temp+N_nodes_vt)
+    return 2;
+  else if (i<=N_nodes_temp+N_nodes_vt+N_nodes_vs)
+    return 3;
+  else if (i<=N_nodes_temp+N_nodes_vt+N_nodes_vs+N_nodes_B)
+    return 4;
+  else if (i<=N_nodes_temp+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta)
+    return 5;
+  else if (i<=N_nodes_temp+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta+N_nodes_phi)
+    return 6;
+  
+  return 0;
+}
+
 int model::print(){
 
   if (N_nodes_temp){

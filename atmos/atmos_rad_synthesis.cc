@@ -263,6 +263,46 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
             d_obs_a[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
       }
     }
+    else {
+      // Otherwise, if model is supplied as input parameter we are gonna go compute responses to parameters directly
+      fp_t ****** op_pert_params = ft6dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+      fp_t ***** em_pert_params = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+      memset(op_pert_params[1][x1l][x2l][x3l][1]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
+      memset(em_pert_params[1][x1l][x2l][x3l]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
+
+      fp_t ***** dS_parameters = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+      fp_t normalizer = 1.0;
+      for (int p=1;p<=N_parameters;++p)
+        for (int q=1;q<=7;++q){
+          if (q==6 || q==7)
+            normalizer = delta_angle;
+          else 
+            normalizer = 1.0;
+          for (int x3k=x3l;x3k<=x3h;++x3k)
+            for (int x1i=x1l;x1i<=x1h;++x1i)
+              for (int x2i=x2l;x2i<=x2h;++x2i)
+                for (int x3i=x3l;x3i<=x3h;++x3i)
+                  for (int s=1;s<=4;++s){
+                    em_pert_params[p][x1i][x2i][x3i][s] += em_pert[l+1][q][x3k][x1i][x2i][x3i][s] 
+                      * atm_resp_to_parameters[p][q][x3k] * normalizer;
+                    for (int sp=1;sp<=4;++sp)
+                      op_pert_params[p][x1i][x2i][x3i][s][sp] += op_pert[l+1][q][x3k][x1i][x2i][x3i][s][sp]
+                      * atm_resp_to_parameters[p][q][x3k] * normalizer;
+        }
+      }
+      // But now when we have these "compressed responses" we need to propagate them further.
+      formal_pert_numerical(dS, op[l+1], em[l+1], op_pert_params, em_pert_params, theta, phi, 
+        boundary_condition_for_rt, N_parameters);
+
+      if (intensity_responses)
+      for (int p=1;p<=N_parameters;++p){
+        normalizer = 1.0;
+        if (input_model->which_parameter(p)==5 || input_model->which_parameter(p)==6)
+          normalizer = delta_angle;
+        for (int s=1;s<=4;++s)
+          intensity_responses[p][l+1][s] = dS[p][x1l][x2l][x3l][s]/normalizer;
+      }
+    }
     
     // Go to lambda_air
     lambda_air[l] = vactoair(lambda[l]);
@@ -280,7 +320,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
     // Write down the intensity perturbations:
-  if (!intensity_responses){
+  if (!intensity_responses && !input_model){
     FILE * out;
     out = fopen("stokes_intensity_responses_analytical.txt", "w");
       for (int param=1;param<=7;++param){
@@ -317,6 +357,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     atml[a]->zeeman_clear();
     atml[a]->rtclean(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
   }
+  if (input_model)
+    del_ft3dim(atm_resp_to_parameters,1,N_parameters,1,7,1,x3h-x3l+1);
 //
   respclean();
   popclean(); // all done

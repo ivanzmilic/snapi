@@ -1900,6 +1900,79 @@ int atmos_ppbez::formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** e
   
 }
 
+// Numerical version for propagation of polarized intensity. This is one for calculating responses to nodes directly.
+// It is the same as the previous one, except it considers "parameters", that is "nodes" all together. 
+int atmos_ppbez::formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, 
+  fp_t theta, fp_t phi, fp_t boundary, int N_parameters){
+
+  // I sugggest we first do one formal solution with extraction of the full lambda operator.
+  fp_t **** Intensity = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  fp_t *** alo_temp = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+    
+  // Then we perform a formal solution:
+  formal(rt_grid, Intensity, alo_temp, op, em, theta, phi, boundary);
+  memset(dS[x3l][x1l][x2l][x3l]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
+  
+  // At the moment we do it in the numerical way:
+  
+  fp_t **** Intensity_perturbed = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  fp_t ***** opacity_perturbed = ft5dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t **** emissivity_perturbed = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  
+  
+  for (int p=1;p<=N_parameters;++p){
+
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i)
+          for (int s=1;s<=4;++s){
+            emissivity_perturbed[x1i][x2i][x3i][s] = 0.5*em_pert[p][x1i][x2i][x3i][s]+em[x1i][x2i][x3i][s];
+            for (int sp=1;sp<=4;++sp)
+              opacity_perturbed[x1i][x2i][x3i][s][sp] = 0.5*op_pert[p][x1i][x2i][x3i][s][sp]+op[x1i][x2i][x3i][s][sp];
+          }
+
+    formal(rt_grid, Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
+
+    //printf("Up : %d %e \n", x3k, Intensity_perturbed[x1l][x2l][x3l][1]);
+
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i)
+          for (int s=1;s<=4;++s)
+            dS[p][x1i][x2i][x3i][s] = Intensity_perturbed[x1i][x2i][x3i][s];
+
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i)
+          for (int s=1;s<=4;++s){
+            emissivity_perturbed[x1i][x2i][x3i][s] = -0.5*em_pert[p][x1i][x2i][x3i][s]+em[x1i][x2i][x3i][s];
+            for (int sp=1;sp<=4;++sp)
+              opacity_perturbed[x1i][x2i][x3i][s][sp] = -0.5*op_pert[p][x1i][x2i][x3i][s][sp]+op[x1i][x2i][x3i][s][sp];
+          }
+          
+    formal(rt_grid, Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
+
+    //printf("Low: %d %e \n", x3k, Intensity_perturbed[x1l][x2l][x3l][1]);
+
+
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i)
+          for (int s=1;s<=4;++s)
+            dS[p][x1i][x2i][x3i][s] -= Intensity_perturbed[x1i][x2i][x3i][s];
+    
+
+  }
+  del_ft4dim(Intensity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  del_ft5dim(opacity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft4dim(emissivity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  
+  del_ft4dim(Intensity, x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  del_ft3dim(alo_temp, x1l,x1h,x2l,x2h,x3l,x3h);
+  return 0;
+  
+}
+
 // Numerical version for propagation of 
 int atmos_ppbez::formal_pert_analytical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary){
 
