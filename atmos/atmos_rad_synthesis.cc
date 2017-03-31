@@ -220,6 +220,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if (input_model){
     atm_resp_to_parameters =  input_model->get_response_to_parameters();
     N_parameters = input_model->get_N_nodes_total();
+    FILE * output;
+    output = fopen("test__2.txt","w");
+    for (int p=1;p<=N_parameters;++p)
+      for (int q=1;q<=7;++q)
+        for (int x3i=x3l;x3i<=x3h;++x3i)
+          fprintf(output, "%d %d %d %e\n", p,q,x3i,atm_resp_to_parameters[p][q][x3i]);
+    fclose(output);
   }
   
   for(int l=0;l<nlambda;++l){
@@ -243,6 +250,18 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
               em_pert[l+1][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
               em_pert[l+1][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
     }
+    if (input_model==0){
+      for (int x3k=x3l;x3k<=x3h;++x3k)
+        for (int x1i=x1l;x1i<=x1h;++x1i)
+          for (int x2i=x2l;x2i<=x2h;++x2i)
+            for (int x3i=x3l;x3i<=x3h;++x3i)
+              for (int s=1;s<=4;++s){
+                for (int sp=1;sp<=4;++sp){
+                  op_pert[l+1][2][x3k][x1i][x2i][x3i][s][sp] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+                }
+                em_pert[l+1][2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+      }
+    }
 
     if (input_model == 0){
       for (int param=1;param<=7;++param){
@@ -264,6 +283,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       }
     }
     else {
+
+      printf("Here we are again!\n");
       // Otherwise, if model is supplied as input parameter we are gonna go compute responses to parameters directly
       fp_t ****** op_pert_params = ft6dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
       fp_t ***** em_pert_params = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);

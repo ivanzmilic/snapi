@@ -654,7 +654,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     T[x1l][x2l][x3i] += 0.5 * d_T;
     
     // Density finite difference perturbations:
-    /*
+    
     fp_t d_Nt = delta_Nt_frac * Nt[x1l][x2l][x3i];
     Nt[x1l][x2l][x3i] += 0.5 * d_Nt;
 

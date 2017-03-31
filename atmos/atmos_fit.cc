@@ -183,7 +183,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   // This is a starting model
   int N_temp_nodes = 4;
-  int N_vt_nodes = 2;
+  int N_vt_nodes = 1;
   int N_vs_nodes = 1;
   int N_B_nodes = 1;
   int N_theta_nodes = 1;
@@ -200,10 +200,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   temp_nodes_tau[3] = -1.3;
   temp_nodes_tau[4] = 0.5;
     
-  temp_nodes_temp[1] = 5000.0;
-  temp_nodes_temp[2] = 5500.0;
+  temp_nodes_temp[1] = 4500.0;
+  temp_nodes_temp[2] = 5000.0;
   temp_nodes_temp[3] = 6000.0;
-  temp_nodes_temp[4] = 6500.0;
+  temp_nodes_temp[4] = 7000.0;
     
   current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
 
@@ -212,9 +212,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
   fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
   vt_nodes_tau[1] = -5.5;
-  vt_nodes_tau[2] = 0.5;
+  //vt_nodes_tau[2] = 0.5;
   vt_nodes_vt[1] = 1.0E5;
-  vt_nodes_vt[2] = 0.5E5;
+  //vt_nodes_vt[2] = 0.5E5;
   current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
   
   // Vs nodes:
@@ -222,7 +222,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
   vs_nodes_tau[1] = -5.5;
   //vs_nodes_tau[2] = 0.5;
-  vs_nodes_vs[1] = 1.0E5;
+  vs_nodes_vs[1] = 0.0E5;
   //vs_nodes_vs[2] = 0.5E5;
   current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
   
@@ -252,7 +252,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   int iter = 0;
   int MAX_ITER = 1;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.1; ws[3] = 4.0;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 4.0; ws[3] = 4.0;
+  fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
@@ -276,8 +277,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
-    //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
+    observable *current_obs = obs_stokes_responses_to_nodes_new(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
+
+    FILE * response_comparison;
+    response_comparison = fopen("responses_comparison.txt","w");
+    for (int p=1;p<=N_parameters;++p)
+      for (int l=1;l<=nlambda;++l)
+        for (int s=1;s<=4;++s)
+          fprintf(response_comparison,"%d %d %d %e %e %e \n",p,l,s,derivatives_to_parameters[p][l][s],derivatives_to_parameters_num[p][l][s],
+            (derivatives_to_parameters[p][l][s]-derivatives_to_parameters_num[p][l][s])/derivatives_to_parameters_num[p][l][s]);
+    fclose(response_comparison);
+
        
     fp_t ** S = current_obs->get_S();
 
@@ -285,7 +296,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / 1E25;
+      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise;
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
     
@@ -309,6 +320,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
       if (i<=N_temp_nodes)
         if (current_model->get_parameter(i) + correction[i] < 3300.0) correction[i] = 3300.0 - current_model->get_parameter(i);
+
+      if (i<=N_temp_nodes)
+        if (current_model->get_parameter(i) + correction[i] > 15E3) correction[i] = 15E3 - current_model->get_parameter(i);
+
 
       // And then correct
       current_model->perturb_node_value(i, correction[i]);
@@ -353,7 +368,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
         for (int s=1;s<=4;++s)
-        metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l]) * ws[s-1] / 1E22;
+        metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
+         * ws[s-1] / noise / noise;
     
     fprintf(output, "%d %e \n", iter, metric);  
     fprintf(detailed_log, "Iteration # %d chisq after correction %e \n", iter, metric_reference);  
@@ -385,9 +401,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
-    //printf("heeeya!");
-    // if (to_break < converged)
-     //break;
   }
 
   fclose(output);
@@ -400,7 +413,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
   delete [](temp_nodes_tau+1);
   delete [](temp_nodes_temp+1);
-  /*delete [](vt_nodes_tau+1);
+  delete [](vt_nodes_tau+1);
   delete [](vt_nodes_vt+1);
   delete [](vs_nodes_tau+1);
   delete [](vs_nodes_vs+1);
@@ -409,7 +422,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   delete [](theta_nodes_tau+1);
   delete [](theta_nodes_theta+1);
   delete [](phi_nodes_tau+1);
-  delete [](phi_nodes_phi+1);*/
+  delete [](phi_nodes_phi+1);
   
   delete current_model;
 
@@ -1050,6 +1063,14 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     interpolate_from_nodes(atmos_model);
   
   }
+
+  FILE * output;
+  output = fopen("test__.txt","w");
+  for (int p=1;p<=N_parameters;++p)
+    for (int q=1;q<=7;++q)
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        fprintf(output, "%d %d %d %e\n", p,q,x3i,resp_atm_to_parameters[p][q][x3i]);
+  fclose(output);
 
   // Now we start the responses part.
 

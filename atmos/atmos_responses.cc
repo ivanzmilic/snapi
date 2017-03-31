@@ -109,7 +109,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	        }
 	        if (tau_grid) de_normalize(op,em);
   				for(int a=0;a<natm;++a){ 
-	        	atml[a]->add_response_contributions(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
+	        	atml[a]->add_response_contributions_new(S, response_to_op, response_to_em, op, em, lambda[l], lambda_w[l], th[tp], ph[tp], bin[tp], Vr,
 	        	op_pert_lte, em_pert_lte); // give each species access to radiation field, that is, add the radiation field to the mean intensity        
 	      }
 

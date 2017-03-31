@@ -179,6 +179,8 @@ protected:
   // polarized radiative transfer solver for perturbations
   virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
   {return 0;};
+  virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary, int N_parameters)
+  {return 0;};
    virtual int formal_pert_analytical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
   {return 0;};
   virtual int formal_with_responses_jcdti(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t )
@@ -400,6 +402,7 @@ public:
   int get_N_nodes_total();
   int perturb_node_value(int, fp_t);
   int get_parameter(int);
+  int which_parameter(int);
 
   int print();
   int print_to_file(FILE *);

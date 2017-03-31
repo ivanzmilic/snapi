@@ -369,11 +369,11 @@ int job_class::start(void)
     phi_nodes_phi[1] = pi/4.0;
     current_model->set_phi_nodes(phi_nodes_tau,phi_nodes_phi);
     
-    //ji.atmos[a]->build_from_nodes(current_model);  
+    ji.atmos[a]->build_from_nodes(current_model);  
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
-    ji.atmos[a]->set_grid(0); // Sets grid to tau if positive, otherwise to geometrical scale
+    ji.atmos[a]->set_grid(1); // Sets grid to tau if positive, otherwise to geometrical scale
     io->msg(IOL_INFO,"Calculating observables...\n");
     for(int o=0;o<ji.no;++o){
       int tickspersec=sysconf(_SC_CLK_TCK);
@@ -381,16 +381,16 @@ int job_class::start(void)
       clock_t t1=times(&t_strt);
       io->msg(IOL_INFO,"nlambda=%d, lambda[0]=%E, lambda[%d]=%E\n",ji.nlambda[o],ji.lambda[o][0],ji.nlambda[o]-1,ji.lambda[o][ji.nlambda[o]-1]);
       
-      class observable *obs = ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0,0);
+      class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
 
-      ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
+      //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
       //class observable * obs;
       //obs = new observable(4);
       //obs->readsingle("spectrum_to_fit_short.dat");
       obs->write(ji.name[o],*io);
       
       // Here we execute the fitting procedure
-      //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);
+      ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);
 
       //delete obs;
       struct tms t_end;
