@@ -553,4 +553,14 @@ It was four months. We published a paper, made Zeeman responses and started tryi
 - atom::compute::nlte_responses() (also lte ones!)
 - atom::compute_nlte_responses() had a stupid issue: collision derivatives were computed using lot of chemeq calls -> Fixed!
 
-17/03/2017:
+23/03/2017:
+
+ - Spent previous time optimizing functions for opacity + emissivity + perturbations for both. Finally everything works. 
+ - Next acceleration we need to add is how to more quickly add up things in add_response_contributions. 
+ - And then finally the one where we merge all the responses into nodes responses before propagating them.
+
+27/03/2017:
+
+- Trying to optimize atom::add_response_contributions(....). For that prupose created a new function with an original name
+  atom::add_response_contributions_new(...)
+  

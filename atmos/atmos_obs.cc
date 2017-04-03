@@ -539,29 +539,28 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
   if (intensity_responses)
-  for (int p=1;p<=7;++p)
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      for (int l=1;l<=nlambda;++l)
-        for (int s=1;s<=4;++s)
-          intensity_responses[p][x3i][l][s] = d_obs_a[param][x3i][l][s];
-
-    // Write down the intensity perturbations:
-  FILE * out;
-  out = fopen("stokes_intensity_responses_analytical.txt", "w");
-  for (int param=1;param<=7;++param){
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      fp_t loc = 0;
-      if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];  
-      for (int l=1;l<=nlambda;++l){
-        fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
-        for (int s=1;s<=4;++s)
-          fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
-        fprintf(out," \n");
+    memcpy(intensity_responses[1][x3l][1]+1,d_obs_a[1][x3l][1]+1,7*(x3h-x3l+1)*nlambda*4*sizeof(fp_t));
+  
+  // Write down the intensity perturbations only if we are doing forward modeling. If we fit, we don't want to lose 
+  // time on this.
+  if (!intensity_responses){
+    FILE * out;
+    out = fopen("stokes_intensity_responses_analytical.txt", "w");
+    for (int param=1;param<=7;++param){
+      for (int x3i=x3l;x3i<=x3h;++x3i){
+        fp_t loc = 0;
+        if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];  
+        for (int l=1;l<=nlambda;++l){
+          fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
+          for (int s=1;s<=4;++s)
+            fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
+          fprintf(out," \n");
+        }
       }
     }
+    fclose(out);
   }
-  fclose(out);
-    
+  
   del_ft4dim(S,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft3dim(Lambda_approx,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);

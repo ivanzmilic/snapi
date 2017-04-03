@@ -220,11 +220,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Vs nodes:
   fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
   fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-  vs_nodes_tau[1] = -5.5;
+  vs_nodes_tau[1] = 0;
   //vs_nodes_tau[2] = 0.5;
   vs_nodes_vs[1] = 0.0E5;
   //vs_nodes_vs[2] = 0.5E5;
   current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
+  
   
   // B nodes:
   fp_t * B_nodes_tau = new fp_t [N_B_nodes] -1;
@@ -251,7 +252,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 1;
+  int MAX_ITER = 10;
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 4.0; ws[3] = 4.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
   
@@ -277,19 +278,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
-    //obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
+    observable *current_obs = obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
 
-    FILE * response_comparison;
+    /*FILE * response_comparison;
     response_comparison = fopen("responses_comparison.txt","w");
     for (int p=1;p<=N_parameters;++p)
       for (int l=1;l<=nlambda;++l)
         for (int s=1;s<=4;++s)
           fprintf(response_comparison,"%d %d %d %e %e %e \n",p,l,s,derivatives_to_parameters[p][l][s],derivatives_to_parameters_num[p][l][s],
             (derivatives_to_parameters[p][l][s]-derivatives_to_parameters_num[p][l][s])/derivatives_to_parameters_num[p][l][s]);
-    fclose(response_comparison);
-
-       
+    fclose(response_comparison);*/
+    
     fp_t ** S = current_obs->get_S();
 
     metric = 0.0;
@@ -1063,14 +1063,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     interpolate_from_nodes(atmos_model);
   
   }
-
-  FILE * output;
-  output = fopen("test__.txt","w");
-  for (int p=1;p<=N_parameters;++p)
-    for (int q=1;q<=7;++q)
-      for (int x3i=x3l;x3i<=x3h;++x3i)
-        fprintf(output, "%d %d %d %e\n", p,q,x3i,resp_atm_to_parameters[p][q][x3i]);
-  fclose(output);
 
   // Now we start the responses part.
 

@@ -170,7 +170,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
     //io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);   
 
-    if (relative_change < 1E-8)
+    if (relative_change < 1E-3)
       break; 
   }
 

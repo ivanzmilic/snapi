@@ -236,20 +236,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     formal(rt_grid, S,0,op[l+1],em[l+1],theta,phi,boundary_condition_for_rt);
   
     // Sorting out the magnitude of perturbations so we can solve this properly:
-    for (int x3k=x3l;x3k<=x3h;++x3k)
-      for (int x1i=x1l;x1i<=x1h;++x1i)
-        for (int x2i=x2l;x2i<=x2h;++x2i)
-          for (int x3i=x3l;x3i<=x3h;++x3i)
-            for (int s=1;s<=4;++s){
-              for (int sp=1;sp<=4;++sp){
-                op_pert[l+1][2][x3k][x1i][x2i][x3i][s][sp] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
-                op_pert[l+1][6][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
-                op_pert[l+1][7][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
-              }
-              em_pert[l+1][2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
-              em_pert[l+1][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
-              em_pert[l+1][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
-    }
     if (input_model==0){
       for (int x3k=x3l;x3k<=x3h;++x3k)
         for (int x1i=x1l;x1i<=x1h;++x1i)
@@ -258,12 +244,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
               for (int s=1;s<=4;++s){
                 for (int sp=1;sp<=4;++sp){
                   op_pert[l+1][2][x3k][x1i][x2i][x3i][s][sp] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+                  op_pert[l+1][6][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
+                  op_pert[l+1][7][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
                 }
                 em_pert[l+1][2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+                em_pert[l+1][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
+                em_pert[l+1][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
       }
-    }
-
-    if (input_model == 0){
       for (int param=1;param<=7;++param){
         formal_pert_numerical(dS, op[l+1], em[l+1], op_pert[l+1][param], em_pert[l+1][param], theta, phi, boundary_condition_for_rt);
   
@@ -282,9 +269,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
             d_obs_a[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
       }
     }
-    else {
+    else { // Else input model is provided and we need to extract  needed things from it.
 
-      printf("Here we are again!\n");
       // Otherwise, if model is supplied as input parameter we are gonna go compute responses to parameters directly
       fp_t ****** op_pert_params = ft6dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
       fp_t ***** em_pert_params = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
@@ -315,16 +301,21 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       formal_pert_numerical(dS, op[l+1], em[l+1], op_pert_params, em_pert_params, theta, phi, 
         boundary_condition_for_rt, N_parameters);
 
+      del_ft6dim(op_pert_params,1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+      del_ft5dim(em_pert_params,1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+
       if (intensity_responses)
       for (int p=1;p<=N_parameters;++p){
-        normalizer = 1.0;
+        //printf("Parameter %d has type %d\n", p, input_model->which_parameter(p));
         if (input_model->which_parameter(p)==5 || input_model->which_parameter(p)==6)
           normalizer = delta_angle;
+        else 
+          normalizer = 1.0; 
         for (int s=1;s<=4;++s)
           intensity_responses[p][l+1][s] = dS[p][x1l][x2l][x3l][s]/normalizer;
       }
     }
-    
+
     // Go to lambda_air
     lambda_air[l] = vactoair(lambda[l]);
 
