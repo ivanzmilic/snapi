@@ -55,7 +55,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 5;
+  int MAX_ITER = 10;
 
   io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
 
@@ -277,8 +277,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes_new(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
-    obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
+    observable *current_obs = obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    //obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
 
     FILE * response_comparison;
     response_comparison = fopen("responses_comparison.txt","w");
