@@ -311,8 +311,8 @@ int job_class::start(void)
     ji.atmos[a]->init(wd,io); // setup structure
 
     int N_temp_nodes = 4;
-    int N_vt_nodes = 1;
-    int N_vs_nodes = 1;
+    int N_vt_nodes = 2;
+    int N_vs_nodes = 2;
     int N_B_nodes = 1;
     int N_theta_nodes = 1;
     int N_phi_nodes = 1;
@@ -339,15 +339,19 @@ int job_class::start(void)
     
     fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
     fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-    vt_nodes_tau[1] = 0;
-    vt_nodes_vt[1] = 0.6E5;
+    vt_nodes_tau[1] = -5.0;
+    vt_nodes_vt[1] = 1.2E5;
+    vt_nodes_tau[2] = 0.5;
+    vt_nodes_vt[2] = 0.4E5;
     current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
     
     // Vs nodes:
     fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
     fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-    vs_nodes_tau[1] = 0;
-    vs_nodes_vs[1] = 2E5;
+    vs_nodes_tau[1] = -5.0;
+    vs_nodes_vs[1] = -1E5;
+    vs_nodes_tau[2] = 0.5;
+    vs_nodes_vs[2] = 2E5;
     current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
     
     
@@ -369,7 +373,7 @@ int job_class::start(void)
     phi_nodes_tau[1] = 0;
     phi_nodes_phi[1] = pi/4.0;
     current_model->set_phi_nodes(phi_nodes_tau,phi_nodes_phi);
-    
+
     ji.atmos[a]->build_from_nodes(current_model);  
 //
     // ---------------------------------------------------------------------------------------------------------------------------------

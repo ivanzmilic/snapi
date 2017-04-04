@@ -183,8 +183,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   // This is a starting model
   int N_temp_nodes = 4;
-  int N_vt_nodes = 1;
-  int N_vs_nodes = 1;
+  int N_vt_nodes = 2;
+  int N_vs_nodes = 2;
   int N_B_nodes = 1;
   int N_theta_nodes = 1;
   int N_phi_nodes = 1;
@@ -212,18 +212,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
   fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
   vt_nodes_tau[1] = -5.5;
-  //vt_nodes_tau[2] = 0.5;
+  vt_nodes_tau[2] = 0.5;
   vt_nodes_vt[1] = 1.0E5;
-  //vt_nodes_vt[2] = 0.5E5;
+  vt_nodes_vt[2] = 0.5E5;
   current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
   
   // Vs nodes:
   fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
   fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-  vs_nodes_tau[1] = 0;
-  //vs_nodes_tau[2] = 0.5;
+  vs_nodes_tau[1] = -5.0;
+  vs_nodes_tau[2] = 0.5;
   vs_nodes_vs[1] = 0.0E5;
-  //vs_nodes_vs[2] = 0.5E5;
+  vs_nodes_vs[2] = 0.0E5;
   current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
   
   
@@ -252,8 +252,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 10;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 4.0; ws[3] = 4.0;
+  int MAX_ITER = 20;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 1.0; ws[3] = 1.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
@@ -278,7 +278,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    observable *current_obs = obs_stokes_responses_to_nodes_new(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
 
     /*FILE * response_comparison;
@@ -296,7 +296,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise;
+      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
     
@@ -369,7 +369,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
         for (int s=1;s<=4;++s)
         metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
-         * ws[s-1] / noise / noise;
+         * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     
     fprintf(output, "%d %e \n", iter, metric);  
     fprintf(detailed_log, "Iteration # %d chisq after correction %e \n", iter, metric_reference);  
