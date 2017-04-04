@@ -346,9 +346,10 @@ int job_class::start(void)
     // Vs nodes:
     fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
     fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-    vs_nodes_tau[1] = 0.0;
+    vs_nodes_tau[1] = 0;
     vs_nodes_vs[1] = 2E5;
     current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
+    
     
     // B nodes:
     fp_t * B_nodes_tau = new fp_t [N_B_nodes] -1;
