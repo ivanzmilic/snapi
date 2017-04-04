@@ -1,14 +1,14 @@
 MAKEFILE      = Makefile
 # local variables
 OPTFLAGS      = -O4 -O5 -ffast-math
-WARNFLAGS     = -Wimplicit -Wshadow
+WARNFLAGS     =  -Wshadow
 DBGFLAGS      = -g3
 XTRAFLAGS     = -fsigned-char # -fno-stack-protector
 # global variables
 AR	      = ar
 COMPILER      = g++
 RANLIB        = ranlib
-INCLUDE       = -I../include -I../atmos -I../grid -I.  -I/home/milic/Downloads/cfitsio -I/home/milic/Downloads/cfitsio/include 
+INCLUDE       = -I../include -I../atmos -I../grid -I.  
 COMPFLAGS     = $(OPTFLAGS) $(WARNFLAGS) $(DBGFLAGS) $(XTRAFLAGS) $(TYPE_DEF)
 # export global variables
 export MAKE

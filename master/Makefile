@@ -1,9 +1,9 @@
 MAKEFILE      = Makefile
 # local variables
 OPTFLAGS      = -O4 -O5 -ffast-math
-WARNFLAGS     = -Wimplicit -Wshadow
+WARNFLAGS     =  -Wshadow
 DBGFLAGS      = -g3
-XTRAFLAGS     = -fsigned-char  -I/usr/local/include    -I/home/milic/Downloads/cfitsio -I/home/milic/Downloads/cfitsio/include
+XTRAFLAGS     = -fsigned-char   
 # global variables
 AR	      = ar
 COMPILER      = g++
@@ -15,8 +15,8 @@ export COMPILER
 export INCLUDE
 export COMPFLAGS
 # ...
-LIBPATH       = -L../cmlib -L../lib -L../atmos -L../grid   -L/home/milic/Downloads/cfitsio -L/home/milic/Downloads/cfitsio/lib -L/home/milic/Downloads/cfitsio/lib64
-LIBS	      = -lcm -latmos -lcm -lcg -lm -lz -lpthread -L/usr/local/lib -lfftw3    -lcfitsio
+LIBPATH       = -L../cmlib -L../lib -L../atmos -L../grid  
+LIBS	      = -lcm -latmos -lcm -lcg -lm -lz -lpthread -lfftw3  -lcfitsio -lz 
 DEST	      = .
 PROGRAM       = imaster
 SHELL         = /bin/sh
