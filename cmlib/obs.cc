@@ -20,7 +20,7 @@ void observable::readsingle(const char* input_file){
   FILE * input;
   input = fopen(input_file,"r");
   while(!feof(input)){
-    fscanf(input,"%e %e %e %e %e", &l_in, &I_in, &Q_in, &U_in, &V_in);
+    //fscanf(input,"%e %e %e %e %e", &l_in, &I_in, &Q_in, &U_in, &V_in);
     I_tmp[1] = I_in; I_tmp[2] = Q_in; I_tmp[3] = U_in; I_tmp[4] = V_in;
     add(I_tmp, fp_t(l_in));
   }

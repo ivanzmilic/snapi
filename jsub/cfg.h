@@ -20,9 +20,29 @@ struct ocfg{                  // configuration per object ("color")
   ~ocfg(void);
 };
 
+struct parcfg{ // configuration for each of the parameter, nodes and values
+  char *id;
+  int n;
+  fp_t *tau;
+  fp_t *value;
+
+  parcfg(char *pardata,io_class&);
+  ~parcfg(void);
+
+};
+
+struct mcfg{                  // configuration for model, which consists from nodes
+  char *id;
+  parcfg **par;
+  int np;
+  mcfg(char *mdata,struct gcfg &gdata,io_class&);
+  ~mcfg(void);
+};
+
 struct gcfg{                  // global configuration
   struct acfg **atm;
   struct ocfg **obs;
+  struct mcfg **mod;
   int no,na,nm;
 //
   gcfg(cmdln&,io_class&);

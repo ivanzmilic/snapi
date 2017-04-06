@@ -55,8 +55,11 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   for(int o=0;o<no;++o) obs[o]=new ocfg(obss[o],*this,io);
   del_str(obss);
 
-
-  del_str(mods);
+  if (mods[0]){
+    mod=new mcfg* [nm];
+    for(int m=0;m<nm;++m) mod[m]=new mcfg(mods[m],*this,io);
+    del_str(mods);
+  }else io.msg(IOL_WARN,"global config: no model specified.\n");
 }
 
 gcfg::~gcfg(void)
@@ -118,5 +121,59 @@ ocfg::~ocfg(void)
   if(id) delete[] id;
   if(lambda) delete[] lambda;
   if(name) delete[] name;
+}
+
+mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)
+{
+  //memset(this,0,sizeof(mcfg)); // Why is this necessary?
+  char **pars=scope_sep(mdata,"parameter",io);
+  while(strlen(mdata)&&(mdata[strlen(mdata)-1]=='\n')) mdata[strlen(mdata)-1]=0;
+//
+  if(!(id=get_arg(mdata,"ID",0))) io.msg(IOL_ERROR|IOL_FATAL,"mod config: model has no ID\n");
+//
+  np=0;
+  par=0;
+  if(pars){
+    for(np=0;pars[np];++np);
+    par=new parcfg* [np];
+    for(int p=0;p<np;++p) par[p]=new parcfg(pars[p],io);
+    del_str(pars);
+  }
+ 
+  if(char *s=arg_test(mdata)) io.msg(IOL_WARN,"mod \"%s\" config: the following lines were not processed:%s\n",id,s);
+}
+
+mcfg::~mcfg(void)
+{
+  if(id) delete[] id;
+  if (par){
+    for (int p=0;p<np;++p)
+      if (par[p]) delete par[p];
+    delete []par;
+  }  
+}
+
+parcfg::parcfg(char* pardata, io_class &io){
+
+  if(!(id=get_arg(pardata,"ID",0))) io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no parameter type specified!\n");
+
+  if(char *tau_str=get_arg(pardata,"TAU",0)){
+    if(get_numbers(tau_str,tau,n)<0) io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: failed to convert TAU argument \"%s\" to floating point values\n",tau_str);
+    tau+=1;
+    delete[] tau_str;
+  }else io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no tau specified for parameter nodes!\n");
+  int m =0;
+  if(char *val_str=get_arg(pardata,"VALUE",0)){
+    if(get_numbers(val_str,value,m)<0) io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: failed to convert VALUE argument \"%s\" to floating point values\n",val_str);
+    value+=1;
+    delete[] val_str;  
+  }else io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no value specified for parameter nodes!\n");
+//
+}
+
+parcfg::~parcfg(void){
+  if (id) delete[]id;
+  if (tau) delete[]tau;
+  if (value) delete[]value;
 }
 
