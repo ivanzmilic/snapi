@@ -36,6 +36,9 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   char **atms=scope_sep(fc,"atmos",io);
   for(na=0;atms[na];++na);
   while(strlen(fc)&&(fc[strlen(fc)-1]=='\n')) fc[strlen(fc)-1]=0;
+  char **mods=scope_sep(fc,"model",io);
+  for(nm=0;atms[nm];++nm);
+  while(strlen(fc)&&(fc[strlen(fc)-1]=='\n')) fc[strlen(fc)-1]=0;
 //
 // initialise gcfg first
 //
@@ -51,6 +54,9 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   obs=new ocfg* [no];
   for(int o=0;o<no;++o) obs[o]=new ocfg(obss[o],*this,io);
   del_str(obss);
+
+
+  del_str(mods);
 }
 
 gcfg::~gcfg(void)

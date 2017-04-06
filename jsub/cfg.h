@@ -23,7 +23,7 @@ struct ocfg{                  // configuration per object ("color")
 struct gcfg{                  // global configuration
   struct acfg **atm;
   struct ocfg **obs;
-  int no,na;
+  int no,na,nm;
 //
   gcfg(cmdln&,io_class&);
   ~gcfg(void);

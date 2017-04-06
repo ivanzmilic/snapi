@@ -395,7 +395,7 @@ int job_class::start(void)
       obs->write(ji.name[o],*io);
       
       // Here we execute the fitting procedure
-      ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);
+      //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);
 
       //delete obs;
       struct tms t_end;
