@@ -4,6 +4,7 @@
 #include "types.h"
 #include "io.h"
 #include "mem.h"
+#include "pack.h"
 #include "atmos.h"
 #include "profiles.h"
 #include "const.h"
@@ -206,6 +207,60 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   response_to_parameters = 0; 
 }
 
+model::model(mcfg *cfg,io_class &io_in){
+
+  N_depths = 0;
+  N_nodes_temp = N_nodes_vt = N_nodes_vs = N_nodes_B = N_nodes_theta = N_nodes_phi = 0;
+  for (int p=0;p<cfg->np;++p){
+    if (strcmp(cfg->par[p]->id,"TEMP") == 0){
+      N_nodes_temp = cfg->par[p]->n;
+      temp_nodes_tau = new fp_t [N_nodes_temp]-1;
+      temp_nodes_temp = new fp_t [N_nodes_temp]-1;
+      memcpy(temp_nodes_tau+1,cfg->par[p]->tau,N_nodes_temp*sizeof(fp_t));
+      memcpy(temp_nodes_temp+1,cfg->par[p]->value,N_nodes_temp*sizeof(fp_t));
+    }
+    else if (strcmp(cfg->par[p]->id,"VT") == 0){
+      N_nodes_vt = cfg->par[p]->n;
+      vt_nodes_tau = new fp_t [N_nodes_vt]-1;
+      vt_nodes_vt = new fp_t [N_nodes_vt]-1;
+      memcpy(vt_nodes_tau+1,cfg->par[p]->tau,N_nodes_vt*sizeof(fp_t));
+      memcpy(vt_nodes_vt+1,cfg->par[p]->value,N_nodes_vt*sizeof(fp_t));
+    }
+    else if (strcmp(cfg->par[p]->id,"VS") == 0){
+      N_nodes_vs = cfg->par[p]->n;
+      vs_nodes_tau = new fp_t [N_nodes_vs]-1;
+      vs_nodes_vs = new fp_t [N_nodes_vs]-1;
+      memcpy(vs_nodes_tau+1,cfg->par[p]->tau,N_nodes_vs*sizeof(fp_t));
+      memcpy(vs_nodes_vs+1,cfg->par[p]->value,N_nodes_vs*sizeof(fp_t));
+    }
+    else if (strcmp(cfg->par[p]->id,"B") == 0){
+      N_nodes_B = cfg->par[p]->n;
+      B_nodes_tau = new fp_t [N_nodes_B]-1;
+      B_nodes_B = new fp_t [N_nodes_B]-1;
+      memcpy(B_nodes_tau+1,cfg->par[p]->tau,N_nodes_B*sizeof(fp_t));
+      memcpy(B_nodes_B+1,cfg->par[p]->value,N_nodes_B*sizeof(fp_t));
+    }
+    else if (strcmp(cfg->par[p]->id,"THETA") == 0){
+      N_nodes_theta = cfg->par[p]->n;
+      theta_nodes_tau = new fp_t [N_nodes_theta]-1;
+      theta_nodes_theta = new fp_t [N_nodes_theta]-1;
+      memcpy(theta_nodes_tau+1,cfg->par[p]->tau,N_nodes_theta*sizeof(fp_t));
+      memcpy(theta_nodes_theta+1,cfg->par[p]->value,N_nodes_theta*sizeof(fp_t));
+    }
+    else if (strcmp(cfg->par[p]->id,"PHI") == 0){
+      N_nodes_phi = cfg->par[p]->n;
+      phi_nodes_tau = new fp_t [N_nodes_phi]-1;
+      phi_nodes_phi = new fp_t [N_nodes_phi]-1;
+      memcpy(phi_nodes_tau+1,cfg->par[p]->tau,N_nodes_phi*sizeof(fp_t));
+      memcpy(phi_nodes_phi+1,cfg->par[p]->value,N_nodes_phi*sizeof(fp_t));
+    }
+  }
+}
+
+model::model(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
+  offs+=unpack(buf+offs,do_swap,io_in);
+}
+
 model::~model(void){
 
   if(temp_nodes_tau)
@@ -233,6 +288,93 @@ model::~model(void){
   if (phi_nodes_phi)
     delete[](phi_nodes_phi+1);
 
+}
+
+int32_t model::size(io_class &io_in)
+{
+  int32_t sz=7*sizeof(int);
+  sz+=2*N_nodes_temp*sizeof(fp_t);
+  sz+=2*N_nodes_vt*sizeof(fp_t);
+  sz+=2*N_nodes_vs*sizeof(fp_t);
+  sz+=2*N_nodes_B*sizeof(fp_t);
+  sz+=2*N_nodes_theta*sizeof(fp_t);
+  sz+=2*N_nodes_phi*sizeof(fp_t);
+
+  return sz;
+}
+
+int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
+{
+
+  int offs=::pack(buf+offs,N_depths,do_swap);
+  int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,0};
+  for (int i=0;P[i];++i) offs+=::pack(buf+offs,P[i],do_swap);
+  
+  offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
+  offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
+  offs+=::pack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
+  offs+=::pack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
+  offs+=::pack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
+  offs+=::pack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
+  offs+=::pack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
+  offs+=::pack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
+  offs+=::pack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
+  offs+=::pack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
+  offs+=::pack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
+  offs+=::pack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+  
+  return offs;
+}
+
+int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
+{
+
+  int offs=::unpack(buf+offs,N_depths,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_temp,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_vt,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_vs,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_B,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_theta,do_swap);
+  offs+=::unpack(buf+offs,N_nodes_phi,do_swap);
+  if (N_nodes_temp){
+    temp_nodes_tau = new fp_t [N_nodes_temp] -1;
+    temp_nodes_temp = new fp_t [N_nodes_temp] -1;
+  }
+  if (N_nodes_vt){
+    vt_nodes_tau = new fp_t [N_nodes_vt] -1;
+    vt_nodes_vt = new fp_t [N_nodes_vt] -1;
+  }
+  if (N_nodes_vs){
+    vs_nodes_tau = new fp_t [N_nodes_vs] -1;
+    vs_nodes_vs = new fp_t [N_nodes_vs] -1;
+  }
+  if (N_nodes_B){
+    B_nodes_tau = new fp_t [N_nodes_B] -1;
+    B_nodes_B = new fp_t [N_nodes_B] -1;
+  }
+  if (N_nodes_theta){
+    theta_nodes_tau = new fp_t [N_nodes_theta] -1;
+    theta_nodes_theta = new fp_t [N_nodes_theta] -1;
+  }
+  if (N_nodes_phi){
+    phi_nodes_tau = new fp_t [N_nodes_phi] -1;
+    phi_nodes_phi = new fp_t [N_nodes_phi] -1;
+  }
+  
+  offs+=::unpack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
+  offs+=::unpack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
+  offs+=::unpack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
+  offs+=::unpack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
+  offs+=::unpack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
+  offs+=::unpack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
+  offs+=::unpack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
+  offs+=::unpack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
+  offs+=::unpack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
+  offs+=::unpack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
+  offs+=::unpack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
+  offs+=::unpack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+//
+  return offs;
 }
 
 int model::set_temp_nodes(fp_t * tau_in, fp_t * temp_in){
@@ -603,6 +745,10 @@ model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int
  return new model(N_nodes_temp_in, N_nodes_vt_in, N_nodes_vs_in, N_nodes_B_in, N_nodes_theta_in, N_nodes_phi_in); 
 }
 
+model * model_new(mcfg *cfg,io_class &io_in){
+  return new model(cfg,io_in);
+}
 
-
-
+model* model_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
+  return new model(buf,offs,do_swap,io_in);
+}

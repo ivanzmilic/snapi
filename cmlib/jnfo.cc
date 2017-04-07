@@ -22,6 +22,14 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     atmos=new atmosphere* [na];
     for(int a=0;a<na;++a) atmos[a]=atmos_new(data,offs,swap_endian,io);
   }else atmos=0;
+  
+  offs+=unpack(data+offs,nm,swap_endian);
+  printf("I unpacked %d models\n", nm);
+  if(nm){
+    models=new model* [nm];
+    for(int m=0;m<nm;++m) models[m]=model_new(data,offs,swap_endian,io);
+  }else models=0;
+  
 //
   offs+=unpack(data+offs,no,swap_endian);  
   if(no){
@@ -60,6 +68,10 @@ jnfo::~jnfo(void)
     for(int a=0;a<na;++a) delete atmos[a];
     delete[] atmos;
   }
+  if (nm){
+    for (int m=0;m<nm;++m) delete models[m];
+    delete[]models;
+  }
   if(no){
     if(az) delete[] az;
     if(el) delete[] el;
@@ -77,6 +89,9 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 {
   int32_t usize=sizeof(int);                     // na
   for(int a=0;a<na;++a) usize+=atmos[a]->size(io);
+  usize+=sizeof(int);                     // nm
+  for(int m=0;m<nm;++m) usize+=models[m]->size(io);
+    
 //  io.msg(IOL_INFO,"jnfo::compress: usize %d\n",usize);
 //
   usize+=sizeof(int);                            // no
@@ -96,6 +111,8 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   int offs=pack(data,na,swap_endian);
   for(int a=0;a<na;++a) offs+=atmos[a]->pack(data+offs,swap_endian,io);
+  offs+=pack(data+offs,nm,swap_endian);
+  for(int m=0;m<nm;++m) offs+=models[m]->pack(data+offs,swap_endian,io);
 //  io.msg(IOL_INFO,"jnfo::compress: %d %d\n",offs,usize);
 //
   offs+=pack(data+offs,no,swap_endian);

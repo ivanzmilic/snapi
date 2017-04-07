@@ -79,6 +79,11 @@ int main(int argc,char *argv[])
     ji.name[o]=strcpy(new char [strlen(cfg.obs[o]->name)+1],cfg.obs[o]->name);
   }
 //
+  // Now do the same for the model as well 
+  ji.nm = cfg.nm;
+  ji.models = new model* [ji.nm];
+  for (int m=0;m<ji.nm;++m) ji.models[m]=model_new(cfg.mod[m],io);
+//
   ji.uid=getuid();
   ji.gid=getgid();
 //

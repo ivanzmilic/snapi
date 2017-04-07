@@ -158,6 +158,7 @@ parcfg::parcfg(char* pardata, io_class &io){
   if(!(id=get_arg(pardata,"ID",0))) io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no parameter type specified!\n");
 
   if(char *tau_str=get_arg(pardata,"TAU",0)){
+    //printf("%s\n", tau_str);
     if(get_numbers(tau_str,tau,n)<0) io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: failed to convert TAU argument \"%s\" to floating point values\n",tau_str);
     tau+=1;
     delete[] tau_str;
@@ -168,6 +169,14 @@ parcfg::parcfg(char* pardata, io_class &io){
     value+=1;
     delete[] val_str;  
   }else io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no value specified for parameter nodes!\n");
+
+  if (strcmp(id,"THETA") == 0 || strcmp(id,"PHI") == 0)
+    for (int nn=0;nn<n;++nn)
+      value[nn] *= 3.141592653589793238462/180.0; // convert to radians
+
+  //printf("%s \n", id);
+  //for (int nn=0;nn<n;++nn)
+    //printf("%e %e \n", tau[nn],value[nn]);
 //
 }
 

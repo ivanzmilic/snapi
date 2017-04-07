@@ -310,75 +310,11 @@ int job_class::start(void)
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
 
-    int N_temp_nodes = 4;
-    int N_vt_nodes = 2;
-    int N_vs_nodes = 2;
-    int N_B_nodes = 1;
-    int N_theta_nodes = 1;
-    int N_phi_nodes = 1;
-    int N_parameters = N_temp_nodes + N_vt_nodes + N_vs_nodes + N_B_nodes + N_theta_nodes + N_phi_nodes;
-    model * current_model = model_new(N_temp_nodes,N_vt_nodes,N_vs_nodes,N_B_nodes,N_theta_nodes,N_phi_nodes);
-    fp_t pi = 3.141592653589793238462643383279502884197169399375105;
-      
-    // Temperature nodes:
-    fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
-    fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
-    temp_nodes_tau[1] = -5.0; // This has to be like this? No, you need to extrapolate the atmosphere correctly. But do you? SIR does not.
-    temp_nodes_tau[2] = -3.1;
-    temp_nodes_tau[3] = -1.3;
-    temp_nodes_tau[4] = 0.5;
-      
-    temp_nodes_temp[1] = 6500.0;
-    temp_nodes_temp[2] = 5700.0;
-    temp_nodes_temp[3] = 4400.0;
-    temp_nodes_temp[4] = 7200.0;
-    
-    current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
-  
-    // Vt nodes:    
-    
-    fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
-    fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-    vt_nodes_tau[1] = -5.0;
-    vt_nodes_vt[1] = 1.2E5;
-    vt_nodes_tau[2] = 0.5;
-    vt_nodes_vt[2] = 0.4E5;
-    current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
-    
-    // Vs nodes:
-    fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
-    fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-    vs_nodes_tau[1] = -5.0;
-    vs_nodes_vs[1] = -1E5;
-    vs_nodes_tau[2] = 0.5;
-    vs_nodes_vs[2] = 2E5;
-    current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
-    
-    
-    // B nodes:
-    fp_t * B_nodes_tau = new fp_t [N_B_nodes] -1;
-    fp_t * B_nodes_B = new fp_t [N_B_nodes] -1;
-    B_nodes_tau[1] = 0;
-    B_nodes_B[1] = 1000.0;
-    current_model->set_B_nodes(B_nodes_tau,B_nodes_B);
-    // theta nodes:
-    fp_t * theta_nodes_tau = new fp_t [N_theta_nodes] -1;
-    fp_t * theta_nodes_theta = new fp_t [N_theta_nodes] -1;
-    theta_nodes_tau[1] = 0;
-    theta_nodes_theta[1] = pi/4.0;
-    current_model->set_theta_nodes(theta_nodes_tau,theta_nodes_theta);
-    // phi nodes:
-    fp_t * phi_nodes_tau = new fp_t [N_phi_nodes] -1;
-    fp_t * phi_nodes_phi = new fp_t [N_phi_nodes] -1;
-    phi_nodes_tau[1] = 0;
-    phi_nodes_phi[1] = pi/4.0;
-    current_model->set_phi_nodes(phi_nodes_tau,phi_nodes_phi);
-
-    ji.atmos[a]->build_from_nodes(current_model);  
+    //ji.atmos[a]->build_from_nodes(current_model);  
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
-    ji.atmos[a]->set_grid(1); // Sets grid to tau if positive, otherwise to geometrical scale
+    ji.atmos[a]->set_grid(0); // Sets grid to tau if positive, otherwise to geometrical scale
     io->msg(IOL_INFO,"Calculating observables...\n");
     for(int o=0;o<ji.no;++o){
       int tickspersec=sysconf(_SC_CLK_TCK);
@@ -405,7 +341,6 @@ int job_class::start(void)
       double utime=((double)user)/(double)tickspersec;
       double stime=((double)sys)/(double)tickspersec;
       double ttime=((double)user+(double)sys)/(double)tickspersec;
-      delete current_model;
       delete obs;
       fprintf(stderr,"job time = user: %7.5f  system: %7.5f  total: %7.5f\n",utime,stime,ttime);
     }

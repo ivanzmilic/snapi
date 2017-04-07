@@ -14,6 +14,10 @@
 struct jnfo{
   int na;
   class atmosphere **atmos;
+  int nm;
+  class model **models; // This is the model used to fit the data, or to synthesize from. Not necessary input. 
+                       // if this is zero then we just synthesize from given atmosphere(s).
+
 //
   int no;
 //  class observable **obs;

@@ -16,6 +16,7 @@ class atmosphere;
 #include "atmol/atmol.h"
 
 #include "acfg.h"
+#include "../jsub/cfg.h"
 
 
 #define ATMOS_FLAG_DEF       0x01UL
@@ -365,6 +366,12 @@ public:
   model(int, int, int, int); // Creates model with values of nodes 
   model(int, int, int, int, int, int); // Creates model with nodes for all 6 parameters
   ~model(void);
+  model(mcfg*,io_class&); // Create from config file
+  model(uint08_t*,int32_t&,uint08_t,io_class&); // Unpack from buffer
+
+  virtual int32_t size(io_class&);
+  virtual int32_t pack(uint08_t*,uint08_t,io_class&);
+  virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
 
   // Now methods which set nodes
   int set_temp_nodes(fp_t *, fp_t *);
@@ -415,5 +422,7 @@ public:
 
 model * model_new(int, int, int, int);
 model * model_new(int, int, int, int, int, int);
+model * model_new(mcfg*,io_class&);
+model * model_new(uint08_t*,int32_t&,uint08_t,io_class&);
 
 #endif              // __ATMOS_H__
