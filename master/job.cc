@@ -310,11 +310,11 @@ int job_class::start(void)
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
 
-    //ji.atmos[a]->build_from_nodes(current_model);  
+    ji.atmos[a]->build_from_nodes(ji.models[1]);
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
-    ji.atmos[a]->set_grid(0); // Sets grid to tau if positive, otherwise to geometrical scale
+    ji.atmos[a]->set_grid(1); // Sets grid to tau if positive, otherwise to geometrical scale
     io->msg(IOL_INFO,"Calculating observables...\n");
     for(int o=0;o<ji.no;++o){
       int tickspersec=sysconf(_SC_CLK_TCK);
@@ -331,7 +331,7 @@ int job_class::start(void)
       obs->write(ji.name[o],*io);
       
       // Here we execute the fitting procedure
-      //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o]);
+      ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o],ji.models[0]);
 
       //delete obs;
       struct tms t_end;

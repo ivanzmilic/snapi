@@ -729,12 +729,76 @@ int model::set_response_to_parameters(fp_t *** responses_in, int Nd_in){
 
 }
 
+int model::cpy_values_from(model* input){
+
+  fp_t * tau, * value;
+  tau = input->get_temp_nodes_tau();
+  value = input->get_temp_nodes_temp();
+  set_temp_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_vt_nodes_tau();
+  value = input->get_vt_nodes_vt();
+  set_vt_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_vs_nodes_tau();
+  value = input->get_vs_nodes_vs();
+  set_vs_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_B_nodes_tau();
+  value = input->get_B_nodes_B();
+  set_B_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_theta_nodes_tau();
+  value = input->get_theta_nodes_theta();
+  set_theta_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_phi_nodes_tau();
+  value = input->get_phi_nodes_phi();
+  set_phi_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  return 0;
+}
+
 fp_t *** model::get_response_to_parameters(){
 
   int N_parameters = N_nodes_temp + N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta + N_nodes_phi;
   fp_t *** response_to_parameters_cpy = ft3dim(1,N_parameters,1,7,1,N_depths);
   memcpy(response_to_parameters_cpy[1][1]+1,response_to_parameters[1][1]+1,N_parameters*7*N_depths*sizeof(fp_t));
   return response_to_parameters_cpy;
+}
+
+int model::correct(fp_t * correction){
+
+  // This function applies an array of corrections to the model.
+  // We need to take care that corrections and not too severe. Which means very high or very low temperatures
+  // Negative magnetic field, negative microturbulent velocities or phi and theta which are in some unreasonable range.
+  int N_parameters = N_nodes_temp+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta+N_nodes_phi;
+
+  // We need to backup node values so that we can properly set-up "correction" array, so that we can
+  // later, if necessary, "revert" to the old model. Is this most convenient? Probably not, but it 
+  // is the fastest, and does not require writing new models and things like that.
+  
+  for (int i=1;i<=N_parameters;++i)
+    this->perturb_node_value(i,correction[i]);
+
+  // Check temperatures:
+  for (int i=1;i<=N_nodes_temp;++i){
+    if (temp_nodes_temp[i] < 3300.0) temp_nodes_temp[i] = 3300.0; // Lowest possible T
+    if (temp_nodes_temp[i] > 10000.0) temp_nodes_temp[i] = 10000.0; // Highest possible T (?)
+  }
+  for (int i=1;i<=N_nodes_vt;++i)
+    if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
+  for (int i=1;i<=N_nodes_B;++i)
+    if (B_nodes_B[i] < 0) B_nodes_B[i] *= (-1.0);
+  /*for (int i=1;i<=N_nodes_theta;++i){
+    if (theta_nodes_theta[i] < 0) theta_nodes_theta[i] *= -1.0;
+    if (theta_nodes_theta[i] > pi) theta_nodes_theta[i] = 2.0*pi - theta_nodes_theta[i];
+  }
+  for (int i=1;i<=N_nodes_phi;++i){
+    if (phi_nodes_phi[i] < 0) theta_nodes_theta[i] += pi;
+    if (phi_nodes_phi[i] > pi) theta_nodes_theta[i] -= pi;
+  }*/ // I am not totally sure what I want to do with angles. I think I want to go back to cost theta and tg(2phi) instead.
+  return 0;
 }
 
 model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){
@@ -752,3 +816,46 @@ model * model_new(mcfg *cfg,io_class &io_in){
 model* model_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
   return new model(buf,offs,do_swap,io_in);
 }
+
+model * clone(model * input){
+
+  model * output;
+  int N_nodes_temp = input->get_N_nodes_temp();
+  int N_nodes_vt = input->get_N_nodes_vt();
+  int N_nodes_vs = input->get_N_nodes_vs();
+  int N_nodes_B = input->get_N_nodes_B();
+  int N_nodes_theta = input->get_N_nodes_theta();
+  int N_nodes_phi = input->get_N_nodes_phi();
+
+  output = new model(N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
+
+  fp_t * tau, * value;
+  tau = input->get_temp_nodes_tau();
+  value = input->get_temp_nodes_temp();
+  output->set_temp_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_vt_nodes_tau();
+  value = input->get_vt_nodes_vt();
+  output->set_vt_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_vs_nodes_tau();
+  value = input->get_vs_nodes_vs();
+  output->set_vs_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_B_nodes_tau();
+  value = input->get_B_nodes_B();
+  output->set_B_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_theta_nodes_tau();
+  value = input->get_theta_nodes_theta();
+  output->set_theta_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+  tau = input->get_phi_nodes_tau();
+  value = input->get_phi_nodes_phi();
+  output->set_phi_nodes(tau,value);
+  delete[](tau+1);delete[](value+1);
+
+  return output;
+}
+
+

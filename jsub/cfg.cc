@@ -37,7 +37,7 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   for(na=0;atms[na];++na);
   while(strlen(fc)&&(fc[strlen(fc)-1]=='\n')) fc[strlen(fc)-1]=0;
   char **mods=scope_sep(fc,"model",io);
-  for(nm=0;atms[nm];++nm);
+  for(nm=0;mods[nm];++nm);
   while(strlen(fc)&&(fc[strlen(fc)-1]=='\n')) fc[strlen(fc)-1]=0;
 //
 // initialise gcfg first
@@ -55,6 +55,7 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   for(int o=0;o<no;++o) obs[o]=new ocfg(obss[o],*this,io);
   del_str(obss);
 
+  printf("there are %d models \n", nm);
   if (mods[0]){
     mod=new mcfg* [nm];
     for(int m=0;m<nm;++m) mod[m]=new mcfg(mods[m],*this,io);

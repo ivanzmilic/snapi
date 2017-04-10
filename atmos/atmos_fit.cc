@@ -175,112 +175,56 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 	return 0;
 }
 
-observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){
+observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda,
+  model * model_to_fit){
 
+
+  set_grid(1);
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
   fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S();
   
-  // This is a starting model
-  int N_temp_nodes = 4;
-  int N_vt_nodes = 2;
-  int N_vs_nodes = 2;
-  int N_B_nodes = 1;
-  int N_theta_nodes = 1;
-  int N_phi_nodes = 1;
-  int N_parameters = N_temp_nodes + N_vt_nodes + N_vs_nodes + N_B_nodes + N_theta_nodes + N_phi_nodes;
-  model * current_model = model_new(N_temp_nodes,N_vt_nodes,N_vs_nodes,N_B_nodes,N_theta_nodes,N_phi_nodes);
-    
-  // Temperature nodes:
-  fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
-  fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
-    
-  temp_nodes_tau[1] = -5.0; // This has to be like this? No, you need to extrapolate the atmosphere correctly. But do you? SIR does not.
-  temp_nodes_tau[2] = -3.1;
-  temp_nodes_tau[3] = -1.3;
-  temp_nodes_tau[4] = 0.5;
-    
-  temp_nodes_temp[1] = 4500.0;
-  temp_nodes_temp[2] = 5000.0;
-  temp_nodes_temp[3] = 6000.0;
-  temp_nodes_temp[4] = 7000.0;
-    
-  current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
-
-  // Vt nodes:
-  
-  fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
-  fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-  vt_nodes_tau[1] = -5.5;
-  vt_nodes_tau[2] = 0.5;
-  vt_nodes_vt[1] = 1.0E5;
-  vt_nodes_vt[2] = 0.5E5;
-  current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
-  
-  // Vs nodes:
-  fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
-  fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-  vs_nodes_tau[1] = -5.0;
-  vs_nodes_tau[2] = 0.5;
-  vs_nodes_vs[1] = 0.0E5;
-  vs_nodes_vs[2] = 0.0E5;
-  current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
-  
-  
-  // B nodes:
-  fp_t * B_nodes_tau = new fp_t [N_B_nodes] -1;
-  fp_t * B_nodes_B = new fp_t [N_B_nodes] -1;
-  B_nodes_tau[1] = 0;
-  B_nodes_B[1] =1200.0;
-  current_model->set_B_nodes(B_nodes_tau,B_nodes_B);
-  // theta nodes:
-  fp_t * theta_nodes_tau = new fp_t [N_theta_nodes] -1;
-  fp_t * theta_nodes_theta = new fp_t [N_theta_nodes] -1;
-  theta_nodes_tau[1] = 0;
-  theta_nodes_theta[1] = pi/6.0;
-  current_model->set_theta_nodes(theta_nodes_tau,theta_nodes_theta);
-  // phi nodes:
-  fp_t * phi_nodes_tau = new fp_t [N_phi_nodes] -1;
-  fp_t * phi_nodes_phi = new fp_t [N_phi_nodes] -1;
-  phi_nodes_tau[1] = 0;
-  phi_nodes_phi[1] = pi/6.0;
-  current_model->set_phi_nodes(phi_nodes_tau,phi_nodes_phi);
-
-  fp_t metric = 0.0;
+  // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
-  FILE * output;
-  output = fopen("fitting_log.txt", "w");
-
+  
+  // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
+  fp_t metric = 0.0;
   int iter = 0;
   int MAX_ITER = 20;
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 1.0; ws[3] = 1.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
-  
-  io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
+  // Series of files where we will store fitting related quantities. This is basically DEBUG  
+  FILE * fitting_log;
+  fitting_log = fopen("fitting_log.txt", "w");
   FILE * detailed_log;
   detailed_log = fopen("detailed_log.txt", "w");
   FILE * result;
   result = fopen("fitted_spectrum.dat", "w");
   FILE * nodes;
   nodes = fopen("fitted_nodes.dat", "w");
-  fprintf(nodes,"%d %d %d %d %d %d \n", N_temp_nodes, N_vt_nodes, N_vs_nodes, N_B_nodes, N_theta_nodes, N_phi_nodes);
-  fprintf(detailed_log,"Starting model:\n");
-  current_model->print_to_file(detailed_log);
   
+  fprintf(detailed_log,"Starting model:\n");
+  model_to_fit->print_to_file(detailed_log);
+  
+  int N_parameters = model_to_fit->get_N_nodes_total();
+  
+  io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
+
   for (iter = 1; iter <=MAX_ITER; ++iter){
   
-    fp_t *** derivatives_to_parameters_num = ft3dim(1,N_parameters,1,nlambda,1,4);
-    memset(derivatives_to_parameters_num[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
+    fp_t *** derivatives_to_parameters_num = ft3dim(1,N_parameters,1,nlambda,1,4); // DEBUG/test
+    memset(derivatives_to_parameters_num[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t)); // DEBUG/test
     fp_t *** derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
     memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
     fp_t * residual = new fp_t [nlambda*4]-1;
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes_new(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    observable *current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
 
+    // Very much DEBUG:
     /*FILE * response_comparison;
     response_comparison = fopen("responses_comparison.txt","w");
     for (int p=1;p<=N_parameters;++p)
@@ -291,7 +235,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fclose(response_comparison);*/
     
     fp_t ** S = current_obs->get_S();
-
     metric = 0.0;
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
@@ -314,27 +257,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, 4*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-    for (int i=1;i<=N_parameters;++i){
-      if (fabs(correction[i]) > 0.5 * fabs(current_model->get_parameter(i)) && i<=(N_temp_nodes+N_vt_nodes))
-        correction[i] = correction[i]/fabs(correction[i]) * 0.5 * current_model->get_parameter(i);
-
-      if (i<=N_temp_nodes)
-        if (current_model->get_parameter(i) + correction[i] < 3300.0) correction[i] = 3300.0 - current_model->get_parameter(i);
-
-      if (i<=N_temp_nodes)
-        if (current_model->get_parameter(i) + correction[i] > 15E3) correction[i] = 15E3 - current_model->get_parameter(i);
-
-
-      // And then correct
-      current_model->perturb_node_value(i, correction[i]);
-    }
+    // Apply the correction:
+    model * test_model = clone(model_to_fit);
+    test_model->correct(correction);
     
     //current_model->print();
     fprintf(detailed_log, "Model after the correction.\n");
-    current_model->print();
-    current_model->print_to_file(detailed_log);
+    test_model->print();
+    test_model->print_to_file(detailed_log);
 
-    build_from_nodes(current_model);
+    build_from_nodes(test_model);
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     fp_t ** S_reference = reference_obs->get_S();
 
@@ -347,23 +279,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         fprintf(result, " %e", S[s][l]);
       fprintf(result,"\n");
     }
-
-    fp_t * current_temp_nodes_tau = current_model->get_temp_nodes_tau();
-    fp_t * current_temp_nodes_temp = current_model->get_temp_nodes_temp();
-
-    for (int i=1;i<=N_temp_nodes;++i)
-      fprintf(nodes, "%e %e \n",current_temp_nodes_tau[i], current_temp_nodes_temp[i]);
-    /*for (int i=1;i<=N_vt_nodes;++i)
-      fprintf(nodes, "%e %e \n",vt_nodes_tau[i], vt_nodes_vt[i]);
-    for (int i=1;i<=N_vs_nodes;++i)
-      fprintf(nodes, "%e %e \n",vs_nodes_tau[i], vs_nodes_vs[i]);
-    for (int i=1;i<=N_B_nodes;++i)
-      fprintf(nodes, "%e %e \n",B_nodes_tau[i], B_nodes_B[i]);
-    for (int i=1;i<=N_theta_nodes;++i)
-      fprintf(nodes, "%e %e \n",theta_nodes_tau[i], theta_nodes_theta[i]);
-    for (int i=1;i<=N_phi_nodes;++i)
-      fprintf(nodes, "%e %e \n",phi_nodes_tau[i], phi_nodes_phi[i]);*/
-    
+  
     // Compute new chi sq
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
@@ -371,22 +287,20 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
          * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     
-    fprintf(output, "%d %e \n", iter, metric);  
+    fprintf(fitting_log, "%d %e \n", iter, metric);  
     fprintf(detailed_log, "Iteration # %d chisq after correction %e \n", iter, metric_reference);  
+    
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
       lm_parameter /= 10.0;
       fprintf(detailed_log, "Good step! Decreasing lm parameter.\n");
+      model_to_fit->cpy_values_from(test_model);
     }
     else{
-      // We are in the more non-linear regime, so we want linearization and hence, gradient descent
       lm_parameter *= 10.0;
-      // And un-modify:
-      for (int i=1;i<=N_parameters;++i)
-      current_model->perturb_node_value(i, -1.0 * correction[i]);
-      fprintf(detailed_log, "Bad step! Undoing modification and increasing lm parameter.\n");
+      fprintf(detailed_log, "Bad step! Undoing modification and increasing lm parameter.\n");  
     }
-    
+    delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,4*nlambda);
     del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
     del_ft2dim(J,1,nlambda*4,1,N_parameters);
@@ -403,29 +317,15 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     metric = 0.0;
   }
 
-  fclose(output);
+  fclose(fitting_log);
   fclose(detailed_log);
   fclose(result);
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
 
   // Clean-up:
-  del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
-  delete [](temp_nodes_tau+1);
-  delete [](temp_nodes_temp+1);
-  delete [](vt_nodes_tau+1);
-  delete [](vt_nodes_vt+1);
-  delete [](vs_nodes_tau+1);
-  delete [](vs_nodes_vs+1);
-  delete [](B_nodes_tau+1);
-  delete [](B_nodes_B+1);
-  delete [](theta_nodes_tau+1);
-  delete [](theta_nodes_theta+1);
-  delete [](phi_nodes_tau+1);
-  delete [](phi_nodes_phi+1);
+  del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
   
-  delete current_model;
-
   return 0;
 }
 
