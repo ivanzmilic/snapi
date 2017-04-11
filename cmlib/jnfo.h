@@ -20,17 +20,22 @@ struct jnfo{
 
 //
   int no;
-//  class observable **obs;
+  //class observable **obs;
 //
+  // These basically describe the observation so you do not have to specify observable per se. Probably MVN found it 
+  // as well
   fp_t *az,*el,**lambda;
   int *nlambda;
   char **name;
+  int *to_invert; ///whether to invert or not.
 //
   uid_t uid;
   gid_t gid;
   char *uname;
 //
   uint08_t cdcl,nmth,nsth,nsln; // chunk compression level, # master threads, # slave threads, # slaves
+
+
 //
   jnfo(byte*,byte,io_class&);
   jnfo(void);

@@ -19,7 +19,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 	// Perform LM fitting and return the best fitting spectrum
 	// First extract the spectrum from the observation:
-	fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S();
+	fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
 	
 	// This is a starting model
 	int N_temp_nodes = 4;
@@ -82,7 +82,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
           (derivatives_to_parameters[i][l] - derivatives_to_parameters_num[i][l]) / derivatives_to_parameters_num[i][l]);
     }*/
 
-    fp_t ** S = current_obs->get_S();
+    fp_t ** S = current_obs->get_S(1,1);
 
     for (int l=1;l<=nlambda;++l){
     	residual[l] = stokes_vector_to_fit[1][l] - S[1][l]; 
@@ -113,7 +113,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 		build_from_nodes(current_model);
 		observable *reference_obs = obs_scalar_tau(theta, phi, lambda, nlambda);
-		fp_t ** S_reference = reference_obs->get_S();
+		fp_t ** S_reference = reference_obs->get_S(1,1);
 
 		// Compute new chi sq
 		fp_t metric_reference = 0.0;
@@ -182,7 +182,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
-  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S();
+  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
@@ -234,7 +234,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
             (derivatives_to_parameters[p][l][s]-derivatives_to_parameters_num[p][l][s])/derivatives_to_parameters_num[p][l][s]);
     fclose(response_comparison);*/
     
-    fp_t ** S = current_obs->get_S();
+    fp_t ** S = current_obs->get_S(1,1);
     metric = 0.0;
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
@@ -268,7 +268,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     build_from_nodes(test_model);
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    fp_t ** S_reference = reference_obs->get_S();
+    fp_t ** S_reference = reference_obs->get_S(1,1);
 
     // Print out everything that we are interesed in:
     fprintf(detailed_log,"Iteration # %d .Current spectrum:\n", iter);
@@ -361,7 +361,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_scalar(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       response_to_parameters[i][l] = S_temp[1][l];
     del_ft2dim(S_temp,1,1,1,nlambda);
@@ -370,7 +370,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -2.0 * step);
     build_from_nodes(atmos_model);
     o_temp = obs_scalar(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l){
       response_to_parameters[i][l] -= S_temp[1][l];
       response_to_parameters[i][l] /= (2.0 * step);
@@ -427,7 +427,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_stokes(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s)
       response_to_parameters[i][l][s] = S_temp[s][l];
@@ -437,7 +437,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -step);
     build_from_nodes(atmos_model);
     o_temp = obs_stokes(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
         response_to_parameters[i][l][s] -= S_temp[s][l];
@@ -482,7 +482,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_scalar_tau(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       response_to_parameters[i][l] = S_temp[1][l];
     del_ft2dim(S_temp,1,1,1,nlambda);
@@ -491,7 +491,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -2.0 * step);
     build_from_nodes(atmos_model);
     o_temp = obs_scalar_tau(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l){
       response_to_parameters[i][l] -= S_temp[1][l];
       response_to_parameters[i][l] /= (2.0 * step);

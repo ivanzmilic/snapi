@@ -104,7 +104,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
  
   // Compute observable:
   observable *o = obs_scalar_tau(theta, phi, lambda, nlambda);
-  fp_t ** S = o->get_S();
+  fp_t ** S = o->get_S(1,1);
 
   fp_t d_T = delta_T;
   int ns = 1;
@@ -123,7 +123,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     observable * temp_o = obs_scalar_tau(theta, phi, lambda, nlambda);
 
-    fp_t ** Stemp = temp_o->get_S();
+    fp_t ** Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[1][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -135,7 +135,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -154,7 +154,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     temp_o = obs_scalar_tau(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[2][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -166,7 +166,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -183,7 +183,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     temp_o = obs_scalar_tau(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[3][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -195,7 +195,7 @@ observable *atmosphere::obs_scalar_num_responses_tau(fp_t theta,fp_t phi,fp_t *l
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){

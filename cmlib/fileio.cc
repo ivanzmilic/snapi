@@ -49,6 +49,39 @@ fp_t ***read_file(char *file_name,int &nx1,int &nx2,int &nx3,io_class &io)
   del_ft3dim(p,1,nx3,1,nx2,1,nx1);
   return q;
 }
+fp_t ****read_file(char *file_name,int &nx1,int &nx2,int &nx3,int &nx4,io_class &io)
+{
+  char *header;
+  int type,nd,*dn;
+  byte *data=ana_fzread(file_name,dn,nd,header,type,io);
+
+  if(!data) return 0;
+  if(nd!=4){ 
+    io.msg(IOL_ERROR,"Number of dimensions of data in \"%s\" is not 4!\n",file_name);
+    return 0;
+  }
+  delete[] header;
+  nx1=dn[1];
+  nx2=dn[2];  
+  nx3=dn[3];
+  nx4=dn[4];  
+  delete[] (dn+1);
+  fp_t *fdata;
+  int t_sz[]=MFBD_TYPE_SIZES;
+  switch(type){
+    case(MFBD_F32T): fdata=(t_sz[type]!=sizeof(fp_t))?float32to64conv(data,nx1*nx2*nx3*nx4):(fp_t*)data; break;
+    case(MFBD_F64T): fdata=(t_sz[type]!=sizeof(fp_t))?float64to32conv(data,nx1*nx2*nx3*nx4):(fp_t*)data; break;
+    default: io.msg(IOL_ERROR,"data type of \"%s\" is not floating point\n",file_name);
+  }
+  fp_t ****p=ft4dim(fdata,1,nx4,1,nx3,1,nx2,1,nx1);
+  fp_t ****q=ft4dim(1,nx1,1,nx2,1,nx3,1,nx4);
+  for(int x1=1;x1<=nx1;++x1)
+    for(int x2=1;x2<=nx2;++x2)
+      for(int x3=1;x3<=nx3;++x3)
+        for (int x4=1;x4<=nx4;++x4) q[x1][x2][x3][x4]=p[x4][x3][x2][x1];
+  del_ft4dim(p,1,nx4,1,nx3,1,nx2,1,nx1);
+  return q;
+}
 
 fp_t **read_file(char *file_name,int &nx1,int &nx2,io_class &io)
 {

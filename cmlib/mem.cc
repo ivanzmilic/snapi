@@ -1853,6 +1853,36 @@ fp_t ***ft3dim(fp_t *t,int x1l,int x1h,int x2l,int x2h,int x3l,int x3h)
   return p;
 }
 
+fp_t ****ft4dim(fp_t *t,int x1l,int x1h,int x2l,int x2h,int x3l,int x3h,int x4l,int x4h)
+{
+  int nx1=x1h-x1l+1,nx2=x2h-x2l+1,nx3=x3h-x3l+1,nx4=x4h-x4l+1;
+  fp_t ****p=new fp_t*** [nx1]-x1l;
+  p[x1l]=new fp_t** [nx1*nx2]-x2l;
+  p[x1l][x2l] = new fp_t * [nx1*nx2*nx3]-x3l;
+  
+  p[x1l][x2l][x3l]=t-x4l;
+  
+  for(int x3=x3l+1;x3<=x3h;++x3) p[x1l][x2l][x3]=p[x1l][x2l][x3-1]+nx4;
+  for(int x2=x2l+1;x2<=x2h;++x2){
+    p[x1l][x2]=p[x1l][x2-1]+nx3;
+    p[x1l][x2][x3l]=p[x1l][x2-1][x3l]+nx3*nx4;
+    for(int x3=x3l+1;x3<=x3h;++x3) p[x1l][x2][x3]=p[x1l][x2][x3-1]+nx4;
+  }
+  for(int x1=x1l+1;x1<=x1h;++x1) {
+    p[x1]=p[x1-1]+nx2;
+    p[x1][x2l]=p[x1-1][x2l]+nx2*nx3;
+    p[x1][x2l][x3l]=p[x1-1][x2l][x3l]+nx2*nx3*nx4;
+    for(int x3=x3l+1;x3<=x3h;++x3) p[x1][x2l][x3]=p[x1][x2l][x3-1]+nx4;
+    for(int x2=x2l+1;x2<=x2h;++x2){
+      p[x1][x2]=p[x1][x2-1]+nx3;
+      p[x1][x2][x3l]=p[x1][x2-1][x3l]+nx3*nx4;
+      for(int x3=x3l+1;x3<=x3h;++x3) p[x1][x2][x3]=p[x1][x2][x3-1]+nx4;
+    }
+  }
+  return p;
+}
+
+
 fp_t ****ft4dim(fp_t *t,int x1l,int x1h,int x2l,int x2h,int x3l,int *x3h,int x4l,int x4h)
 {
   int nx1=x1h-x1l+1,nx2=x2h-x2l+1,nx23t=0,nx4=x4h-x4l+1;

@@ -143,6 +143,7 @@ void del_f64t3dim(float64_t***,int,int,int,int,int,int);
 
 fp_t **ft2dim(fp_t*,int,int,int,int);
 fp_t ***ft3dim(fp_t*,int,int,int,int,int,int);
+fp_t ****ft4dim(fp_t*,int,int,int,int,int,int,int,int);
 fp_t ****ft4dim(fp_t*,int,int,int,int,int,int*,int,int);
 
 byte **b2dim(int,int,int,int);

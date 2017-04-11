@@ -81,7 +81,15 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
   while(strlen(odata)&&(odata[strlen(odata)-1]=='\n')) odata[strlen(odata)-1]=0;
 //
   if(!(id=get_arg(odata,"ID",0))) io.msg(IOL_ERROR|IOL_FATAL,"obs config: observable has no ID\n");
-//
+
+  fp_t tempfp;
+  to_invert = false; //default
+  if(char *tmp_str=get_arg(odata,"INVERT",0)){
+    get_number(tmp_str,tempfp);
+    delete[] tmp_str;
+    if (tempfp) to_invert = true;
+  }; 
+  //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
     get_number(tmp_str,az);
     delete[] tmp_str;

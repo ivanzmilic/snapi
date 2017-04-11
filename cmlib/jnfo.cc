@@ -36,6 +36,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,az=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,el=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,nlambda=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     lambda=new fp_t* [no];
     name=new char* [no];
     for(int o=0;o<no;++o){
@@ -80,6 +81,7 @@ jnfo::~jnfo(void)
     if(lambda) delete[] lambda;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
     if(name) delete[] name;
+    if(to_invert) delete[] to_invert;
   }
   if(uname) delete[] uname;
   
@@ -120,6 +122,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,az,0,no-1,swap_endian);
     offs+=pack(data+offs,el,0,no-1,swap_endian);
     offs+=pack(data+offs,nlambda,0,no-1,swap_endian);
+    offs+=pack(data+offs,to_invert,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,name[o]);
