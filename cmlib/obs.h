@@ -3,7 +3,8 @@
 
 #include "types.h"
 #include "io.h"
-//#include "fileio.h"
+#include "fileio.h"
+#include "ana_io.h"
 
 class observable{
   fp_t ****S,*lambda; // Stokes vector (N_stokes components x N_wvl)
@@ -17,6 +18,7 @@ public:
   void set(fp_t, int,int,int,int);
   void set(fp_t *,fp_t,int,int,int);
   void set(fp_t **,int,int);
+  void set(fp_t ****);
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);

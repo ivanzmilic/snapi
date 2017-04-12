@@ -65,6 +65,10 @@ void observable::set(fp_t * S_in, fp_t lambda_in, int i, int j, int l){
     S[i][j][s][l] = S_in[s];
 }
 
+void observable::set(fp_t **** S_in){
+  memcpy(S[1][1][1]+1,S_in[1][1][1]+1,nx*ny*ns*nlambda*sizeof(fp_t));
+}
+
 fp_t **** observable::get_S(){
 
   fp_t **** S_copy;
@@ -109,8 +113,12 @@ void observable::write(const char *name,io_class &io,int i, int j)
 void observable::read(char * name, io_class &io){
 
   // First, delete the arrays if they exist:
-  if (S)
-    del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
-  S = read_file4d(name,nx,ny,ns,nlambda,io);
-  printf("I read an array with dimensions : %d %d %d %d \n", nx,ny,ns,nlambda);
+  //if (S)
+  //  del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
+
+  // WHY DOES THIS NOT WORK?
+  //int n1,n2,n3,n4;
+  //fp_t **** test = read_file(name,n1,n2,n3,n4,io);
+  //S = read_file(name,nx,ny,ns,nlambda,io);
+  //printf("I read an array with dimensions : %d %d %d %d \n", nx,ny,ns,nlambda);
 }

@@ -30,6 +30,7 @@
 #include "obs.h"
 #include "atmos.h"
 
+
 // -------------------------------------
 
 
@@ -323,8 +324,18 @@ int job_class::start(void)
       io->msg(IOL_INFO,"nlambda=%d, lambda[0]=%E, lambda[%d]=%E\n",ji.nlambda[o],ji.lambda[o][0],ji.nlambda[o]-1,ji.lambda[o][ji.nlambda[o]-1]);
       
       //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
-      class observable *obs = new observable(1);
-      obs->read(ji.name[o],*io);
+      class observable * obs;
+      
+     	if (ji.to_invert[o]){ // We are going to invert something.
+     		printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
+     		int n1,n2,n3,n4;
+      	fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
+      	printf("cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+     		obs = new observable(n4,n3,n2,n1);
+     		obs->set(test);
+     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+     	}
+      
 
       //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
       //class observable * obs;
