@@ -322,25 +322,17 @@ int job_class::start(void)
       clock_t t1=times(&t_strt);
       io->msg(IOL_INFO,"nlambda=%d, lambda[0]=%E, lambda[%d]=%E\n",ji.nlambda[o],ji.lambda[o][0],ji.nlambda[o]-1,ji.lambda[o][ji.nlambda[o]-1]);
       
-      class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+      //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+      class observable *obs = new observable(1);
+      obs->read(ji.name[o],*io);
 
       //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
       //class observable * obs;
       //obs = new observable(4);
-      obs->write(ji.name[o],*io,1,1);
+      //obs->write(ji.name[o],*io,1,1);
       
       // Here we execute the fitting procedure
       //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o],ji.models[0]);
-
-      // TEST:
-      /*int what = ana_data_type("scan_si.lr2000.f0",*io);
-      printf("ANA file has type %d \n", what);
-      int dns,dnx,dny,dnz;
-      fp_t **** data = read_file("scan_si.lr2000.f0",dns,dnx,dny,dnz,*io);
-      if (!data) printf("Error in reading the file.... bye.\n");
-      exit(1);
-      printf("I read ana file with dimensions %d %d %d \n", dnx, dny, dnz);
-      del_ft4dim(data,1,dns,1,dnx,1,dny,1,dnz);*/
 
       //delete obs;
       struct tms t_end;

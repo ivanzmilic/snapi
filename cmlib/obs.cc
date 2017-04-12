@@ -2,6 +2,8 @@
 #include <errno.h>
 #include "types.h"
 #include "io.h"
+#include "fileio.h"
+#include "ana_io.h"
 #include "obs.h"
 #include "mem.h"
 
@@ -102,4 +104,13 @@ void observable::write(const char *name,io_class &io,int i, int j)
     }
     fclose(f);
   }else io.msg(IOL_WARN,"failed to open file \"%s\":\"%s\"\n",name,strerror(errno));
+}
+
+void observable::read(char * name, io_class &io){
+
+  // First, delete the arrays if they exist:
+  if (S)
+    del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
+  S = read_file4d(name,nx,ny,ns,nlambda,io);
+  printf("I read an array with dimensions : %d %d %d %d \n", nx,ny,ns,nlambda);
 }

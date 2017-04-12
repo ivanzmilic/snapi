@@ -77,11 +77,11 @@ jnfo::~jnfo(void)
     if(az) delete[] az;
     if(el) delete[] el;
     if(nlambda) delete[] nlambda;
+    if(to_invert) delete[] to_invert;
     if(lambda) for(int o=0;o<no;++o) if(lambda[o]) delete[] lambda[o];
     if(lambda) delete[] lambda;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
     if(name) delete[] name;
-    if(to_invert) delete[] to_invert;
   }
   if(uname) delete[] uname;
   
@@ -100,6 +100,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
   if(no){
     usize+=2*no*sizeof(fp_t);                    // az,el
     usize+=no*sizeof(int);                       // nlambda
+    usize+=no*sizeof(int);                       // to_invert
     for(int o=0;o<no;++o){
       usize+=nlambda[o]*sizeof(fp_t);  // lambda
       usize+=strlen(name[o])+1;        // file name
