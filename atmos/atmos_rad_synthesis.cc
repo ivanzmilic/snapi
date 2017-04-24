@@ -192,7 +192,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   fp_t * lambda_air = new fp_t [nlambda];
 
-  class observable *o=new observable(4);
+  class observable *o=new observable(1,1,4,nlambda);
 
   //if (intensity_responses) // If provided, copy the intensity to the input array
     //memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
@@ -220,13 +220,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if (input_model){
     atm_resp_to_parameters =  input_model->get_response_to_parameters();
     N_parameters = input_model->get_N_nodes_total();
-    FILE * output;
+    /*FILE * output;
     output = fopen("test__2.txt","w");
     for (int p=1;p<=N_parameters;++p)
       for (int q=1;q<=7;++q)
         for (int x3i=x3l;x3i<=x3h;++x3i)
           fprintf(output, "%d %d %d %e\n", p,q,x3i,atm_resp_to_parameters[p][q][x3i]);
-    fclose(output);
+    fclose(output);*/
   }
   
   for(int l=0;l<nlambda;++l){
@@ -320,7 +320,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     lambda_air[l] = vactoair(lambda[l]);
 
     // Add it to the observable
-    o->add(S[x1l][x2l][x3l],lambda_air[l]);
+    o->set(S[x1l][x2l][x3l],lambda_air[l],1,1,l+1);
     
   }
   
@@ -375,7 +375,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   respclean();
   popclean(); // all done
 
-  io.msg(IOL_INFO,"atmosphere::obs_scalar_responses: observable and responses synthesized...\n");
+  io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   

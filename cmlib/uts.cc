@@ -224,9 +224,12 @@ int get_numbers(const char *numbers,fp_t *&nout,int &ni,fp_t dn)
         fprintf(stderr,"could not convert \"%s\" to floating point value\n",p+1);
         return -1;
       }
-      int nn=0.5+(nmax-nmin)/dn;
+      fp_t nnn=0.5+(nmax-nmin)/dn;
+      //printf("I calculated that we need %f steps\n", nnn);
+      int nn = int(nnn)+1;
+      //printf("But conversion turns it into: %d steps\n", nn);
       fp_t ndn=(nmax-nmin)/(fp_t)nn;
-      fp_t *tmp=new fp_t [ni+nn+1]-1;
+      fp_t *tmp=new fp_t [ni+nn]-1;
       memcpy(tmp+1,nout+1,ni*sizeof(fp_t));
       delete[] (nout+1);
       nout=tmp;

@@ -254,7 +254,7 @@ public:
 
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
-  virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, fp_t *, int,model *); // Function which performs a levenberg-marquard fit
+  virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);

@@ -61,12 +61,21 @@ void observable::add(fp_t *S_in,fp_t lambda_in)
 void observable::set(fp_t * S_in, fp_t lambda_in, int i, int j, int l){
 
   lambda[l] = lambda_in;
-  for (int s=1;s<=4;++s)
+  for (int s=1;s<=ns;++s)
     S[i][j][s][l] = S_in[s];
 }
 
 void observable::set(fp_t **** S_in){
   memcpy(S[1][1][1]+1,S_in[1][1][1]+1,nx*ny*ns*nlambda*sizeof(fp_t));
+  /*for (int i=1;i<=nx;++i)
+    for (int j=1;j<=ny;++j)
+      for (int s=1;s<=ns;++s)
+        for (int l=1;l<=nlambda;++l)
+          S[i][j][s][l] = S_in[l][s][j][i];*/
+}
+
+void observable::setlambda(fp_t * lambda_in){
+  memcpy(lambda+1,lambda_in+1,nlambda*sizeof(fp_t));
 }
 
 fp_t **** observable::get_S(){
@@ -82,15 +91,17 @@ fp_t ** observable::get_S(int i, int j){
 
   fp_t ** S_copy;
   S_copy = ft2dim(1,ns,1,nlambda);
-  memcpy(S_copy[1]+1,S[i][j][i]+1,nlambda*ns*sizeof(fp_t)); 
+  memcpy(S_copy[1]+1,S[i][j][1]+1,nlambda*ns*sizeof(fp_t)); 
 
   return S_copy;
 }
 
 fp_t * observable::get_lambda(){
   fp_t * lambda_copy;
-  lambda = new fp_t [nlambda]-1;
+  lambda_copy = new fp_t [nlambda]-1;
+  //printf("I am trying to copy an array of length %d \n", nlambda);
   memcpy(lambda_copy+1,lambda+1,nlambda*sizeof(fp_t));
+  //printf("Does it work?\n");
   return lambda_copy;
 }
 
@@ -108,6 +119,29 @@ void observable::write(const char *name,io_class &io,int i, int j)
     }
     fclose(f);
   }else io.msg(IOL_WARN,"failed to open file \"%s\":\"%s\"\n",name,strerror(errno));
+}
+
+observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
+
+  int nxn = xh-xl+1,nyn=yh-yl+1,nln=lh-ll+1;
+  observable * obs_small = new observable(nxn,nyn,ns,nln);
+  fp_t **** S_small = ft4dim(1,nxn,1,nyn,1,ns,1,nln);
+  for (int i=xl;i<=xh;++i)
+    for (int j=yl;j<=yh;++j)
+      for (int s=1;s<=ns;++s)
+        for (int l=ll;l<=lh;++l)
+          S_small[i-xl+1][j-yl+1][s][l-ll+1] = S[i][j][s][l];
+  obs_small->set(S_small);
+
+  del_ft4dim(S_small,1,nxn,1,nyn,1,ns,1,nln);
+
+  fp_t * lambda_small = new fp_t [nln]-1;
+  for (int l=ll;l<=lh;++l)
+    lambda_small[l-ll+1] = lambda[l];
+  obs_small->setlambda(lambda_small);
+  delete[](lambda_small+1);
+  return obs_small;
+
 }
 
 void observable::read(char * name, io_class &io){

@@ -583,7 +583,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   respclean();
   popclean(); // all done
 
-  io.msg(IOL_INFO,"atmosphere::obs_scalar_responses: observable and responses synthesized...\n");
+  io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   

@@ -175,14 +175,16 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 	return 0;
 }
 
-observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda,
-  model * model_to_fit){
+observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
 
   set_grid(1);
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
   fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
+  int nlambda = spectrum_to_fit->get_n_lambda();
+  fp_t * lambda = spectrum_to_fit->get_lambda();
+  lambda = airtovac(lambda+1,nlambda);
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
@@ -239,6 +241,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
+      if (s==1) printf("%e \n", residual[(l-1)*4+s]);
       metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
@@ -325,6 +328,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   // Clean-up:
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
+  delete[](lambda);
   
   return 0;
 }
@@ -969,9 +973,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
 
   observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model);
-
+  
   del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
-
+  
   return o;
   
  }

@@ -110,7 +110,8 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       if(get_numbers(tmp_str,lambda,nlambda)<0)
         io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting wavelength points (did you specify a range but not a step size?)!\n",id);
     }
-    lambda+=1; // get_numbers returns range from 0...N-1
+    lambda+=1; // get_numbers returns range from 0...N-1 <---- what?
+    //printf("%1.10e %1.10e %d %1.10e\n ", lambda[0],lambda[nlambda-1],nlambda, lambda[1]-lambda[0]);
     for(int l=0;l<nlambda;++l){
       lambda[l]*=1E-8; // A->cm
       lambda[l] = airtovac(lambda[l]);

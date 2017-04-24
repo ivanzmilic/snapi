@@ -321,19 +321,29 @@ int job_class::start(void)
       int tickspersec=sysconf(_SC_CLK_TCK);
       struct tms t_strt;
       clock_t t1=times(&t_strt);
-      io->msg(IOL_INFO,"nlambda=%d, lambda[0]=%E, lambda[%d]=%E\n",ji.nlambda[o],ji.lambda[o][0],ji.nlambda[o]-1,ji.lambda[o][ji.nlambda[o]-1]);
-      
-      //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
-      class observable * obs;
+     	//printf("nlambda=%d, lambda[0]=%1.7E, lambda[%d]=%1.7E\n",ji.nlambda[o],vactoair(ji.lambda[o][0]),ji.nlambda[o]-1,vactoair(ji.lambda[o][ji.nlambda[o]-1]));
+      class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+      obs->write(ji.name[o],*io,1,1);
+      //class observable * obs;
       
      	if (ji.to_invert[o]){ // We are going to invert something.
-     		printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
+     		/*printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
      		int n1,n2,n3,n4;
       	fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
+      	test = transpose(test,n1,n2,n3,n4);
       	printf("cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+      	printf("input lambda array has %d wavelengths. \n", ji.nlambda[o]);
      		obs = new observable(n4,n3,n2,n1);
      		obs->set(test);
-     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+     		obs->setlambda(ji.lambda[o]-1);
+     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);*/
+
+     		// Cut the piece
+     		//class observable * obs_subset = obs->extract(1,1,1,1,678,ji.nlambda[o]);
+     		//obs_subset->write("spectrum_to_fit.dat",*io,1,1);
+     		printf("about to fit...\n");
+     		ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.models[0]);
+     		//delete obs_subset;
      	}
       
 

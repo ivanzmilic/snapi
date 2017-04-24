@@ -580,6 +580,18 @@ fp_t ** transpose(fp_t ** A, int N_rows, int N_columns){
   return B;
 }
 
+fp_t **** transpose(fp_t **** A, int N1, int N2, int N3, int N4){
+
+  fp_t **** B = ft4dim(1,N4,1,N3,1,N2,1,N1);
+  for (int i1=1;i1<=N1;++i1)
+    for (int i2=1;i2<=N2;++i2)
+      for (int i3=1;i3<=N3;++i3)
+        for (int i4=1;i4<=N4;++i4)
+          B[i4][i3][i2][i1] = A[i1][i2][i3][i4];
+  del_ft4dim(A,1,N1,1,N2,1,N3,1,N4);
+  return B;
+}
+
 fp_t ** multiply_with_transpose(fp_t ** A, int N_rows, int N_columns){
 
   fp_t ** B = ft2dim(1,N_columns,1,N_columns);
@@ -1134,7 +1146,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
 fp_t vactoair(fp_t lambda_vac){
 
   fp_t s = 1E4/(lambda_vac*1E8);
-  fp_t n =  1.0 + 0.0000834254 + 0.02406147 / (130.0 - s*s) + 0.00015998 / (38.9 - s*s);
+  fp_t n =  1.0 + 0.00008336624212083 + 0.02408926869968 / (130.1065924522 - s*s) + 0.0001599740894897 / (38.92568793293 - s*s);
   return lambda_vac / n;
 }
 
@@ -1144,4 +1156,12 @@ fp_t airtovac(fp_t lambda_air){
   fp_t s = 1E4/(lambda_air*1E8);
   fp_t n = 1.0 + 0.00008336624212083 + 0.02408926869968 / (130.1065924522 - s*s) + 0.0001599740894897 / (38.92568793293 - s*s);
   return lambda_air * n;
+}
+
+fp_t * airtovac(fp_t * lambda_air, int N){
+  fp_t * lambda_out = new fp_t [N];
+  for (int l=0;l<N;++l)
+    lambda_out[l] = airtovac(lambda_air[l]);
+  delete[]lambda_air;
+  return lambda_out;
 }
