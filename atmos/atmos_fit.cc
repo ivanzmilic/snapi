@@ -192,8 +192,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 20;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 1.0; ws[3] = 1.0;
+  int MAX_ITER = 15;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
 
   // Series of files where we will store fitting related quantities. This is basically DEBUG  
@@ -205,6 +205,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   result = fopen("fitted_spectrum.dat", "w");
   FILE * nodes;
   nodes = fopen("fitted_nodes.dat", "w");
+  observable * current_obs;
   
   fprintf(detailed_log,"Starting model:\n");
   model_to_fit->print_to_file(detailed_log);
@@ -223,7 +224,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
 
     // Very much DEBUG:
@@ -241,7 +242,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      if (s==1) printf("%e \n", residual[(l-1)*4+s]);
       metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
@@ -311,7 +311,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     del_ft3dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda,1,4);
     del_ft2dim(S,1,4,1,nlambda);
     del_ft2dim(S_reference,1,4,1,nlambda);
-    delete current_obs;
+    
+    if(iter<MAX_ITER)
+      delete current_obs;
+    
     delete reference_obs;
 
     delete [](residual+1);
@@ -330,7 +333,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
   delete[](lambda);
   
-  return 0;
+  return current_obs;
 }
 
 // ======================================================================================================================================================

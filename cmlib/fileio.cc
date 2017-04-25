@@ -315,3 +315,14 @@ void write_file(char *name,float32_t ****data,int nx1,int nx2,int nx3,int nx4,io
   ana_fzwrite((byte*)(data[1][1][1]+1),name,ds,4,0,FLOAT32,io);
   delete[] (ds+1);
 }
+
+void write_file(char *name,fp_t ****data,int nx1,int nx2,int nx3,int nx4,io_class &io)
+{
+  int *ds=new int [4]-1;
+  ds[1]=nx4;
+  ds[2]=nx3;
+  ds[3]=nx2;
+  ds[4]=nx1;
+  ana_fzwrite((byte*)(data[1][1][1]+1),name,ds,4,0,FLOAT64,io);
+  delete[] (ds+1);
+}

@@ -311,7 +311,7 @@ int job_class::start(void)
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
 
-    ji.atmos[a]->build_from_nodes(ji.models[1]);
+    //ji.atmos[a]->build_from_nodes(ji.models[1]);
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
@@ -322,12 +322,12 @@ int job_class::start(void)
       struct tms t_strt;
       clock_t t1=times(&t_strt);
      	//printf("nlambda=%d, lambda[0]=%1.7E, lambda[%d]=%1.7E\n",ji.nlambda[o],vactoair(ji.lambda[o][0]),ji.nlambda[o]-1,vactoair(ji.lambda[o][ji.nlambda[o]-1]));
-      class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
-      obs->write(ji.name[o],*io,1,1);
-      //class observable * obs;
+      //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+      //obs->write(ji.name[o],*io,1,1);
+      class observable * obs;
       
      	if (ji.to_invert[o]){ // We are going to invert something.
-     		/*printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
+     		printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
      		int n1,n2,n3,n4;
       	fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
       	test = transpose(test,n1,n2,n3,n4);
@@ -335,15 +335,52 @@ int job_class::start(void)
       	printf("input lambda array has %d wavelengths. \n", ji.nlambda[o]);
      		obs = new observable(n4,n3,n2,n1);
      		obs->set(test);
+     		ji.lambda[o] = vactoair(ji.lambda[o],ji.nlambda[o]);
      		obs->setlambda(ji.lambda[o]-1);
-     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);*/
+     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+     		obs->normalize();
 
-     		// Cut the piece
-     		//class observable * obs_subset = obs->extract(1,1,1,1,678,ji.nlambda[o]);
-     		//obs_subset->write("spectrum_to_fit.dat",*io,1,1);
-     		printf("about to fit...\n");
-     		ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.models[0]);
-     		//delete obs_subset;
+     		int left_cut = 678;
+     		int iup=15,jup=15;
+     		modelcube * test_cube = new modelcube(ji.models[0],iup,jup);
+
+     		FILE * lambda = fopen("lambda_fitted.dat","w");
+     		for (int l=left_cut-1;l<ji.nlambda[o];++l)
+     			fprintf(lambda,"%5.11e \n",ji.lambda[o][l]);
+     		fclose(lambda);
+
+     		fp_t **** fitted_spectra = ft4dim(1,iup,1,jup,1,4,1,ji.nlambda[o]-left_cut+1);
+     		memset(fitted_spectra[1][1][1]+1,0,iup*jup*4*(ji.nlambda[o]-left_cut+1)*sizeof(fp_t));
+
+     		for (int i=1;i<=iup;++i)
+     			for (int j=1;j<=jup;++j){
+     				// Cut the piece
+     				class observable * obs_subset = obs->extract(i,i,j,j,left_cut,ji.nlambda[o]);
+     				obs_subset->write("spectrum_to_fit.dat",*io,1,1);
+     				// Clone the initial model
+     				model * model_to_fit = clone(ji.models[0]);
+     				printf("about to fit pixel %d %d...\n",i,j);
+     				observable * fitted_obs = ji.atmos[a]->stokes_lm_fit(obs_subset,ji.el[o],ji.az[o],model_to_fit);
+     				fp_t ** S_temp = fitted_obs->get_S(1,1);
+
+     				memcpy(fitted_spectra[i][j][1]+1,S_temp[1]+1,4*(ji.nlambda[o]-left_cut+1)*sizeof(fp_t));
+     				
+     				del_ft2dim(S_temp,1,4,1,(ji.nlambda[o]-left_cut+1));
+     				test_cube->add_model(model_to_fit,i,j);
+     				//printf("added model...\n");
+     				delete obs_subset;
+     				delete model_to_fit;
+     				delete fitted_obs;
+     		}
+     		test_cube->simple_print("output_test.dat");
+     		write_file("cube_fitted.f0",fitted_spectra,iup,jup,4,(ji.nlambda[o]-left_cut+1),*io);
+     		delete test_cube;
+     		del_ft4dim(fitted_spectra,1,iup,1,jup,1,4,1,ji.nlambda[o]-left_cut+1);
+     	}
+
+     	else {
+     		obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+     		obs->write(ji.name[o],*io,1,1);
      	}
       
 
@@ -363,7 +400,7 @@ int job_class::start(void)
       double utime=((double)user)/(double)tickspersec;
       double stime=((double)sys)/(double)tickspersec;
       double ttime=((double)user+(double)sys)/(double)tickspersec;
-      delete obs;
+      //delete obs;
       fprintf(stderr,"job time = user: %7.5f  system: %7.5f  total: %7.5f\n",utime,stime,ttime);
     }
     exit(1);

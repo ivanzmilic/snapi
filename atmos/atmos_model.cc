@@ -859,3 +859,104 @@ model * clone(model * input){
 }
 
 
+// --------------------------------------------------------------------------------------------------------------
+
+// Modelcube related properties:
+modelcube::modelcube(){
+  N_nodes_temp=N_nodes_vt=N_nodes_vs=N_nodes_B=N_nodes_theta=N_nodes_phi=0;
+  nx=ny=0;
+  data = 0;
+  temp_nodes_tau = 0;
+  vt_nodes_tau = 0;
+  vs_nodes_tau = 0;
+  theta_nodes_tau = 0;
+  phi_nodes_tau = 0;
+}
+
+modelcube::modelcube(model * make_from, int nx_in, int ny_in){
+
+  N_nodes_temp=make_from->get_N_nodes_temp();
+  N_nodes_vt=make_from->get_N_nodes_vt();
+  N_nodes_vs=make_from->get_N_nodes_vs();
+  N_nodes_B=make_from->get_N_nodes_B();
+  N_nodes_theta=make_from->get_N_nodes_theta();
+  N_nodes_phi=make_from->get_N_nodes_phi();
+
+  N_parameters = make_from->get_N_nodes_total();
+
+  fp_t * temp; // temporary array
+  temp = make_from->get_temp_nodes_tau();
+  temp_nodes_tau = new fp_t [N_nodes_temp] - 1;
+  for (int i=1;i<=N_nodes_temp;++i)
+    temp_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+  temp = make_from->get_vt_nodes_tau();
+  vt_nodes_tau = new fp_t [N_nodes_vt] - 1;
+  for (int i=1;i<=N_nodes_vt;++i)
+    vt_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+  temp = make_from->get_vs_nodes_tau();
+  vs_nodes_tau = new fp_t [N_nodes_vs] - 1;
+  for (int i=1;i<=N_nodes_vs;++i)
+    vs_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+  temp = make_from->get_B_nodes_tau();
+  B_nodes_tau = new fp_t [N_nodes_B] - 1;
+  for (int i=1;i<=N_nodes_B;++i)
+    B_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+  temp = make_from->get_theta_nodes_tau();
+  theta_nodes_tau = new fp_t [N_nodes_theta] - 1;
+  for (int i=1;i<=N_nodes_theta;++i)
+    theta_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+  temp = make_from->get_vt_nodes_tau();
+  phi_nodes_tau = new fp_t [N_nodes_phi] - 1;
+  for (int i=1;i<=N_nodes_phi;++i)
+    phi_nodes_tau[i] = temp[i];
+  delete[](temp+1);
+
+  nx = nx_in;ny=ny_in;
+  data=ft3dim(1,nx,1,ny,1,N_parameters);
+  memset(data[1][1]+1,0,nx*ny*N_parameters*sizeof(fp_t));
+
+}
+
+modelcube::~modelcube(){
+  if (temp_nodes_tau)
+    delete[](temp_nodes_tau+1);
+  if (vt_nodes_tau)
+    delete[](vt_nodes_tau+1);
+  if (vs_nodes_tau);
+    delete[](vs_nodes_tau+1);
+  if (B_nodes_tau)
+    delete[](B_nodes_tau+1);
+  if (theta_nodes_tau);
+    delete[](theta_nodes_tau+1);
+  if (phi_nodes_tau);
+    delete[](phi_nodes_tau+1);
+  if (data)
+    del_ft3dim(data,1,nx,1,ny,1,N_parameters);
+
+}
+
+void modelcube::add_model(model * to_add, int i, int j){
+
+  for (int kk=1;kk<=N_parameters;++kk)
+    data[i][j][kk] = to_add->get_parameter(kk);
+
+}
+
+void modelcube::simple_print(const char* printhere){
+
+  FILE * output;
+  output = fopen(printhere,"w");
+  for (int i=1;i<=nx;++i)
+    for (int j=1;j<=ny;++j){
+      fprintf(output,"%d %d ", i, j);
+      for (int kk=1;kk<=N_parameters;++kk)
+        fprintf(output,"%f ", data[i][j][kk]);
+      fprintf(output, "\n");
+    }
+}
+

@@ -144,6 +144,29 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
 
 }
 
+void observable::normalize(){
+  // Normalizes already arranged observable to physical units.
+
+  fp_t qs = 3.076E14; // quiet sun reference continuum
+
+  // Average continuum in all field, assume here for simplicity that point #30 is continuum:
+  int l_ref = 30;
+  fp_t mean = 0.0;
+  for (int i=1;i<=nx;++i)
+    for (int j=1;j<=ny;++j)
+      mean += S[i][j][1][30] / nx / ny;
+
+  fp_t scale = qs/mean;
+
+  for (int i=1;i<=nx;++i)
+    for (int j=1;j<=ny;++j)
+      for (int l=1;l<=nlambda;++l){
+        S[i][j][1][l] *= scale;
+        for (int s=2;s<=4;++s)
+          S[i][j][s][l] *= S[i][j][1][l];
+      }
+}
+
 void observable::read(char * name, io_class &io){
 
   // First, delete the arrays if they exist:

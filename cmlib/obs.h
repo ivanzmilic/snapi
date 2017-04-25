@@ -20,6 +20,7 @@ public:
   void set(fp_t **,int,int);
   void set(fp_t ****);
   void setlambda(fp_t *);
+  void normalize();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);

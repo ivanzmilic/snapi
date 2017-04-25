@@ -69,6 +69,7 @@ fp_t compute_w1(fp_t);
 fp_t vactoair(fp_t);
 fp_t airtovac(fp_t);
 fp_t * airtovac(fp_t *, int);
+fp_t * vactoair(fp_t *, int);
 
 
 #endif                        // __MATHTOOLS_H__

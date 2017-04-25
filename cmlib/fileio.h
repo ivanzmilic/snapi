@@ -25,5 +25,6 @@ int16_t **read_file(char*,int&,int&,char*&,io_class&);
 void write_file(char*,fp_t***,int,int,int,io_class&);
 void write_file(char*,fp_t****,int,int,int*,int,io_class&);
 void write_file(char*,float32_t****,int,int,int,int,io_class&);
+void write_file(char*,fp_t****,int,int,int,int,io_class&);
 
 #endif                 // __FILEIO_H__

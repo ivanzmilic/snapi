@@ -430,4 +430,26 @@ model * model_new(int, int, int, int, int, int);
 model * model_new(mcfg*,io_class&);
 model * model_new(uint08_t*,int32_t&,uint08_t,io_class&);
 
+class modelcube{
+private:
+  int nx,ny;
+  int N_parameters;
+  int N_nodes_temp, N_nodes_vt, N_nodes_vs, N_nodes_B, N_nodes_theta, N_nodes_phi;
+  fp_t * temp_nodes_tau;
+  fp_t * vt_nodes_tau;
+  fp_t * vs_nodes_tau;
+  fp_t * B_nodes_tau;
+  fp_t * theta_nodes_tau;
+  fp_t * phi_nodes_tau;
+
+  fp_t *** data;
+public:
+  modelcube();
+  modelcube(model*, int nx, int ny);
+  ~modelcube();
+  void add_model(model*,int i, int j);
+  void simple_print(const char*);
+  //void anaprint(const * char,);
+};
+
 #endif              // __ATMOS_H__
