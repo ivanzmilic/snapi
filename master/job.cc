@@ -341,7 +341,7 @@ int job_class::start(void)
      		obs->normalize();
 
      		int left_cut = 678;
-     		int iup=15,jup=15;
+     		int iup=0,jup=0;
      		modelcube * test_cube = new modelcube(ji.models[0],iup,jup);
 
      		FILE * lambda = fopen("lambda_fitted.dat","w");
