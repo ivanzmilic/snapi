@@ -59,6 +59,8 @@ int pack(byte *dest,int32_t ***x,int xl,int xh,int yl,int *yh,int zl,int **zh,by
 int unpack(byte *dest,int32_t ***x,int xl,int xh,int yl,int *yh,int zl,int **zh,byte);
 int pack(byte *dest,fp_t ***x,int xl,int xh,int yl,int yh,int zl,int zh,byte);
 int unpack(byte *dest,fp_t ***x,int xl,int xh,int yl,int yh,int zl,int zh,byte);
+int pack(byte *dest,fp_t ****x,int xl,int xh,int yl,int yh,int zl,int zh,int wl,int wh,byte);
+int unpack(byte *dest,fp_t ****x,int xl,int xh,int yl,int yh,int zl,int zh,int wl, int wh,byte);
 int pack(byte *dest,fp_t ***x,int xl,int xh,int yl,int *yh,int zl,int **zh,byte);
 int unpack(byte *dest,fp_t ***x,int xl,int xh,int yl,int *yh,int zl,int **zh,byte);
 int pack(byte *dest,fp_t ****x,int wl,int wh,int xl,int xh,int yl,int *yh,int zl,int zh,byte);

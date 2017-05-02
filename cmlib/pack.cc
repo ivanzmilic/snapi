@@ -419,6 +419,23 @@ int unpack(byte *src,fp_t ***x,int xl,int xh,int yl,int yh,int zl,int zh,byte sw
   return sz*sizeof(fp_t);
 }
 
+int pack(byte *dest,fp_t ****x,int xl,int xh,int yl,int yh,int zl,int zh,int wl,int wh,byte swap_endian)
+{
+  int sz=(xh-xl+1)*(yh-yl+1)*(zh-zl+1)*(wh-wl+1);
+  memcpy(dest,x[xl][yl][zl]+wl,sz*sizeof(fp_t));
+  if(swap_endian) swap(dest,sizeof(fp_t),sz);
+  return sz*sizeof(fp_t);
+}
+
+int unpack(byte *src,fp_t ****x,int xl,int xh,int yl,int yh,int zl,int zh,int wl,int wh,byte swap_endian)
+{
+  int sz=(xh-xl+1)*(yh-yl+1)*(zh-zl+1)*(wh-wl+1);
+  memcpy(x[xl][yl][zl]+wl,src,sz*sizeof(fp_t));
+  if(swap_endian) swap(x[xl][yl][zl]+wl,sizeof(fp_t),sz);
+  return sz*sizeof(fp_t);
+}
+
+
 int pack(byte *dest,fp_t ***x,int xl,int xh,int yl,int *yh,int zl,int **zh,byte swap_endian)
 {
   int sz=0;

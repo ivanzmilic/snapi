@@ -152,7 +152,6 @@ protected:
   
   fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
   fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
-
 //
   // Overloaded versions of b-b functions, which also take magnetic field. 
   // Oringally they took the concentration of the collisional partner but we have dumped them. 
@@ -176,7 +175,19 @@ protected:
   fp_t bb_em_derivative_to_level(int x1i, int x2i, int x3i, int i, fp_t lambda);
   fp_t * bb_op_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
   fp_t * bb_em_derivative_explicit(int x1i, int x2i, int x3i, fp_t lambda, fp_t ** profile_derivatives);
-                          // |
+
+  // Now the boundbound, boundfree, freefree and Raileygh scattering functions. These ones compute the 
+  // opacity and emissivity at once.
+  virtual int boundbound_op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int boundfree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int boundbound_op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****, fp_t********,fp_t*******);
+  virtual int boundfree_op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****,fp_t********,fp_t*******);
+  
+  //virtual int boundbound_op_em_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  //virtual int boundfree_op_em_vector_pert(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+
+// ==============================================================================================================================
+
 // ---------------------------------------------------------------------------------------------- |
 //
 // -----------------------------------------------------------------------------------------------|
@@ -244,10 +255,11 @@ protected:
 
   virtual fp_t derivative_collisions_Temp(int, int, int, int, int);
   virtual fp_t collisional_rates(int, int, int, int, int);
+  virtual fp_t collisional_rates_der_ne(int, int, int, int, int, fp_t);
   virtual fp_t derivative_collisions_full_temp(int, int, int, int, int);
   virtual fp_t derivative_collisions_full_density(int, int, int, int, int);
 
-  // More derivative related functions, but now related to collisional rates:
+  // More derivative related functions, but now related to radiative rates:
 
   virtual fp_t * dR_i_cont_dqk(int z, int i, int x1i, int x2i, int x3i, fp_t Temp, fp_t Ne, fp_t I, fp_t lambda);
   virtual fp_t * dR_cont_i_dqk(int z, int i, int x1i, int x2i, int x3i, fp_t Temp, fp_t Ne, fp_t I, fp_t lambda);
@@ -293,7 +305,12 @@ public:
   // Then the perturbations:
   virtual fp_t *******opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ******emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-  
+
+  // Method which computes both op and em, at the whole wavelength grid at once:
+  virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,
+    fp_t ******, fp_t *****, fp_t********,fp_t*******);
+ 
   // The only relevant ones for the vector case are b-b opacity and emissivity:
   fp_t ****boundbound_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t ****, fp_t);
   fp_t *****boundbound_op_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t ****, fp_t);
@@ -376,6 +393,7 @@ public:
   virtual int responses_init();
   virtual int responses_clear();
   virtual int add_response_contributions(fp_t***, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
+  virtual int add_response_contributions_new(fp_t***, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
   virtual int add_response_contributions_taugrid(fp_t***, fp_t ***, fp_t *****, fp_t**,fp_t **, fp_t ***, fp_t ***, fp_t, fp_t, fp_t, fp_t, fp_t, fp_t ***, fp_t *****, fp_t *****);
   virtual int add_pops_to_response(int , int);
   virtual int subtract_pops_from_response(int, int);

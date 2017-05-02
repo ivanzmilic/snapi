@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "types.h"
 #include "io.h"
@@ -11,8 +12,6 @@
 #include "profiles.h"
 #include "obs.h"
 #include "mathtools.h"
-
-#include <ctime>
 
 observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda)
   // You have to write this down or you will forget. 
@@ -209,7 +208,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
  
   // Compute observable:
   observable *o = obs_scalar(theta, phi, lambda, nlambda);
-  fp_t ** S = o->get_S();
+  fp_t ** S = o->get_S(1,1);
 
   fp_t d_T = delta_T;
   int ns = 1;
@@ -228,7 +227,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     observable * temp_o = obs_scalar(theta, phi, lambda, nlambda);
 
-    fp_t ** Stemp = temp_o->get_S();
+    fp_t ** Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[1][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -240,7 +239,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -259,7 +258,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     
     temp_o = obs_scalar(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[2][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -271,7 +270,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -289,7 +288,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_scalar(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     memcpy(d_obs[3][x3i][1]+1, Stemp[1]+1, nlambda*sizeof(fp_t));
 
@@ -301,7 +300,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -379,40 +378,46 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
-  for (int a = 0; a<natm; ++a)
-    atml[a]->prof_setup();
+  //for (int a = 0; a<natm; ++a)
+  //  atml[a]->prof_setup();
 
   for (int a=0;a<natm;++a)
     atml[a]->zeeman_setup();
 
-  class observable *o=new observable(4);
-  
+  class observable *o=new observable(1,1,4,nlambda);
+
+  fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  op_em_vector(Vr,B,theta,phi,lambda-1,nlambda,op_vector,em_vector);
+
   for (int l = 0; l<nlambda; ++l){
 
-    for (int a = 0; a<natm; ++a)
-      atml[a]->prof_init();
+    //for (int a = 0; a<natm; ++a)
+    //  atml[a]->prof_init();
 
-    fp_t *****op = opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);   
-    fp_t ****em = emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    if (tau_grid) normalize_to_referent_opacity(op, em);
+    //fp_t *****op = opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);   
+    //fp_t ****em = emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
+    if (tau_grid) normalize_to_referent_opacity(op_vector[l+1], em_vector[l+1]);
 
-    formal(rt_grid, S,0,op,em,theta,phi,boundary_condition_for_rt); 
+    formal(rt_grid, S,0,op_vector[l+1],em_vector[l+1],theta,phi,boundary_condition_for_rt); 
 
     // Prior to printing convert wavelength to air again:
     fp_t lambda_air = vactoair(lambda[l]);
 
-    o->add(S[x1l][x2l][x3l],lambda_air);
+    o->set(S[x1l][x2l][x3l],lambda_air,1,1,l+1);
 
-    del_ft5dim(op, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4, 1, 4);
-    del_ft4dim(em, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
+    //del_ft5dim(op, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4, 1, 4);
+    //del_ft4dim(em, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   }
 
-  for (int a = 0; a<natm; ++a)
-    atml[a]->prof_clear();
+  //for (int a = 0; a<natm; ++a)
+  //  atml[a]->prof_clear();
 
   del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   popclean();
   
   io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");
@@ -425,7 +430,8 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t **** intensity_responses)
   // This function synthesises the spectrum, and computes the response functions of the 
   // unpolarized intensity. It can compute the derivatives of populations and number densities
-  // analyticaly or numerically, but the final computation of perturbation is computed analyticaly.
+  // analyticaly or numerically, but the final computation of perturbation is computed analyticaly, 
+  // and propagated numerically or analytically, to get the stokes spctrum responses. .
 {
 
   boundary_condition_for_rt = -1;
@@ -437,7 +443,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if(tau_grid) compute_op_referent_derivative();
 
   nltepops();
-  
   respsetup();
   ne_lte_derivatives();
   //compute_nlte_population_responses_numerical(x3l,x3h);
@@ -451,8 +456,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);   
   fp_t ***Lambda_approx = ft3dim(x1l, x1h, x2l, x2h, x3l, x3h);
   
-  for (int a = 0; a<natm; ++a)
-    atml[a]->prof_setup();
   for (int a=0;a<natm;++a)
     atml[a]->zeeman_setup();
 
@@ -468,49 +471,46 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if (intensity_responses) // If provided, copy the intensity to the input array
     memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
 
+  clock_t begin = clock();
+  clock_t end = clock();
+  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  
+  fp_t****** op = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t***** em = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  fp_t******** op_pert = ft8dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t******* em_pert = ft7dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  op_em_vector_plus_pert(Vr,B,theta,phi,lambda-1,nlambda,op,em,op_pert,em_pert);
+  
+  // Normalize to referent opacity, for each wavelength:
+  if (tau_grid)
+    for (int l=1;l<=nlambda;++l){
+      normalize_to_referent_opacity(op[l],em[l],op_pert[l],em_pert[l]);
+      normalize_to_referent_opacity(op[l],em[l]);
+  }
+
   for(int l=0;l<nlambda;++l){
 
-    for (int a = 0; a<natm; ++a)
-      atml[a]->prof_init();
-
-
-    //printf("Hahahahahah!\n");
-    
-    fp_t *****op=opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    fp_t ****em=emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-
-    //printf("Hahahahahah!\n");
-        
-    fp_t ******* op_pert = opacity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    fp_t ******  em_pert = emissivity_vector_pert(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-
-    //printf("Hahahahahah!\n");
-    
-    if (tau_grid){
-      normalize_to_referent_opacity(op,em,op_pert,em_pert);
-      normalize_to_referent_opacity(op,em);
-    }
-    formal(rt_grid, S,0,op,em,theta,phi,boundary_condition_for_rt);
-
+    // Now we formally solve for each wavelength:      
+    formal(rt_grid, S,0,op[l+1],em[l+1],theta,phi,boundary_condition_for_rt);
+  
+    // Sorting out the magnitude of perturbations so we can solve this properly:
     for (int x3k=x3l;x3k<=x3h;++x3k)
       for (int x1i=x1l;x1i<=x1h;++x1i)
         for (int x2i=x2l;x2i<=x2h;++x2i)
           for (int x3i=x3l;x3i<=x3h;++x3i)
             for (int s=1;s<=4;++s){
               for (int sp=1;sp<=4;++sp){
-                op_pert[2][x3k][x1i][x2i][x3i][s][sp] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
-                op_pert[6][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
-                op_pert[7][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
+                op_pert[l+1][2][x3k][x1i][x2i][x3i][s][sp] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+                op_pert[l+1][6][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
+                op_pert[l+1][7][x3k][x1i][x2i][x3i][s][sp] *= delta_angle;
               }
-              em_pert[2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
-              em_pert[6][x3k][x1i][x2i][x3i][s] *= delta_angle;
-              em_pert[7][x3k][x1i][x2i][x3i][s] *= delta_angle;
+              em_pert[l+1][2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
+              em_pert[l+1][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
+              em_pert[l+1][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
     }
-
-
     for (int param=1;param<=7;++param){
-      formal_pert_numerical(dS, op, em, op_pert[param], em_pert[param], theta, phi, boundary_condition_for_rt);
-
+      formal_pert_numerical(dS, op[l+1], em[l+1], op_pert[l+1][param], em_pert[l+1][param], theta, phi, boundary_condition_for_rt);
+  
       if (param == 2)
         for (int x3i=x3l;x3i<=x3h;++x3i)
           for (int s=1;s<=4;++s)
@@ -524,56 +524,43 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       for (int x3i=x3l;x3i<=x3h;++x3i)
         for (int s=1;s<=4;++s)
           d_obs_a[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
-
-      if (intensity_responses)
-        for (int x3i=x3l;x3i<=x3h;++x3i)
-          for (int s=1;s<=4;++s)
-            intensity_responses[param][x3i][l+1][s] = dS[x3i][x1l][x2l][x3l][s];
-
     }
-    del_ft7dim(op_pert,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-    del_ft6dim(em_pert,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-
     // Go to lambda_air
     lambda_air[l] = vactoair(lambda[l]);
-
     // Add it to the observable
     o->add(S[x1l][x2l][x3l],lambda_air[l]);
-
-    // Delete all wavelength dependent quantities:            
-    del_ft4dim(em,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-    del_ft5dim(op,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-
-    // Finally, after all responses for each of the parameters are known, 
-    // we need to 'rotate' the responses to \theta and \phi, because they are calculate for \theta and \phi where the 
-    // system of reference is given w.r.t. the light ray. What we want are the responses to \theta and \phi in the frame
-    // of reference of the atmosphere
-    
   }
+  
+  end = clock();
+  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  printf("Time spent on op/em + pert = %f \n", time_spent);
+
+  // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
-    // Write down the intensity perturbations:
-  FILE * out;
-  out = fopen("stokes_intensity_responses_analytical.txt", "w");
-  for (int param=1;param<=7;++param){
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      for (int l=1;l<=nlambda;++l){
+  if (intensity_responses)
+    memcpy(intensity_responses[1][x3l][1]+1,d_obs_a[1][x3l][1]+1,7*(x3h-x3l+1)*nlambda*4*sizeof(fp_t));
+  
+  // Write down the intensity perturbations only if we are doing forward modeling. If we fit, we don't want to lose 
+  // time on this.
+  if (!intensity_responses){
+    FILE * out;
+    out = fopen("stokes_intensity_responses_analytical.txt", "w");
+    for (int param=1;param<=7;++param){
+      for (int x3i=x3l;x3i<=x3h;++x3i){
         fp_t loc = 0;
-        if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
-        fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
-        for (int s=1;s<=4;++s)
-          fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
-        fprintf(out," \n");
+        if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];  
+        for (int l=1;l<=nlambda;++l){
+          fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
+          for (int s=1;s<=4;++s)
+            fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
+          fprintf(out," \n");
+        }
       }
     }
+    fclose(out);
   }
-  fclose(out);
-    
-  // Clear un-needed quantities
-  for (int a = 0; a<natm; ++a){
-    atml[a]->prof_clear();
-  }
-
+  
   del_ft4dim(S,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft3dim(Lambda_approx,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -582,14 +569,21 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   del_ft5dim(dS,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4); 
 //
   del_ft4dim(d_obs_a,1,7,x3l,x3h,1,nlambda,1,4);
-  delete []lambda_air;
 
-//
-  //for(int a=0;a<natm;++a) alltml[a]->radiation_moments_clean();
+  del_ft6dim(op,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft5dim(em,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  del_ft8dim(op_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft7dim(em_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  delete []lambda_air;
+  for(int a=0;a<natm;++a){
+    atml[a]->zeeman_clear();
+    atml[a]->rtclean(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  }
+  
   respclean();
   popclean(); // all done
 
-  io.msg(IOL_INFO,"atmosphere::obs_scalar_responses: observable and responses synthesized...\n");
+  io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -606,7 +600,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
   // Compute observable:
   observable *o = obs_stokes(theta, phi, lambda, nlambda);
   
-  fp_t ** S = o->get_S();
+  fp_t ** S = o->get_S(1,1);
   int ns = 4;
 
   fp_t d_T = delta_T;
@@ -625,7 +619,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     observable * temp_o = obs_stokes(theta, phi, lambda, nlambda);
 
-    fp_t ** Stemp = temp_o->get_S();
+    fp_t ** Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[1][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     
@@ -637,7 +631,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -656,7 +650,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[2][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -667,7 +661,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     // Now we need to subtract, this is unfortunately more complicated:
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
 
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
@@ -684,7 +678,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[3][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -693,7 +687,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
     // Now we need to subtract, this is unfortunately more complicated:
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
         d_obs[3][x3i][s][l] -= Stemp[s][l];
@@ -710,7 +704,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[4][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -719,7 +713,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
     // Now we need to subtract, this is unfortunately more complicated:
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
         d_obs[4][x3i][s][l] -= Stemp[s][l];
@@ -743,7 +737,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
 
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[5][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -754,7 +748,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
     // Now we need to subtract, this is unfortunately more complicated:
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
         d_obs[5][x3i][s][l] -= Stemp[s][l];
@@ -780,7 +774,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     Bz[x1l][x2l][x3i] += 0.5*d_Bz;
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[6][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -790,7 +784,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     Bz[x1l][x2l][x3i] -= d_Bz;
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
     // Now we need to subtract, this is unfortunately more complicated:
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
         d_obs[6][x3i][s][l] -= Stemp[s][l];
@@ -811,7 +805,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     Bz[x1l][x2l][x3i] += 0.5*d_Bz;
 
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     memcpy(d_obs[7][x3i][1]+1, Stemp[1]+1, ns*nlambda*sizeof(fp_t));
     del_ft2dim(Stemp,1,ns,1,nlambda);
     delete temp_o;
@@ -821,7 +815,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     Bz[x1l][x2l][x3i] -= d_Bz;
     temp_o = obs_stokes(theta, phi, lambda, nlambda);
     // Now we need to subtract, this is unfortunately more complicated:
-    Stemp = temp_o->get_S();
+    Stemp = temp_o->get_S(1,1);
     for (int s=1;s<=ns;++s)
       for (int l=1;l<=nlambda;++l){
         d_obs[7][x3i][s][l] -= Stemp[s][l];

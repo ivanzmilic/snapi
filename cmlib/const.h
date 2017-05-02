@@ -32,6 +32,8 @@
 
 #define n_air = 1.000277 // in the end we took the VALC approach, so n is still lambda dependent. 
 
+#define turn_on_damping 1.0 //
+
 #else
 
 #define c   2.99792458E8             // m/s

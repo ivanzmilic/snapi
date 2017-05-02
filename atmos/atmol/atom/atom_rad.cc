@@ -1,6 +1,12 @@
-#include <math.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/times.h>
 
 #include "types.h"
 #include "uts.h"
@@ -22,8 +28,6 @@
 #include "colr.h"   // collisional rates
 #include "atom.h"
 // --------------------------------------------------------------------------------------------------------------------------------------------------
-
-fp_t turn_on_damping = 1.0;
 
 // Total opacity and emissivity functions. They both simply add three different contributions from three kinds of processes:
 
@@ -843,7 +847,6 @@ fp_t * atom::a_derivative(int x1i, int x2i, int x3i, int z, int i, int ii, fp_t 
   derivative[1] = -a/dld * d_dld;
   derivative[1] += damp_col_der_T(x1i, x2i, x3i, z, i, ii, Temp, ne, lam)  / dld * (lam*lam)/(4.0*pi*c) * turn_on_damping;
 
-
   // Then the density:
   fp_t Nt = fetch_Nt(x1i,x2i,x3i);
   fp_t delta_Nt = delta_Nt_frac * Nt;
@@ -997,7 +1000,7 @@ fp_t ******* atom::opacity_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t **
   memset(op_pert[1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
 
   fp_t ***** op_scalar_pert = boundfree_op_pert(Vlos,lambda);
-  //op_scalar_pert=add(boundbound_op_pert(T,Ne,Vlos,Vt, B_vec, lambda),op_scalar_pert,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+  
 
   for (int p=1;p<=7;++p)
     for (int x3k=x3l;x3k<=x3h;++x3k)
@@ -1021,8 +1024,7 @@ fp_t ****** atom::emissivity_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t 
   memset(em_pert[1][x3l][x1l][x2l][x3l]+1,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
   
   fp_t ***** em_scalar_pert = boundfree_em_pert(Vlos,lambda);
-  //em_scalar_pert=add(boundbound_em_pert(T,Ne,Vlos,Vt, B_vec, lambda),em_scalar_pert,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-
+  
   for (int p=1;p<=7;++p)
     for (int x3k=x3l;x3k<=x3h;++x3k)
       for (int x1i=x1l;x1i<=x1h;++x1i)
@@ -1250,11 +1252,13 @@ fp_t **** atom::boundbound_em_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***V
 
 fp_t ******* atom::boundbound_op_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t ****B_vec, fp_t lambda){
   fp_t *******op_pert=ft7dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  
   memset(op_pert[1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
 
   for(int z=0;z<=Z;++z) //
     for(int i=1;i<nl[z];++i) // upper level
       for(int ii=0;ii<i;++ii){ // lower level
+        if (A[z][i][ii] > 1E0){
         fp_t lam=h*c/(ee[z][i]-ee[z][ii]);   // transition wavelength: may be shifted by the local velocity
         fp_t ar=damp_rad(A[z],ii,i);
         fp_t gc = 0.0;
@@ -1497,6 +1501,7 @@ fp_t ******* atom::boundbound_op_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,f
                 delete [](H_p_der+1); delete [](H_b_der+1); delete [](H_r_der+1);
                 delete [](F_p_der+1); delete [](F_b_der+1); delete [](F_r_der+1);
               }
+            }
   }
   //printf("op_pol = %e %e %e %e \n", op[x1l][x2l][25][1][1], op[x1l][x2l][25][1][2],op[x1l][x2l][25][1][3],op[x1l][x2l][25][1][4]);
   return op_pert;
@@ -1847,14 +1852,6 @@ fp_t atom::C_i_cont(int z, int i, fp_t T, fp_t n_e){
 	fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda) : -1.0;
   fp_t rate = 1.55E13 / sqrt(T) * g_i * sigma * exp(-u0) / u0 * n_e;
 
-  /*if (Z > 1 ){
-    if (i==0)
-      rate = 3E-17 * n_e * exp(-u0) * sqrt(T) * 1E6;
-
-    if (i==1)
-      rate = 3E-17 * n_e * exp(-u0) * sqrt(T) * 1E6;
-  }*/
-
 	return rate;
 
 }
@@ -1870,14 +1867,5 @@ fp_t atom::C_cont_i(int z, int i, fp_t T, fp_t n_e){
 	return rate;
 }
 
-fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) // absorption
-// *************************************************************************
-// * Bound-Free opacities as specified for each level...                   *
-// *************************************************************************
-{
- 
-  return 0;
-}
-
-
+fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) {};
 

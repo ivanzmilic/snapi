@@ -19,6 +19,7 @@ fp_t * multiply_vector(fp_t ** A, fp_t * B, int dim);
 fp_t * multiply_vector(fp_t ** A, fp_t * B, int N_rows, int N_columns); // same as above but for arbitrary matrices, i.e. not only square ones
 fp_t * multiply_with_vector(fp_t * A, fp_t ** B, int dim);
 fp_t ** transpose (fp_t ** A, int N_rows, int N_columns);
+fp_t **** transpose(fp_t ****A, int N1, int N2, int N3, int N4);
 fp_t ** multiply_with_transpose(fp_t ** A, int N_rows, int N_columns);
 
 fp_t * solve(fp_t ** A, fp_t * rhs, int from, int to); // Solve linear system using LU decomposition
@@ -67,6 +68,8 @@ fp_t compute_w1(fp_t);
 
 fp_t vactoair(fp_t);
 fp_t airtovac(fp_t);
+fp_t * airtovac(fp_t *, int);
+fp_t * vactoair(fp_t *, int);
 
 
 #endif                        // __MATHTOOLS_H__

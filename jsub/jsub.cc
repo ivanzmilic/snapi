@@ -68,16 +68,23 @@ int main(int argc,char *argv[])
   ji.az=new fp_t [ji.no];
   ji.el=new fp_t [ji.no];
   ji.nlambda=new int [ji.no];
+  ji.to_invert = new int [ji.no];
   ji.lambda=new fp_t* [ji.no];
   ji.name=new char* [ji.no];
   for(int o=0;o<ji.no;++o){
     ji.az[o]=cfg.obs[o]->az;
     ji.el[o]=cfg.obs[o]->el;
     ji.nlambda[o]=cfg.obs[o]->nlambda;
+    ji.to_invert[o]=cfg.obs[o]->to_invert;
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
     ji.name[o]=strcpy(new char [strlen(cfg.obs[o]->name)+1],cfg.obs[o]->name);
   }
+//
+  // Now do the same for the model as well 
+  ji.nm = cfg.nm;
+  ji.models = new model* [ji.nm];
+  for (int m=0;m<ji.nm;++m) ji.models[m]=model_new(cfg.mod[m],io);
 //
   ji.uid=getuid();
   ji.gid=getgid();

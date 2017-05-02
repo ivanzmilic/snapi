@@ -16,6 +16,7 @@ class atmosphere;
 #include "atmol/atmol.h"
 
 #include "acfg.h"
+#include "../jsub/cfg.h"
 
 
 #define ATMOS_FLAG_DEF       0x01UL
@@ -112,6 +113,7 @@ protected:
   fp_t ***** thomson_sc_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ***** thomson_em_pert(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
 
+  
   int op_em_pert_numerical_scalar(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t,fp_t *****, fp_t *****);
   
 // Vector versions, frequency by frequency:
@@ -119,6 +121,16 @@ protected:
   fp_t ****emissivity_vector(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ******* opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ****** emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+// ======================================================================================================================
+  // Special versions of functions which compute opacity and emissivity for full wavelength grid in one go.
+  // We still account for the atmosphere as if it were 3D, although we might not need it like that.
+
+  int op_em_vector(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****); // With less arguments as most are already contained in the atmosphere
+  int op_em_vector_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t********,fp_t*******){return 0;}; // Basically the same as the one above, except taking different arguments
+  int op_em_vector_plus_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****,fp_t********,fp_t*******);
+
+// =======================================================================================================================
 
 // Referent optical depth scale related functions:
   virtual int compute_op_referent();
@@ -168,6 +180,8 @@ protected:
   // polarized radiative transfer solver for perturbations
   virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
   {return 0;};
+  virtual int formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary, int N_parameters)
+  {return 0;};
    virtual int formal_pert_analytical(fp_t ***** dS, fp_t ***** op, fp_t **** em, fp_t ****** op_pert, fp_t ***** em_pert, fp_t theta, fp_t phi, fp_t boundary)
   {return 0;};
   virtual int formal_with_responses_jcdti(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t )
@@ -186,6 +200,7 @@ public:
   atmosphere(acfg*,io_class&);
   atmosphere(uint08_t*,int32_t&,uint08_t,io_class&);
   virtual int build_from_nodes(model *);
+  virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
   virtual ~atmosphere(void);
 //
   virtual int32_t size(io_class&);
@@ -219,6 +234,7 @@ public:
 // Vector case. Here we have already generalized. So no need to split between "tau" and "geometrical" functions. This should be cleaned up in 
 // the 'final' version of the code
   virtual observable *obs_stokes_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
+  virtual observable *obs_stokes_responses_to_nodes_new(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // 'New' version
                                                                                                          // hence the 3D vector in last argument
   virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
                                                                                                          // hence the 3D vector in last argument
@@ -226,6 +242,8 @@ public:
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
+  
+  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
   
   // Debug:
@@ -236,7 +254,7 @@ public:
 
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
-  virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
+  virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
@@ -301,6 +319,8 @@ private:
   int N_nodes_theta;
   int N_nodes_phi;
 
+  int N_depths; // This depends on the specific atmosphere we are using:
+  
   // Does it make sense to have separate number of nodes for different components of velocity/magnetic field? 
   // To me it does not. But maybe we want to allow for possibillity for that in the code?
   // Let's leave this as a starting point. If we get things working we will code new one.
@@ -335,6 +355,9 @@ private:
   fp_t * phi_nodes_tau;
   fp_t * phi_nodes_phi;
 
+  // Mapping matrix which describes how is every parameter mapped onto perturbations of other ones:
+  fp_t *** response_to_parameters;
+
 public:
 
   // We will keep these virtual so we can make some derived class from this
@@ -343,6 +366,12 @@ public:
   model(int, int, int, int); // Creates model with values of nodes 
   model(int, int, int, int, int, int); // Creates model with nodes for all 6 parameters
   ~model(void);
+  model(mcfg*,io_class&); // Create from config file
+  model(uint08_t*,int32_t&,uint08_t,io_class&); // Unpack from buffer
+
+  virtual int32_t size(io_class&);
+  virtual int32_t pack(uint08_t*,uint08_t,io_class&);
+  virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
 
   // Now methods which set nodes
   int set_temp_nodes(fp_t *, fp_t *);
@@ -380,14 +409,47 @@ public:
   int get_N_nodes_total();
   int perturb_node_value(int, fp_t);
   int get_parameter(int);
+  int which_parameter(int);
 
   int print();
   int print_to_file(FILE *);
 
+  int set_response_to_parameters(fp_t ***, int);
+  fp_t *** get_response_to_parameters();
+
+  int correct(fp_t * correction);
+  
+  int cpy_values_from(model *);
+
 
 };
 
+model * clone(model *);
 model * model_new(int, int, int, int);
 model * model_new(int, int, int, int, int, int);
+model * model_new(mcfg*,io_class&);
+model * model_new(uint08_t*,int32_t&,uint08_t,io_class&);
+
+class modelcube{
+private:
+  int nx,ny;
+  int N_parameters;
+  int N_nodes_temp, N_nodes_vt, N_nodes_vs, N_nodes_B, N_nodes_theta, N_nodes_phi;
+  fp_t * temp_nodes_tau;
+  fp_t * vt_nodes_tau;
+  fp_t * vs_nodes_tau;
+  fp_t * B_nodes_tau;
+  fp_t * theta_nodes_tau;
+  fp_t * phi_nodes_tau;
+
+  fp_t *** data;
+public:
+  modelcube();
+  modelcube(model*, int nx, int ny);
+  ~modelcube();
+  void add_model(model*,int i, int j);
+  void simple_print(const char*);
+  //void anaprint(const * char,);
+};
 
 #endif              // __ATMOS_H__

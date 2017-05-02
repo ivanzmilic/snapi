@@ -5,7 +5,7 @@ import sys
 
 spectrum_to_fit = np.loadtxt(sys.argv[1],unpack = True)
 spectrum_by_iters = np.loadtxt(sys.argv[2],unpack = True)
-nodes = np.loadtxt(sys.argv[3],unpack = True,skiprows = 1)
+#nodes = np.loadtxt(sys.argv[3],unpack = True,skiprows = 1)
 chisq = np.loadtxt(sys.argv[4],unpack = True)
 
 spectrum_to_fit[0] *= 1E8
@@ -17,7 +17,7 @@ N_iters = spectrum_by_iters.size / (5 * N_wlv)
 
 spectrum_by_iters = spectrum_by_iters.reshape(5,N_iters,N_wlv)
 
-nodes = nodes.reshape(2,N_iters,4)
+#nodes = nodes.reshape(2,N_iters,4)
 
 limits = np.zeros([2,4])
 limits[0,0] = 0.0
@@ -36,7 +36,7 @@ lambda_max = spectrum_to_fit[0,-1]
 # But now also prepare the nodes and their evolution:
 
 
-tau_fine = np.linspace(nodes[0,0,0],nodes[0,0,-1],50)
+#tau_fine = np.linspace(nodes[0,0,0],nodes[0,0,-1],50)
 #print N_wlv, N_iters
 
 for i in range (0,N_iters):
@@ -56,14 +56,14 @@ for i in range (0,N_iters):
 	plt.xlim([lambda_min,lambda_max])
 	plt.ylabel('$\mathrm{Stokes}\,Q$')
 
-	plt.subplot(233)
-	f = interp1d(nodes[0,i,:],nodes[1,i,:], kind='cubic')
-	plt.plot(nodes[0,i,:],nodes[1,i,:],'o',markersize=10)
-	plt.plot(tau_fine,f(tau_fine))
-	plt.xlim([-5.5,1.0])
-	plt.ylim([3000,10000])
-	plt.xlabel('$\\tau$')
-	plt.ylabel('$\mathrm{T\,[K]}$')
+	#plt.subplot(233)
+	#f = interp1d(nodes[0,i,:],nodes[1,i,:], kind='cubic')
+	#plt.plot(nodes[0,i,:],nodes[1,i,:],'o',markersize=10)
+	#plt.plot(tau_fine,f(tau_fine))
+	#plt.xlim([-5.5,1.0])
+	#plt.ylim([3000,10000])
+	#plt.xlabel('$\\tau$')
+	#plt.ylabel('$\mathrm{T\,[K]}$')
 	
 	plt.subplot(234)
 	plt.plot(spectrum_to_fit[0], spectrum_to_fit[3],'o')

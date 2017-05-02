@@ -1,7 +1,7 @@
 MAKEFILE      = Makefile
 # local variables
 OPTFLAGS      = -O4 -O5 -ffast-math
-WARNFLAGS     =  -Wshadow
+WARNFLAGS     = -Wshadow
 DBGFLAGS      = -g3
 XTRAFLAGS     = -fsigned-char # -fno-stack-protector
 # global variables

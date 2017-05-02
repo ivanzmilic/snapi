@@ -30,6 +30,7 @@ public:
   virtual fp_t U(fp_t){ return 0.0; }
 //
   virtual fp_t *getlambda(int&){ return 0; }
+  virtual fp_t getlambda_crit(){return 0;}
 };
 
 class hybf:public bfcs{ // hydrogenic
@@ -48,6 +49,7 @@ public:
   virtual fp_t U(fp_t);
 //
   virtual fp_t *getlambda(int&);
+  virtual fp_t getlambda_crit();
 };
 
 class tabbf:public bfcs{ // tabulated
@@ -65,6 +67,7 @@ public:
 
   virtual fp_t U(fp_t);
   virtual fp_t *getlambda(int&);
+  virtual fp_t getlambda_crit();
 };
 
 class phbf:public bfcs{ // pseudo-hydrogenic, only critical cross-section is given
@@ -82,6 +85,7 @@ public:
 
   virtual fp_t U(fp_t);
   virtual fp_t *getlambda(int&);
+  virtual fp_t getlambda_crit();
 };
 
 class bfcs *bf_new(uint08_t*,int32_t&,uint08_t,io_class&);

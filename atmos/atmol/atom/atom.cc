@@ -1548,7 +1548,7 @@ uint08_t atom::rtclean(int ntp,int32_t nlambda,
   if(Ju) del_ft4dim(Ju,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
   if(Ls) del_ft4dim(Ls,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
   if(norm) del_ft4dim(norm,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
-  if(norm_derivative) del_ft5dim(norm_derivative,1,8,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  if(norm_derivative) del_ft5dim(norm_derivative,1,7,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
   if(current_profile) del_ft4dim(current_profile, x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
 
   if(inverse_tmap) del_ui32t2dim(inverse_tmap, 1, ntr, 1, 4);
@@ -1739,6 +1739,29 @@ void atom::zeeman_setup(){
 
 void atom::zeeman_clear(){
 
+  if(ntr){
+    for (int tr=1;tr<=ntr;++tr){
+      int z_state = inverse_tmap[tr][2];
+      int lower_level = inverse_tmap[tr][3];
+      int upper_level = inverse_tmap[tr][4];
+      if (upper_level < nl[z_state]){
+        delete[]delta_lambda_p[tr];
+        delete[]delta_lambda_b[tr];
+        delete[]delta_lambda_r[tr];
+        delete[]S_p[tr];
+        delete[]S_b[tr];
+        delete[]S_r[tr];
+        delete[]nm[tr];
+      }      
+    }
+    delete[](nm+1);
+    delete[](delta_lambda_p+1);
+    delete[](delta_lambda_b+1);
+    delete[](delta_lambda_r+1);
+    delete[](S_p+1);
+    delete[](S_b+1);
+    delete[](S_r+1);
+  }
 }
 
 void atom::rtinit(void)

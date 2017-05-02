@@ -15,6 +15,7 @@
 #define MFBD_TYPE_NAMES {"byte","int16","int32","int64","float32","float64"}
 
 int data_type(const char*,io_class&);
+fp_t ****read_file(char*,int&,int&,int&,int&,io_class&);
 fp_t ***read_file(char*,int&,int&,int&,io_class&);
 fp_t **read_file(char*,int&,int&,io_class&);
 fp_t *read_file(char*,int&,io_class&);
@@ -24,5 +25,6 @@ int16_t **read_file(char*,int&,int&,char*&,io_class&);
 void write_file(char*,fp_t***,int,int,int,io_class&);
 void write_file(char*,fp_t****,int,int,int*,int,io_class&);
 void write_file(char*,float32_t****,int,int,int,int,io_class&);
+void write_file(char*,fp_t****,int,int,int,int,io_class&);
 
 #endif                 // __FILEIO_H__

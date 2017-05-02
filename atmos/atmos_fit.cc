@@ -19,7 +19,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 	// Perform LM fitting and return the best fitting spectrum
 	// First extract the spectrum from the observation:
-	fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S();
+	fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
 	
 	// This is a starting model
 	int N_temp_nodes = 4;
@@ -55,7 +55,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 5;
+  int MAX_ITER = 10;
 
   io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
 
@@ -82,7 +82,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
           (derivatives_to_parameters[i][l] - derivatives_to_parameters_num[i][l]) / derivatives_to_parameters_num[i][l]);
     }*/
 
-    fp_t ** S = current_obs->get_S();
+    fp_t ** S = current_obs->get_S(1,1);
 
     for (int l=1;l<=nlambda;++l){
     	residual[l] = stokes_vector_to_fit[1][l] - S[1][l]; 
@@ -113,7 +113,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 		build_from_nodes(current_model);
 		observable *reference_obs = obs_scalar_tau(theta, phi, lambda, nlambda);
-		fp_t ** S_reference = reference_obs->get_S();
+		fp_t ** S_reference = reference_obs->get_S(1,1);
 
 		// Compute new chi sq
 		fp_t metric_reference = 0.0;
@@ -175,115 +175,75 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 	return 0;
 }
 
-observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){
+observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
+
+  set_grid(1);
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
-  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S();
+  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
+  int nlambda = spectrum_to_fit->get_n_lambda();
+  fp_t * lambda = spectrum_to_fit->get_lambda();
+  lambda = airtovac(lambda+1,nlambda);
   
-  // This is a starting model
-  int N_temp_nodes = 4;
-  int N_vt_nodes = 1;
-  int N_vs_nodes = 1;
-  int N_B_nodes = 1;
-  int N_theta_nodes = 1;
-  int N_phi_nodes = 1;
-  int N_parameters = N_temp_nodes + N_vt_nodes + N_vs_nodes + N_B_nodes + N_theta_nodes + N_phi_nodes;
-  model * current_model = model_new(N_temp_nodes,N_vt_nodes,N_vs_nodes,N_B_nodes,N_theta_nodes,N_phi_nodes);
-    
-  // Temperature nodes:
-  fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
-  fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
-    
-  temp_nodes_tau[1] = -5.0; // This has to be like this? No, you need to extrapolate the atmosphere correctly. But do you? SIR does not.
-  temp_nodes_tau[2] = -3.1;
-  temp_nodes_tau[3] = -1.3;
-  temp_nodes_tau[4] = 0.5;
-    
-  temp_nodes_temp[1] = 5000.0;
-  temp_nodes_temp[2] = 5500.0;
-  temp_nodes_temp[3] = 6000.0;
-  temp_nodes_temp[4] = 6500.0;
-    
-  current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
-
-  // Vt nodes:
-  
-  fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
-  fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-  vt_nodes_tau[1] = -5.5;
-  //vt_nodes_tau[2] = 0.5;
-  vt_nodes_vt[1] = 1.0E5;
-  //vt_nodes_vt[2] = 0.5E5;
-  current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
-  
-  // Vs nodes:
-  fp_t * vs_nodes_tau = new fp_t [N_vs_nodes] -1;
-  fp_t * vs_nodes_vs = new fp_t [N_vs_nodes] -1;
-  vs_nodes_tau[1] = 0.0;
-  vs_nodes_vs[1] = -0.0E5;
-  current_model->set_vs_nodes(vs_nodes_tau,vs_nodes_vs);
-  
-  // B nodes:
-  fp_t * B_nodes_tau = new fp_t [N_B_nodes] -1;
-  fp_t * B_nodes_B = new fp_t [N_B_nodes] -1;
-  B_nodes_tau[1] = 0;
-  B_nodes_B[1] =1200.0;
-  current_model->set_B_nodes(B_nodes_tau,B_nodes_B);
-  // theta nodes:
-  fp_t * theta_nodes_tau = new fp_t [N_theta_nodes] -1;
-  fp_t * theta_nodes_theta = new fp_t [N_theta_nodes] -1;
-  theta_nodes_tau[1] = 0;
-  theta_nodes_theta[1] = pi/6.0;
-  current_model->set_theta_nodes(theta_nodes_tau,theta_nodes_theta);
-  // phi nodes:
-  fp_t * phi_nodes_tau = new fp_t [N_phi_nodes] -1;
-  fp_t * phi_nodes_phi = new fp_t [N_phi_nodes] -1;
-  phi_nodes_tau[1] = 0;
-  phi_nodes_phi[1] = pi/6.0;
-  current_model->set_phi_nodes(phi_nodes_tau,phi_nodes_phi);
-
-  fp_t metric = 0.0;
+  // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
-  FILE * output;
-  output = fopen("fitting_log.txt", "w");
-
+  
+  // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
+  fp_t metric = 0.0;
   int iter = 0;
   int MAX_ITER = 15;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 4.0; ws[3] = 4.0;
-  
-  io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0;
+  fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
 
+  // Series of files where we will store fitting related quantities. This is basically DEBUG  
+  FILE * fitting_log;
+  fitting_log = fopen("fitting_log.txt", "w");
   FILE * detailed_log;
   detailed_log = fopen("detailed_log.txt", "w");
   FILE * result;
   result = fopen("fitted_spectrum.dat", "w");
   FILE * nodes;
   nodes = fopen("fitted_nodes.dat", "w");
-  fprintf(nodes,"%d %d %d %d %d %d \n", N_temp_nodes, N_vt_nodes, N_vs_nodes, N_B_nodes, N_theta_nodes, N_phi_nodes);
-  fprintf(detailed_log,"Starting model:\n");
-  current_model->print_to_file(detailed_log);
+  observable * current_obs;
   
+  fprintf(detailed_log,"Starting model:\n");
+  model_to_fit->print_to_file(detailed_log);
+  
+  int N_parameters = model_to_fit->get_N_nodes_total();
+  
+  io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
+
   for (iter = 1; iter <=MAX_ITER; ++iter){
   
-    fp_t *** derivatives_to_parameters_num = ft3dim(1,N_parameters,1,nlambda,1,4);
-    memset(derivatives_to_parameters_num[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
+    fp_t *** derivatives_to_parameters_num = ft3dim(1,N_parameters,1,nlambda,1,4); // DEBUG/test
+    memset(derivatives_to_parameters_num[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t)); // DEBUG/test
     fp_t *** derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
     memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
     fp_t * residual = new fp_t [nlambda*4]-1;
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    observable *current_obs = obs_stokes_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+    current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+ 
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
-       
-    fp_t ** S = current_obs->get_S();
 
+    // Very much DEBUG:
+    /*FILE * response_comparison;
+    response_comparison = fopen("responses_comparison.txt","w");
+    for (int p=1;p<=N_parameters;++p)
+      for (int l=1;l<=nlambda;++l)
+        for (int s=1;s<=4;++s)
+          fprintf(response_comparison,"%d %d %d %e %e %e \n",p,l,s,derivatives_to_parameters[p][l][s],derivatives_to_parameters_num[p][l][s],
+            (derivatives_to_parameters[p][l][s]-derivatives_to_parameters_num[p][l][s])/derivatives_to_parameters_num[p][l][s]);
+    fclose(response_comparison);*/
+    
+    fp_t ** S = current_obs->get_S(1,1);
     metric = 0.0;
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / 1E22;
+      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     }
     fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
     
@@ -301,25 +261,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, 4*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-    for (int i=1;i<=N_parameters;++i){
-      if (fabs(correction[i]) > 0.5 * fabs(current_model->get_parameter(i)) && i<=(N_temp_nodes+N_vt_nodes))
-        correction[i] = correction[i]/fabs(correction[i]) * 0.5 * current_model->get_parameter(i);
-
-      if (i<=N_temp_nodes)
-        if (current_model->get_parameter(i) + correction[i] < 3300.0) correction[i] = 3300.0 - current_model->get_parameter(i);
-
-      // And then correct
-      current_model->perturb_node_value(i, correction[i]);
-    }
+    // Apply the correction:
+    model * test_model = clone(model_to_fit);
+    test_model->correct(correction);
     
     //current_model->print();
     fprintf(detailed_log, "Model after the correction.\n");
-    current_model->print();
-    current_model->print_to_file(detailed_log);
+    test_model->print();
+    test_model->print_to_file(detailed_log);
 
-    build_from_nodes(current_model);
+    build_from_nodes(test_model);
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    fp_t ** S_reference = reference_obs->get_S();
+    fp_t ** S_reference = reference_obs->get_S(1,1);
 
     // Print out everything that we are interesed in:
     fprintf(detailed_log,"Iteration # %d .Current spectrum:\n", iter);
@@ -330,45 +283,28 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         fprintf(result, " %e", S[s][l]);
       fprintf(result,"\n");
     }
-
-    fp_t * current_temp_nodes_tau = current_model->get_temp_nodes_tau();
-    fp_t * current_temp_nodes_temp = current_model->get_temp_nodes_temp();
-
-    for (int i=1;i<=N_temp_nodes;++i)
-      fprintf(nodes, "%e %e \n",current_temp_nodes_tau[i], current_temp_nodes_temp[i]);
-    /*for (int i=1;i<=N_vt_nodes;++i)
-      fprintf(nodes, "%e %e \n",vt_nodes_tau[i], vt_nodes_vt[i]);
-    for (int i=1;i<=N_vs_nodes;++i)
-      fprintf(nodes, "%e %e \n",vs_nodes_tau[i], vs_nodes_vs[i]);
-    for (int i=1;i<=N_B_nodes;++i)
-      fprintf(nodes, "%e %e \n",B_nodes_tau[i], B_nodes_B[i]);
-    for (int i=1;i<=N_theta_nodes;++i)
-      fprintf(nodes, "%e %e \n",theta_nodes_tau[i], theta_nodes_theta[i]);
-    for (int i=1;i<=N_phi_nodes;++i)
-      fprintf(nodes, "%e %e \n",phi_nodes_tau[i], phi_nodes_phi[i]);*/
-    
+  
     // Compute new chi sq
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
         for (int s=1;s<=4;++s)
-        metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l]) * ws[s-1] / 1E22;
+        metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
+         * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     
-    fprintf(output, "%d %e \n", iter, metric);  
+    fprintf(fitting_log, "%d %e \n", iter, metric);  
     fprintf(detailed_log, "Iteration # %d chisq after correction %e \n", iter, metric_reference);  
+    
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
       lm_parameter /= 10.0;
       fprintf(detailed_log, "Good step! Decreasing lm parameter.\n");
+      model_to_fit->cpy_values_from(test_model);
     }
     else{
-      // We are in the more non-linear regime, so we want linearization and hence, gradient descent
       lm_parameter *= 10.0;
-      // And un-modify:
-      for (int i=1;i<=N_parameters;++i)
-      current_model->perturb_node_value(i, -1.0 * correction[i]);
-      fprintf(detailed_log, "Bad step! Undoing modification and increasing lm parameter.\n");
+      fprintf(detailed_log, "Bad step! Undoing modification and increasing lm parameter.\n");  
     }
-    
+    delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,4*nlambda);
     del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
     del_ft2dim(J,1,nlambda*4,1,N_parameters);
@@ -376,42 +312,29 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     del_ft3dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda,1,4);
     del_ft2dim(S,1,4,1,nlambda);
     del_ft2dim(S_reference,1,4,1,nlambda);
-    delete current_obs;
+    
+    if(iter<MAX_ITER)
+      delete current_obs;
+    
     delete reference_obs;
 
     delete [](residual+1);
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
-    //printf("heeeya!");
-    // if (to_break < converged)
-     //break;
   }
 
-  fclose(output);
+  fclose(fitting_log);
   fclose(detailed_log);
   fclose(result);
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
 
   // Clean-up:
-  del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
-  delete [](temp_nodes_tau+1);
-  delete [](temp_nodes_temp+1);
-  /*delete [](vt_nodes_tau+1);
-  delete [](vt_nodes_vt+1);
-  delete [](vs_nodes_tau+1);
-  delete [](vs_nodes_vs+1);
-  delete [](B_nodes_tau+1);
-  delete [](B_nodes_B+1);
-  delete [](theta_nodes_tau+1);
-  delete [](theta_nodes_theta+1);
-  delete [](phi_nodes_tau+1);
-  delete [](phi_nodes_phi+1);*/
+  del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
+  delete[](lambda);
   
-  delete current_model;
-
-  return 0;
+  return current_obs;
 }
 
 // ======================================================================================================================================================
@@ -446,7 +369,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_scalar(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       response_to_parameters[i][l] = S_temp[1][l];
     del_ft2dim(S_temp,1,1,1,nlambda);
@@ -455,7 +378,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -2.0 * step);
     build_from_nodes(atmos_model);
     o_temp = obs_scalar(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l){
       response_to_parameters[i][l] -= S_temp[1][l];
       response_to_parameters[i][l] /= (2.0 * step);
@@ -512,7 +435,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_stokes(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s)
       response_to_parameters[i][l][s] = S_temp[s][l];
@@ -522,7 +445,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -step);
     build_from_nodes(atmos_model);
     o_temp = obs_stokes(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
         response_to_parameters[i][l][s] -= S_temp[s][l];
@@ -567,7 +490,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(atmos_model);
 
     o_temp = obs_scalar_tau(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l)
       response_to_parameters[i][l] = S_temp[1][l];
     del_ft2dim(S_temp,1,1,1,nlambda);
@@ -576,7 +499,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     atmos_model->perturb_node_value(i, -2.0 * step);
     build_from_nodes(atmos_model);
     o_temp = obs_scalar_tau(theta, phi, lambda, nlambda);
-    S_temp = o_temp->get_S();
+    S_temp = o_temp->get_S(1,1);
     for (int l=1;l<=nlambda;++l){
       response_to_parameters[i][l] -= S_temp[1][l];
       response_to_parameters[i][l] /= (2.0 * step);
@@ -894,7 +817,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * local_perturbations = new fp_t [x3h-x3l+1] - x3l;
     
     atmos_model->perturb_node_value(i, step * 0.5);
-    build_from_nodes(atmos_model); // <------- Can be done better but cannot be bothered now. FIX! 
+    interpolate_from_nodes(atmos_model); // <------- Can be done better but cannot be bothered now. FIX! 
 
     for (int x3i=x3l;x3i<=x3h;++x3i){
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
@@ -906,7 +829,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }
     
     atmos_model->perturb_node_value(i, -1.0 * step);
-    build_from_nodes(atmos_model);
+    interpolate_from_nodes(atmos_model);
 
     for (int x3i=x3l;x3i<=x3h;++x3i){
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
@@ -920,7 +843,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }
 
     atmos_model->perturb_node_value(i, 0.5 * step);
-    build_from_nodes(atmos_model);
+    interpolate_from_nodes(atmos_model);
   
     // Now you need everything together:
     int param = 0; // Which parameter are we accounting for? 
@@ -946,4 +869,117 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   del_ft4dim(responses_depth_dependent,1,7,x3l,x3h,1,nlambda,1,4);
   return o;
 
+ }
+
+ // Same as the above except for polarized radiation (Zeeman mode so far):
+ observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
+
+  // We first need to create the atmosphere from the model and compute the observable:
+  build_from_nodes(atmos_model);
+  
+  int N_parameters = atmos_model->get_N_nodes_total();
+  int N_nodes_T = atmos_model->get_N_nodes_temp();
+  int N_nodes_vt = atmos_model->get_N_nodes_vt();
+  int N_nodes_vs = atmos_model->get_N_nodes_vs();
+  int N_nodes_B = atmos_model->get_N_nodes_B();
+  int N_nodes_theta = atmos_model->get_N_nodes_theta();
+  int N_nodes_phi = atmos_model->get_N_nodes_phi();
+
+  memset(response_to_parameters[1][1]+1, 0, N_parameters*nlambda*4*sizeof(fp_t));
+
+  int N_depths = x3h-x3l+1;
+  fp_t *** resp_atm_to_parameters = ft3dim(1,N_parameters,1,7,1,N_depths);
+  memset(resp_atm_to_parameters[1][1]+1,0,N_parameters*7*N_depths*sizeof(fp_t));
+  
+  fp_t step = delta_T; // We still need step because we want to numerically study the derivative of the interpolation scheme. It does not matter a lot.
+     
+  for (int i=1;i<=N_nodes_T;++i){
+    
+    atmos_model->perturb_node_value(i, step * 0.5);
+    build_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      resp_atm_to_parameters[i][1][x3i-x3l+1] = T[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][2][x3i-x3l+1] = Nt[x1l][x2l][x3i];
+    }
+    
+    atmos_model->perturb_node_value(i, -1.0 * step);
+    build_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      resp_atm_to_parameters[i][1][x3i-x3l+1] -= T[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][2][x3i-x3l+1] -= Nt[x1l][x2l][x3i];
+      resp_atm_to_parameters[i][1][x3i-x3l+1] /= (1.0 * step);
+      resp_atm_to_parameters[i][2][x3i-x3l+1] /= (1.0 * step); 
+    }
+
+    atmos_model->perturb_node_value(i, 0.5 * step);
+    build_from_nodes(atmos_model);
+  }
+  
+  int param = 0;
+  // Then for all other parameters it is much simpler as we do not have to build atmosphere, we can just interpolate.
+  for (int i=N_nodes_T+1;i<=N_parameters;++i){
+
+    if (i<=N_nodes_T+N_nodes_vt){
+      step = delta_vt;
+      param = 3;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs){
+      step = delta_vr;
+      param = 4;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B){
+      step = delta_B;
+      param = 5;
+    }
+    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta){
+      step = delta_angle;
+      param = 6;
+    }
+    else {
+      step = delta_angle;
+      param = 7;
+    }
+    // First perturb to the one side
+    fp_t * local_perturbations = new fp_t [x3h-x3l+1] - x3l;
+    
+    atmos_model->perturb_node_value(i, step * 0.5);
+    interpolate_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
+      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      //if (i>N_nodes_T+N_nodes_vt+N_nodes_vs)
+      //  printf("%d %e %e %e",B_mag, theta_B, phi_B);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] = Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B;
+    }
+    
+    atmos_model->perturb_node_value(i, -1.0 * step);
+    interpolate_from_nodes(atmos_model);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
+      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] -= (Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B);
+      resp_atm_to_parameters[i][param][x3i-x3l+1] /= step;
+    }
+
+    atmos_model->perturb_node_value(i, 0.5 * step);
+    interpolate_from_nodes(atmos_model);
+  
+  }
+
+  // Now we start the responses part.
+
+  atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
+
+  observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model);
+  
+  del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
+  
+  return o;
+  
  }

@@ -175,6 +175,11 @@ fp_t *hybf::getlambda(int &np)
   return 0;
 }
 
+fp_t hybf::getlambda_crit()
+{
+  return l_b;
+}
+
 /*
 fp_t hybf::dU(fp_t,fp_t,io_class&)
 {
@@ -263,6 +268,10 @@ fp_t *tabbf::getlambda(int &np)
   return 0;
 }
 
+fp_t tabbf::getlambda_crit(){
+  return lambda_tabulated[n-1];
+}
+
 // ----------------------------------------------------------------------------------------
 // SAme here but for pseudo-hydrogenic cross-sections, let's see if we can keep up! 
 // In this formalism, ionization cross-section is given and then everything is scaled with lambda ** 3.0
@@ -335,7 +344,9 @@ fp_t *phbf::getlambda(int &np)
     l[i] = lambda_crit / pow(lambda_step,i);
     //printf("%d %e \n", i, l[i]);
   }
-
-
   return l;
+}
+
+fp_t phbf::getlambda_crit(){
+  return lambda_crit;
 }

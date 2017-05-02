@@ -22,12 +22,21 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     atmos=new atmosphere* [na];
     for(int a=0;a<na;++a) atmos[a]=atmos_new(data,offs,swap_endian,io);
   }else atmos=0;
+  
+  offs+=unpack(data+offs,nm,swap_endian);
+  printf("I unpacked %d models\n", nm);
+  if(nm){
+    models=new model* [nm];
+    for(int m=0;m<nm;++m) models[m]=model_new(data,offs,swap_endian,io);
+  }else models=0;
+  
 //
   offs+=unpack(data+offs,no,swap_endian);  
   if(no){
     offs+=unpack(data+offs,az=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,el=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,nlambda=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     lambda=new fp_t* [no];
     name=new char* [no];
     for(int o=0;o<no;++o){
@@ -60,10 +69,15 @@ jnfo::~jnfo(void)
     for(int a=0;a<na;++a) delete atmos[a];
     delete[] atmos;
   }
+  if (nm){
+    for (int m=0;m<nm;++m) delete models[m];
+    delete[]models;
+  }
   if(no){
     if(az) delete[] az;
     if(el) delete[] el;
     if(nlambda) delete[] nlambda;
+    if(to_invert) delete[] to_invert;
     if(lambda) for(int o=0;o<no;++o) if(lambda[o]) delete[] lambda[o];
     if(lambda) delete[] lambda;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
@@ -77,12 +91,16 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 {
   int32_t usize=sizeof(int);                     // na
   for(int a=0;a<na;++a) usize+=atmos[a]->size(io);
+  usize+=sizeof(int);                     // nm
+  for(int m=0;m<nm;++m) usize+=models[m]->size(io);
+    
 //  io.msg(IOL_INFO,"jnfo::compress: usize %d\n",usize);
 //
   usize+=sizeof(int);                            // no
   if(no){
     usize+=2*no*sizeof(fp_t);                    // az,el
     usize+=no*sizeof(int);                       // nlambda
+    usize+=no*sizeof(int);                       // to_invert
     for(int o=0;o<no;++o){
       usize+=nlambda[o]*sizeof(fp_t);  // lambda
       usize+=strlen(name[o])+1;        // file name
@@ -96,6 +114,8 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   int offs=pack(data,na,swap_endian);
   for(int a=0;a<na;++a) offs+=atmos[a]->pack(data+offs,swap_endian,io);
+  offs+=pack(data+offs,nm,swap_endian);
+  for(int m=0;m<nm;++m) offs+=models[m]->pack(data+offs,swap_endian,io);
 //  io.msg(IOL_INFO,"jnfo::compress: %d %d\n",offs,usize);
 //
   offs+=pack(data+offs,no,swap_endian);
@@ -103,6 +123,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,az,0,no-1,swap_endian);
     offs+=pack(data+offs,el,0,no-1,swap_endian);
     offs+=pack(data+offs,nlambda,0,no-1,swap_endian);
+    offs+=pack(data+offs,to_invert,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,name[o]);

@@ -25,19 +25,10 @@ const int N_atm_parameters = 7;
 
 void atom::compute_nlte_population_responses(){
 
-  // First allocate space for: 
-  // - Derivatives themselves
-  // - Right hand side, i.e. 'local' stuff
-  // - The big response matrix
-
-  // From now on we are assuming that responses are computed only for the `column' (1,1), i.e. that the atmosphere is of the size (x3h - x3l + 1)
-  // Of course, this is only done if there are transitions actually:
-
   if(ntr){
 
+    clock_t begin = clock();
     io.msg(IOL_INFO, "atom::now computing nlte population responses in analytical way \n ---- version in progress --- \n");
-
-    // Small test, we put it here because why not:
 
     int x1i = 1;
     int x2i = 1;
@@ -87,25 +78,9 @@ void atom::compute_nlte_population_responses(){
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    // Now we move on to the adjustments in the large coupling matrix.
-    // Write down the matrix so we can analyze this further:
-    FILE * output;
-    output = fopen("response_matrix_only_radiative.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-    
+   
     // Now we manipulate a bit the left hand side, what remains to be added, are the rates:
     fp_t * J_lu, * J_ul, * nrm;
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------
-    //memset(response_matrix[1]+1,0,N_responses*N_responses*sizeof(fp_t));
 
     for (int l=x3l; l<=x3h; ++l){ // At each depth of the atmosphere.
 
@@ -170,6 +145,11 @@ void atom::compute_nlte_population_responses(){
           else 
             response_matrix[(l-x3l) * nmap + nmap][(ll-x3l) * nmap + ii] = 0.0;
     }
+// ------------------------------------------------------------------------------------------------------------------------------------------------
+  
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time spent on setting up linear system = %f \n", time_spent);
 
     // Finally we need to compute all the responses and that really means invert response matrix and then multiply by the right hand side:
    
@@ -177,44 +157,12 @@ void atom::compute_nlte_population_responses(){
     fp_t * M_LU = new fp_t [N_depths * N_depths * nmap * nmap];
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
-   
-    // Before the solution you can print the response matrix:
-    output = fopen("response_matrix.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // We also have to output beta, too...
-    output = fopen("response_beta.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int ll = x3l;ll<=x3h;++ll)
-        for (int i=1;i<=nmap;++i){
-            fprintf(output, "%15.15e", beta_Temp[l][(ll-x3l) * nmap + i]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // And also get us populations, please:
-    output = fopen("pops.txt", "w");
-    for (int l = x3l; l<=x3h; ++l){
-      fprintf(output, "%d %5.15e ", l, parent_atm->get_x3(l));
-      for (int i=0;i<nmap;++i)
-        fprintf(output, "%5.15e ", pop[x1l][x2l][l].n[zmap[i]][lmap[i]]);
-      fprintf(output, "\n");
-    }
-    fclose(output);
-// ------------------------------------------------------------------------------------------------------------------------------------------------
+    
     printf(">> Now solving via LU decomposition << \n");
 
     Crout(nmap * N_depths,M_to_solve, M_LU);
 
+    begin = clock();
     for (int x3i = x3l; x3i <= x3h; ++x3i){
 
       b = beta_Temp[x3i] + 1;
@@ -244,16 +192,10 @@ void atom::compute_nlte_population_responses(){
         for (int i = 1; i<=nmap; ++i){
           level_responses[3][(x3ii - x3l) * nmap + i][x3i] = solution[(x3ii-x3l) * nmap + i -1];
       }
-
-      // Macroscopic velocity
-      b = beta_v_r[x3i] + 1;
-      solveCrout(nmap * N_depths,M_LU,b,solution);
-      // Write down the solution for microturbulent velocity
-      for (int x3ii = x3l;x3ii<=x3h; ++x3ii)
-        for (int i = 1; i<=nmap; ++i){
-          level_responses[4][(x3ii - x3l) * nmap + i][x3i] = solution[(x3ii-x3l) * nmap + i -1];
-      }
     }
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time spent on solving linear system = %f \n", time_spent);
     io.msg(IOL_INFO, "responses computed for the atom with Z = %d using analytical approximation \n", Z);
     delete []M_LU;
     delete []solution;
@@ -280,8 +222,7 @@ void atom::compute_lte_population_responses(){
     memset(beta_Temp[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
     memset(beta_density[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
     memset(beta_v_micro[x3l]+1,0,N_depths*N_responses*sizeof(fp_t));
-    
-    
+     
     // Lets us start with 'beta' coefficients. We stick to the temperature so far.
     for (int x3i = x3l; x3i<= x3h; ++x3i){ // For each depth point.
       // You are perturbing the temperature @ k and looking @ what is happening:
@@ -393,40 +334,6 @@ void atom::compute_lte_population_responses(){
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
    
-    FILE * output;
-    // Before the solution you can print the response matrix:
-    output = fopen("response_matrix.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int i=1;i<=nmap;++i){
-        for (int ll = x3l;ll<=x3h;++ll)
-          for (int ii=1;ii<=nmap;++ii)
-            fprintf(output, "%15.15e   ", response_matrix[(l-x3l)*nmap + i][(ll-x3l) * nmap + ii]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-
-    // We also have to output beta, too...
-    output = fopen("response_beta.txt", "w");
-    for (int l = x3l;l<=x3h;++l)
-      for (int ll = x3l;ll<=x3h;++ll)
-        for (int i=1;i<=nmap;++i){
-            fprintf(output, "%15.15e", beta_Temp[l][(ll-x3l) * nmap + i]);
-
-        fprintf(output, "\n");
-    }
-    fclose(output);
-    
-    // And also get us populations, please:
-    
-    output = fopen("pops.txt", "w");
-    for (int l = x3l; l<=x3h; ++l){
-      fprintf(output, "%d %5.15e ", l, parent_atm->get_x3(l));
-      for (int i=0;i<nmap;++i)
-        fprintf(output, "%5.15e ", pop[x1l][x2l][l].n[zmap[i]][lmap[i]]);
-      fprintf(output, "\n");
-    }
-    fclose(output);
 // ------------------------------------------------------------------------------------------------------------------------------------------------
     printf(">> Now solving via LU decomposition << \n");
 
@@ -482,22 +389,16 @@ fp_t atom::derivative_collisions_Temp(int x1i, int x2i, int x3i, int from, int t
 fp_t atom::derivative_collisions_full_temp(int x1i, int x2i, int x3i, int from , int to){
 
   fp_t derivative = 0.0;
-
   fp_t local_T = fetch_temperature(x1i, x2i, x3i);
-
-  // Increase the temperature:
+  // Numerically compute the derivative of the rates for fixed Ne density:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T + 0.5 * delta_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
-  // Decrease the temperature:
   parent_atm->set_Temp(x1i, x2i, x3i, local_T - 0.5 * delta_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
-  
   derivative /= delta_T;
-
   parent_atm->set_Temp(x1i, x2i, x3i, local_T);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
+  derivative += parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
   return derivative;
 }
@@ -505,25 +406,18 @@ fp_t atom::derivative_collisions_full_temp(int x1i, int x2i, int x3i, int from ,
 fp_t atom::derivative_collisions_full_density(int x1i, int x2i, int x3i, int from , int to){
 
   fp_t derivative = 0.0;
-
   fp_t Nt = fetch_Nt(x1i, x2i, x3i);
   fp_t Nt_step = delta_Nt_frac*Nt;
   fp_t Ne = fetch_Ne(x1i,x2i,x3i);
-  // Increase the temperature:
+  // Numerically compute the derivative of the rates for fixed Ne density:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt + 0.5 * Nt_step);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
-  //printf(">>>> %e \n",fetch_Ne(x1i,x2i,x3i)/Ne);
-
   derivative = collisional_rates(x1i, x2i, x3i, from, to);
-  // Decrease the temperature:
   parent_atm->set_Nt(x1i, x2i, x3i, Nt - 0.5 * Nt_step);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
   derivative -= collisional_rates(x1i, x2i, x3i, from, to);
-  
   derivative /= Nt_step;
-
   parent_atm->set_Nt(x1i, x2i, x3i, Nt);
-  parent_atm->execute_chemeq_for_point(x1i, x2i, x3i);
+  fp_t rates = collisional_rates(x1i, x2i, x3i, from, to);
+  derivative += parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i) * collisional_rates_der_ne(x1i, x2i, x3i, from, to, rates);
   
   return derivative;
 }
@@ -548,6 +442,29 @@ fp_t atom::collisional_rates(int x1i, int x2i, int x3i, int from, int to){
 
   else if (z_from - z_to == 1 && l_from == 0)
     return C_cont_i(z_to, l_to, Temp, Ne);
+
+  return 0;
+}
+
+fp_t atom::collisional_rates_der_ne(int x1i, int x2i, int x3i, int from, int to, fp_t rate_value){
+
+  int z_from = zmap[from];
+  int l_from = lmap[from];
+
+  int z_to = zmap[to];
+  int l_to = lmap[to];
+
+  fp_t Ne = fetch_Ne(x1i, x2i, x3i);
+  
+  // If they are from the same ionization state:
+  if (z_from == z_to)
+    return rate_value/Ne;
+
+  else if (z_from - z_to == -1 && l_to == 0)
+    return rate_value/Ne;
+
+  else if (z_from - z_to == 1 && l_from == 0)
+    return rate_value*2.0/Ne;
 
   return 0;
 }
@@ -621,6 +538,468 @@ void atom::divide_ion_responses(int param, int x3i, fp_t step){
 
 }
 
+int atom::add_response_contributions_new(fp_t *** I, fp_t ** response_to_op, fp_t ** response_to_em, fp_t *** opp, fp_t *** em, fp_t lambda, fp_t lambda_w, fp_t theta, fp_t phi, fp_t angular_weight, 
+  fp_t *** vlos, fp_t ***** op_pert_lte, fp_t ***** em_pert_lte){
+
+  int ncmp = 1; // total number of Stokes components
+  int istaugrid = parent_atm->is_tau_grid();
+
+  if (!Jb || !norm || !NLTE) // No reason to proceed.
+    return 0;
+
+  // Otherwise we start by doing the same as we do in NLTE solution itself. We compute radiative rates.
+  // This costs very little, so we can keep it separate for clarity.
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){
+
+        // Fetch them in the more convenient arrays:
+        fp_t *Jm = Jb[x1i][x2i][x3i];
+        fp_t *Jn = Ju[x1i][x2i][x3i];
+        fp_t *nrm = norm[x1i][x2i][x3i];
+
+        // For each transition:
+        for (int tr=1; tr<=ntr; ++tr){
+
+          int z_state = inverse_tmap[tr][2];
+          int lower_level = inverse_tmap[tr][3];
+          int upper_level = inverse_tmap[tr][4]; 
+
+          if (upper_level < nl[z_state]){ // Line transitions:
+
+            fp_t line_energy = ee[z_state][upper_level] - ee[z_state][lower_level];
+            fp_t line_opacity = (pop[x1i][x2i][x3i].n[z_state][lower_level] * B[z_state][lower_level][upper_level] - pop[x1i][x2i][x3i].n[z_state][upper_level] * B[z_state][upper_level][lower_level]) 
+              * current_profile[x1i][x2i][x3i][tr] * line_energy * 0.25 / pi;
+            fp_t line_factor = line_opacity / opp[x1i][x2i][x3i];
+            fp_t elementary_contribution = lambda_w * angular_weight * I[x1i][x2i][x3i] * current_profile[x1i][x2i][x3i][tr] * line_factor * 0.25 / pi;
+
+            Jm[tr] += elementary_contribution;
+            Jn[tr] += elementary_contribution;
+          }
+          // If it is a bound-free transition. There is no profile. Instead, compute rates directly, so:
+          else if (upper_level == nl[z_state]){
+            fp_t sigma = (bf[z_state][lower_level]) ? bf[z_state][lower_level]->U(lambda) : 0.0;
+            Jm[tr] += lambda_w * angular_weight * sigma * lambda / h /c * I[x1i][x2i][x3i];
+            Jn[tr] += lambda_w * angular_weight * sigma * lambda / h /c * (I[x1i][x2i][x3i] + 2.0 * h * c * c / pow(lambda, 5.0)) * exp(-h * c / lambda / k / fetch_temperature(x1i, x2i, x3i));
+          }
+        }
+  }
+
+  // We continue by pre-computing the line profile derivatives as they are used multiple times throughout the procedure.
+  // This is also relatively computationaly cheap, and, furthermore, cannot be made much (if at all) faster.
+  fp_t **** profile_derivative_T;
+  profile_derivative_T = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  memset(profile_derivative_T[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*ntr*sizeof(fp_t));
+  fp_t **** profile_derivative_density;
+  profile_derivative_density = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  memset(profile_derivative_density[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*ntr*sizeof(fp_t));
+  fp_t **** profile_derivative_vt;
+  profile_derivative_vt = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  memset(profile_derivative_vt[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*ntr*sizeof(fp_t));
+  fp_t **** profile_derivative_vr;
+  profile_derivative_vr = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  memset(profile_derivative_vr[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*ntr*sizeof(fp_t));
+    
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int tr = 1;tr<=ntr;++tr){
+      int z_state = inverse_tmap[tr][2];
+      int lower_level = inverse_tmap[tr][3];
+      int upper_level = inverse_tmap[tr][4]; 
+      if (upper_level < nl[z_state]){
+        int z_i = z_state;
+        int l_i = upper_level;
+        int l_ii = lower_level;
+        fp_t x,a; x=a=0;
+        fp_t * x_der;
+        fp_t * a_der;
+        fp_t * dld_der;
+        x_der = new fp_t [7]-1;
+        a_der = new fp_t [7]-1;
+        dld_der = new fp_t [7]-1;
+        memset(x_der+1,0,7*sizeof(fp_t));
+        memset(a_der+1,0,7*sizeof(fp_t));
+        memset(dld_der+1,0,7*sizeof(fp_t));
+        if (A[z_i][l_i][l_ii] > 1.0){
+          compute_xa_der_scalar(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos, x, a, x_der, a_der, dld_der);
+          fp_t F,H,dF,dH;
+          fvoigtn(x,a,H,F,dH,dF);
+          fp_t lam=fabs(h*c/(ee[z_i][l_i]-ee[z_i][l_ii]));
+          fp_t dld = broad_dop(lam, fetch_temperature(x1l,x2l,x3i),fetch_vt(x1l,x2l,x3i));
+
+          profile_derivative_T[x1l][x2l][x3i][tr] = dH * x_der[1] / dld - dF * a_der[1] / dld - H/dld/dld*dld_der[1];
+          profile_derivative_density[x1l][x2l][x3i][tr] = dH * x_der[2] / dld - dF * a_der[2] / dld - H/dld/dld*dld_der[2];
+          profile_derivative_vt[x1l][x2l][x3i][tr] = dH * x_der[3] / dld - dF * a_der[3] / dld - H/dld/dld*dld_der[3];
+          profile_derivative_vr[x1l][x2l][x3i][tr] = (dH * x_der[4] / dld - dF * a_der[4] / dld - H/dld/dld*dld_der[4])*0.0*(cos(theta));
+        }
+        delete [](x_der+1);
+        delete [](a_der+1);
+        delete [](dld_der+1);
+      }
+  }
+  fp_t *** profile_derivatives = ft3dim(x3l,x3h,1,7,1,ntr);
+  memset(profile_derivatives[x3l][1]+1,0,(x3h-x3l+1)*7*ntr*sizeof(fp_t));
+  
+  for (int l=x3l;l<=x3h;++l)
+    for (int tr=1;tr<=ntr;++tr){
+      profile_derivatives[l][1][tr] = profile_derivative_T[x1l][x2l][l][tr];
+      profile_derivatives[l][2][tr] = profile_derivative_density[x1l][x2l][l][tr];
+      profile_derivatives[l][3][tr] = profile_derivative_vt[x1l][x2l][l][tr];
+  }
+
+  fp_t ** bf_op_derivative_ex;
+  fp_t ** bf_em_derivative_ex;
+  fp_t ** bb_op_derivative_ex;
+  fp_t ** bb_em_derivative_ex;
+  bf_op_derivative_ex = new fp_t* [x3h-x3l+1]-x3l;
+  bf_em_derivative_ex = new fp_t* [x3h-x3l+1]-x3l;
+  bb_op_derivative_ex = new fp_t* [x3h-x3l+1]-x3l;
+  bb_em_derivative_ex = new fp_t* [x3h-x3l+1]-x3l;
+
+
+  for (int ll=x3l;ll<=x3h;++ll){
+    bf_op_derivative_ex[ll] = op_derivative_explicit(ll,0,0,lambda);
+    bf_em_derivative_ex[ll] = em_derivative_explicit(ll,0,0,lambda);
+    bb_op_derivative_ex[ll] = bb_op_derivative_explicit(x1l,x2l,ll,lambda,profile_derivatives[ll]);
+    bb_em_derivative_ex[ll] = bb_em_derivative_explicit(x1l,x2l,ll,lambda,profile_derivatives[ll]);
+  }
+
+  // And then derivatives of op and em w.r.t. level populations, again pre-compute:
+  fp_t ** d_op_d_ni = ft2dim(x3l,x3h,0,nmap-1);
+  fp_t ** d_em_d_ni = ft2dim(x3l,x3h,0,nmap-1);
+  fp_t ** d_op_d_ni_bb = ft2dim(x3l,x3h,0,nmap-1);
+  fp_t ** d_em_d_ni_bb = ft2dim(x3l,x3h,0,nmap-1);
+  for (int ll=x3l;ll<=x3h;++ll)
+    for (int i=0;i<nmap;++i){
+      d_op_d_ni[ll][i] = op_derivative_to_level(ll,i,lambda);
+      d_em_d_ni[ll][i] = em_derivative_to_level(ll,i,lambda);
+      d_op_d_ni_bb[ll][i] = bb_op_derivative_to_level(x1l,x2l,ll,i,lambda);
+      d_em_d_ni_bb[ll][i] = bb_em_derivative_to_level(x1l,x2l,ll,i,lambda);
+  }
+
+  // Now we need an effective method to sum-up and distribute responses to the l.h.s and r.h.s.
+  // Let's first try BOOM-ing it straight from the other function. We compute r.h.s separately
+
+   // Lets deal with the "response matrix" separately:
+  for (int l=x3l;l<=x3h;++l) // For each depth point
+    for (int tr=1;tr<=ntr;++tr){ // For each posible transition
+
+      // Look up what levels we are talking about:
+      int z = inverse_tmap[tr][2];
+      int ii = inverse_tmap[tr][3];
+      int i = inverse_tmap[tr][4];
+      int type = 0; // 0 don't account, 1 b-f, 2-bb
+      if (i == nl[z]){
+        if (lambda <= bf[z][ii]->getlambda_crit())
+          type = 1;
+      }
+      else {
+        if (A[z][i][ii] > 1.0)
+          type = 2;
+      }
+      // So if it is a line:
+      if (type == 2){ // If this is a line transition
+
+        // First we add local, explicit perturbations which go to the rhs:
+
+        // This does not change whatsoever, regardless of the type of the derivative
+        fp_t constant_factor =  lambda_w * angular_weight * 0.25 / pi;
+        fp_t line_energy = ee[z][i] - ee[z][ii];
+        fp_t lam = h * c / line_energy;
+        fp_t line_opacity = (pop[x1l][x2l][l].n[z][ii]*B[z][ii][i] - pop[x1l][x2l][l].n[z][i]*B[z][i][ii]) 
+          * line_energy * 0.25 / pi;
+        fp_t line_factor = line_opacity * current_profile[x1l][x2l][l][tr] / opp[x1l][x2l][l];      
+        fp_t J_chunk = (B[z][ii][i]*pop[x1l][x2l][l].n[z][ii]-B[z][i][ii]*pop[x1l][x2l][l].n[z][i])*
+        I[x1l][x2l][l] * lambda_w * angular_weight * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr]
+          * line_factor * 0.25 / pi;     
+
+        // TEMPERATURE profile derivative, influencing locally:
+        fp_t derivative = profile_derivative_T[x1l][x2l][l][tr];
+        fp_t derived_part = 0.0; // This is a part which multiplies J_chunk to get the derivative of J_chunk.
+        // It has the form profile' / profile + norm' / norm .... etc.   
+        // Profile derivative:
+        derived_part += derivative / current_profile[x1l][x2l][l][tr];
+        // Norm derivative:
+        derived_part -= norm_derivative[1][x1l][x2l][l][tr]/ norm[x1l][x2l][l][tr];
+        // Profile derivative influencing line factor:
+        derived_part +=  (1.0 - line_factor)/line_factor * line_opacity / opp[x1l][x2l][l] * derivative;
+        // Background opacity derivative influencing the line factor:
+        derived_part -= (op_pert_lte[1][l][x1l][x2l][l]+bf_op_derivative_ex[l][1]) / opp[x1l][x2l][l];
+        // Then add everything to the appropriate beta
+        beta_Temp[l][(l-x3l)*nmap + rmap[z][i]+1] -= J_chunk * derived_part;
+        beta_Temp[l][(l-x3l)*nmap + rmap[z][ii]+1] += J_chunk * derived_part;
+
+        // DENSITY profile derivative:
+        derivative = profile_derivative_density[x1l][x2l][l][tr];
+        derived_part = 0.0;
+        // Profile derivative:
+        derived_part += derivative / current_profile[x1l][x2l][l][tr];
+        // Norm derivative:
+        derived_part -= norm_derivative[2][x1l][x2l][l][tr]/ norm[x1l][x2l][l][tr];
+        // Profile derivative influencing line factor:
+        derived_part +=  (1.0 - line_factor)/line_factor * line_opacity / opp[x1l][x2l][l] * derivative;
+        // Background opacity derivative influencing the line factor:
+        derived_part -= (op_pert_lte[2][l][x1l][x2l][l]+bf_op_derivative_ex[l][2]) / opp[x1l][x2l][l];
+        // Then add everything to the appropriate beta
+        beta_density[l][(l-x3l)*nmap + rmap[z][i]+1] -= J_chunk * derived_part;
+        beta_density[l][(l-x3l)*nmap + rmap[z][ii]+1] += J_chunk * derived_part;
+
+        // V_micro profile derivative:
+        derivative = profile_derivative_vt[x1l][x2l][l][tr];
+        derived_part = 0.0;
+        // Profile derivative:
+        derived_part += derivative / current_profile[x1l][x2l][l][tr];
+        // Norm derivative:
+        derived_part -= norm_derivative[3][x1l][x2l][l][tr]/ norm[x1l][x2l][l][tr];
+        // Profile derivative influencing line factor:
+        derived_part +=  (1.0 - line_factor)/line_factor * line_opacity / opp[x1l][x2l][l] * derivative;
+        // Then add everything to the appropriate beta
+        beta_v_micro[l][(l-x3l)*nmap + rmap[z][i]+1] -= J_chunk * derived_part;
+        beta_v_micro[l][(l-x3l)*nmap + rmap[z][ii]+1] += J_chunk * derived_part;
+
+        // -----------------------------------------------------------------------------------------------------------------
+
+        // Now we can pre-compute dR_dI, to shorten the notation:
+        fp_t dR_dI = (B[z][ii][i]*pop[x1l][x2l][l].n[z][ii]-B[z][i][ii]*pop[x1l][x2l][l].n[z][i])*
+          lambda_w * angular_weight * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * line_factor * 0.25 / pi; 
+        // Now time for the non-local explicit dependencies:
+        for (int ll=x3l;ll<=x3h;++ll){
+
+          fp_t op_ref = 1.0;
+          if (istaugrid)
+            op_ref = parent_atm->get_op_referent(x1l,x2l,ll);
+
+          fp_t d_op_d_profile = (pop[x1l][x2l][ll].n[z][ii]*B[z][ii][i]-pop[x1l][x2l][ll].n[z][i]*B[z][i][ii])*h*c/lam*0.25/pi;
+          fp_t d_em_d_profile = pop[x1l][x2l][ll].n[z][i]*A[z][i][ii]*h*c/lam*0.25/pi;
+
+          // TEMPERATURE:
+          // First main contributor is the change of the profile in other points:
+          derivative = profile_derivative_T[x1l][x2l][ll][tr];
+          fp_t d_op_d_qk = derivative*d_op_d_profile;
+          fp_t d_em_d_qk = derivative*d_em_d_profile;
+          // Add b-f contributions, and background contributors:
+          d_op_d_qk += bf_op_derivative_ex[ll][1] + op_pert_lte[1][ll][x1l][x2l][ll];
+          d_em_d_qk += bf_em_derivative_ex[ll][1] + em_pert_lte[1][ll][x1l][x2l][ll];
+
+          fp_t remote_response = dR_dI * (response_to_op[l][ll] * d_op_d_qk + response_to_em[l][ll] * d_em_d_qk);
+          beta_Temp[ll][(l-x3l) * nmap +rmap[z][i] +1] -= remote_response/op_ref;
+          beta_Temp[ll][(l-x3l) * nmap +rmap[z][ii] +1] += remote_response/op_ref;
+
+          // Then, an additional term if we are using taugrid as a primary grid:
+          if (istaugrid){      
+            fp_t op_ref_der = parent_atm->get_op_referent_der(1,ll,x1l,x2l,ll);
+            beta_Temp[ll][(l-x3l) * nmap +rmap[z][i] +1] += dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_Temp[ll][(l-x3l) * nmap +rmap[z][ii] +1] -= dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+          }
+          
+          // DENSITY:
+          // First main contributor is the change of the profile i other points:
+          derivative = profile_derivative_density[x1l][x2l][ll][tr];
+          d_op_d_qk = derivative*d_op_d_profile;
+          d_em_d_qk = derivative*d_em_d_profile;
+          // Add b-f contributions + background contributors
+          d_op_d_qk += bf_op_derivative_ex[ll][2] + op_pert_lte[2][ll][x1l][x2l][ll];;
+          d_em_d_qk += bf_em_derivative_ex[ll][2] + em_pert_lte[2][ll][x1l][x2l][ll];;
+          remote_response = dR_dI * (response_to_op[l][ll] * d_op_d_qk + response_to_em[l][ll] * d_em_d_qk);
+          beta_density[ll][(l-x3l) * nmap +rmap[z][i] +1] -= remote_response/op_ref;
+          beta_density[ll][(l-x3l) * nmap +rmap[z][ii] +1] += remote_response/op_ref;
+
+          // Then, an additional term if we are using taugrid as a primary grid:
+          if (istaugrid){      
+            fp_t op_ref_der = parent_atm->get_op_referent_der(2,ll,x1l,x2l,ll);
+            beta_density[ll][(l-x3l) * nmap +rmap[z][i] +1] += dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_density[ll][(l-x3l) * nmap +rmap[z][ii] +1] -= dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+          }
+
+          // MICROTURBULENT VELOCITY:
+
+          // First main contributor is the change of the profile i other points:
+          derivative = profile_derivative_vt[x1l][x2l][ll][tr];
+          d_op_d_qk = derivative*d_op_d_profile;
+          d_em_d_qk = derivative*d_em_d_profile;
+          // + Background sources
+          d_op_d_qk += op_pert_lte[3][ll][x1l][x2l][ll];
+          d_em_d_qk += em_pert_lte[3][ll][x1l][x2l][ll];
+          remote_response = dR_dI * (response_to_op[l][ll] * d_op_d_qk + response_to_em[l][ll] * d_em_d_qk);
+          beta_v_micro[ll][(l-x3l) * nmap +rmap[z][i] +1] -= remote_response/op_ref;
+          beta_v_micro[ll][(l-x3l) * nmap +rmap[z][ii] +1] += remote_response/op_ref;
+
+          // Then, an additional term if we are using taugrid as a primary grid:
+          if (istaugrid){      
+            fp_t op_ref_der = parent_atm->get_op_referent_der(3,ll,x1l,x2l,ll);
+            beta_v_micro[ll][(l-x3l) * nmap +rmap[z][i] +1] += dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_v_micro[ll][(l-x3l) * nmap +rmap[z][ii] +1] -= dR_dI *  (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + 
+              response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+          }
+
+          // Now we need to sort out left hand side:
+          fp_t der_i = line_energy * 0.25 / pi * current_profile[x1l][x2l][ll][tr] * (A[z][i][ii] * response_to_em[l][ll] - B[z][i][ii] * response_to_op[l][ll]); 
+          fp_t der_ii = line_energy * 0.25 / pi * current_profile[x1l][x2l][ll][tr] * (B[z][ii][i] * response_to_op[l][ll]);
+          der_i /= op_ref;
+          der_ii /= op_ref;
+
+          if (l==ll){
+            der_i -= (1.0 - line_factor) / opp[x1l][x2l][l] * B[z][i][ii] * I[x1l][x2l][l] * line_energy * 0.25 / pi * current_profile[x1l][x2l][l][tr] / line_factor;
+            der_ii += (1.0 - line_factor) / opp[x1l][x2l][l] * B[z][ii][i] * I[x1l][x2l][l] * line_energy * 0.25 / pi * current_profile[x1l][x2l][l][tr] / line_factor;
+          }
+              
+          fp_t nd = der_ii * dR_dI;
+          fp_t dd = der_i * dR_dI;
+
+          response_matrix[(l-x3l) * nmap + rmap[z][i]+1][(ll-x3l) * nmap + rmap[z][ii]+1] += nd;
+          response_matrix[(l-x3l) * nmap + rmap[z][i]+1][(ll-x3l) * nmap + rmap[z][i] +1] += dd;
+          response_matrix[(l-x3l) * nmap + rmap[z][ii]+1][(ll-x3l) * nmap + rmap[z][i] +1] -= dd;
+          response_matrix[(l-x3l) * nmap + rmap[z][ii]+1][(ll-x3l) * nmap + rmap[z][ii]+1] -= nd;
+
+          for (int iii=0;iii<nmap;++iii){ // Now note that this notation here is using >>map<<
+            response_matrix[(l-x3l) * nmap + rmap[z][i]+1][(ll-x3l) * nmap + iii+1] += dR_dI / op_ref * 
+              (response_to_op[l][ll] * d_op_d_ni[ll][iii] + response_to_em[l][ll] * d_em_d_ni[ll][iii]);
+            response_matrix[(l-x3l) * nmap + rmap[z][ii]+1][(ll-x3l) * nmap + iii+1] -= dR_dI / op_ref * 
+              (response_to_op[l][ll] * d_op_d_ni[ll][iii] + response_to_em[l][ll] * d_em_d_ni[ll][iii]);
+            
+            if (l==ll){
+              response_matrix[(l-x3l) * nmap + i+1][(ll-x3l) * nmap + iii+1] -= J_chunk * d_op_d_ni[l][iii] / opp[x1l][x2l][l];
+              response_matrix[(l-x3l) * nmap + ii+1][(ll-x3l) * nmap + iii+1] += J_chunk * d_op_d_ni[l][iii] / opp[x1l][x2l][l];         
+            }
+          }
+          
+        }
+      }
+
+      else if (type == 1){ // Else it is the f-b transition (i->ii):
+
+        // Keep in mind that ii -> lower level 
+        // i is equal to nl[z], z is z corresponding to ii
+
+        fp_t T = fetch_temperature(x1l,x2l,l);
+        fp_t n_e = fetch_Ne(x1l,x2l,l);
+        fp_t ddR_i_cont_dI = dR_i_cont_dI(z, ii, T, n_e, lambda);
+        fp_t ddR_cont_i_dI = dR_cont_i_dI(z, ii, T, n_e, lambda);
+
+        // Now, explicit dependency of radiative rates on atmospheric parameters. Only applies of local:
+        fp_t * ddR_i_cont_dqk = dR_i_cont_dqk(z,ii,x1l,x2l,l,T,n_e,I[x1l][x2l][l],lambda);
+        fp_t * ddR_cont_i_dqk = dR_cont_i_dqk(z,ii,x1l,x2l,l,T,n_e,I[x1l][x2l][l],lambda);
+
+        beta_Temp[l][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dqk[1]*angular_weight*lambda_w;
+        beta_Temp[l][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dqk[1]*angular_weight*lambda_w;
+        beta_Temp[l][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dqk[1]*angular_weight*lambda_w;
+        beta_Temp[l][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dqk[1]*angular_weight*lambda_w;
+        
+        beta_density[l][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dqk[2]*angular_weight*lambda_w;
+        beta_density[l][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dqk[2]*angular_weight*lambda_w;
+        beta_density[l][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dqk[2]*angular_weight*lambda_w;
+        beta_density[l][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dqk[2]*angular_weight*lambda_w;
+
+        delete [](ddR_i_cont_dqk+1);
+        delete [](ddR_cont_i_dqk+1);
+        
+        for (int ll=x3l;ll<=x3h;++ll){
+
+          fp_t op_ref = 1.0;
+          if (istaugrid)
+            op_ref = parent_atm->get_op_referent(x1l,x2l,ll);
+
+          // Separate known perturbations to intensity. These come from known perturbations of chi and eta
+          fp_t * dI_dqk_lte = new fp_t [7]-1;
+          memset(dI_dqk_lte+1,0,7*sizeof(fp_t));
+          dI_dqk_lte[1] = response_to_op[l][ll] * op_pert_lte[1][ll][x1l][x2l][ll] + response_to_em[l][ll] * em_pert_lte[1][ll][x1l][x2l][ll];
+          dI_dqk_lte[2] = response_to_op[l][ll] * op_pert_lte[2][ll][x1l][x2l][ll] + response_to_em[l][ll] * em_pert_lte[2][ll][x1l][x2l][ll];
+
+          // Additional known perturbations to the intensity come from known perturbations to opacity and emissivity. Here we go step-by-step
+          // so we will add first the contributions from known perturbations to opacity and emissivity
+      
+          dI_dqk_lte[1] += response_to_op[l][ll] * bb_op_derivative_ex[ll][1] + response_to_em[l][ll] * bb_em_derivative_ex[ll][1];
+          dI_dqk_lte[2] += response_to_op[l][ll] * bb_op_derivative_ex[ll][2] + response_to_em[l][ll] * bb_em_derivative_ex[ll][2];
+          dI_dqk_lte[1] += response_to_op[l][ll] * bf_op_derivative_ex[ll][1] + response_to_em[l][ll] * bf_em_derivative_ex[ll][1];
+          dI_dqk_lte[2] += response_to_op[l][ll] * bf_op_derivative_ex[ll][2] + response_to_em[l][ll] * bf_em_derivative_ex[ll][2];
+
+          // This is contribution of known Intensity perturbations to the free-bound rates
+          beta_Temp[ll][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*dI_dqk_lte[1]*angular_weight*lambda_w/op_ref;
+          beta_Temp[ll][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*dI_dqk_lte[1]*angular_weight*lambda_w/op_ref;
+          beta_density[ll][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*dI_dqk_lte[2]*angular_weight*lambda_w/op_ref;
+          beta_density[ll][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*dI_dqk_lte[2]*angular_weight*lambda_w/op_ref;
+
+          // This is the contribution of known intensity perturbations to the bound-free rates
+          beta_Temp[ll][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI*dI_dqk_lte[1]*angular_weight*lambda_w/op_ref;
+          beta_Temp[ll][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI*dI_dqk_lte[1]*angular_weight*lambda_w/op_ref;
+          beta_density[ll][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI*dI_dqk_lte[2]*angular_weight*lambda_w/op_ref;
+          beta_density[ll][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI*dI_dqk_lte[2]*angular_weight*lambda_w/op_ref;
+
+          if (istaugrid){ // if tau grid
+
+            fp_t op_ref_der = parent_atm->get_op_referent_der(1,ll,x1l,x2l,ll);
+            beta_Temp[ll][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*angular_weight*lambda_w* 
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_Temp[ll][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*angular_weight*lambda_w* 
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            
+            beta_Temp[ll][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z][ii] * ddR_i_cont_dI * angular_weight * lambda_w *
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_Temp[ll][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z][ii] * ddR_i_cont_dI * angular_weight * lambda_w *
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+
+            op_ref_der = parent_atm->get_op_referent_der(2,ll,x1l,x2l,ll);
+            beta_density[ll][(l-x3l)*nmap+rmap[z+1][0]+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*angular_weight*lambda_w* 
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_density[ll][(l-x3l)*nmap+rmap[z][ii]+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI*angular_weight*lambda_w* 
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            
+            beta_density[ll][(l-x3l)*nmap+rmap[z+1][0]+1] += pop[x1l][x2l][l].n[z][ii] * ddR_i_cont_dI * angular_weight * lambda_w *
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+            beta_density[ll][(l-x3l)*nmap+rmap[z][ii]+1] -= pop[x1l][x2l][l].n[z][ii] * ddR_i_cont_dI * angular_weight * lambda_w *
+              (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] + response_to_em[l][ll] * op_ref_der * em[x1l][x2l][ll]) / op_ref/op_ref;
+          }
+
+          delete [](dI_dqk_lte+1);
+                
+          // And finally, modification of the coupling matrix because of the contribution of all the level populations of other levels to 
+          // this transition:
+          for (int iii=0;iii<nmap;++iii){ // iii is now notation in rmap
+            fp_t d_op_d_n = d_op_d_ni_bb[ll][iii] + d_op_d_ni[ll][iii];
+            fp_t d_em_d_n = d_em_d_ni_bb[ll][iii] + d_em_d_ni[ll][iii];
+
+            response_matrix[(l-x3l)*nmap+rmap[z+1][0]+1][(ll-x3l)*nmap+iii+1] += pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI* 
+              (response_to_op[l][ll]*d_op_d_n + response_to_em[l][ll]*d_em_d_n)*lambda_w*angular_weight/op_ref;
+            response_matrix[(l-x3l)*nmap+rmap[z][ii]+1][(ll-x3l)*nmap+iii+1] -= pop[x1l][x2l][l].n[z][ii]*ddR_i_cont_dI* 
+              (response_to_op[l][ll]*d_op_d_n + response_to_em[l][ll]*d_em_d_n)*lambda_w*angular_weight/op_ref;
+
+            response_matrix[(l-x3l)*nmap+rmap[z+1][0]+1][(ll-x3l)*nmap+iii+1] -= pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI* 
+              (response_to_op[l][ll]*d_op_d_n + response_to_em[l][ll]*d_em_d_n)*lambda_w*angular_weight/op_ref;
+            response_matrix[(l-x3l)*nmap+rmap[z][ii]+1][(ll-x3l)*nmap+iii+1] += pop[x1l][x2l][l].n[z+1][0]*ddR_cont_i_dI* 
+              (response_to_op[l][ll]*d_op_d_n + response_to_em[l][ll]*d_em_d_n)*lambda_w*angular_weight/op_ref;
+          }
+        }
+
+      }
+  }
+  del_ft4dim(profile_derivative_T,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  del_ft4dim(profile_derivative_density,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  del_ft4dim(profile_derivative_vt,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  del_ft4dim(profile_derivative_vr,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);
+  for (int ll=x3l;ll<=x3h;++ll){
+    delete [](bf_op_derivative_ex[ll]+1);
+    delete [](bf_em_derivative_ex[ll]+1);
+    delete [](bb_op_derivative_ex[ll]+1);
+    delete [](bb_em_derivative_ex[ll]+1);
+  }
+  delete[](bf_op_derivative_ex+x3l);
+  delete[](bf_em_derivative_ex+x3l);
+  delete[](bb_op_derivative_ex+x3l);
+  delete[](bb_em_derivative_ex+x3l);
+  del_ft2dim(d_op_d_ni,x3l,x3h,0,nmap-1);
+  del_ft2dim(d_em_d_ni,x3l,x3h,0,nmap-1);
+  del_ft2dim(d_op_d_ni_bb,x3l,x3h,0,nmap-1);
+  del_ft2dim(d_em_d_ni_bb,x3l,x3h,0,nmap-1);
+
+  del_ft3dim(profile_derivatives,x3l,x3h,1,7,1,ntr);
+
+  return 0; 
+}
+
 int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t ** response_to_em, fp_t *** opp, fp_t *** em, fp_t lambda, fp_t lambda_w, fp_t theta, fp_t phi, fp_t angular_weight, 
   fp_t *** vlos, fp_t ***** op_pert_lte, fp_t ***** em_pert_lte){
 
@@ -628,7 +1007,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
   // The same way we are handling the NLTE problem itself, we are going to try to handle the problem of finding response functions.
   // In principle you should compute all the quantities which are needed for the computation of radiative rates, but then also some other stuff.
 
-   int ncmp = 1; // total number of Stokes components
+  int ncmp = 1; // total number of Stokes components
+  int istaugrid = parent_atm->is_tau_grid();
 
   // If this is the proper transition, i.e. if it has mean intensiy, approximate operator and `norm' 
   if (Jb && norm && NLTE){
@@ -711,28 +1091,24 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
             memset(x_der+1,0,7*sizeof(fp_t));
             memset(a_der+1,0,7*sizeof(fp_t));
             memset(dld_der+1,0,7*sizeof(fp_t));
-            compute_xa_der_scalar(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos, x, a, x_der, a_der, dld_der);
-            fp_t F,H,dF,dH;
-            fvoigtn(x,a,H,F,dH,dF);
-            fp_t lam=fabs(h*c/(ee[z_i][l_i]-ee[z_i][l_ii]));
-            fp_t dld = broad_dop(lam, fetch_temperature(x1l,x2l,x3i),fetch_vt(x1l,x2l,x3i));
+            if (A[z_i][l_i][l_ii] > 1.0){
+              compute_xa_der_scalar(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos, x, a, x_der, a_der, dld_der);
+              fp_t F,H,dF,dH;
+              fvoigtn(x,a,H,F,dH,dF);
+              fp_t lam=fabs(h*c/(ee[z_i][l_i]-ee[z_i][l_ii]));
+              fp_t dld = broad_dop(lam, fetch_temperature(x1l,x2l,x3i),fetch_vt(x1l,x2l,x3i));
 
-            profile_derivative_T[x1l][x2l][x3i][tr] = dH * x_der[1] / dld - dF * a_der[1] / dld - H/dld/dld*dld_der[1];
-            profile_derivative_density[x1l][x2l][x3i][tr] = dH * x_der[2] / dld - dF * a_der[2] / dld - H/dld/dld*dld_der[2];
-            profile_derivative_vt[x1l][x2l][x3i][tr] = dH * x_der[3] / dld - dF * a_der[3] / dld - H/dld/dld*dld_der[3];
-            profile_derivative_vr[x1l][x2l][x3i][tr] = (dH * x_der[4] / dld - dF * a_der[4] / dld - H/dld/dld*dld_der[4])*0.0*(cos(theta));
+              profile_derivative_T[x1l][x2l][x3i][tr] = dH * x_der[1] / dld - dF * a_der[1] / dld - H/dld/dld*dld_der[1];
+              profile_derivative_density[x1l][x2l][x3i][tr] = dH * x_der[2] / dld - dF * a_der[2] / dld - H/dld/dld*dld_der[2];
+              profile_derivative_vt[x1l][x2l][x3i][tr] = dH * x_der[3] / dld - dF * a_der[3] / dld - H/dld/dld*dld_der[3];
+              profile_derivative_vr[x1l][x2l][x3i][tr] = (dH * x_der[4] / dld - dF * a_der[4] / dld - H/dld/dld*dld_der[4])*0.0*(cos(theta));
+            }
             delete [](x_der+1);
             delete [](a_der+1);
             delete [](dld_der+1);
-            //profile_derivative_T[x1l][x2l][x3i][tr] = voigt_der_T(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-            //profile_derivative_density[x1l][x2l][x3i][tr] = voigt_der_density(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-            //profile_derivative_vt[x1l][x2l][x3i][tr] = voigt_der_vt(x1l, x2l, x3i, z_i, l_i, l_ii, lambda, vlos);
-
           }
-  }
-    
-    // Lets deal with the "response matrix" separately:
-
+    }
+   
     for (int l = x3l; l<=x3h; ++l){
       for (int ll = x3l; ll <= x3h; ++ll){
 
@@ -747,10 +1123,13 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
               int l_ii = lmap[ii];
 
               int is_bf = 0; // 0 if it is not, 1 if it is bound->free and -1 if it is free->bound
+
               if (z_i == z_ii-1 && l_ii == 0)
-                is_bf = 1; // bound-free
+                if (lambda <= bf[z_i][l_i]->getlambda_crit()) // We only care if it can actually ionize
+                  is_bf = 1; // bound-free
               else if (z_i == z_ii+1 && l_i == 0)
-                is_bf = -1; // free-bound
+                if (lambda <= bf[z_ii][l_ii]->getlambda_crit()) // Same here
+                  is_bf = -1; // free-bound
 
               fp_t op_ref = 1.0;
               if (parent_atm->is_tau_grid())
@@ -762,7 +1141,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 int tr = tmap[z_i][l_i][l_ii];
                 int z_state = inverse_tmap[tr][2];
                 int lower_level = inverse_tmap[tr][3];
-                int upper_level = inverse_tmap[tr][4]; 
+                int upper_level = inverse_tmap[tr][4];
+                if (A[z_state][upper_level][lower_level] > 1.0){ 
 
                 // Lets first write it in the column where upper is i and lower is ii
             
@@ -850,7 +1230,6 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                   derived_part -= I[x1l][x2l][l] * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * line_factor * op_pert_lte[1][l][x1l][x2l][l] / opp[x1l][x2l][l];
 
                   beta_Temp[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;
-
                   
                   // ------------ DENSITY -----------------------------------------------------------------------------------------------
 
@@ -883,17 +1262,6 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                     * derivative;
                   beta_v_micro[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;
 
-                  // ---------- MACROSCOPIC VELOCITY ---------------------------------------------------------------------------------
-                  
-                  derivative = profile_derivative_vr[x1l][x2l][l][tr];
-
-                  derived_part = 0.0;
-                  derived_part += I[x1l][x2l][l] * derivative * line_factor / norm[x1l][x2l][l][tr];
-                  derived_part -= I[x1l][x2l][l] * current_profile[x1l][x2l][l][tr] * line_factor 
-                    / norm[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * norm_derivative[4][x1l][x2l][l][tr];
-                  derived_part += I[x1l][x2l][l] * current_profile[x1l][x2l][l][tr] / norm[x1l][x2l][l][tr] * (1.0 - line_factor) * line_opacity / opp[x1l][x2l][l]
-                    * derivative;
-                  beta_v_r[l][(l-x3l)*nmap + i+1] += constant_factor * derived_part;           
                 }
                 // ========================================================================================================================
 
@@ -911,9 +1279,19 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 beta_Temp[ll][(l-x3l) * nmap +i + 1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) * J_chunk;
 
                 // Finally there is additional contribution from other species that we know:
-                beta_Temp[ll][(l-x3l) * nmap +i +1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
+                fp_t chunk = (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
                   * elementary_contribution * (response_to_op[l][ll] * op_pert_lte[1][ll][x1l][x2l][ll] + response_to_em[l][ll] * em_pert_lte[1][ll][x1l][x2l][ll]) / op_ref/ norm[x1l][x2l][l][tr];
+                beta_Temp[ll][(l-x3l) * nmap +i +1] += chunk;
 
+                //if (isnan(em_pert_lte[1][ll][x1l][x2l][ll])){
+                //  printf("AAAAAAAAAAA!\n");
+                  //exit(1);
+                //}
+                /*if (isnan(chunk)){
+                    printf("%e %e %e %e %e %e \n", elementary_contribution,response_to_op[l][ll],op_pert_lte[1][ll][x1l][x2l][ll],response_to_em[l][ll],em_pert_lte[1][ll][x1l][x2l][ll],norm[x1l][x2l][l][tr]);
+                    printf("!3! %d %d %d \n", ll,l,i);
+                    exit(1);
+                  }*/
                 // Then, an additional term if we are using taugrid as a primary grid:
                 if (parent_atm->is_tau_grid()){
                   
@@ -957,23 +1335,6 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
 
                 beta_v_micro[ll][(l-x3l) * nmap +i + 1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) * J_chunk;
 
-                // ---------------- MACROSCOPIC VELOCITY ---------------------------------------------------------------------------------------------------
-
-                fp_t derivative_vr = profile_derivative_vr[x1l][x2l][ll][tr];
-
-                J_chunk = derivative_vr * (response_to_op[l][ll] * (pop[x1l][x2l][ll].n[z_i][lower_level] * B[z_i][lower_level][upper_level] - pop[x1l][x2l][ll].n[z_i][upper_level] * B[z_i][upper_level][lower_level])   
-                  + response_to_em[l][ll] * pop[x1l][x2l][ll].n[z_i][upper_level] * A[z_i][upper_level][lower_level]) * line_energy * 0.25 / pi * elementary_contribution 
-                  / norm[x1l][x2l][l][tr];
-
-                J_chunk /= op_ref;
-
-                beta_v_r[ll][(l-x3l) * nmap +i + 1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) * J_chunk;
-
-                // Here there is not an additional contribution as we assume that other speices are not influenced by the microturbutlent velocity, i.e. that other sources 
-                // are basically continuum sources.
-
-                // We assume the same for op_ref.
-
                 // Some additional, hopefully clean(r)er formulations:
                 
                 fp_t * bf_op_derivative_ex = op_derivative_explicit(ll,0,0,lambda);
@@ -993,7 +1354,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 }
                 delete[](bf_op_derivative_ex+1);
                 delete[](bf_em_derivative_ex+1);
-                
+              }  
             }
 
             // Otherwise it has to be a b-f transition, f-b transition:
@@ -1201,7 +1562,8 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
     } 
     del_ft4dim(profile_derivative_T,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
     del_ft4dim(profile_derivative_density,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
-    del_ft4dim(profile_derivative_vt,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);         
+    del_ft4dim(profile_derivative_vt,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr); 
+    del_ft4dim(profile_derivative_vr,x1l,x1h,x2l,x2h,x3l,x3h,1,ntr);          
   }
   return 0;
 }
@@ -1372,7 +1734,7 @@ fp_t * atom::em_derivative_explicit(int depth, int, int, fp_t lambda){
   //return derivative;
   fp_t T = fetch_temperature(x1l, x2l, depth);
   fp_t ne = fetch_Ne(x1l,x2l,depth);
-
+  
   for(int z=0;z<Z;++z) // skip final stage: it cannot be ionized
     for(int l=0;l<nl[z];++l){
       
@@ -1386,12 +1748,10 @@ fp_t * atom::em_derivative_explicit(int depth, int, int, fp_t lambda){
         fp_t pop_mod = pop[x1l][x2l][depth].n[z+1][0] * ne * 2.07E-16 * pow(T, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp(delta_E / k /  T);
         
         derivative[1] += sigma *  (-pop_mod * exp(- h * c / lambda / k / T) * h*c/lambda/k/T/T) * B_planck;
-
         fp_t constant_part = pop[x1l][x2l][depth].n[z+1][0] * 2.07E-16 * fp_t(g[z][l]) / fp_t(g[z+1][0]) * B_planck * sigma * (1.0 - exp(-h*c/lambda/k/T));
-
+        
         derivative[1] += constant_part * (parent_atm->get_ne_lte_derivative(1,x1l,x2l,depth) * pow(T,-1.5) * exp(delta_E/k/T) +
           ne * (-1.5 * pow(T,-2.5)) * exp(delta_E/k/T) + ne * pow(T,-1.5) * exp(delta_E/k/T) * -delta_E/k/T/T);
-
         // Finally, additional part because of Planck function:
         derivative[1] += pop_mod * sigma * (1.0 - exp(-h*c/lambda/k/T)) * Planck_f_derivative(lambda, T);
           
