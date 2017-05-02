@@ -14,6 +14,13 @@ public:
   observable(int ns_in, int nx_in, int ny_in);
   observable(int ns_in,int nlambda_in,int nx_in,int ny_in);
   virtual ~observable(void);
+
+  observable(uint08_t*,int32_t&,uint08_t,io_class&){}; // Unpack from buffer
+
+  virtual int32_t size(io_class&);
+  virtual int32_t pack(uint08_t*,uint08_t,io_class&);
+  virtual int32_t unpack(uint08_t*,uint08_t,io_class&){};
+
   void add(fp_t*,fp_t); // Maybe we will not use this, maybe something like 'set' is better?
   void set(fp_t, int,int,int,int);
   void set(fp_t *,fp_t,int,int,int);

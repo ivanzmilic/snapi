@@ -6,6 +6,7 @@
 #include "ana_io.h"
 #include "obs.h"
 #include "mem.h"
+#include "pack.h"
 
 observable::observable(int ns_in):ns(ns_in)
 {
@@ -39,6 +40,25 @@ observable::~observable(void){
     del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
     delete[] (lambda+1);
   }
+}
+
+int32_t observable::size(io_class &io_in){
+
+  int32_t sz = 4*sizeof(int); // ns, nlambda,nx,ny
+  sz += nlambda*sizeof(fp_t); // lambda
+  sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
+  return sz;
+}
+
+int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
+
+  int offs=::pack(buf+offs,nx,do_swap);
+  offs+=::pack(buf+offs,ny,do_swap);
+  offs+=::pack(buf+offs,ns,do_swap);
+  offs+=::pack(buf+offs,nlambda,do_swap);
+  
+  offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
+  offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 }
 
 void observable::add(fp_t *S_in,fp_t lambda_in)
