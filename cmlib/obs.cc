@@ -34,6 +34,10 @@ observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
   memset(lambda+1,0,nlambda*sizeof(fp_t));
 }
 
+observable::observable(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
+  offs+=unpack(buf+offs,do_swap,io_in);
+}
+
 
 observable::~observable(void){
   if(nlambda){
@@ -59,6 +63,25 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
+
+  return offs;
+}
+
+int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
+
+  int offs=::unpack(buf+offs,nx,do_swap);
+  offs+=::unpack(buf+offs,ny,do_swap);
+  offs+=::unpack(buf+offs,ns,do_swap);
+  offs+=::unpack(buf+offs,nlambda,do_swap);
+
+  lambda = new fp_t [nlambda]-1;
+  S=ft4dim(1,nx,1,ny,1,ns,1,nlambda);
+
+  offs+=::unpack(buf+offs,lambda,1,nlambda,do_swap);
+  offs+=::unpack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
+
+  return offs;
+
 }
 
 void observable::add(fp_t *S_in,fp_t lambda_in)
@@ -198,4 +221,12 @@ void observable::read(char * name, io_class &io){
   //fp_t **** test = read_file(name,n1,n2,n3,n4,io);
   //S = read_file(name,nx,ny,ns,nlambda,io);
   //printf("I read an array with dimensions : %d %d %d %d \n", nx,ny,ns,nlambda);
+}
+
+observable * obs_new(int nx,int ny,int ns,int nlambda){
+  return new observable(nx,ny,ns,nlambda);
+}
+
+observable * obs_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
+  return new observable(buf,offs,do_swap,io_in);
 }
