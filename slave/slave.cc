@@ -15,6 +15,7 @@
 #include "uts.h"
 #include "net.h"
 #include "conf.h"
+#include "compress.h"
 #include "version.h"
 
 #include "cmdcfg.h"
@@ -49,6 +50,8 @@ int main(int argc,char *argv[])
   cmd.get("--timeout",timeout);
 //  fprintf(stderr,"computing on %d threads\n",nthread);
   class atmosphere *atmos=0;
+  class model *mod=0;
+  class observable *obs=0;
 //
   while(!quit){
     sock_class sock(host,port,timeout);         // open connection
@@ -93,6 +96,65 @@ int main(int argc,char *argv[])
           break;
         }
         case(CMD_SLV_TSK):{  // new patch
+          int64_t flops=0;
+          struct tms t_start;
+          clock_t t0=times(&t_start);
+
+          int32_t size,offs=0;
+          uint08_t *buf=sock.recv(size);
+          if(atmos) delete atmos;         // cleanup old structure
+          atmos=new atmosphere(buf,offs,swap_endian,io);  // create atmospheric structure
+          if(mod) delete mod;         // cleanup old structure
+          mod=new model(buf+offs,offs,swap_endian,io);  // create atmospheric structure
+          if(obs) delete obs;         // cleanup old structure
+          obs=new observable(buf+offs,offs,swap_endian,io);  // create atmospheric structure
+          delete[] buf;
+          
+          class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
+
+          
+
+          int32_t rsz=mod->size(io);
+          rsz+=fit->size(io);
+          rsz+=3*sizeof(int32_t);
+          uint08_t *data=new uint08_t [rsz];
+          offs=mod->pack(data,0,io);
+          offs+=fit->pack(data+offs,0,io);
+//
+          struct tms t_end;
+          clock_t t1=times(&t_end);
+//
+          int32_t user=t_end.tms_utime-t_start.tms_utime;
+          int32_t sys=t_end.tms_stime-t_start.tms_stime;
+          int32_t clock=tickspersec;
+          offs+=pack(data+offs,user,swap_endian);
+          offs+=pack(data+offs,sys,swap_endian);
+          offs+=pack(data+offs,clock,swap_endian);
+          if(offs!=size) io.msg(IOL_WARN,"in main: packed %d bytes, but buffer is %d bytes!\n",offs,size); // sanity check...
+          buf=z_compress(data,size,clvl,swap_endian,io);       // +(2)
+          delete[] data;                                       // -(1)
+//
+          data=new byte [size+2*sizeof(fp_t)+sizeof(int64_t)]; // +(3)
+          memcpy(data,buf,size);
+          delete[] buf;                                        // -(2)
+          offs=size;
+          fp_t utime=(fp_t)user/(fp_t)clock;
+          fp_t stime=(fp_t)sys/(fp_t)clock;
+          offs+=pack(data+offs,utime,swap_endian);
+          offs+=pack(data+offs,stime,swap_endian);
+          offs+=pack(data+offs,flops,swap_endian);
+          size=offs;
+// send data to master
+          int conn_stat=sock.test();
+          if(!conn_stat){
+            sock.send_cmd(CMD_SLV_RES);
+            sock.send(data,size);
+          }else{
+            alive=0;
+            quit=(conn_stat<0);
+          }
+          delete[] data;                                       // -(3)
+
           break;
         }
         default:{

@@ -258,7 +258,7 @@ void slv_class::helper(void) // thread main loop
             sock->send_cmd(CMD_SLV_TSK);
             byte *buf;
             int bsz;
-            chnk->get(buf,bsz);
+            chnk->get(buf,bsz,io);
             if(sock->send(buf,bsz,thr_sock)<0){
               quit=1;
               while(token=fds.next());   // empty the queue
@@ -312,7 +312,7 @@ void slv_class::helper(void) // thread main loop
             sock->send_cmd(CMD_SLV_TSK);
             byte *buf;
             int bsz;
-            chnk->get(buf,bsz);
+            chnk->get(buf,bsz,io);
             if(sock->send(buf,bsz,thr_sock)<0){
               quit=1;
               while(token=fds.next());   // empty the queue

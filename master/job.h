@@ -13,7 +13,11 @@
 #include "img_i16t.h"
 #include "img_mat.h"
 #include "slvcfg.h"
+#include "uts.h"
 #include "jnfo.h"
+
+#include "atmos.h"
+#include "obs.h"
 
 #define PRI_MAX 100
 
@@ -202,22 +206,22 @@ struct chunk{
   struct slvcfg *cfg;
 // input/output
   byte *buf;
-  int bsz;
+  int bsz,xsz;
   int fswap;
-  off_t offset;
+  off_t offset,xoffset;
   pthread_mutex_t *mutex;
   char *slv_id;
   fp_t s_time,u_time;
 //
   chunk(int,int,int,int,int,int,struct slvcfg*);
   ~chunk(void);
-  int pack(image_t ****image,image_i16t ***offx,image_i16t ***offy,fp_t ***noise_sigma,int no,int *nc,int **nim,int mls,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io);
+  int pack(atmosphere*,model*,observable*,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io);
   void put(byte *buf_in,int bsz_in){
     buf=buf_in;
     bsz=bsz_in;
     fswap=-1;
   }
-  int put(byte *buf_in,int bsz_in,int fswap_in,off_t &offset_in,pthread_mutex_t *mutex_in){
+  int put(byte *buf_in,int bsz_in,int fswap_in,off_t &offset_in,pthread_mutex_t *mutex_in,io_class &io){
     fswap=fswap_in;
     mutex=mutex_in;
     pthread_mutex_lock(mutex);
@@ -231,39 +235,85 @@ struct chunk{
       return -1;
     }
     offset_in+=bsz_in;
+#ifdef HAVE_POSIX_FADVISE
+    if(posix_fadvise(fswap,offset,bsz_in,POSIX_FADV_DONTNEED)<0) io.msg(IOL_ERROR,"chunk::put: releasing page cache: %s\n",strerror(errno));
+#endif
     pthread_mutex_unlock(mutex);
     bsz=bsz_in;
     delete[] buf_in;
     buf=0;
     return 0;
   }
-  int get(byte *&buf_o,int &bsz_o){
+  int get(byte *&buf_o,int &bsz_o,io_class &io){
     if((!buf)&&(fswap>=0)){
-      buf=new byte [bsz];
+      buf=new byte [bsz+xsz];
       pthread_mutex_lock(mutex);
       lseek(fswap,offset,SEEK_SET);
       if(read(fswap,buf,bsz)<bsz){
         pthread_mutex_unlock(mutex);
         return -1;
       }
+#ifdef HAVE_POSIX_FADVISE
+      if(posix_fadvise(fswap,offset,bsz,POSIX_FADV_DONTNEED)<0) io.msg(MFBD_ERROR,"chunk::put: releasing page cache: %s\n",strerror(errno));
+#endif
+      if(xsz&&xoffset){
+        lseek(fswap,xoffset,SEEK_SET);
+        if(read(fswap,buf+bsz,xsz)<xsz){
+          pthread_mutex_unlock(mutex);
+          return -1;
+        }
+#ifdef HAVE_POSIX_FADVISE
+        if(posix_fadvise(fswap,xoffset,xsz,POSIX_FADV_DONTNEED)<0) io.msg(MFBD_ERROR,"chunk::put: releasing page cache: %s\n",strerror(errno));
+#endif
+      }
       pthread_mutex_unlock(mutex);
     }
-//    fprintf(stderr,"chunk_get: %X %X\n",this,buf);
-    bsz_o=bsz;
+    bsz_o=bsz+xsz;
     buf_o=buf;
     return 0;
   }
   void result(byte *buf_i,int bsz_i){
-    if(buf){
-//      fprintf(stderr,"chunk_free: %X %X\n",this,buf);
-      delete[] buf;
+    if(fswap>=0){ // swap!
+      xsz=max(bsz_i-bsz,0); // the excess
+      bsz=min(bsz_i,bsz);   // may shrink but not grow
+    }else{
+      xsz=0;
+      bsz=bsz_i;
     }
+    if(buf) delete[] buf;
     buf=buf_i;
-    bsz=bsz_i;
+  }
+  void archive(io_class &io){
+    if((buf)&&(fswap>=0)){ // swap!
+      pthread_mutex_lock(mutex);
+      lseek(fswap,offset,SEEK_SET);
+      if(write(fswap,buf,bsz)<bsz){ // failed to write: keep in RAM
+        fswap=-1;
+      }else{ // success: append the excess (if any)
+#ifdef HAVE_POSIX_FADVISE
+        if(posix_fadvise(fswap,offset,bsz,POSIX_FADV_DONTNEED)<0) io.msg(MFBD_ERROR,"chunk::put: releasing page cache: %s\n",strerror(errno));
+#endif
+        if(xsz){
+          xoffset=lseek(fswap,1,SEEK_END);
+          if(write(fswap,buf+bsz,xsz)<xsz){ // failed to write: keep in RAM
+            fswap=-1;
+          }else{
+#ifdef HAVE_POSIX_FADVISE
+            if(posix_fadvise(fswap,xoffset,xsz,POSIX_FADV_DONTNEED)<0) io.msg(MFBD_ERROR,"chunk::put: releasing page cache: %s\n",strerror(errno));
+#endif
+            delete[] buf; // success!
+            buf=0;
+          }
+        }else{
+          delete[] buf; // success!
+          buf=0;
+        }
+      }
+      pthread_mutex_unlock(mutex);
+    }
   }
   void free(void){
     if((buf)&&(fswap>=0)){ // free buffer when reading from fswap...
-//      fprintf(stderr,"chunk_free: %X %X\n",this,buf);
       delete[] buf;
       buf=0;
     }

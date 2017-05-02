@@ -46,73 +46,38 @@ chunk::chunk(int x_in,int y_in,int xl_in,int xh_in,int yl_in,int yh_in,struct sl
   dx=dy=0;
   offset=0;
   fswap=-1;
-  cfg=cfg_in->ref(this);
+  cfg=0;
+//  cfg=cfg_in->ref(this);
 }
 
 chunk::~chunk(void)
 {
-  if(cfg) cfg->unref(this);
+//  if(cfg) cfg->unref(this);
   if(buf) delete[] buf;
   if(slv_id) delete[] slv_id;
   if(dx) del_i2dim(dx,1,1,1,1);
   if(dy) del_i2dim(dy,1,1,1,1);
 }
 
-int chunk::pack(image_t ****image,image_i16t ***offx,image_i16t ***offy,fp_t ***noise_sigma,int no,int *nc,int **nim,int mls,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io)
+int chunk::pack(atmosphere *atmos,model *mod,observable *obs,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io)
 {
-  int dxl=-mls,dxh=mls,dyl=-mls,dyh=mls,offs=0,sz=0;
-  for(int o=1;o<=no;++o)
-    for(int k=1;k<=nc[o];++k) sz+=nim[o][k]*(2*sizeof(int)+3*sizeof(fp_t)+(xh+dxh-xl-dxl+1)*(yh+dyh-yl-dyl+1)*sizeof(float32_t));
-  byte *data=new byte [sz];
-  dx=i2dim(1,no,1,nc);
-  dy=i2dim(1,no,1,nc);
-  for(int o=1;o<=no;++o)
-    for(int k=1;k<=nc[o];++k){
-      fp_t fdx=0.0,fdy=0.0;
-      if(offx[o][k]){
-        fp_t **ox=offx[o][k]->subimage(xl,xh,yl,yh);
-        int snx=xh-xl+1,sny=yh-yl+1;
-        for(int ix=1;ix<=snx;++ix)
-          for(int iy=1;iy<=sny;++iy) fdx+=ox[ix][iy];
-        fdx/=(fp_t)(snx*sny)*100.0;
-        del_ft2dim(ox,1,snx,1,sny);
-      }
-      if(offy[o][k]){
-        fp_t **oy=offy[o][k]->subimage(xl,xh,yl,yh);
-        int snx=xh-xl+1,sny=yh-yl+1;
-        for(int ix=1;ix<=snx;++ix)
-          for(int iy=1;iy<=sny;++iy) fdy+=oy[ix][iy];
-        fdy/=(fp_t)(snx*sny)*100.0;
-        del_ft2dim(oy,1,snx,1,sny);
-      }
-      dx[o][k]=i_round(fdx);
-      dy[o][k]=i_round(fdy);
-      int ixl=xl+dxl+dx[o][k]+1,ixh=xh+dxh+dx[o][k]+1;
-      int iyl=yl+dyl+dy[o][k]+1,iyh=yh+dyh+dy[o][k]+1;
-      fp_t ixo=rest(fdx)-(fp_t)dxl; // initial tilt will cause placement at dxl-rest(fdx)?
-      fp_t iyo=rest(fdy)-(fp_t)dyl;
-      for(int i=1;i<=nim[o][k];++i){
-        fp_t **tmp=image[o][k][i]->subimage(ixl,ixh,iyl,iyh);
-        int snx=ixh-ixl+1,sny=iyh-iyl+1;
-        float32_t **img=f32t2dim(1,snx,1,sny);
-        for(int ix=1;ix<=snx;++ix) for(int iy=1;iy<=sny;++iy) img[ix][iy]=tmp[ix][iy];
-        del_ft2dim(tmp,1,snx,1,sny);
-        offs+=::pack(data+offs,snx,0);
-        offs+=::pack(data+offs,sny,0);
-        offs+=::pack(data+offs,ixo,0);
-        offs+=::pack(data+offs,iyo,0);
-        offs+=::pack(data+offs,noise_sigma[o][k][i],0);
-        offs+=::pack(data+offs,img,1,snx,1,sny,0);
-        del_f32t2dim(img,1,snx,1,sny);
-      }
-    }
+  int sz=atmos->size(io);
+  sz+=mod->size(io);
+  sz+=obs->size(io);
+//
+  uint08_t *data=new uint08_t [sz];
+  uint32_t offs=atmos->pack(data,0,io);
+  offs+=mod->pack(data+offs,0,io);
+  offs+=obs->pack(data+offs,0,io);
+//
   if(offs!=sz) io.msg(IOL_ERROR,"chunk::pack: inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,sz);
   byte *cbuf=z_compress(data,sz,clvl,0,io);
   delete[] data;
-  if(swapfile>=0)
-    if(put(cbuf,sz,swapfile,swapfile_offset,swapfile_lock)<0) io.msg(IOL_WARN,"chunk::pack: failed to write to swap file (keep your fingers crossed)\n",offs,sz); 
-  else 
-    put(cbuf,sz);
+  if(swapfile>=0){  // don't forget the braces to avoid ambiguous else
+    if(this->put(cbuf,sz,swapfile,swapfile_offset,swapfile_lock,io)<0) io.msg(IOL_WARN,"chunk::pack: failed to write to swap file (keep your fingers crossed)\n",offs,sz); 
+  }else{
+    this->put(cbuf,sz);
+  }
   return 0;
 }
 
@@ -308,6 +273,7 @@ int job_class::start(void)
   io->msg(IOL_INFO,"job ID = %s\n",id_str);
 
 //
+  off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
 
@@ -321,91 +287,48 @@ int job_class::start(void)
       int tickspersec=sysconf(_SC_CLK_TCK);
       struct tms t_strt;
       clock_t t1=times(&t_strt);
-     	//printf("nlambda=%d, lambda[0]=%1.7E, lambda[%d]=%1.7E\n",ji.nlambda[o],vactoair(ji.lambda[o][0]),ji.nlambda[o]-1,vactoair(ji.lambda[o][ji.nlambda[o]-1]));
+       //printf("nlambda=%d, lambda[0]=%1.7E, lambda[%d]=%1.7E\n",ji.nlambda[o],vactoair(ji.lambda[o][0]),ji.nlambda[o]-1,vactoair(ji.lambda[o][ji.nlambda[o]-1]));
       //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
       //obs->write(ji.name[o],*io,1,1);
       class observable * obs;
       
-     	if (ji.to_invert[o]){ // We are going to invert something.
-     		printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
-     		int n1,n2,n3,n4;
-      	fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
-      	test = transpose(test,n1,n2,n3,n4);
-      	printf("cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
-      	printf("input lambda array has %d wavelengths. \n", ji.nlambda[o]);
-     		obs = new observable(n4,n3,n2,n1);
-     		obs->set(test);
-     		ji.lambda[o] = vactoair(ji.lambda[o],ji.nlambda[o]);
-     		obs->setlambda(ji.lambda[o]-1);
-     		del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
-     		obs->normalize();
+       if (ji.to_invert[o]){ // We are going to invert something.
+         printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
+         int n1,n2,n3,n4;
 
-     		int left_cut = 678;
-     		int iup=0,jup=0;
-     		modelcube * test_cube = new modelcube(ji.models[0],iup,jup);
+         fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
+         test = transpose(test,n1,n2,n3,n4);
+         printf("cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+         printf("input lambda array has %d wavelengths. \n", ji.nlambda[o]);
 
-     		FILE * lambda = fopen("lambda_fitted.dat","w");
-     		for (int l=left_cut-1;l<ji.nlambda[o];++l)
-     			fprintf(lambda,"%5.11e \n",ji.lambda[o][l]);
-     		fclose(lambda);
+         obs = new observable(n4,n3,n2,n1);
+         obs->set(test);
+         ji.lambda[o] = vactoair(ji.lambda[o],ji.nlambda[o]);
+         obs->setlambda(ji.lambda[o]-1);
+         del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+         obs->normalize();
 
-     		fp_t **** fitted_spectra = ft4dim(1,iup,1,jup,1,4,1,ji.nlambda[o]-left_cut+1);
-     		memset(fitted_spectra[1][1][1]+1,0,iup*jup*4*(ji.nlambda[o]-left_cut+1)*sizeof(fp_t));
+         nx=n4;
+         ny=n3;
+                  
+         for(int x=1,n=1;x<=nx;++x)
+           for(int y=1;y<=ny;++y,++n){ // Cut the piece
+             class observable *obs_subset=obs->extract(x,x,y,y,1,ji.nlambda[o]);
 
-     		for (int i=1;i<=iup;++i)
-     			for (int j=1;j<=jup;++j){
-     				// Cut the piece
-     				class observable * obs_subset = obs->extract(i,i,j,j,left_cut,ji.nlambda[o]);
-     				obs_subset->write("spectrum_to_fit.dat",*io,1,1);
-     				// Clone the initial model
-     				model * model_to_fit = clone(ji.models[0]);
-     				printf("about to fit pixel %d %d...\n",i,j);
-     				observable * fitted_obs = ji.atmos[a]->stokes_lm_fit(obs_subset,ji.el[o],ji.az[o],model_to_fit);
-     				fp_t ** S_temp = fitted_obs->get_S(1,1);
+             struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
+             array_add(chk,raw);     // add new chunk to the raw data list
+             chk->pack(ji.atmos[a],ji.models[0],obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
 
-     				memcpy(fitted_spectra[i][j][1]+1,S_temp[1]+1,4*(ji.nlambda[o]-left_cut+1)*sizeof(fp_t));
-     				
-     				del_ft2dim(S_temp,1,4,1,(ji.nlambda[o]-left_cut+1));
-     				test_cube->add_model(model_to_fit,i,j);
-     				//printf("added model...\n");
-     				delete obs_subset;
-     				delete model_to_fit;
-     				delete fitted_obs;
-     		}
-     		test_cube->simple_print("output_test.dat");
-     		write_file("cube_fitted.f0",fitted_spectra,iup,jup,4,(ji.nlambda[o]-left_cut+1),*io);
-     		delete test_cube;
-     		del_ft4dim(fitted_spectra,1,iup,1,jup,1,4,1,ji.nlambda[o]-left_cut+1);
-     	}
-
-     	else {
-     		obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
-     		obs->write(ji.name[o],*io,1,1);
-     	}
-      
-
-      //ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o],0);      
-      //class observable * obs;
-      //obs = new observable(4);
-      //obs->write(ji.name[o],*io,1,1);
-      
-      // Here we execute the fitting procedure
-      //ji.atmos[a]->stokes_lm_fit(obs,ji.el[o],ji.az[o],ji.lambda[o], ji.nlambda[o],ji.models[0]);
-
-      //delete obs;
-      struct tms t_end;
-      clock_t t2=times(&t_end);
-      int user=t_end.tms_utime-t_strt.tms_utime;
-      int sys=t_end.tms_stime-t_strt.tms_stime;
-      double utime=((double)user)/(double)tickspersec;
-      double stime=((double)sys)/(double)tickspersec;
-      double ttime=((double)user+(double)sys)/(double)tickspersec;
-      //delete obs;
-      fprintf(stderr,"job time = user: %7.5f  system: %7.5f  total: %7.5f\n",utime,stime,ttime);
+             pthread_mutex_lock(&active_lock);
+             ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
+             pthread_mutex_unlock(&active_lock);
+           }
+       }else{
+         obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
+         obs->write(ji.name[o],*io,1,1);
+       }
     }
-    exit(1);
   }
- 
 //
   io->msg(IOL_INFO,"init done.\n");
 //
@@ -442,6 +365,48 @@ struct slv_data{
 
 int job_class::stop(void)
 {
+// grid of chunks
+  struct chunk ***chunks=(struct chunk ***)v2dim(1,nx,1,ny);
+  for(int n=0;fin[n];++n) chunks[fin[n]->x][fin[n]->y]=fin[n];
+
+  for(int o=0;o<ji.no;++o){
+    modelcube *test_cube=new modelcube(ji.models[0],ny,nx);
+    fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,ji.nlambda[o]);
+    memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*ji.nlambda[o]*sizeof(fp_t));
+           
+    for(int x=1;x<=nx;++x)
+      for(int y=1;y<=ny;++y) 
+       if(chunks[x][y]->bsz){ // chunk was successful
+          int bsz=0;
+          byte *buf=0;
+          if(chunks[x][y]->get(buf,bsz,*io)>=0){ // buffer retreive succesful
+            int size;
+            byte *data=z_uncompress(buf,size,0,*io); // decompress results
+            chunks[x][y]->free(); // free up the compressed  buffer in swap mode
+
+            int32_t offs=0;
+            class model* mod=new model(data,offs,0,*io);
+            class observable *obs=new observable(data+offs,offs,0,*io);
+
+            if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
+
+            fp_t **S_temp=obs->get_S(1,1);
+            memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*ji.nlambda[o]*sizeof(fp_t));
+            del_ft2dim(S_temp,1,4,1,ji.nlambda[o]);
+            delete obs;
+
+            test_cube->add_model(mod,x,y);
+            delete mod;
+
+            delete[] data;
+         }
+       }else io->msg(IOL_ERROR,"job_class::stop: chunck [%d,%d] did not contain any data!",x,y); // no data
+//
+    test_cube->simple_print("output_test.dat");
+    write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    delete test_cube;
+    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
+  }
 /******************************
  * statistics                 *
  ******************************/
