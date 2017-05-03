@@ -66,8 +66,8 @@ int chunk::pack(atmosphere *atmos,model *mod,observable *obs,int swapfile,off_t 
   sz+=obs->size(io);
 //
   uint08_t *data=new uint08_t [sz];
-  uint32_t offs=atmos->pack(data,0,io);
-  offs+=mod->pack(data+offs,0,io);
+  //uint32_t offs=atmos->pack(data,0,io);
+  uint32_t offs=mod->pack(data+offs,0,io);
   offs+=obs->pack(data+offs,0,io);
 //
   if(offs!=sz) io.msg(IOL_ERROR,"chunk::pack: inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,sz);
