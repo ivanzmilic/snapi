@@ -392,11 +392,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   for (int l = 0; l<nlambda; ++l){
 
-    //for (int a = 0; a<natm; ++a)
-    //  atml[a]->prof_init();
-
-    //fp_t *****op = opacity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);   
-    //fp_t ****em = emissivity_vector(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
     if (tau_grid) normalize_to_referent_opacity(op_vector[l+1], em_vector[l+1]);
 
     formal(rt_grid, S,0,op_vector[l+1],em_vector[l+1],theta,phi,boundary_condition_for_rt); 
@@ -405,13 +400,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     fp_t lambda_air = vactoair(lambda[l]);
 
     o->set(S[x1l][x2l][x3l],lambda_air,1,1,l+1);
-
-    //del_ft5dim(op, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4, 1, 4);
-    //del_ft4dim(em, x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   }
-
-  //for (int a = 0; a<natm; ++a)
-  //  atml[a]->prof_clear();
 
   del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);

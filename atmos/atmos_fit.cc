@@ -55,7 +55,7 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
   output = fopen("fitting_log.txt", "w");
 
   int iter = 0;
-  int MAX_ITER = 10;
+  int MAX_ITER = 1;
 
   io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
 

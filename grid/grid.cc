@@ -24,9 +24,7 @@ grid::grid(uint08_t ndim_in,int32_t *dim_in,io_class &io_in):node(ndim_in,io_in)
 
 grid::grid(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):node(buf,offs,do_swap,io_in)
 {
-  printf("grid::grid : can I even make a grid from a buffer?\n");
-  offs+=unpack(buf+offs,do_swap,io_in);
-  printf("grid::grid : yes I can!\n");
+  offs+=unpack(buf+offs,do_swap,io_in); 
 }
 
 grid::~grid(void)

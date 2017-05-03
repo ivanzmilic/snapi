@@ -152,11 +152,12 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   //io.msg(IOL_INFO, "atmos_pp::enforcing HD equilibrium. \n");
   popsetup();
 
+
   fp_t const grav_acc = 274.88E2; // cm/s^2
 
   fp_t lambda_reference = 500E-7; // Usually a referent lambda is 500 nm, but in general could be different
   int MAX_ITER = 20;
-  fp_t break_me = 1E-3;
+  fp_t break_me = 1E-2;
   
   Nt[x1l][x2l][x3l] = 0.3/k/T[x1l][x2l][x3l];
 
@@ -165,23 +166,14 @@ int atmos_pp::build_from_nodes(model * atmos_model){
 
   for (int iter=0;iter<MAX_ITER;++iter){ // No more than 20 iterations
     
-    //printf("I will execute chemeq for iteration %d \n", iter);
     chemeq(atml, natm, T[x1l][x2l][x3l], Nt[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
-    //printf("I executed chemeq for iteration %d \n", iter);
     for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
     // Now from this we need to get mass density and opacity
     op_referent[x1l][x2l][x3l] = opacity_continuum(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], lambda_reference, x1l,x2l,x3l);
     rho[x1l][x2l][x3l] = atml[0]->get_total_pop(x1l,x2l,x3l) * 1.4 * 1.67E-24; // in gram/cm^3, approximate.
     
-    
-  
     fp_t dN = (pow(10.0, logtau[x3l]) * rho[x1l][x2l][x3l] * grav_acc / op_referent[x1l][x2l][x3l]) / k / T[x1l][x2l][x3l] - Nt[x1l][x2l][x3l];
     Nt[x1l][x2l][x3l] += dN; 
-    
-    //if (fabs(dN / Nt[x1l][x2l][x3l]) < break_me){
-      //io.msg(IOL_INFO, "atmos_pp:: iterated top density after %d iterations. \n", iter);
-      //break;
-    //}
     
   }
 
@@ -205,44 +197,27 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       fp_t kappa_mean = sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1] / rho[x1l][x2l][x3i] / rho[x1l][x2l][x3i-1]); // Geometrical mean of the value of kappa
       // New correction:
       fp_t P_local_correction = Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + grav_acc / kappa_mean * delta_tau - Nt[x1l][x2l][x3i] * k * T[x1l][x2l][x3i];
-
-
-      //if (fabs(P_local_correction / k / T[x1l][x2l][x3i] / Nt[x1l][x2l][x3i]) < break_me){
-      //  break;
-      //}
-      //printf(" x3i = %d iter# %d dP/P = %e \n",x3i, iter, fabs(P_local_correction / k / T[x1l][x2l][x3i] / Nt[x1l][x2l][x3i]));
-
     }
 
     fp_t d_h = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1])) / sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1]);
-    //x3[x3i] = x3[x3i-1] - d_h;
-
   }
-  
 
   // Recompute, just in case referent opacity (DEBUG)
   for (int x3i=x3l;x3i<=x3h;++x3i)
     op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_reference, x1l,x2l,x3i); // New opacity
-
-
-
-  FILE * output;
-  output = fopen("cfg/current_atmosphere.dat", "w");
 
   for (int x3i=x3l;x3i<=x3h;++x3i){
     chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
     for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
     op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_reference, x1l,x2l,x3i);
     rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24;
-    fprintf(output,"%d %e %f %e %e %e %e %e \n", x3i, x3[x3i], logtau[x3i], T[x1l][x2l][x3i], (Nt[x1l][x2l][x3i]) * k * T[x1l][x2l][x3i], (Ne[x1l][x2l][x3i]) * k * T[x1l][x2l][x3i], 
-      op_referent[x1l][x2l][x3i]/rho[x1l][x2l][x3i], rho[x1l][x2l][x3i]);
   }
-
-  fclose(output);
 
   delete [](logtau+x3l);
 
   popclean();
+
+  fprintf(stderr,"Actually done\n");
 
   return 0;
 }

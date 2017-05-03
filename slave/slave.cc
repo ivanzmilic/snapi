@@ -116,7 +116,15 @@ int main(int argc,char *argv[])
           delete[] ubuf;
           if(offs!=size) io.msg(IOL_ERROR,"inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,size);
           
-          class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
+          //class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
+          fp_t * lambda = obs->get_lambda();
+          int nlambda = obs->get_n_lambda();
+
+          atmos->set_grid(0);
+
+          class observable *fit=atmos->obs_stokes(3.14,0.0,lambda+1,nlambda);
+          fit->write("spectrum_slave.dat",io,1,1);
+          exit(1);
 
           int32_t rsz=mod->size(io);
           rsz+=fit->size(io);
