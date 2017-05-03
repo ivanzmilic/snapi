@@ -62,13 +62,13 @@ chunk::~chunk(void)
 int chunk::pack(atmosphere *atmos,model *mod,observable *obs,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io)
 {
   int sz=atmos->size(io);
-  //sz+=mod->size(io);
-  //sz+=obs->size(io);
+  sz+=mod->size(io);
+  sz+=obs->size(io);
 //
   uint08_t *data=new uint08_t [sz];
   uint32_t offs=atmos->pack(data,0,io);
-  //offs+=mod->pack(data+offs,0,io);
-  //offs+=obs->pack(data+offs,0,io);
+  offs+=mod->pack(data+offs,0,io);
+  offs+=obs->pack(data+offs,0,io);
 //
   if(offs!=sz) io.msg(IOL_ERROR,"chunk::pack: inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,sz);
   byte *cbuf=z_compress(data,sz,clvl,0,io);
@@ -385,8 +385,8 @@ int job_class::stop(void)
             chunks[x][y]->free(); // free up the compressed  buffer in swap mode
 
             int32_t offs=0;
-            class model* mod=new model(data,offs,0,*io);
-            class observable *obs=new observable(data+offs,offs,0,*io);
+            class model* mod=model_new(data,offs,0,*io);
+            class observable *obs=obs_new(data,offs,0,*io);
 
             if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
 

@@ -310,6 +310,7 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,0};
   for (int i=0;P[i];++i) offs+=::pack(buf+offs,P[i],do_swap);
   
+//  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
   offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
   offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
   offs+=::pack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
@@ -322,7 +323,7 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::pack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
   offs+=::pack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
   offs+=::pack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
-  
+
   return offs;
 }
 
@@ -336,7 +337,7 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,N_nodes_B,do_swap);
   offs+=::unpack(buf+offs,N_nodes_theta,do_swap);
   offs+=::unpack(buf+offs,N_nodes_phi,do_swap);
-  //printf("%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
+//  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
   if (N_nodes_temp){
     temp_nodes_tau = new fp_t [N_nodes_temp] -1;
     temp_nodes_temp = new fp_t [N_nodes_temp] -1;

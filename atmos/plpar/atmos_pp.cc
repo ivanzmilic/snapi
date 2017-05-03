@@ -55,7 +55,8 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   
   // This is a working version which modifies the atmosphere with respect to given 'model'
 
-  io.msg(IOL_INFO, "atmos_pp::building from nodes \n");
+  fprintf(stderr,"atmos_pp::building from nodes (%d..%d)\n",x3h,x3l);
+  io.msg(IOL_INFO, "atmos_pp::building from nodes (%d..%d)\n",x3h,x3l);
   
   // First you need to make a grid in tau. This is like this by default
   int N_depths = x3h-x3l+1;

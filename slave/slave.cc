@@ -100,25 +100,22 @@ int main(int argc,char *argv[])
           struct tms t_start;
           clock_t t0=times(&t_start);
 
-          int32_t size,offs=0;
-          byte *buf=sock.recv(size);
+          int32_t csz;
+          byte *buf=sock.recv(csz);
 
+          int32_t size;
           uint08_t *ubuf=z_uncompress(buf,size,0,io); // decompress results
-          if(atmos) delete atmos;         // cleanup old structure
-          printf("slave : now trying to unpack the atmosphere...\n");
-          atmos=new atmosphere(ubuf,offs,swap_endian,io);  // create atmospheric structure
-          printf("slave : atmosphere unpacked...\n");
-          /*if(mod) delete mod;         // cleanup old structure
-          mod=new model(ubuf+offs,offs,swap_endian,io);  // create model
-          printf("model unpacked!\n");
-          if(obs) delete obs;         // cleanup old structure
-          obs=new observable(ubuf+offs,offs,swap_endian,io);  // create observbable
-          printf("observable unpacked!\n");*/
           delete[] buf;
+          if(atmos) delete atmos;         // cleanup old structure
+          int32_t offs=0;
+          atmos=atmos_new(ubuf,offs,swap_endian,io);  // create atmospheric structure
+          if(mod) delete mod;         // cleanup old structure
+          mod=model_new(ubuf,offs,swap_endian,io);  // create model
+          if(obs) delete obs;         // cleanup old structure
+          obs=obs_new(ubuf,offs,swap_endian,io);  // create observbable
           delete[] ubuf;
+          if(offs!=size) io.msg(IOL_ERROR,"inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,size);
           
-          printf("lalalalalala \n");
-          exit(1);
           class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
 
           int32_t rsz=mod->size(io);

@@ -40,14 +40,14 @@ int32_t node::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
   int offs=::pack(buf,ndim);
-  io_in.msg(IOL_INFO,"node::pack: ndim=%d\n",ndim);
+  io_in.msg(IOL_DEB1,"node::pack: ndim=%d\n",ndim);
   return offs;
 }
 
 int32_t node::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
   int offs=::unpack(buf,ndim);
-  io_in.msg(IOL_INFO,"node::unpack: ndim=%d\n",ndim);
+  io_in.msg(IOL_DEB1,"node::unpack: ndim=%d\n",ndim);
   return offs;
 }
 

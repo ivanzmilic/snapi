@@ -98,6 +98,7 @@ int32_t grid::size(void)
 int32_t grid::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
   int32_t offs=node::pack(buf,do_swap,io_in);
+//  fprintf(stderr,"grid::pack  %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
 // pack local stuff
   offs+=::pack(buf+offs,x1l,do_swap);
   offs+=::pack(buf+offs,x1h,do_swap);
@@ -123,7 +124,7 @@ int32_t grid::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,x2h,do_swap);
   offs+=::unpack(buf+offs,x3l,do_swap);
   offs+=::unpack(buf+offs,x3h,do_swap);
-  printf("Dimensions = %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
+//  fprintf(stderr,"grid::unpack = %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
 //
   offs+=::unpack(buf+offs,x1=new fp_t [x1h-x1l+1]-x1l,x1l,x1h,do_swap);
   offs+=::unpack(buf+offs,x2=new fp_t [x2h-x2l+1]-x2l,x2l,x2h,do_swap);
