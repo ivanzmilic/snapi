@@ -113,7 +113,8 @@ int32_t grid::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 
 int32_t grid::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
-// only unpack local stuff
+// only unpack local stuff - why? what does this mean?
+
   int32_t offs=::unpack(buf+offs,x1l,do_swap);
   offs+=::unpack(buf+offs,x1h,do_swap);
   offs+=::unpack(buf+offs,x2l,do_swap);

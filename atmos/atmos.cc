@@ -69,12 +69,6 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
     (*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
     memset((*(p[i]))[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   }
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i){
-    //(*(pp[i]))=ft4dim(1,7,x1l,x1h,x2l,x2h,x3l,x3h);
-    //memset((*(pp[i]))[1][x1l][x2l]+x3l,0,7*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  //}
-
 // setup atomic and molecular data
   natm=cfg->natm+cfg->nmol;
   boundary_condition_for_rt = -1; // Semi-infinite atmosphere
@@ -96,9 +90,11 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
 
 atmosphere::atmosphere(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):grid(buf,offs,do_swap,io_in),flags(ATMOS_FLAG_MASK)
 {
+  printf("trying to create the atmosphere from a bufer...\n");
   gtype=ATMOS_GEOM_3D;
   rtstype=ATMOS_RTS_QSC;
   offs+=unpack(buf+offs,do_swap,io_in);
+  
 }
 
 atmosphere::~atmosphere(void)
@@ -180,7 +176,7 @@ int32_t atmosphere::size(io_class &io_in)
 int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 // selection variables
-  int offs=::pack(buf,gtype);
+  int32_t offs=::pack(buf,gtype);
   offs+=::pack(buf+offs,rtstype);
 // grid...
   offs+=grid::pack(buf+offs,do_swap,io_in);
@@ -208,7 +204,8 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
-  int offs=flags.unpack(buf,io_in);
+  printf("atmosphere:trying to unpack.....\n");
+  int32_t offs=flags.unpack(buf,io_in);
 //
   offs+=::unpack(buf+offs,id);
   offs+=::unpack(buf+offs,fname);

@@ -102,20 +102,23 @@ int main(int argc,char *argv[])
 
           int32_t size,offs=0;
           uint08_t *buf=sock.recv(size);
-          byte *ubuf=z_uncompress(buf,size,0,io); // decompress results
-          //if(atmos) delete atmos;         // cleanup old structure
-          //atmos=new atmosphere(ubuf,offs,swap_endian,io);  // create atmospheric structure
+          uint08_t *ubuf=z_uncompress(buf,size,0,io); // decompress results
+          if(atmos) delete atmos;         // cleanup old structure
+          printf("slave : now trying to unpack the atmosphere...\n");
+          atmos=new atmosphere(ubuf,offs,swap_endian,io);  // create atmospheric structure
+          printf("slave : atmosphere unpacked...\n");
           if(mod) delete mod;         // cleanup old structure
-          mod=new model(ubuf+offs,offs,swap_endian,io);  // create atmospheric structure
+          mod=new model(ubuf+offs,offs,swap_endian,io);  // create model
           printf("model unpacked!\n");
           if(obs) delete obs;         // cleanup old structure
-          obs=new observable(ubuf+offs,offs,swap_endian,io);  // create atmospheric structure
+          obs=new observable(ubuf+offs,offs,swap_endian,io);  // create observbable
+          printf("observable unpacked!\n");
           delete[] buf;
           delete[] ubuf;
           
+          printf("lalalalalala \n");
+          exit(1);
           class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
-
-          
 
           int32_t rsz=mod->size(io);
           rsz+=fit->size(io);
