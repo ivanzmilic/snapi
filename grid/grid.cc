@@ -24,7 +24,9 @@ grid::grid(uint08_t ndim_in,int32_t *dim_in,io_class &io_in):node(ndim_in,io_in)
 
 grid::grid(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):node(buf,offs,do_swap,io_in)
 {
+  printf("grid::grid : can I even make a grid from a buffer?\n");
   offs+=unpack(buf+offs,do_swap,io_in);
+  printf("grid::grid : yes I can!\n");
 }
 
 grid::~grid(void)
@@ -83,7 +85,7 @@ int08_t grid::resize(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t x2h_in
 
 int32_t grid::size(void)
 {
-  int sz=node::size();
+  int32_t sz=node::size();
 // add local size
   sz+=6*sizeof(int32_t); // x?l,x?h
   sz+=(x1h-x1l+1)*sizeof(fp_t); // x1
@@ -113,14 +115,15 @@ int32_t grid::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 
 int32_t grid::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
-// only unpack local stuff - why? what does this mean?
+// only unpack local stuff  - nodes unpacked automatically in the contructor - this makes a problem somehow?
 
-  int32_t offs=::unpack(buf+offs,x1l,do_swap);
+  int32_t offs=::unpack(buf,x1l,do_swap);
   offs+=::unpack(buf+offs,x1h,do_swap);
   offs+=::unpack(buf+offs,x2l,do_swap);
   offs+=::unpack(buf+offs,x2h,do_swap);
   offs+=::unpack(buf+offs,x3l,do_swap);
   offs+=::unpack(buf+offs,x3h,do_swap);
+  printf("Dimensions = %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
 //
   offs+=::unpack(buf+offs,x1=new fp_t [x1h-x1l+1]-x1l,x1l,x1h,do_swap);
   offs+=::unpack(buf+offs,x2=new fp_t [x2h-x2l+1]-x2l,x2l,x2h,do_swap);

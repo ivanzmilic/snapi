@@ -38,6 +38,7 @@ int32_t node::size(void)
 
 int32_t node::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
+
   int offs=::pack(buf,ndim);
   io_in.msg(IOL_INFO,"node::pack: ndim=%d\n",ndim);
   return offs;

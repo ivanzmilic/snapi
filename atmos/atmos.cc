@@ -90,7 +90,7 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
 
 atmosphere::atmosphere(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):grid(buf,offs,do_swap,io_in),flags(ATMOS_FLAG_MASK)
 {
-  printf("trying to create the atmosphere from a bufer...\n");
+  printf("trying to create the atmosphere...\n");
   gtype=ATMOS_GEOM_3D;
   rtstype=ATMOS_RTS_QSC;
   offs+=unpack(buf+offs,do_swap,io_in);

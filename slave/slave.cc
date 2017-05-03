@@ -101,18 +101,19 @@ int main(int argc,char *argv[])
           clock_t t0=times(&t_start);
 
           int32_t size,offs=0;
-          uint08_t *buf=sock.recv(size);
+          byte *buf=sock.recv(size);
+
           uint08_t *ubuf=z_uncompress(buf,size,0,io); // decompress results
           if(atmos) delete atmos;         // cleanup old structure
           printf("slave : now trying to unpack the atmosphere...\n");
           atmos=new atmosphere(ubuf,offs,swap_endian,io);  // create atmospheric structure
           printf("slave : atmosphere unpacked...\n");
-          if(mod) delete mod;         // cleanup old structure
+          /*if(mod) delete mod;         // cleanup old structure
           mod=new model(ubuf+offs,offs,swap_endian,io);  // create model
           printf("model unpacked!\n");
           if(obs) delete obs;         // cleanup old structure
           obs=new observable(ubuf+offs,offs,swap_endian,io);  // create observbable
-          printf("observable unpacked!\n");
+          printf("observable unpacked!\n");*/
           delete[] buf;
           delete[] ubuf;
           

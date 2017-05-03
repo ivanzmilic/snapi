@@ -306,7 +306,7 @@ int32_t model::size(io_class &io_in)
 int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
-  int32_t offs=::pack(buf+offs,N_depths,do_swap);
+  int32_t offs=::pack(buf,N_depths,do_swap);
   int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,0};
   for (int i=0;P[i];++i) offs+=::pack(buf+offs,P[i],do_swap);
   
@@ -329,7 +329,7 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
-  int32_t offs=::unpack(buf+offs,N_depths,do_swap);
+  int32_t offs=::unpack(buf,N_depths,do_swap);
   offs+=::unpack(buf+offs,N_nodes_temp,do_swap);
   offs+=::unpack(buf+offs,N_nodes_vt,do_swap);
   offs+=::unpack(buf+offs,N_nodes_vs,do_swap);

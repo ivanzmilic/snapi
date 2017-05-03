@@ -62,13 +62,13 @@ chunk::~chunk(void)
 int chunk::pack(atmosphere *atmos,model *mod,observable *obs,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io)
 {
   int sz=atmos->size(io);
-  sz+=mod->size(io);
-  sz+=obs->size(io);
+  //sz+=mod->size(io);
+  //sz+=obs->size(io);
 //
   uint08_t *data=new uint08_t [sz];
   uint32_t offs=atmos->pack(data,0,io);
-  offs+=mod->pack(data+offs,0,io);
-  offs+=obs->pack(data+offs,0,io);
+  //offs+=mod->pack(data+offs,0,io);
+  //offs+=obs->pack(data+offs,0,io);
 //
   if(offs!=sz) io.msg(IOL_ERROR,"chunk::pack: inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,sz);
   byte *cbuf=z_compress(data,sz,clvl,0,io);
