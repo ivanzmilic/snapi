@@ -177,7 +177,6 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
-
   set_grid(1);
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:

@@ -114,7 +114,7 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     //printf("%1.10e %1.10e %d %1.10e\n ", lambda[0],lambda[nlambda-1],nlambda, lambda[1]-lambda[0]);
     for(int l=0;l<nlambda;++l){
       lambda[l]*=1E-8; // A->cm
-      lambda[l] = airtovac(lambda[l]);
+      //lambda[l] = airtovac(lambda[l]);
     }
     io.msg(IOL_XNFO,"obs: %d %E...%E\n",nlambda,lambda[0],lambda[nlambda-1]);
     if(!(name=get_arg(odata,"NAME",0)))

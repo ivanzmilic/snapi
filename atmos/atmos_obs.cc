@@ -386,20 +386,20 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   class observable *o=new observable(1,1,4,nlambda);
 
+  fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
+  lambda_vacuum -=1;
+
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  op_em_vector(Vr,B,theta,phi,lambda-1,nlambda,op_vector,em_vector);
+  op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
 
-  for (int l = 0; l<nlambda; ++l){
+  for (int l = 1; l<=nlambda; ++l){
 
-    if (tau_grid) normalize_to_referent_opacity(op_vector[l+1], em_vector[l+1]);
+    if (tau_grid) normalize_to_referent_opacity(op_vector[l], em_vector[l]);
 
-    formal(rt_grid, S,0,op_vector[l+1],em_vector[l+1],theta,phi,boundary_condition_for_rt); 
+    formal(rt_grid, S,0,op_vector[l],em_vector[l],theta,phi,boundary_condition_for_rt); 
 
-    // Prior to printing convert wavelength to air again:
-    fp_t lambda_air = vactoair(lambda[l]);
-
-    o->set(S[x1l][x2l][x3l],lambda_air,1,1,l+1);
+    o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);
   }
 
   del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
@@ -407,6 +407,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  delete[](lambda_vacuum+1);
   popclean();
   
   io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");

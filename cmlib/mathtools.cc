@@ -1162,7 +1162,7 @@ fp_t * airtovac(fp_t * lambda_air, int N){
   fp_t * lambda_out = new fp_t [N];
   for (int l=0;l<N;++l)
     lambda_out[l] = airtovac(lambda_air[l]);
-  delete[]lambda_air;
+  //delete[]lambda_air;
   return lambda_out;
 }
 
@@ -1170,6 +1170,6 @@ fp_t * vactoair(fp_t * lambda_vac, int N){
   fp_t * lambda_out = new fp_t [N];
   for (int l=0;l<N;++l)
     lambda_out[l] = vactoair(lambda_vac[l]);
-  delete[]lambda_vac;
+  //delete[]lambda_vac;
   return lambda_out;
 }

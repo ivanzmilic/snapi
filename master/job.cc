@@ -293,17 +293,16 @@ int job_class::start(void)
       class observable * obs;
       
        if (ji.to_invert[o]){ // We are going to invert something.
-         printf("seems like we are inverting this hypercube: %s \n",ji.name[o]);
+         fprintf(stderr,"seems like we are inverting this hypercube: %s \n",ji.name[o]);
          int n1,n2,n3,n4;
 
          fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
          test = transpose(test,n1,n2,n3,n4);
-         printf("cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
-         printf("input lambda array has %d wavelengths. \n", ji.nlambda[o]);
+         fprintf(stderr,"cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+         fprintf(stderr,"input lambda array has %d wavelengths. \n", ji.nlambda[o]);
 
          obs = new observable(n4,n3,n2,n1);
          obs->set(test);
-         ji.lambda[o] = vactoair(ji.lambda[o],ji.nlambda[o]);
          obs->setlambda(ji.lambda[o]-1);
          del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
          obs->normalize();
@@ -311,8 +310,8 @@ int job_class::start(void)
          nx=n4;
          ny=n3;
                   
-         for(int x=1,n=1;x<=nx;++x)
-           for(int y=1;y<=ny;++y,++n){ // Cut the piece
+         for(int x=1,n=1;x<=1;++x)
+           for(int y=1;y<=1;++y,++n){ // Cut the piece
              class observable *obs_subset=obs->extract(x,x,y,y,1,ji.nlambda[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
@@ -389,7 +388,7 @@ int job_class::stop(void)
             class observable *obs=obs_new(data,offs,0,*io);
 
             if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
-
+            fprintf(stderr, "Seems like we got back results for pixel %d %d \n",x,y);
             fp_t **S_temp=obs->get_S(1,1);
             memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*ji.nlambda[o]*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,ji.nlambda[o]);
@@ -399,13 +398,16 @@ int job_class::stop(void)
             delete mod;
 
             delete[] data;
+            fprintf(stderr, "Everything went fine. Pixel %d %d done \n",x,y);
          }
        }else io->msg(IOL_ERROR,"job_class::stop: chunck [%d,%d] did not contain any data!",x,y); // no data
 //
-    test_cube->simple_print("output_test.dat");
-    write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
-    delete test_cube;
+    //test_cube->simple_print("output_test.dat");
+    //write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    //delete test_cube;
+    fprintf(stderr, "Is problem here? \n");
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
+    fprintf(stderr, "Nope");
   }
 /******************************
  * statistics                 *

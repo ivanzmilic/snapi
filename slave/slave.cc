@@ -121,10 +121,8 @@ int main(int argc,char *argv[])
           int nlambda = obs->get_n_lambda();
 
           atmos->set_grid(0);
-
-          class observable *fit=atmos->obs_stokes(3.14,0.0,lambda+1,nlambda);
+          class observable *fit=atmos->obs_stokes(3.14,0.0,lambda,nlambda);
           fit->write("spectrum_slave.dat",io,1,1);
-          exit(1);
 
           int32_t rsz=mod->size(io);
           rsz+=fit->size(io);
