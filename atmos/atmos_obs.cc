@@ -378,11 +378,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
-  //for (int a = 0; a<natm; ++a)
-  //  atml[a]->prof_setup();
-
-  for (int a=0;a<natm;++a)
+  for (int a=0;a<natm;++a){
+    atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h);
     atml[a]->zeeman_setup();
+  }
 
   class observable *o=new observable(1,1,4,nlambda);
 
@@ -408,6 +407,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   delete[](lambda_vacuum+1);
+  for (int a=0;a<natm;++a){
+    atml[a]->rtclean(0,0,x1l,x1h,x2l,x2h,x3l,x3h);
+    atml[a]->zeeman_clear();
+  }
   popclean();
   
   io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");

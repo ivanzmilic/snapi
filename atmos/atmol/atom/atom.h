@@ -50,6 +50,7 @@ protected:
   uint16_t **rmap;     // reverse mapping (z,l -> level index)
   uint08_t *zmap;      // mapping of level index -> z,l
   uint08_t **j,**g;
+  int * split; // is the transition split @ all
   uint08_t **flags;
 
   // Additional quantities which characterize a level

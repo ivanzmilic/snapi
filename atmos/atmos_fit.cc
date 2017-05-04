@@ -177,13 +177,13 @@ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
-  set_grid(1);
+  
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
   fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
   int nlambda = spectrum_to_fit->get_n_lambda();
   fp_t * lambda = spectrum_to_fit->get_lambda();
-  lambda = airtovac(lambda+1,nlambda);
+  set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
@@ -277,7 +277,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fprintf(detailed_log,"Iteration # %d .Current spectrum:\n", iter);
     
     for (int l=1;l<=nlambda;++l){
-      fprintf(result,"%e", lambda[l-1]);
+      fprintf(result,"%e", lambda[l]);
       for (int s=1;s<=4;++s)
         fprintf(result, " %e", S[s][l]);
       fprintf(result,"\n");
@@ -331,7 +331,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   // Clean-up:
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
-  delete[](lambda);
+  delete[](lambda+1);
   
   return current_obs;
 }

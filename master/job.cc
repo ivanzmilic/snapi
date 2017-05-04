@@ -281,8 +281,6 @@ int job_class::start(void)
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
-    ji.atmos[a]->set_grid(1); // Sets grid to tau if positive, otherwise to geometrical scale
-    io->msg(IOL_INFO,"Calculating observables...\n");
     for(int o=0;o<ji.no;++o){
       int tickspersec=sysconf(_SC_CLK_TCK);
       struct tms t_strt;
@@ -293,13 +291,13 @@ int job_class::start(void)
       class observable * obs;
       
        if (ji.to_invert[o]){ // We are going to invert something.
-         fprintf(stderr,"seems like we are inverting this hypercube: %s \n",ji.name[o]);
+         io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
          int n1,n2,n3,n4;
 
          fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
          test = transpose(test,n1,n2,n3,n4);
-         fprintf(stderr,"cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
-         fprintf(stderr,"input lambda array has %d wavelengths. \n", ji.nlambda[o]);
+         io->msg(IOL_INFO,"master::job : cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+         io->msg(IOL_INFO,"master::job : input lambda array has %d wavelengths. \n", ji.nlambda[o]);
 
          obs = new observable(n4,n3,n2,n1);
          obs->set(test);
@@ -307,12 +305,13 @@ int job_class::start(void)
          del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
          obs->normalize();
 
-         nx=n4;
-         ny=n3;
+         // Implement more formal way how to do this
+         nx=1;
+         ny=1;
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
-             class observable *obs_subset=obs->extract(x,x,y,y,1,ji.nlambda[o]);
+             class observable *obs_subset=obs->extract(x,x,y,y,678,ji.nlambda[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
@@ -328,8 +327,6 @@ int job_class::start(void)
        }
     }
   }
-//
-  io->msg(IOL_INFO,"init done.\n");
 //
   pthread_mutex_lock(&active_lock);
   ++active;
@@ -422,7 +419,7 @@ int job_class::stop(void)
               slvs[ns].st=chunks[x][y]->s_time;
               slvs[ns].pc=1;
             }
-//
+//					
             fp_t **S_temp=obs->get_S(1,1);
             memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*ji.nlambda[o]*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,ji.nlambda[o]);
@@ -437,12 +434,11 @@ int job_class::stop(void)
          io->msg(IOL_ERROR,"job_class::stop: chunck [%d,%d] did not contain any data!",x,y); // no data
        }
 //
-    //test_cube->simple_print("output_test.dat");
-    //write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
-    //delete test_cube;
-    fprintf(stderr, "Is problem here? \n");
+    io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
+    test_cube->simple_print("output_test.dat");
+    write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    delete test_cube;
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
-    fprintf(stderr, "Nope");
   }
   del_v2dim((void***)chunks,1,nx,1,ny);
 /******************************

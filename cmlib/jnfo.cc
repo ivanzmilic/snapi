@@ -24,7 +24,6 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
   }else atmos=0;
   
   offs+=unpack(data+offs,nm,swap_endian);
-  printf("I unpacked %d models\n", nm);
   if(nm){
     models=new model* [nm];
     for(int m=0;m<nm;++m) models[m]=model_new(data,offs,swap_endian,io);

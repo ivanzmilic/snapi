@@ -55,7 +55,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   
   // This is a working version which modifies the atmosphere with respect to given 'model'
 
-  fprintf(stderr,"atmos_pp::building from nodes (%d..%d)\n",x3h,x3l);
   io.msg(IOL_INFO, "atmos_pp::building from nodes (%d..%d)\n",x3h,x3l);
   
   // First you need to make a grid in tau. This is like this by default
@@ -92,9 +91,9 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h);
 
   // Magnetic field:
-  fp_t * B = new fp_t[x3h-x3l] - x3l;
-  fp_t * theta = new fp_t[x3h-x3l] - x3l;
-  fp_t * phi = new fp_t[x3h-x3l] - x3l;
+  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
+  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
+  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
 
   int N_nodes_B = atmos_model->get_N_nodes_B();
   fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
@@ -216,9 +215,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   delete [](logtau+x3l);
 
   popclean();
-
-  fprintf(stderr,"Actually done\n");
-
   return 0;
 }
 
@@ -261,9 +257,9 @@ int atmos_pp::interpolate_from_nodes(model * atmos_model){
   atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h);
 
   // Magnetic field:
-  fp_t * B = new fp_t[x3h-x3l] - x3l;
-  fp_t * theta = new fp_t[x3h-x3l] - x3l;
-  fp_t * phi = new fp_t[x3h-x3l] - x3l;
+  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
+  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
+  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
 
   int N_nodes_B = atmos_model->get_N_nodes_B();
   fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();

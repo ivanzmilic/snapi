@@ -408,7 +408,7 @@ public:
 
   int get_N_nodes_total();
   int perturb_node_value(int, fp_t);
-  int get_parameter(int);
+  fp_t get_parameter(int);
   int which_parameter(int);
 
   int print();

@@ -1308,14 +1308,6 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
             fp_t dld_max=0;  // thermal broadening for some maximum parameters
             fp_t dld_min=broad_dop(lam,1E5,5E5);   // thermal broadening for some minimum parameters  
 
-            /*for (int x1i=x1l;x1i<=x1h;++x1i)
-              for (int x2i=x2l;x2i<=x2h;++x2i)
-                for (int x3i=x3l;x3i<=x3h;++x3i){
-                  fp_t dld_current = broad_dop(lam,fetch_temperature(x1i,x2i,x3i), fetch_vt(x1i,x2i,x3i));
-                  if (dld_current > dld_max) dld_max = dld_current;
-                  if (dld_current < dld_min) dld_min = dld_current;
-            }*/
-
             dld_max = broad_dop(lam,1E5,2E5);
             dld_min = broad_dop(lam,4E4,0.5E5);
 
@@ -1364,14 +1356,6 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
           }
         }
       }
-// merge with the new wavelength array
-
-    /*for (int z=0;z<Z;++z)
-      for (int ii=0;ii<nl[z];++ii){
-        printf("Z = %d \n", Z);
-        for (int n=0;n<nnlambda;++n)
-          printf("%e %e \n", tmplamb[n], bf[z][ii]->U(tmplamb[n]));
-    }*/
     lambda=add_points(lambda,nlambda,tmplamb,nnlambda);
 
   }
@@ -1535,7 +1519,7 @@ uint08_t atom::rtsetup(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t x2h_
    Jb=Ju=Ls=current_profile=norm=0;
    norm_derivative=0;
    inverse_tmap = 0;
- }
+  }
   return EC_OK;
 }
 
@@ -1558,6 +1542,9 @@ uint08_t atom::rtclean(int ntp,int32_t nlambda,
 
   for(int z=0;z<=Z;++z) del_ui32t2dim(tmap[z],0,nl[z],0,nl[z]);
   delete[] tmap;
+
+  for (int z=0;z<=Z;++z) delete[]rmap[z];
+  delete []rmap;  
   return EC_OK;
 }
 
@@ -1595,23 +1582,25 @@ void atom::radiation_moments_clean(){
 
 void atom::zeeman_setup(){
 
-  rtsetup(x1l,x1h,x2l,x2h,x3l,x3h);
+  split = 0;
   if (ntr){
 
     nm = new int* [ntr]-1;
     S_p = new fp_t* [ntr]-1;
     S_b = new fp_t* [ntr]-1;
     S_r = new fp_t* [ntr]-1;
-    //printf("! \n");
         
     delta_lambda_p = new fp_t * [ntr]-1;
     delta_lambda_b = new fp_t * [ntr]-1;
     delta_lambda_r = new fp_t * [ntr]-1;
 
+    split = new int [ntr]-1;
+
     for (int tr=1;tr<=ntr;++tr){
       int z_state = inverse_tmap[tr][2];
       int lower_level = inverse_tmap[tr][3];
       int upper_level = inverse_tmap[tr][4];
+      split[tr] = 0;
       if (upper_level < nl[z_state]){ // if it is a line transition
 
         // First we need to find the number of transitions:
@@ -1621,119 +1610,125 @@ void atom::zeeman_setup(){
 
         fp_t lambda_0 = h*c / (ee[z_state][upper_level] - ee[z_state][lower_level]);
 
-        nm[tr] = new int[3];
-        nm[tr][0] = j_min + 1;
-        nm[tr][1] = nm[tr][2] = (j_upper + j_lower)/2; // There is an issue of how to order them! Lets keep it like this so far: PI, SIGMA_P, SIGMA_R
+        if ((j_upper-j_lower == 2) || (j_upper-j_lower == -2) || ((j_upper==j_lower) && (j_upper !=0)))
+          split[tr] = 1;
 
-        S_p[tr] = new fp_t [nm[tr][0]];
-        S_b[tr] = new fp_t [nm[tr][1]];
-        S_r[tr] = new fp_t [nm[tr][2]];
-        delta_lambda_p[tr] = new fp_t [nm[tr][0]];
-        delta_lambda_b[tr] = new fp_t [nm[tr][1]];
-        delta_lambda_r[tr] = new fp_t [nm[tr][2]];
+        if (split[tr]){
+          nm[tr] = new int[3];
+          nm[tr][0] = j_min + 1;
+          nm[tr][1] = nm[tr][2] = (j_upper + j_lower)/2; // There is an issue of how to order them! Lets keep it like this so far: PI, SIGMA_P, SIGMA_R
+
+          S_p[tr] = new fp_t [nm[tr][0]];
+          S_b[tr] = new fp_t [nm[tr][1]];
+          S_r[tr] = new fp_t [nm[tr][2]];
+          delta_lambda_p[tr] = new fp_t [nm[tr][0]];
+          delta_lambda_b[tr] = new fp_t [nm[tr][1]];
+          delta_lambda_r[tr] = new fp_t [nm[tr][2]];
 
 
-        fp_t g_l = g_lande[z_state][lower_level];
-        fp_t g_u = g_lande[z_state][upper_level];
+          fp_t g_l = g_lande[z_state][lower_level];
+          fp_t g_u = g_lande[z_state][upper_level];
 
-        // We should be able to compute shifts separately:
+          // We should be able to compute shifts separately:
 
-        fp_t ju = fp_t(j_upper) / 2.0;
-        fp_t jl = fp_t(j_lower) / 2.0; // These are now actuall angular quantum numbers
-        fp_t jmin = fp_t(j_min) / 2.0;
+          fp_t ju = fp_t(j_upper) / 2.0;
+          fp_t jl = fp_t(j_lower) / 2.0; // These are now actuall angular quantum numbers
+          fp_t jmin = fp_t(j_min) / 2.0;
 
-        if (j_upper == j_lower){ // i.e. delta_j = 0, we use the equation 8.45 for summing limits
+          if (j_upper == j_lower){ // i.e. delta_j = 0, we use the equation 8.45 for summing limits
 
-          // PI:
-          fp_t norm_p = 0;
-          fp_t norm_total = 0;
-          for (int i=0;i<nm[tr][0];++i){
-            fp_t mi = fp_t(i) - ju; // Actual value of m_i
-            S_p[tr][i] = mi*mi;
-            delta_lambda_p[tr][i] = mi*(g_l - g_u);
-            norm_p += S_p[tr][i];
-            norm_total += S_p[tr][i];
+            // PI:
+            fp_t norm_p = 0;
+            fp_t norm_total = 0;
+            for (int i=0;i<nm[tr][0];++i){
+              fp_t mi = fp_t(i) - ju; // Actual value of m_i
+              S_p[tr][i] = mi*mi;
+              delta_lambda_p[tr][i] = mi*(g_l - g_u);
+              norm_p += S_p[tr][i];
+              norm_total += S_p[tr][i];
+            }
+
+            for (int i=0;i<nm[tr][0];++i)
+              S_p[tr][i] /= norm_p;
+            // SIGMA_B/R
+            fp_t norm_b = 0.0;
+            fp_t norm_r = 0.0;
+            for (int i=0;i<nm[tr][1];++i){
+              // B:
+              fp_t mi = fp_t(i) - ju + 1.0;
+              S_b[tr][i] = 0.5 * (ju+mi) * (ju-mi+1.0);
+              norm_b += S_b[tr][i];
+              norm_total += S_b[tr][i];
+              delta_lambda_b[tr][i] = mi*(g_l - g_u) - g_l;
+              // R:
+              mi = fp_t(i) - ju;
+              S_r[tr][i] = 0.5 * (ju-mi) * (ju+mi+1);
+              norm_r += S_r[tr][i];
+              norm_total +=S_r[tr][i];
+              delta_lambda_r[tr][i] = mi*(g_l - g_u) + g_l;
+            }
+            for (int i=0;i<nm[tr][1];++i){
+              S_b[tr][i] /= norm_b;
+              S_r[tr][i] /= norm_r;
+              
+            }
           }
+          else { // del_j = +1,-1, use the equation 8.46 for the limits of summation
 
+            // PI, B, B, should have the same number of components
+            fp_t norm_p = 0.0;
+            fp_t norm_b = 0.0;
+            fp_t norm_r = 0.0;
+            fp_t norm_total = 0.0;
+
+            for (int i=0;i<nm[tr][0];++i){
+              
+              fp_t mi = fp_t(i) - jmin; // This is the "magnetic index" so to speak. It goes into strengths.
+
+              if (jl < ju){
+                S_b[tr][i] = 0.5 * (jmin+mi+1)*(jmin+mi+2);
+                S_p[tr][i] = (jmin+1)*(jmin+1)-mi*mi;
+                S_r[tr][i] = 0.5 * (jmin-mi+1)*(jmin-mi+2);
+
+              }
+              else {
+                S_b[tr][i] = 0.5 * (jmin-mi+1)*(jmin-mi+2);
+                S_p[tr][i] = (jmin+1)*(jmin+1)-mi*mi;
+                S_r[tr][i] = 0.5 * (jmin+mi+1)*(jmin+mi+2);
+              }
+
+              norm_p += S_p[tr][i];
+              norm_r += S_r[tr][i];
+              norm_b += S_b[tr][i];
+              norm_total += (S_p[tr][i] + S_b[tr][i] + S_r[tr][i]);
+
+              // To properly find delta_lambda we want to have m_lower
+              int offset = 0;
+              if (j_lower > j_upper){
+                offset = 1;
+              }
+
+              delta_lambda_p[tr][i] = mi * (g_l- g_u);
+              delta_lambda_b[tr][i] = (mi-offset) * (g_l - g_u) - g_u;
+              delta_lambda_r[tr][i] = (mi+offset) * (g_l - g_u) + g_u;
+            }
+            for (int i=0;i<nm[tr][0];++i){
+              S_p[tr][i] /= norm_p;
+              S_b[tr][i] /= norm_b;
+              S_r[tr][i] /= norm_r; 
+            }
+          }
+          // Finally lets print the strengths so we can see what is going on here:
+          /*FILE * test;
+          test = fopen("zeeman_pattern.txt", "w");
+          for (int i=0;i<nm[tr][1];++i)
+            fprintf(test,"%d %e %e %e \n", i, delta_lambda_b[tr][i], delta_lambda_b[tr][i] * lambda_0 * lambda_0 * 4.69E3 , -S_b[tr][i]);
           for (int i=0;i<nm[tr][0];++i)
-            S_p[tr][i] /= norm_p;
-          // SIGMA_B/R
-          fp_t norm_b = 0.0;
-          fp_t norm_r = 0.0;
-          for (int i=0;i<nm[tr][1];++i){
-            // B:
-            fp_t mi = fp_t(i) - ju + 1.0;
-            S_b[tr][i] = 0.5 * (ju+mi) * (ju-mi+1.0);
-            norm_b += S_b[tr][i];
-            norm_total += S_b[tr][i];
-            delta_lambda_b[tr][i] = mi*(g_l - g_u) - g_l;
-            // R:
-            mi = fp_t(i) - ju;
-            S_r[tr][i] = 0.5 * (ju-mi) * (ju+mi+1);
-            norm_r += S_r[tr][i];
-            norm_total +=S_r[tr][i];
-            delta_lambda_r[tr][i] = mi*(g_l - g_u) + g_l;
-          }
-          for (int i=0;i<nm[tr][1];++i){
-            S_b[tr][i] /= norm_b;
-            S_r[tr][i] /= norm_r;
-            
-          }
+            fprintf(test,"%d %e %e %e \n", i, delta_lambda_p[tr][i], delta_lambda_p[tr][i] * lambda_0 * lambda_0 * 4.69E3, S_p[tr][i]);
+          for (int i=0;i<nm[tr][2];++i)
+            fprintf(test,"%d %e %e %e \n", i, delta_lambda_r[tr][i], delta_lambda_r[tr][i] * lambda_0 * lambda_0 * 4.69E3, -S_r[tr][i]);
+          fclose(test);*/
         }
-        else { // del_j = +1,-1, use the equation 8.46 for the limits of summation
-
-          // PI, B, B, should have the same number of components
-          fp_t norm_p = 0.0;
-          fp_t norm_b = 0.0;
-          fp_t norm_r = 0.0;
-          fp_t norm_total = 0.0;
-          for (int i=0;i<nm[tr][0];++i){
-            
-            fp_t mi = fp_t(i) - jmin; // This is the "magnetic index" so to speak. It goes into strengths.
-
-            if (jl < ju){
-              S_b[tr][i] = 0.5 * (jmin+mi+1)*(jmin+mi+2);
-              S_p[tr][i] = (jmin+1)*(jmin+1)-mi*mi;
-              S_r[tr][i] = 0.5 * (jmin-mi+1)*(jmin-mi+2);
-
-            }
-            else {
-              S_b[tr][i] = 0.5 * (jmin-mi+1)*(jmin-mi+2);
-              S_p[tr][i] = (jmin+1)*(jmin+1)-mi*mi;
-              S_r[tr][i] = 0.5 * (jmin+mi+1)*(jmin+mi+2);
-            }
-
-            norm_p += S_p[tr][i];
-            norm_r += S_r[tr][i];
-            norm_b += S_b[tr][i];
-            norm_total += (S_p[tr][i] + S_b[tr][i] + S_r[tr][i]);
-
-            // To properly find delta_lambda we want to have m_lower
-            int offset = 0;
-            if (j_lower > j_upper){
-              offset = 1;
-            }
-
-            delta_lambda_p[tr][i] = mi * (g_l- g_u);
-            delta_lambda_b[tr][i] = (mi-offset) * (g_l - g_u) - g_u;
-            delta_lambda_r[tr][i] = (mi+offset) * (g_l - g_u) + g_u;
-          }
-          for (int i=0;i<nm[tr][0];++i){
-            S_p[tr][i] /= norm_p;
-            S_b[tr][i] /= norm_b;
-            S_r[tr][i] /= norm_r; 
-          }
-        }
-        // Finally lets print the strengths so we can see what is going on here:
-        FILE * test;
-        test = fopen("zeeman_pattern.txt", "w");
-        for (int i=0;i<nm[tr][1];++i)
-          fprintf(test,"%d %e %e %e \n", i, delta_lambda_b[tr][i], delta_lambda_b[tr][i] * lambda_0 * lambda_0 * 4.69E3 , -S_b[tr][i]);
-        for (int i=0;i<nm[tr][0];++i)
-          fprintf(test,"%d %e %e %e \n", i, delta_lambda_p[tr][i], delta_lambda_p[tr][i] * lambda_0 * lambda_0 * 4.69E3, S_p[tr][i]);
-        for (int i=0;i<nm[tr][2];++i)
-          fprintf(test,"%d %e %e %e \n", i, delta_lambda_r[tr][i], delta_lambda_r[tr][i] * lambda_0 * lambda_0 * 4.69E3, -S_r[tr][i]);
-        fclose(test);
       }
     }
     io.msg(IOL_INFO, "atom::relative strengths of zeeman components are set-up \n");
@@ -1747,7 +1742,7 @@ void atom::zeeman_clear(){
       int z_state = inverse_tmap[tr][2];
       int lower_level = inverse_tmap[tr][3];
       int upper_level = inverse_tmap[tr][4];
-      if (upper_level < nl[z_state]){
+      if (split[tr]){
         delete[]delta_lambda_p[tr];
         delete[]delta_lambda_b[tr];
         delete[]delta_lambda_r[tr];
@@ -1764,6 +1759,7 @@ void atom::zeeman_clear(){
     delete[](S_p+1);
     delete[](S_b+1);
     delete[](S_r+1);
+    delete[](split+1);
   }
 }
 
@@ -1856,8 +1852,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
         
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates); 
-        //if (i==0 && x3i==x3h)
-          //printf("seeme! %e %e %e \n",M[i+1][i+1], Radiative_rates, Collisional_rates);
         
         // Transitions to this level:
         Radiative_rates = 1.0 * R_ij_local_ALO(z, ll, l, JJ, LL, pop[x1i][x2i][x3i].n[z][ll], pop[x1i][x2i][x3i].n[z][l]);
@@ -1876,8 +1870,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         // Transitions from this level:
         fp_t Radiative_rates = 1.0 * R_i_cont(z, l, JJ, Temp);
         fp_t Collisional_rates = C_i_cont(z, l, Temp, ne);
-        //if (x3i==x3h && l==0)
-          //printf("Level: %d C_b->f = %e R_b->f %e \n", l+1, Collisional_rates, Radiative_rates);
 
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates);
         // But now the same these rates should populate the continuum:
@@ -1909,7 +1901,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 
   // Print the rate matrix:
   
-  if (x3i == x3i_control){
+  /*if (x3i == x3i_control){
     printf("Rate matrix:\n");
     io.msg(IOL_INFO,"atom::pops: %s\n",name);
     for(int i=1;i<=nmap;++i){
@@ -1918,7 +1910,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       }
       fprintf(stderr,"%5.10E \n", b[i-1]);
     }
-  }
+  }*/
 
   fp_t relaxation_factor = 1.0;
 
@@ -1931,17 +1923,10 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   Crout(nmap,M_to_solve, M_LU);
   solveCrout(nmap,M_LU,b,solution);
 
-  // Alternative way to invert:
-  //fp_t ** M_inverted = ft2dim(1,nmap,1,nmap);
-  //invert(M, M_inverted, nmap, nmap);
-  //fp_t * b_alt = b-1;
-  //fp_t * solution_alt = multiply_vector(M_inverted, b_alt, nmap);
-  // Correct:
   fp_t delta = 0.0;
   for (int i = 0; i<nmap; ++i){
     fp_t rel_delta = fabs(solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]) / pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]];
     delta = (rel_delta > delta) ? rel_delta : delta;
-    //printf("%d %d %e %e \n",x3i,i,solution[i], delta);
   }
   for (int i = 0; i<nmap; ++i){
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
@@ -1986,7 +1971,6 @@ fp_t **atom::weight(fp_t op,fp_t T,fp_t Ne,fp_t Vr,fp_t Vt,struct pps &pp,fp_t l
       for(uint16_t ll=0;ll<nl[z];++ll){ // lower level
         for(uint16_t ul=ll+1;ul<nl[z];++ul) w[i][tmap[z][ll][ul]]=boundbound_op(z,ll,ul,T,Ne,Vr,Vt,lambda,pp)/op; // bound-bound
         w[i][tmap[z][ll][nl[z]]]=boundfree_op(z,ll,Vr,lambda,pp)/op; // bound-free
-//        if(tmap[z][ll][nl[z]]==10) io.msg(IOL_INFO|IOL_FATAL,"%d,%E %E %E\n",ll,w[i][tmap[z][ll][nl[z]]],lambda,pp.n[z][ll]);
       }
   return w;
 }

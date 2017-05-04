@@ -205,7 +205,7 @@ int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, 
             	st = sin(theta_B); ct = cos(theta_B); 
 
               // Check if the line is sensitive to zeeman effect
-            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){ // If not sensitive:
+            	if (split[tr] == 0){ // If not sensitive:
             	  for (int l=1;l<=nlambda;++l){
             	  	fp_t x=(lam-lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
             	  	fp_t profile = fvoigt(x,a) / dld;
@@ -314,7 +314,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
             	fp_t *x_der, *a_der, *dld_der;
 
             	// Check if the line is sensitive to zeeman effect
-            	if (nm[tr][0] + nm[tr][1] + nm[tr][2] <= 1){ // If not sensitive
+            	if (split[ntr]==0){ // If not sensitive
             	  for (int l=1;l<=nlambda;++l){
             	  	fp_t x=(lam-lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
             	  	fp_t H,F,dH,dF;

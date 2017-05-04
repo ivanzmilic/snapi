@@ -255,6 +255,7 @@ model::model(mcfg *cfg,io_class &io_in){
       memcpy(phi_nodes_phi+1,cfg->par[p]->value,N_nodes_phi*sizeof(fp_t));
     }
   }
+  response_to_parameters=0;
 }
 
 model::model(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
@@ -376,6 +377,7 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
   offs+=::unpack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
 //
+  response_to_parameters = 0;
   return offs;
 }
 
@@ -536,21 +538,28 @@ int model::get_N_nodes_total(){
   return N_nodes_temp + N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta + N_nodes_phi;
 }
 
-int model::get_parameter(int i){
+fp_t model::get_parameter(int i){
 
   if (i>0 && i<=get_N_nodes_total()){
 
-    if (i<=N_nodes_temp)
+    if (i<=N_nodes_temp){
       return temp_nodes_temp[i];
-    else if (i<=N_nodes_temp + N_nodes_vt)
+    }
+    else if (i<=N_nodes_temp + N_nodes_vt){
       return vt_nodes_vt[i-N_nodes_temp]; 
-    else if (i<=N_nodes_temp + N_nodes_vt + N_nodes_vs)
+    }
+    else if (i<=N_nodes_temp + N_nodes_vt + N_nodes_vs){
       return vs_nodes_vs[i-N_nodes_temp-N_nodes_vt];
-    else if (i<=N_nodes_temp+N_nodes_vt + N_nodes_vs + N_nodes_B)
+    }
+    else if (i<=N_nodes_temp+N_nodes_vt + N_nodes_vs + N_nodes_B){
       return B_nodes_B[i-N_nodes_temp-N_nodes_vt-N_nodes_vs];
-    else if (i<=N_nodes_temp+N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta)
+    }
+    else if (i<=N_nodes_temp+N_nodes_vt + N_nodes_vs + N_nodes_B + N_nodes_theta){
       return theta_nodes_theta[i-N_nodes_temp-N_nodes_vt-N_nodes_vs-N_nodes_B];
-    else return phi_nodes_phi[i-N_nodes_temp-N_nodes_vt-N_nodes_vs-N_nodes_B-N_nodes_theta];
+    }
+    else{ 
+      return phi_nodes_phi[i-N_nodes_temp-N_nodes_vt-N_nodes_vs-N_nodes_B-N_nodes_theta];
+    }
   }
   printf("Invalid input. \n");
   return -1;
@@ -944,8 +953,9 @@ modelcube::~modelcube(){
 
 void modelcube::add_model(model * to_add, int i, int j){
 
-  for (int kk=1;kk<=N_parameters;++kk)
+  for (int kk=1;kk<=N_parameters;++kk){
     data[i][j][kk] = to_add->get_parameter(kk);
+  }
 
 }
 
@@ -960,5 +970,6 @@ void modelcube::simple_print(const char* printhere){
         fprintf(output,"%f ", data[i][j][kk]);
       fprintf(output, "\n");
     }
+  fclose(output);
 }
 
