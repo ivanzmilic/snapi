@@ -192,13 +192,10 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   fp_t **** d_obs_a = ft4dim(1,7,x3l, x3h,1,nlambda,1,4);
   memset(d_obs_a[1][x3l][1]+1,0,7*(x3h-x3l+1)*4*nlambda*sizeof(fp_t));
 
-  fp_t * lambda_vac = vactoair(lambda+1,nlambda);
-  lambda_vac-=1;
+  fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
+  lambda_vacuum -=1;
 
   class observable *o=new observable(1,1,4,nlambda);
-
-  //if (intensity_responses) // If provided, copy the intensity to the input array
-    //memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*(x3h-x3l+1))*4*sizeof(fp_t));
 
   clock_t begin = clock();
   clock_t end = clock();
@@ -208,9 +205,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   fp_t***** em = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   fp_t******** op_pert = ft8dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t******* em_pert = ft7dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vac,nlambda,op,em,op_pert,em_pert);
-
-  printf("op/em computed sucessfully\n");
+  op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
   
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
@@ -218,7 +213,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       normalize_to_referent_opacity(op[l],em[l],op_pert[l],em_pert[l]);
       normalize_to_referent_opacity(op[l],em[l]);
   }
-
 
   fp_t *** atm_resp_to_parameters;
   int N_parameters = 0;
@@ -316,7 +310,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // Add it to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
-   printf("jammed formal solution sucessfully\n");
   
   end = clock();
   time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -358,7 +351,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   del_ft5dim(em,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft8dim(op_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft7dim(em_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  delete [](lambda_vac+1);
+  delete [](lambda_vacuum+1);
   for(int a=0;a<natm;++a){
     atml[a]->zeeman_clear();
     atml[a]->rtclean(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);

@@ -49,8 +49,8 @@ parameters = np.loadtxt(input_nodes,unpack=True)
 temp = parameters.shape
 NN = temp[0]
 
-NX = 15 
-NY = 15 #hardcoded
+NX = 1 
+NY = 1 #hardcoded
 
 parameters = parameters.reshape(NN,NX,NY)
 
