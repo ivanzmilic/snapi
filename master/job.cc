@@ -310,8 +310,8 @@ int job_class::start(void)
          nx=n4;
          ny=n3;
                   
-         for(int x=1,n=1;x<=1;++x)
-           for(int y=1;y<=1;++y,++n){ // Cut the piece
+         for(int x=1,n=1;x<=nx;++x)
+           for(int y=1;y<=ny;++y,++n){ // Cut the piece
              class observable *obs_subset=obs->extract(x,x,y,y,1,ji.nlambda[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
@@ -368,8 +368,13 @@ int job_class::stop(void)
   struct chunk ***chunks=(struct chunk ***)v2dim(1,nx,1,ny);
   for(int n=0;fin[n];++n) chunks[fin[n]->x][fin[n]->y]=fin[n];
 
+//
+  fp_t u_time=0.0,s_time=0.0;
+  struct slv_data *slvs=new slv_data [1]-1;
+  int ns=0;
+//
   for(int o=0;o<ji.no;++o){
-    modelcube *test_cube=new modelcube(ji.models[0],ny,nx);
+    modelcube *test_cube=new modelcube(ji.models[0],nx,ny);
     fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,ji.nlambda[o]);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*ji.nlambda[o]*sizeof(fp_t));
            
@@ -386,9 +391,38 @@ int job_class::stop(void)
             int32_t offs=0;
             class model* mod=model_new(data,offs,0,*io);
             class observable *obs=obs_new(data,offs,0,*io);
-
+            delete[] data;
+//
+            int32_t user,sys,clock;
+            offs+=unpack(data+offs,user,0);
+            offs+=unpack(data+offs,sys,0);
+            offs+=unpack(data+offs,clock,0);
             if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
-            fprintf(stderr, "Seems like we got back results for pixel %d %d \n",x,y);
+//
+            u_time+=chunks[x][y]->u_time;
+            s_time+=chunks[x][y]->s_time;
+            byte found=0;
+            for(int s=1;s<=ns;++s)
+              if(!strcmp(chunks[x][y]->slv_id,slvs[s].id)){
+                found=1;
+                slvs[s].ut+=chunks[x][y]->u_time;
+                slvs[s].st+=chunks[x][y]->s_time;
+                ++slvs[s].pc;
+                s=ns; // break
+              }
+            if(!found){
+              struct slv_data *tmp=new slv_data [ns+1]-1;
+              if(ns) memcpy(tmp+1,slvs+1,ns*sizeof(struct slv_data));
+              delete[] (slvs+1);
+              slvs=tmp;
+              ++ns;
+//
+              slvs[ns].id=chunks[x][y]->slv_id;
+              slvs[ns].ut=chunks[x][y]->u_time;
+              slvs[ns].st=chunks[x][y]->s_time;
+              slvs[ns].pc=1;
+            }
+//
             fp_t **S_temp=obs->get_S(1,1);
             memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*ji.nlambda[o]*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,ji.nlambda[o]);
@@ -397,10 +431,11 @@ int job_class::stop(void)
             test_cube->add_model(mod,x,y);
             delete mod;
 
-            delete[] data;
-            fprintf(stderr, "Everything went fine. Pixel %d %d done \n",x,y);
          }
-       }else io->msg(IOL_ERROR,"job_class::stop: chunck [%d,%d] did not contain any data!",x,y); // no data
+       }else{
+         chunks[x][y]->free(); // free memory in case of read error        
+         io->msg(IOL_ERROR,"job_class::stop: chunck [%d,%d] did not contain any data!",x,y); // no data
+       }
 //
     //test_cube->simple_print("output_test.dat");
     //write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
@@ -409,6 +444,7 @@ int job_class::stop(void)
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
     fprintf(stderr, "Nope");
   }
+  del_v2dim((void***)chunks,1,nx,1,ny);
 /******************************
  * statistics                 *
  ******************************/
@@ -421,6 +457,16 @@ int job_class::stop(void)
   delete[] tt;
   io->msg(IOL_INFO|IOL_NOID,"breakdown by slave:\n");
   int ids=0;
+  for(int s=1;s<=ns;++s) ids=max(ids,strlen(slvs[s].id));
+  for(int s=1;s<=ns;++s){
+    char fill[1000];
+    int idl=strlen(slvs[s].id);
+    for(int idx=0;idx<ids-idl;++idx) fill[idx]=' ';
+    fill[ids-idl]=0;
+    io->msg(IOL_INFO|IOL_NOID,"%s:%s user %1.3fs (%5.1f%%) system %1.3fs (%5.1f%%) %3d subfield%s (%5.1f%%)\n",slvs[s].id,fill,slvs[s].ut,100.0*slvs[s].ut/u_time,slvs[s].st,100.0*slvs[s].st/s_time,slvs[s].pc,(slvs[s].pc>1)?"s":" ",100.0*(fp_t)slvs[s].pc/(fp_t)(nx*ny));
+  }
+  io->msg(IOL_INFO|IOL_NOID,"\n");
+  delete[] (slvs+1);
 //
   pthread_mutex_lock(&active_lock);
   active=5;

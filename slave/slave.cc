@@ -140,7 +140,8 @@ int main(int argc,char *argv[])
           offs+=pack(data+offs,user,swap_endian);
           offs+=pack(data+offs,sys,swap_endian);
           offs+=pack(data+offs,clock,swap_endian);
-          if(offs!=size) io.msg(IOL_WARN,"in main: packed %d bytes, but buffer is %d bytes!\n",offs,size); // sanity check...
+          if(offs!=rsz) io.msg(IOL_WARN,"in main: packed %d bytes, but buffer is %d bytes!\n",offs,size); // sanity check...
+          size=rsz;
           buf=z_compress(data,size,clvl,swap_endian,io);       // +(2)
           delete[] data;                                       // -(1)
 //

@@ -90,7 +90,6 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
 
 atmosphere::atmosphere(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):grid(buf,offs,do_swap,io_in),flags(ATMOS_FLAG_MASK)
 {
-  printf("trying to create the atmosphere...\n");
   gtype=ATMOS_GEOM_3D;
   rtstype=ATMOS_RTS_QSC;
   offs+=unpack(buf+offs,do_swap,io_in);
@@ -105,10 +104,8 @@ atmosphere::~atmosphere(void)
   }
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
-  for(int i=0;p[i];++i) if(*(p[i])) del_ft3dim(*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h);
-
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i) if(*(pp[i])) del_ft4dim(*(pp[i]),1,7,x1l,x1h,x2l,x2h,x3l,x3h);
+  if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
+    for(int i=0;p[i];++i) if(*(p[i])) del_ft3dim(*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h);
 //
   if(id) delete[] id;
   if(fname) delete[] fname;
@@ -192,7 +189,8 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   for(int a=0;a<natm;++a) offs+=atml[a]->pack(buf+offs,do_swap,io_in);
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
-  for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
+  if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
+    for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
 
   //fp_t *****pp[]={&Ne_lte_der,0};
   //for(int i=0;pp[i];++i)
@@ -204,7 +202,6 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
-  printf("atmosphere:trying to unpack.....\n");
   int32_t offs=flags.unpack(buf,io_in);
 //
   offs+=::unpack(buf+offs,id);
@@ -217,14 +214,13 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   atml=new atmol* [natm];
   for(int a=0;a<natm;++a) atml[a]=atmol_new(buf,offs,do_swap,atml,a,io_in);
 //
+//  fprintf(stderr,"atmosphere:trying to unpack %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
-  for(int i=0;p[i];++i) offs+=::unpack(buf+offs,(*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
+  if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
+    for(int i=0;p[i];++i) offs+=::unpack(buf+offs,(*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
+  else
+    for(int i=0;p[i];++i) (*(p[i]))=0;
 
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i)
-    //for (int j=1;j<=7;++j) 
-      //offs+=::unpack(buf+offs,(*(pp[i][j]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
-//
   return offs;
 }
 

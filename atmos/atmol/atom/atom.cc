@@ -106,22 +106,25 @@ fp_t ***newtrans(uint08_t Z,uint16_t *nl)
   }
 //
   fp_t ***p=new fp_t** [Z+1];
-  p[0]=new fp_t* [nn];
-  p[0][0]=new fp_t [nt];
-  int m=0,n=0;
-  for(uint08_t z=1;z<=Z;++z){
-    p[z]=p[0]+(m+=nl[z-1]);
-    p[z][0]=p[0][0]+(n+=nl[z-1]*nl[z-1]);
-  }
+  if(nn){
+    p[0]=new fp_t* [nn];
+    if(nt){
+      p[0][0]=new fp_t [nt];
+      int m=0,n=0;
+      for(uint08_t z=1;z<=Z;++z){
+        p[z]=p[0]+(m+=nl[z-1]);
+        p[z][0]=p[0][0]+(n+=nl[z-1]*nl[z-1]);
+      }  
 //
-  for(uint08_t z=0;z<=Z;++z) for(uint16_t l=1;l<nl[z];++l) p[z][l]=p[z][l-1]+nl[z];
-//
+      for(uint08_t z=0;z<=Z;++z) for(uint16_t l=1;l<nl[z];++l) p[z][l]=p[z][l-1]+nl[z];
+    }else p[0][0]=0;
+  }else p[0]=0;
   return p;
 }
 
 void deltrans(fp_t ***p)
 {
-  delete[] (p[0][0]);
+  if(p[0]) delete[] (p[0][0]);
   delete[] (p[0]);
   delete[] (p);
 }
