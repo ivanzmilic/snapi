@@ -288,6 +288,9 @@ model::~model(void){
     delete[](phi_nodes_tau+1);
   if (phi_nodes_phi)
     delete[](phi_nodes_phi+1);
+  int N_parameters = get_N_nodes_total();
+  if(response_to_parameters)
+    del_ft3dim(response_to_parameters,1,N_parameters,1,7,1,N_depths);
 
 }
 

@@ -191,7 +191,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 1;
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
 
@@ -968,6 +968,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     atmos_model->perturb_node_value(i, 0.5 * step);
     interpolate_from_nodes(atmos_model);
+    delete[](local_perturbations+x3l);
   
   }
 

@@ -617,6 +617,8 @@ fp_t * solve(fp_t ** A, fp_t * rhs, int from, int to){
   solveCrout(size,M_LU,b,solution);
   Crout(size,M_to_solve, M_LU);
   solveCrout(size,M_LU,b,solution);
+  delete[]M_LU;
+  delete[]solution;
 
   return solution-from;
 }

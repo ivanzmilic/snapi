@@ -268,7 +268,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
       memset(op_pert_params[1][x1l][x2l][x3l][1]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
       memset(em_pert_params[1][x1l][x2l][x3l]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
 
-      fp_t ***** dS_parameters = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
       fp_t normalizer = 1.0;
       for (int p=1;p<=N_parameters;++p)
         for (int q=1;q<=7;++q){
@@ -361,6 +360,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 //
   respclean();
   popclean(); // all done
+  // We can put this here. Does this need a separate function?
+  del_ft5dim(op_referent_derivative,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
 
   io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 

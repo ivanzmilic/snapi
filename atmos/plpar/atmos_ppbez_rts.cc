@@ -280,17 +280,10 @@ int atmos_ppbez::compute_op_referent(){
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i){
         fp_t T_local = T[x1i][x2i][x3i];
-        //T_local = 6500.0;
         chemeq(atml, natm, T_local, Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T_local, Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         op_referent[x1i][x2i][x3i] = opacity_continuum(T_local,Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
-        //T_local = T[x1i][x2i][x3i];
-        //chemeq(atml, natm, T_local, Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        //for (int a=0;a<natm;++a) atml[a]->lte(T_local, Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        //if (x3i==11)
-        //    printf("Referent opacity @%d is: %5.15e \n", x3i,op_referent[x1i][x2i][x3i]);
       }
-
   return 0;
 }
 
@@ -298,8 +291,7 @@ int atmos_ppbez::compute_op_referent_derivative(){
 
   op_referent_derivative = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_referent_derivative[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  //return 0;
-
+  
   for (int x1i=x1l;x1i<=x1h;++x1i)
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i){
@@ -315,8 +307,6 @@ int atmos_ppbez::compute_op_referent_derivative(){
         for (int a=0;a<natm;++a) atml[a]->lte(T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         op_referent_derivative[1][x3i][x1i][x2i][x3i] -= opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
         op_referent_derivative[1][x3i][x1i][x2i][x3i] /= delta_T;
-        //if (x3i==11)
-        //  printf("Opacity derivative = %5.15e \n",op_referent_derivative[1][x3i][x1i][x2i][x3i]);
         T[x1i][x2i][x3i] += delta_T*0.5;
 
         // Then the density
