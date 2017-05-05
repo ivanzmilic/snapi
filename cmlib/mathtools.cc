@@ -618,7 +618,7 @@ fp_t * solve(fp_t ** A, fp_t * rhs, int from, int to){
   Crout(size,M_to_solve, M_LU);
   solveCrout(size,M_LU,b,solution);
   delete[]M_LU;
-  delete[]solution;
+  //delete[]solution;
 
   return solution-from;
 }
@@ -1014,8 +1014,18 @@ fp_t interpol_1d_linear(fp_t * f, fp_t * x, int N, fp_t x_to_interpol){
   }  
 }
 
-// A function which in itself solves a determined (hopefully determined) linear system by means of svd. 
-// We are doing this to see if we can get well behaved convergence. 
+fp_t * add_to_1d_array(fp_t * x, int &n, fp_t to_add){
+  
+  fp_t * result = new fp_t [n+1];
+
+  if (n){
+    memcpy(result,x,n*sizeof(fp_t));
+    delete[]x;
+  }
+  result[n] = to_add;
+  n+=1;
+  return result;
+}
 
 
 fp_t Planck_f(fp_t lambda, fp_t T){

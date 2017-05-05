@@ -1284,8 +1284,10 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
 {
   if(ntr && NLTE){                                       // check if NLTE levels present <-- This actually checks if there are LEVELS present
 
-    int32_t nnlambda=0;                        // calculate the number of required wavelength points
-    fp_t *tmplamb=new fp_t [nnlambda+1];         // compute sorted wavelength array
+    int32_t nnlambda=0; 
+    fp_t * tmplamb;                       // calculate the number of required wavelength points
+    //if (nnlambda)
+    //  tmplamb=new fp_t [nnlambda];         // compute sorted wavelength array
     fp_t fct=me*c/(8.0*pi*pi*e*e);             // common factor for line transitions
     
 // add points, avoiding overlap and duplicates
@@ -1932,10 +1934,11 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
     if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
       printf("Negative population n = %e for z = %d i = %d @ x3i = %d \n", pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]], zmap[i],lmap[i],x3i);
-      printf("Rate matrix:\n");
-      io.msg(IOL_INFO,"atom::pops: %s\n",name);
-      FILE * to_invert;
-      to_invert = fopen("matrix_to_invert.txt","w");
+      delta = 1.0;
+      //printf("Rate matrix:\n");
+      //io.msg(IOL_INFO,"atom::pops: %s\n",name);
+      //FILE * to_invert;
+      /*to_invert = fopen("matrix_to_invert.txt","w");
       for(int ii=1;ii<=nmap;++ii){
         for(int iii=1;iii<=nmap;++iii){
          fprintf(stderr,"%5.10E ",M[ii][iii]);      
@@ -1945,7 +1948,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         fprintf(to_invert,"%5.10E \n", b[ii-1]);
       }
       fclose(to_invert);
-      exit(1);
+      exit(1);*/
     } 
   }
  

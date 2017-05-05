@@ -120,22 +120,21 @@ int main(int argc,char *argv[])
           fp_t * lambda = obs->get_lambda();
           int nlambda = obs->get_n_lambda();
 
-          atmos->set_grid(0);
+          //obs->write("fit_me.dat",io,1,1);
           class observable *fit=atmos->stokes_lm_fit(obs,3.14,0.0,mod);
-          //class observable *fit=atmos->obs_stokes_responses(3.14,0.0,lambda,nlambda,0,0);
-          fit->write("spectrum_slave.dat",io,1,1);
-
+          
           int32_t rsz=mod->size(io);
           rsz+=fit->size(io);
           rsz+=3*sizeof(int32_t);
           uint08_t *data=new uint08_t [rsz];
           offs=mod->pack(data,0,io);
           offs+=fit->pack(data+offs,0,io);
-          delete mod;
+          //delete mod;
           delete fit;
-          delete atmos;
-          delete obs;
+          //delete atmos;
+          //delete obs;
           delete[](lambda+1);
+          
 //
           struct tms t_end;
           clock_t t1=times(&t_end);
@@ -171,7 +170,6 @@ int main(int argc,char *argv[])
             quit=(conn_stat<0);
           }
           delete[] data;                                       // -(3)
-
           break;
         }
         default:{

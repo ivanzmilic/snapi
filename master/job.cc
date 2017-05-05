@@ -306,8 +306,8 @@ int job_class::start(void)
          obs->normalize();
 
          // Implement more formal way how to do this
-         nx=1;
-         ny=1;
+         nx=20;
+         ny=20;
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece

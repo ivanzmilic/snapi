@@ -22,7 +22,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 		if(!atml[a]->check_if_nlte()){
 			atml[a]->responses_init();
 			atml[a]->compute_lte_population_responses();
-			atml[a]->print_population_responses("responses_analytical.txt", x3l, x3h);
+			//atml[a]->print_population_responses("responses_analytical.txt", x3l, x3h);
 		}
 	
 	// Some continuum wavelengths, not sure if they are needed:
@@ -123,7 +123,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	} 
 	clock_t end = clock();
   double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("Time spent on adding contributions = %f \n", time_spent); 
+  //printf("Time spent on adding contributions = %f \n", time_spent); 
 	
 	delete[] lambda;
 	// cleanup angular quadrature arrays
@@ -142,8 +142,8 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	    	atml[a]->compute_nlte_population_responses();
 
 	// Print to test:
-	for (int a=0;a<natm;++a)
-		atml[a]->print_population_responses("responses_analytical.txt", x3l, x3h);
+	//for (int a=0;a<natm;++a)
+		//atml[a]->print_population_responses("responses_analytical.txt", x3l, x3h);
 
 	for (int a=0;a<natm;++a){
 		atml[a]->rtinit();

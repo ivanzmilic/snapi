@@ -49,6 +49,7 @@ for i in range (0,N_iters):
 	plt.ylim([limits[0,0], limits[1,0]])
 	plt.xlim([lambda_min,lambda_max])
 	plt.ylabel('$\mathrm{Stokes}\,I$')
+	
 	plt.subplot(232)
 	plt.plot(spectrum_to_fit[0], spectrum_to_fit[2],'o')
 	plt.plot(spectrum_to_fit[0], spectrum_by_iters[2,i,:],'red',linewidth=2.0)
@@ -56,7 +57,7 @@ for i in range (0,N_iters):
 	plt.xlim([lambda_min,lambda_max])
 	plt.ylabel('$\mathrm{Stokes}\,Q$')
 
-	#plt.subplot(233)
+	plt.subplot(233)
 	#f = interp1d(nodes[0,i,:],nodes[1,i,:], kind='cubic')
 	#plt.plot(nodes[0,i,:],nodes[1,i,:],'o',markersize=10)
 	#plt.plot(tau_fine,f(tau_fine))
@@ -89,3 +90,16 @@ for i in range (0,N_iters):
 
 	plt.tight_layout()
 	plt.savefig('fit_'+str(i+1),fmt='png')
+
+plt.clf()
+plt.cla()
+rel_diff = np.zeros(N_iters-1)
+
+for i in range (0,N_iters-1):
+	rel_diff[i] = np.abs((chisq[1,i+1] - chisq[1,i])/chisq[1,i+1])
+print rel_diff
+plt.plot(np.log10(rel_diff),'o',markersize=10)
+plt.xlabel('$\mathrm{Iteration\,no.}$')
+plt.ylabel('chisq relative change')
+plt.ylim([-5,2])
+plt.savefig('relative_change.png',fmt='png')

@@ -149,7 +149,7 @@ void atom::compute_nlte_population_responses(){
   
     clock_t end = clock();
     double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Time spent on setting up linear system = %f \n", time_spent);
+    //printf("Time spent on setting up linear system = %f \n", time_spent);
 
     // Finally we need to compute all the responses and that really means invert response matrix and then multiply by the right hand side:
    
@@ -158,7 +158,7 @@ void atom::compute_nlte_population_responses(){
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
     
-    printf(">> Now solving via LU decomposition << \n");
+    //printf(">> Now solving via LU decomposition << \n");
 
     Crout(nmap * N_depths,M_to_solve, M_LU);
 
@@ -195,7 +195,7 @@ void atom::compute_nlte_population_responses(){
     }
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Time spent on solving linear system = %f \n", time_spent);
+    //printf("Time spent on solving linear system = %f \n", time_spent);
     io.msg(IOL_INFO, "responses computed for the atom with Z = %d using analytical approximation \n", Z);
     delete []M_LU;
     delete []solution;
@@ -335,8 +335,6 @@ void atom::compute_lte_population_responses(){
     fp_t * solution = new fp_t [N_depths * nmap];
    
 // ------------------------------------------------------------------------------------------------------------------------------------------------
-    printf(">> Now solving via LU decomposition << \n");
-
     Crout(nmap * N_depths,M_to_solve, M_LU);
 
     for (int x3i = x3l; x3i <= x3h; ++x3i){
