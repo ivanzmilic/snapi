@@ -16,6 +16,7 @@ struct ocfg{                  // configuration per object ("color")
   char *name;
   int nlambda;
   int to_invert;
+  int xl,xh,yl,yh;
 //
   ocfg(char *odata,struct gcfg &gdata,io_class&);
   ~ocfg(void);

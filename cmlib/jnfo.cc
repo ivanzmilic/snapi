@@ -36,6 +36,10 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,el=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,nlambda=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,xl=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,xh=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,yl=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,yh=new int [no],0,no-1,swap_endian);
     lambda=new fp_t* [no];
     name=new char* [no];
     for(int o=0;o<no;++o){
@@ -77,6 +81,10 @@ jnfo::~jnfo(void)
     if(el) delete[] el;
     if(nlambda) delete[] nlambda;
     if(to_invert) delete[] to_invert;
+    if (xl) delete[] xl;
+    if (xh) delete[] xh;
+    if (yl) delete[] yl;
+    if (yh) delete[] yh;
     if(lambda) for(int o=0;o<no;++o) if(lambda[o]) delete[] lambda[o];
     if(lambda) delete[] lambda;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
@@ -99,7 +107,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
   if(no){
     usize+=2*no*sizeof(fp_t);                    // az,el
     usize+=no*sizeof(int);                       // nlambda
-    usize+=no*sizeof(int);                       // to_invert
+    usize+=no*5*sizeof(int);                       // to_invert,xl,xh,yl,yh
     for(int o=0;o<no;++o){
       usize+=nlambda[o]*sizeof(fp_t);  // lambda
       usize+=strlen(name[o])+1;        // file name
@@ -123,6 +131,10 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,el,0,no-1,swap_endian);
     offs+=pack(data+offs,nlambda,0,no-1,swap_endian);
     offs+=pack(data+offs,to_invert,0,no-1,swap_endian);
+    offs+=pack(data+offs,xl,0,no-1,swap_endian);
+    offs+=pack(data+offs,xh,0,no-1,swap_endian);
+    offs+=pack(data+offs,yl,0,no-1,swap_endian);
+    offs+=pack(data+offs,yh,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,name[o]);

@@ -28,6 +28,7 @@ struct jnfo{
   int *nlambda;
   char **name;
   int *to_invert; ///whether to invert or not.
+  int *xl,*xh,*yl,*yh;
 //
   uid_t uid;
   gid_t gid;

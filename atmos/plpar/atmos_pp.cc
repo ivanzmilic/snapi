@@ -60,9 +60,15 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   // First you need to make a grid in tau. This is like this by default
   int N_depths = x3h-x3l+1;
   fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
-  // Uniform in log_tau from -6 to 1.5 in tau500
+  // Uniform in log_tau from the uppeermost to the lowermost node
+  int N_nodes_temp = atmos_model->get_N_nodes_temp();
+  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
+  
+  fp_t tau_min = temp_nodes_tau[1];
+  fp_t tau_max = temp_nodes_tau[N_nodes_temp];
+  
   for (int x3i=x3l;x3i<=x3h;++x3i)
-    logtau[x3i] = -5.0 + 5.5 / (x3h-x3l) * (x3i-x3l);
+    logtau[x3i] = tau_min + (tau_max-tau_min) / (x3h-x3l) * (x3i-x3l);
 
   for (int x1i=x1l;x1i<=x1h;++x1i)
     for (int x2i=x2l;x2i<=x2h;++x2i)
@@ -73,8 +79,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   // Then we need to interpolate all the quantities to this tau grid:
 
   // Temperature:
-  int N_nodes_temp = atmos_model->get_N_nodes_temp();
-  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
   fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
   atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h);
 

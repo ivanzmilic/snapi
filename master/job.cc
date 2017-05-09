@@ -306,12 +306,17 @@ int job_class::start(void)
          obs->normalize();
 
          // Implement more formal way how to do this
-         nx=2;
-         ny=2;
+         nx=ji.xh[o]-ji.xl[o]+1;
+         ny=ji.yh[o]-ji.yl[o]+1;
+         io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d and yrange = %d, %d \n",
+          ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o]);
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
-             class observable *obs_subset=obs->extract(x,x,y,y,678,ji.nlambda[o]);
+
+           	 int x_coordinate = x+ji.xl[o]-1;
+           	 int y_coordinate = y+ji.yl[o]-1;
+             class observable *obs_subset=obs->extract(x_coordinate,x_coordinate,y_coordinate,y_coordinate,678,ji.nlambda[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
@@ -374,7 +379,7 @@ int job_class::stop(void)
     modelcube *test_cube=new modelcube(ji.models[0],nx,ny);
     fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,ji.nlambda[o]);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*ji.nlambda[o]*sizeof(fp_t));
-           
+    
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
        if(chunks[x][y]->bsz){ // chunk was successful

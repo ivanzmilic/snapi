@@ -55,7 +55,6 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   for(int o=0;o<no;++o) obs[o]=new ocfg(obss[o],*this,io);
   del_str(obss);
 
-  printf("there are %d models \n", nm);
   if (mods[0]){
     mod=new mcfg* [nm];
     for(int m=0;m<nm;++m) mod[m]=new mcfg(mods[m],*this,io);
@@ -122,6 +121,26 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
   
     delete[] tmp_str;
   }else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: observation must have wavelength specified to be observable!\n",id);
+
+  if(char *tmp_str=get_arg(odata,"XRANGE",0)){
+    fp_t * xrange;
+    int temp=0;
+    if(get_numbers(tmp_str,xrange,temp)<0) io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: failed to convert VALUE argument \"%s\" to floating point values\n",id,tmp_str);
+    xrange +=1;
+    xl = int(xrange[0]);xh=int(xrange[1]);
+    delete[] tmp_str;
+    delete[] xrange;
+  }else xl=xh=0; // default
+  if(char *tmp_str=get_arg(odata,"YRANGE",0)){
+    fp_t * yrange;
+    int temp=0;
+    if(get_numbers(tmp_str,yrange,temp)<0) io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: failed to convert VALUE argument \"%s\" to floating point values\n",id,tmp_str);
+    yrange +=1;
+    yl = int(yrange[0]);yh=int(yrange[1]);
+    delete[] tmp_str;
+    delete[] yrange;
+  }else yl=yh=0; // default
+
 //
   if(char *s=arg_test(odata)) io.msg(IOL_WARN,"obs \"%s\" config: the following lines were not processed:%s\n",id,s);
 }

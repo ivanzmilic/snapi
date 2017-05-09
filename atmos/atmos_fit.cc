@@ -15,166 +15,6 @@
 #include <ctime>
 
 
-observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){
-
-	// Perform LM fitting and return the best fitting spectrum
-	// First extract the spectrum from the observation:
-	fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
-	
-	// This is a starting model
-	int N_temp_nodes = 4;
-	int N_vt_nodes = 1;
-	int N_parameters = N_temp_nodes + N_vt_nodes;
-	model * current_model = model_new(N_temp_nodes,N_vt_nodes,0,0);
-    
-	// Temperature nodes:
-  fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
-  fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
-  temp_nodes_tau[1] = -4.0;
-  temp_nodes_tau[2] = -2.5;
-  temp_nodes_tau[3] = -1.0;
-  temp_nodes_tau[4] = 0.5;
-    
-  temp_nodes_temp[1] = 6000.0;
-  temp_nodes_temp[2] = 7000.0;
-  temp_nodes_temp[3] = 8000.0;
-  temp_nodes_temp[4] = 8500.0;
-    
-  current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
-
-	// Vt nodes:
-  fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
-  fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-  vt_nodes_tau[1] = 0;
-	vt_nodes_vt[1] = 1.5E5;
-	current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
-
-  fp_t metric = 0.0;
-  fp_t lm_parameter = 1E-3;
-  FILE * output;
-  output = fopen("fitting_log.txt", "w");
-
-  int iter = 0;
-  int MAX_ITER = 1;
-
-  io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
-
-  FILE * detailed_log;
-  detailed_log = fopen("detailed_log.txt", "w");
-  
-  for (iter = 1; iter <=MAX_ITER; ++iter){
-	
-		fp_t ** derivatives_to_parameters_num = ft2dim(1,N_parameters,1,nlambda);
-    memset(derivatives_to_parameters_num[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
-		fp_t ** derivatives_to_parameters = ft2dim(1,N_parameters,1,nlambda);
-    memset(derivatives_to_parameters[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
-    fp_t * residual = new fp_t [nlambda] - 1;
-	    
-	  // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
-
-    observable *current_obs = obs_scalar_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);
-    /*obs_scalar_num_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
-          
-    for (int i=1;i<=N_parameters;++i){
-      fprintf(detailed_log,"NODE# %d \n", i);
-      for (int l=1;l<=nlambda;++l)
-      	fprintf(detailed_log,"%d %e %e %e %e \n", l, lambda[l-1]*1E8, derivatives_to_parameters_num[i][l], derivatives_to_parameters[i][l],
-          (derivatives_to_parameters[i][l] - derivatives_to_parameters_num[i][l]) / derivatives_to_parameters_num[i][l]);
-    }*/
-
-    fp_t ** S = current_obs->get_S(1,1);
-
-    for (int l=1;l<=nlambda;++l){
-    	residual[l] = stokes_vector_to_fit[1][l] - S[1][l]; 
-    	//printf("l = %d residual = %e \n", l, residual[l]);
-    	metric += residual[l] * residual[l] / 1E22;
-    }
-    fprintf(detailed_log, "Iteration # : %d Chisq : %e \n", iter, metric);
-    // Now we need to correct:
-    fp_t ** J = ft2dim(1,nlambda,1,N_parameters);
-    for (int i=1;i<=N_parameters;++i) for (int l=1;l<=nlambda;++l) J[l][i] = derivatives_to_parameters[i][l];
-    fp_t ** J_transpose = transpose(J,nlambda,N_parameters);
-    fp_t ** JTJ = multiply_with_transpose(J, nlambda, N_parameters);
-  	for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
-  	// Now correct
-		fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, nlambda);
-		fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
-
-    fprintf(detailed_log, "Jacobian, residual and finally, correction: \n");
-		for (int i=1;i<=N_parameters;++i){
-	 	  for (int j=1;j<=N_parameters;++j)
-		    fprintf(detailed_log, " %e ", JTJ[i][j]);
-		  fprintf(detailed_log, " %e %e \n", residual[i], correction[i]);
-		}
-
-		for (int i=1;i<=N_parameters;++i)
-		  current_model->perturb_node_value(i, correction[i]);
-		current_model->print();
-
-		build_from_nodes(current_model);
-		observable *reference_obs = obs_scalar_tau(theta, phi, lambda, nlambda);
-		fp_t ** S_reference = reference_obs->get_S(1,1);
-
-		// Compute new chi sq
-		fp_t metric_reference = 0.0;
-		for (int l=1;l<=nlambda;++l){
-	      metric_reference += (stokes_vector_to_fit[1][l] - S_reference[1][l]) * (stokes_vector_to_fit[1][l] - S_reference[1][l]) / 1E22;
-	    }
-      fprintf(output, "%d %e \n", iter, metric);
-	    if (metric_reference < metric){
-	      // Everything is ok, and we can decrease lm_parameter:
-	      lm_parameter /= 10.0;
-	      //fprintf(output, "Good step! Decreasing lm parameter.\n");
-	  	}
-	    else{
-	      // We are in the more non-linear regime, so we want linearization and hence, gradient descent
-	      lm_parameter *= 10.0;
-	      // And un-modify:
-	      for (int i=1;i<=N_parameters;++i)
-		    current_model->perturb_node_value(i, -1.0 * correction[i]);
-			//fprintf(output, "Bad step! Undoing modification and increasing lm parameter.\n");
-	    }
-
-    if (iter == MAX_ITER){
-      FILE * result;
-      result = fopen("spectrum_fitted.dat", "w");
-      for (int l=1;l<=nlambda;++l)
-        fprintf(result, "%e %e %e \n", lambda[l-1], stokes_vector_to_fit[1][l], S_reference[1][l]);
-      fclose(result);
-    }
-
-		del_ft2dim(J_transpose,1,N_parameters,1,nlambda);
-		del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
-		del_ft2dim(J,1,nlambda,1,N_parameters);
-    del_ft2dim(derivatives_to_parameters,1,N_parameters,1,nlambda);
-    del_ft2dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda);
-    del_ft2dim(S,1,1,1,nlambda);
-    del_ft2dim(S_reference,1,1,1,nlambda);
-    delete current_obs;
-    delete reference_obs;
-
-    delete [](residual+1);
-    delete [](rhs+1);
-    delete [](correction+1);
-    metric = 0.0;
-    // if (to_break < converged)
-		 //break;
-	}
-
-	fclose(output);
-  fclose(detailed_log);
-
-	io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
-
-  // Clean-up:
-  del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
-  delete [](temp_nodes_tau+1);
-  delete [](temp_nodes_temp+1);
-  delete current_model;
-
-	return 0;
-}
-
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
   
@@ -1005,3 +845,166 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   return o;
   
  }
+
+ /////////////////////
+ // OLD:::::
+
+ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){
+
+  // Perform LM fitting and return the best fitting spectrum
+  // First extract the spectrum from the observation:
+  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
+  
+  // This is a starting model
+  int N_temp_nodes = 4;
+  int N_vt_nodes = 1;
+  int N_parameters = N_temp_nodes + N_vt_nodes;
+  model * current_model = model_new(N_temp_nodes,N_vt_nodes,0,0);
+    
+  // Temperature nodes:
+  fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
+  fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
+  temp_nodes_tau[1] = -4.0;
+  temp_nodes_tau[2] = -2.5;
+  temp_nodes_tau[3] = -1.0;
+  temp_nodes_tau[4] = 0.5;
+    
+  temp_nodes_temp[1] = 6000.0;
+  temp_nodes_temp[2] = 7000.0;
+  temp_nodes_temp[3] = 8000.0;
+  temp_nodes_temp[4] = 8500.0;
+    
+  current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
+
+  // Vt nodes:
+  fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
+  fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
+  vt_nodes_tau[1] = 0;
+  vt_nodes_vt[1] = 1.5E5;
+  current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
+
+  fp_t metric = 0.0;
+  fp_t lm_parameter = 1E-3;
+  FILE * output;
+  output = fopen("fitting_log.txt", "w");
+
+  int iter = 0;
+  int MAX_ITER = 1;
+
+  io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
+
+  FILE * detailed_log;
+  detailed_log = fopen("detailed_log.txt", "w");
+  
+  for (iter = 1; iter <=MAX_ITER; ++iter){
+  
+    fp_t ** derivatives_to_parameters_num = ft2dim(1,N_parameters,1,nlambda);
+    memset(derivatives_to_parameters_num[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
+    fp_t ** derivatives_to_parameters = ft2dim(1,N_parameters,1,nlambda);
+    memset(derivatives_to_parameters[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
+    fp_t * residual = new fp_t [nlambda] - 1;
+      
+    // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
+
+    observable *current_obs = obs_scalar_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);
+    /*obs_scalar_num_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
+          
+    for (int i=1;i<=N_parameters;++i){
+      fprintf(detailed_log,"NODE# %d \n", i);
+      for (int l=1;l<=nlambda;++l)
+        fprintf(detailed_log,"%d %e %e %e %e \n", l, lambda[l-1]*1E8, derivatives_to_parameters_num[i][l], derivatives_to_parameters[i][l],
+          (derivatives_to_parameters[i][l] - derivatives_to_parameters_num[i][l]) / derivatives_to_parameters_num[i][l]);
+    }*/
+
+    fp_t ** S = current_obs->get_S(1,1);
+
+    for (int l=1;l<=nlambda;++l){
+      residual[l] = stokes_vector_to_fit[1][l] - S[1][l]; 
+      //printf("l = %d residual = %e \n", l, residual[l]);
+      metric += residual[l] * residual[l] / 1E22;
+    }
+    fprintf(detailed_log, "Iteration # : %d Chisq : %e \n", iter, metric);
+    // Now we need to correct:
+    fp_t ** J = ft2dim(1,nlambda,1,N_parameters);
+    for (int i=1;i<=N_parameters;++i) for (int l=1;l<=nlambda;++l) J[l][i] = derivatives_to_parameters[i][l];
+    fp_t ** J_transpose = transpose(J,nlambda,N_parameters);
+    fp_t ** JTJ = multiply_with_transpose(J, nlambda, N_parameters);
+    for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
+    // Now correct
+    fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, nlambda);
+    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
+
+    fprintf(detailed_log, "Jacobian, residual and finally, correction: \n");
+    for (int i=1;i<=N_parameters;++i){
+      for (int j=1;j<=N_parameters;++j)
+        fprintf(detailed_log, " %e ", JTJ[i][j]);
+      fprintf(detailed_log, " %e %e \n", residual[i], correction[i]);
+    }
+
+    for (int i=1;i<=N_parameters;++i)
+      current_model->perturb_node_value(i, correction[i]);
+    current_model->print();
+
+    build_from_nodes(current_model);
+    observable *reference_obs = obs_scalar_tau(theta, phi, lambda, nlambda);
+    fp_t ** S_reference = reference_obs->get_S(1,1);
+
+    // Compute new chi sq
+    fp_t metric_reference = 0.0;
+    for (int l=1;l<=nlambda;++l){
+        metric_reference += (stokes_vector_to_fit[1][l] - S_reference[1][l]) * (stokes_vector_to_fit[1][l] - S_reference[1][l]) / 1E22;
+      }
+      fprintf(output, "%d %e \n", iter, metric);
+      if (metric_reference < metric){
+        // Everything is ok, and we can decrease lm_parameter:
+        lm_parameter /= 10.0;
+        //fprintf(output, "Good step! Decreasing lm parameter.\n");
+      }
+      else{
+        // We are in the more non-linear regime, so we want linearization and hence, gradient descent
+        lm_parameter *= 10.0;
+        // And un-modify:
+        for (int i=1;i<=N_parameters;++i)
+        current_model->perturb_node_value(i, -1.0 * correction[i]);
+      //fprintf(output, "Bad step! Undoing modification and increasing lm parameter.\n");
+      }
+
+    if (iter == MAX_ITER){
+      FILE * result;
+      result = fopen("spectrum_fitted.dat", "w");
+      for (int l=1;l<=nlambda;++l)
+        fprintf(result, "%e %e %e \n", lambda[l-1], stokes_vector_to_fit[1][l], S_reference[1][l]);
+      fclose(result);
+    }
+
+    del_ft2dim(J_transpose,1,N_parameters,1,nlambda);
+    del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
+    del_ft2dim(J,1,nlambda,1,N_parameters);
+    del_ft2dim(derivatives_to_parameters,1,N_parameters,1,nlambda);
+    del_ft2dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda);
+    del_ft2dim(S,1,1,1,nlambda);
+    del_ft2dim(S_reference,1,1,1,nlambda);
+    delete current_obs;
+    delete reference_obs;
+
+    delete [](residual+1);
+    delete [](rhs+1);
+    delete [](correction+1);
+    metric = 0.0;
+    // if (to_break < converged)
+     //break;
+  }
+
+  fclose(output);
+  fclose(detailed_log);
+
+  io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
+
+  // Clean-up:
+  del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
+  delete [](temp_nodes_tau+1);
+  delete [](temp_nodes_temp+1);
+  delete current_model;
+
+  return 0;
+}
