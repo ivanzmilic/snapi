@@ -306,8 +306,8 @@ int job_class::start(void)
          obs->normalize();
 
          // Implement more formal way how to do this
-         nx=20;
-         ny=20;
+         nx=2;
+         ny=2;
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
@@ -421,13 +421,14 @@ int job_class::stop(void)
             }
 //					
             fp_t **S_temp=obs->get_S(1,1);
-            memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*ji.nlambda[o]*sizeof(fp_t));
-            del_ft2dim(S_temp,1,4,1,ji.nlambda[o]);
+            int n_lambda_fitted = obs->get_n_lambda();
+            memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*n_lambda_fitted*sizeof(fp_t));
+            del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
             delete obs;
-
+            
             test_cube->add_model(mod,x,y);
             delete mod;
-
+            
          }
        }else{
          chunks[x][y]->free(); // free memory in case of read error        
