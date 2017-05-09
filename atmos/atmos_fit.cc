@@ -32,7 +32,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 30;
+  int MAX_ITER = 20;
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
 
@@ -68,6 +68,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
+    //model_to_fit->print();
     current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
  
     //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
@@ -152,7 +153,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       // Also add it to the array of tracked chisq:
       chi_to_track = add_to_1d_array(chi_to_track,n_to_track,metric_reference);
       if (n_to_track >=2)
-        if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 0.01)
+        if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 1E-2)
           to_break=1;
     }
     else{
@@ -177,6 +178,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
+
+    //printf("Fitting iteration %d \n",iter);
     if (to_break)
       break;
   }

@@ -1934,7 +1934,8 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
     if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
       printf("Negative population n = %e for z = %d i = %d @ x3i = %d \n", pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]], zmap[i],lmap[i],x3i);
-      delta = 1.0;
+      //delta = 1.0;
+      //exit(1);
       //printf("Rate matrix:\n");
       //io.msg(IOL_INFO,"atom::pops: %s\n",name);
       //FILE * to_invert;
