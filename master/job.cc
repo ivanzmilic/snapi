@@ -289,6 +289,14 @@ int job_class::start(void)
       //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
       //obs->write(ji.name[o],*io,1,1);
       class observable * obs;
+
+      io->msg(IOL_INFO,"master::job : invert mode is : %s \n",ji.to_invert[o]);
+      if (ji.to_invert[o]){
+      	io->msg(IOL_INFO,"master::job : return_model mode is : %s \n",ji.return_model[o]);
+      	io->msg(IOL_INFO,"master::job : return_atmos mode is : %s \n",ji.return_atmos[o]);
+      }
+      else 
+      	io->msg(IOL_INFO,"master::job : we are synthesizing the data : %s \n",ji.return_model[o]);
       
        if (ji.to_invert[o]){ // We are going to invert something.
          io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);

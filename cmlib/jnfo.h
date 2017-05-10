@@ -29,6 +29,8 @@ struct jnfo{
   char **name;
   int *to_invert; ///whether to invert or not.
   int *xl,*xh,*yl,*yh;
+  int *return_model; //whether to return model as the result of the inversion
+  int *return_atmos; //whether to return full atmosphere as the result of the inversion
 //
   uid_t uid;
   gid_t gid;

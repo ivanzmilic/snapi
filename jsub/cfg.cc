@@ -87,7 +87,19 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     get_number(tmp_str,tempfp);
     delete[] tmp_str;
     if (tempfp) to_invert = 1;
-  }; 
+  }
+  return_model = 0
+  if(char *tmp_str=get_arg(odata,"RETURN_MODEL",0)){
+    get_number(tmp_str,tempfp);
+    delete[] tmp_str;
+    if (tempfp) return_model = 1;
+  }
+  return_atmos = 0
+  if(char *tmp_str=get_arg(odata,"RETURN_ATMOS",0)){
+    get_number(tmp_str,tempfp);
+    delete[] tmp_str;
+    if (tempfp) return_atmos = 1;
+  }  
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
     get_number(tmp_str,az);
