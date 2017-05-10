@@ -305,6 +305,12 @@ int job_class::start(void)
          del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
          obs->normalize();
 
+         // Save normalized:
+         //fp_t **** S_to_save = obs->get_S();
+         //write_file((char*)"cube_test_2_normalized.f0",S_to_save,n4,n3,4,ji.nlambda[o],*io);
+         //del_ft4dim(S_to_save,1,n4,1,n3,1,n2,1,n1);
+
+
          // Implement more formal way how to do this
          nx=ji.xh[o]-ji.xl[o]+1;
          ny=ji.yh[o]-ji.yl[o]+1;
@@ -441,8 +447,8 @@ int job_class::stop(void)
        }
 //
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
-    test_cube->simple_print("output_test.dat");
-    write_file((char*)"cube_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    test_cube->simple_print("output_test_2.dat");
+    write_file((char*)"cube_test_2_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
     delete test_cube;
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
   }

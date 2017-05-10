@@ -12,11 +12,11 @@ input_lambdao = sys.argv[4] #lambda of original observations, same as above
 
 input_nodes = sys.argv[5] #inferred values of the nodes
 
-matplotlib.rcParams['figure.figsize'] = 7, 10
+#matplotlib.rcParams['figure.figsize'] = 7, 10 #do I even want this?
 
 #offsets between figures, hardcoded at the moment, we need to figure out how to put it in
-x_offset = 5
-y_offset = 5
+x_offset = 0
+y_offset = 0
 l_offset = 677
 
 
@@ -26,19 +26,18 @@ l_offset = 677
 a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
-nx = dims[0]
-ny = dims[1]
-nlambda = dims[3]
+#print dims
+#keep in mind this one is transposed:
+NY = dims[0]
+NX = dims[1]
+NL = dims[3]
 
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
-print fitted_cube.shape
-print obs_cube.shape
-
 #These are debug lines
-for i in range(0,5):
-	for j in range (0,5):
+for i in range(0,0):
+	for j in range (0,0):
 		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:290])
 		plt.plot(obs_cube[j+x_offset,i+y_offset,0,677:])
@@ -77,66 +76,94 @@ plt.cla()
 #current_spectrum.tight_layout()
 
 
+#Here we read the parameter map.
 parameters = np.loadtxt(input_nodes,unpack=True)
-
 temp = parameters.shape
-NN = temp[0]
+NN = temp[0] #total number of nodes
 
-NX = nx
-NY = ny
 
-parameters = parameters.reshape(NN,NX,NY)
+parameters = parameters.reshape(NN,NX,NY) #we do this without checking but we should 
+										  #probably check to see if dimensions match
 
 parameters[7] /= 1E5 #convert to km/s
 
-matplotlib.rcParams['figure.figsize'] = 16,9
-plt.subplot(321)
-plt.pcolormesh(parameters[2])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-plt.colorbar()
-plt.title("Temperature at $\\log\\tau=-5$")
-plt.subplot(322)
-plt.pcolormesh(parameters[3])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-plt.colorbar()
-plt.title("Temperature at $\\log\\tau=-3.2$")
-plt.subplot(323)
-plt.pcolormesh(parameters[4])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-plt.colorbar()
-plt.title("Temperature at $\\log\\tau=-1.4$")
-plt.subplot(324)
-plt.pcolormesh(parameters[5])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-plt.colorbar()
-plt.title("Temperature at $\\log\\tau=0.5$")
-plt.subplot(325)
-#plt.pcolormesh(parameters[7])
-plt.pcolormesh(obs_cube[x_offset:x_offset+NX,y_offset:y_offset+NY,0,160+l_offset])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-plt.colorbar()
-plt.title("Line core intensity")
-plt.subplot(326)
-plt.pcolormesh(obs_cube[x_offset:x_offset+NX,y_offset:y_offset+NY,0,30])
-plt.ylim([0,NX])
-plt.xlim([0,NY])
-#plt.pcolormesh(parameters[8])
-plt.colorbar()
-plt.title("Continuum intensity")
+#Hard-coded plotting of some images.
+
+
+
+barshrink = 0.5
+
+plt.clf()
+plt.cla()
+
+panelsx=2
+panelsy=4
+
+
+plt.figure(figsize=[16,10])
+
+plt.subplot(panelsy*100+panelsx*10+1)
+plt.imshow(parameters[2].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Temperature at $\log\,\\tau = -5$')
+
+plt.subplot(panelsy*100+panelsx*10+2)
+plt.imshow(parameters[3].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Temperature at $\log \\tau = -3.2$')
+
+plt.subplot(panelsy*100+panelsx*10+3)
+plt.imshow(parameters[4].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Temperature at $\log\,\\tau = -1.4$')
+
+plt.subplot(panelsy*100+panelsx*10+4)
+plt.imshow(parameters[5].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Temperature at $\log \\tau = 0.5$')
+
+plt.subplot(panelsy*100+panelsx*10+5)
+plt.imshow(obs_cube[x_offset:,y_offset:,0,30].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Continuum intensity')
+
+plt.subplot(panelsy*100+panelsx*10+6)
+plt.imshow(obs_cube[x_offset:,y_offset:,0,l_offset+160].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Na D1 line core intensity')
+
+plt.subplot(panelsy*100+panelsx*10+7)
+plt.imshow(parameters[8].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('$\mathrm{B\,[Gauss]}$')
+
+noise = np.average(obs_cube[x_offset:,y_offset:,0,30]) * 5E-3
+
+print 'noise is = ', noise
+
+obs_cube = obs_cube.transpose(1,0,2,3)
+
+residual = np.abs((obs_cube[x_offset:,y_offset:,0,l_offset:] - fitted_cube[x_offset:,y_offset:,0,l_offset:]))
+chisq = np.sum(residual,axis=2)
+#chisq /= noise**2.0
+#chisq /= 280.0
+
+plt.subplot(panelsy*100+panelsx*10+8)
+plt.imshow(parameters[7].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('$\mathrm{v_{los}\,[km/s]}$')
+
+
+
+#finishing touches
+matplotlib.rcParams['figure.figsize'] = 44,12
 plt.tight_layout()
 plt.savefig("maps_test.png")
 plt.clf()
 plt.cla()
 
 
-#plt.subplot(211)
 
-plt.savefig("map_observed.png")
 
 
 
