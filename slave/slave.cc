@@ -116,11 +116,9 @@ int main(int argc,char *argv[])
           delete[] ubuf;
           if(offs!=size) io.msg(IOL_ERROR,"inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,size);
           
-          //class observable *fit=atmos->stokes_lm_fit(obs,0.0,0.0,mod);
           fp_t * lambda = obs->get_lambda();
           int nlambda = obs->get_n_lambda();
 
-          //obs->write("fit_me.dat",io,1,1);
           class observable *fit=atmos->stokes_lm_fit(obs,3.14,0.0,mod);
           
           int32_t rsz=mod->size(io);
@@ -129,10 +127,7 @@ int main(int argc,char *argv[])
           uint08_t *data=new uint08_t [rsz];
           offs=mod->pack(data,0,io);
           offs+=fit->pack(data+offs,0,io);
-          //delete mod;
           delete fit;
-          //delete atmos;
-          //delete obs;
           delete[](lambda+1);
           
 //

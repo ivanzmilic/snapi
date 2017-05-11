@@ -132,6 +132,8 @@ plt.imshow(obs_cube[x_offset:,y_offset:,0,l_offset+160].transpose(),origin='lowe
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Na D1 line core intensity')
 
+parameters[8] *= np.cos(parameters[9]*np.pi/180.0)
+
 plt.subplot(panelsy*100+panelsx*10+7)
 plt.imshow(parameters[8].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)

@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/times.h>
 
 #include "types.h"
 #include "version.h"
@@ -260,7 +261,6 @@ int job_class::activate(void)
   return 0;
 }
 
-#include <sys/times.h>
 int job_class::start(void)
 {
 
@@ -276,8 +276,6 @@ int job_class::start(void)
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
-
-    //ji.atmos[a]->build_from_nodes(ji.models[1]);
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
@@ -285,9 +283,6 @@ int job_class::start(void)
       int tickspersec=sysconf(_SC_CLK_TCK);
       struct tms t_strt;
       clock_t t1=times(&t_strt);
-       //printf("nlambda=%d, lambda[0]=%1.7E, lambda[%d]=%1.7E\n",ji.nlambda[o],vactoair(ji.lambda[o][0]),ji.nlambda[o]-1,vactoair(ji.lambda[o][ji.nlambda[o]-1]));
-      //class observable *obs = ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
-      //obs->write(ji.name[o],*io,1,1);
       class observable * obs;
 
       io->msg(IOL_INFO,"master::job : invert mode is : %s \n",ji.to_invert[o]);

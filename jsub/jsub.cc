@@ -69,6 +69,8 @@ int main(int argc,char *argv[])
   ji.el=new fp_t [ji.no];
   ji.nlambda=new int [ji.no];
   ji.to_invert = new int [ji.no];
+  ji.return_model = new int [ji.no];
+  ji.return_atmos = new int [ji.no];
   ji.xl = new int [ji.no]; ji.xh = new int [ji.no];
   ji.yl = new int [ji.no]; ji.yh = new int [ji.no];
   ji.lambda=new fp_t* [ji.no];
@@ -78,6 +80,8 @@ int main(int argc,char *argv[])
     ji.el[o]=cfg.obs[o]->el;
     ji.nlambda[o]=cfg.obs[o]->nlambda;
     ji.to_invert[o]=cfg.obs[o]->to_invert;
+    ji.return_model[o]=cfg.obs[o]->return_model;
+    ji.return_atmos[o]=cfg.obs[o]->return_atmos;
     ji.xl[o] = cfg.obs[o]->xl;ji.xh[o] = cfg.obs[o]->xh;
     ji.yl[o] = cfg.obs[o]->yl;ji.yh[o] = cfg.obs[o]->yh;
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
