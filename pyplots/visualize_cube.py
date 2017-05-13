@@ -12,11 +12,13 @@ input_lambdao = sys.argv[4] #lambda of original observations, same as above
 
 input_nodes = sys.argv[5] #inferred values of the nodes
 
+print_maps_here = sys.argv[6]
+
 #matplotlib.rcParams['figure.figsize'] = 7, 10 #do I even want this?
 
 #offsets between figures, hardcoded at the moment, we need to figure out how to put it in
-x_offset = 0
-y_offset = 0
+x_offset = 49
+y_offset = 49
 l_offset = 677
 
 
@@ -35,25 +37,30 @@ NL = dims[3]
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
+
+print fitted_cube[0,0,3,:]
+
 #These are debug lines
-for i in range(0,0):
-	for j in range (0,0):
+for i in range(0,1):
+	for j in range (0,1):
+		plt.clf()
+		plt.cla()
+		plt.figure(figsize=[6,10])
 		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:290])
 		plt.plot(obs_cube[j+x_offset,i+y_offset,0,677:])
-		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		plt.subplot(212)
 		#print fitted_cube[i,j,3,:290]
 		plt.plot(fitted_cube[i,j,3,:290])
 		plt.plot(obs_cube[j+x_offset,i+y_offset,3,677:])
-		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
 		plt.tight_layout()
-		plt.clf()
-plt.cla()		
+		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
+		
+#plt.cla()		
 
 #now let's start by plotting observed map
 
@@ -91,7 +98,7 @@ parameters[7] /= 1E5 #convert to km/s
 
 
 
-barshrink = 0.5
+barshrink = 0.8
 
 plt.clf()
 plt.cla()
@@ -100,42 +107,55 @@ panelsx=2
 panelsy=4
 
 
-plt.figure(figsize=[16,10])
+plt.figure(figsize=[10,12])
 
 plt.subplot(panelsy*100+panelsx*10+1)
 plt.imshow(parameters[2].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log\,\\tau = -5$')
 
-plt.subplot(panelsy*100+panelsx*10+2)
-plt.imshow(parameters[3].transpose(),origin='lower')
+plt.subplot(panelsy*100+panelsx*10+3)
+plt.imshow(parameters[3].transpose(),origin='lower',vmin=5500,vmax=7000)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = -3.2$')
 
-plt.subplot(panelsy*100+panelsx*10+3)
+plt.subplot(panelsy*100+panelsx*10+5)
 plt.imshow(parameters[4].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log\,\\tau = -1.4$')
 
-plt.subplot(panelsy*100+panelsx*10+4)
+plt.subplot(panelsy*100+panelsx*10+7)
 plt.imshow(parameters[5].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = 0.5$')
 
-plt.subplot(panelsy*100+panelsx*10+5)
-plt.imshow(obs_cube[x_offset:,y_offset:,0,30].transpose(),origin='lower')
+i_cont = obs_cube[x_offset:,y_offset:,0,30].transpose()
+
+i_c_mean = np.mean(i_cont)
+i_cont /= i_c_mean
+
+sigma = np.std(i_cont)
+print i_c_mean, sigma
+
+plt.subplot(panelsy*100+panelsx*10+8)
+plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Continuum intensity')
 
+i_core = obs_cube[x_offset:,y_offset:,0,l_offset+160].transpose()
+i_core_mean = np.mean(i_core)
+i_core /= i_core_mean
+sigma = np.std(i_cont)
+
 plt.subplot(panelsy*100+panelsx*10+6)
-plt.imshow(obs_cube[x_offset:,y_offset:,0,l_offset+160].transpose(),origin='lower')
+plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Na D1 line core intensity')
 
 parameters[8] *= np.cos(parameters[9]*np.pi/180.0)
 
-plt.subplot(panelsy*100+panelsx*10+7)
-plt.imshow(parameters[8].transpose(),origin='lower')
+plt.subplot(panelsy*100+panelsx*10+2)
+plt.imshow(parameters[8].transpose(),origin='lower',vmin=-1000,vmax=1000)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('$\mathrm{B\,[Gauss]}$')
 
@@ -150,17 +170,14 @@ chisq = np.sum(residual,axis=2)
 #chisq /= noise**2.0
 #chisq /= 280.0
 
-plt.subplot(panelsy*100+panelsx*10+8)
+plt.subplot(panelsy*100+panelsx*10+4)
 plt.imshow(parameters[7].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('$\mathrm{v_{los}\,[km/s]}$')
 
-
-
-#finishing touches
-matplotlib.rcParams['figure.figsize'] = 44,12
 plt.tight_layout()
-plt.savefig("maps_test.png")
+plt.savefig(print_maps_here+'.eps',fmt='eps')
+plt.savefig(print_maps_here+'.png',fmt='png')
 plt.clf()
 plt.cla()
 

@@ -285,10 +285,10 @@ int job_class::start(void)
       clock_t t1=times(&t_strt);
       class observable * obs;
 
-      io->msg(IOL_INFO,"master::job : invert mode is : %s \n",ji.to_invert[o]);
+      io->msg(IOL_INFO,"master::job : invert mode is : %d \n",ji.to_invert[o]);
       if (ji.to_invert[o]){
-      	io->msg(IOL_INFO,"master::job : return_model mode is : %s \n",ji.return_model[o]);
-      	io->msg(IOL_INFO,"master::job : return_atmos mode is : %s \n",ji.return_atmos[o]);
+      	io->msg(IOL_INFO,"master::job : return_model mode is : %d \n",ji.return_model[o]);
+      	io->msg(IOL_INFO,"master::job : return_atmos mode is : %d \n",ji.return_atmos[o]);
       }
       else 
       	io->msg(IOL_INFO,"master::job : we are synthesizing the data : %s \n",ji.return_model[o]);
@@ -309,9 +309,9 @@ int job_class::start(void)
          obs->normalize();
 
          // Save normalized:
-         //fp_t **** S_to_save = obs->get_S();
-         //write_file((char*)"cube_test_2_normalized.f0",S_to_save,n4,n3,4,ji.nlambda[o],*io);
-         //del_ft4dim(S_to_save,1,n4,1,n3,1,n2,1,n1);
+         fp_t **** S_to_save = obs->get_S();
+         write_file((char*)"cube_test_3_normalized.f0",S_to_save,n4,n3,4,ji.nlambda[o],*io);
+         del_ft4dim(S_to_save,1,n4,1,n3,1,n2,1,n1);
 
 
          // Implement more formal way how to do this
@@ -435,8 +435,13 @@ int job_class::stop(void)
             }
 //					
             fp_t **S_temp=obs->get_S(1,1);
+            //obs->write("test_me.dat",*io,1,1);
             int n_lambda_fitted = obs->get_n_lambda();
-            memcpy(fitted_spectra[y][x][1]+1,S_temp[1]+1,4*n_lambda_fitted*sizeof(fp_t));
+            printf("%d \n",n_lambda_fitted);
+            for (int s=1;s<=4;++s)
+              memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
+           // for (int l=1;l<=n_lambda_fitted;++l)
+            //  printf("%d %e %e \n",l,S_temp[4][l],fitted_spectra[y][x][4][l]);
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
             delete obs;
             
@@ -450,8 +455,8 @@ int job_class::stop(void)
        }
 //
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
-    test_cube->simple_print("output_test_2.dat");
-    write_file((char*)"cube_test_2_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    test_cube->simple_print("output_test_3.dat");
+    write_file((char*)"cube_test_3_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
     delete test_cube;
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
   }

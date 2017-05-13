@@ -38,6 +38,8 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_model=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_atmos=new int [no],0,no-1,swap_endian);
+    //printf("Helllooo\n");
+    // /printf("%d %d \n",return_model[0],return_atmos[0]);
     offs+=unpack(data+offs,xl=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,xh=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,yl=new int [no],0,no-1,swap_endian);
