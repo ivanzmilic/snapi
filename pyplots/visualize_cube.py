@@ -16,18 +16,14 @@ print_maps_here = sys.argv[6]
 
 #matplotlib.rcParams['figure.figsize'] = 7, 10 #do I even want this?
 
-#offsets between figures, hardcoded at the moment, we need to figure out how to put it in
-x_offset = 49
-y_offset = 49
-l_offset = 677
-
-
 #l = np.loadtxt(input_lambda)
 #l*=1E8
 
 a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
+
+#print fitted_cube.shape
 #print dims
 #keep in mind this one is transposed:
 NY = dims[0]
@@ -37,8 +33,10 @@ NL = dims[3]
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
+#print obs_cube.shape
 
-print fitted_cube[0,0,3,:]
+
+#print fitted_cube[0,0,3,:]
 
 #These are debug lines
 for i in range(0,1):
@@ -47,14 +45,14 @@ for i in range(0,1):
 		plt.cla()
 		plt.figure(figsize=[6,10])
 		plt.subplot(211)
-		plt.plot(fitted_cube[i,j,0,:290])
-		plt.plot(obs_cube[j+x_offset,i+y_offset,0,677:])
+		plt.plot(fitted_cube[i,j,0,:])
+		plt.plot(obs_cube[j,i,0,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		plt.subplot(212)
 		#print fitted_cube[i,j,3,:290]
-		plt.plot(fitted_cube[i,j,3,:290])
-		plt.plot(obs_cube[j+x_offset,i+y_offset,3,677:])
+		plt.plot(fitted_cube[i,j,3,:])
+		plt.plot(obs_cube[j,i,3,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
 		plt.tight_layout()
@@ -81,6 +79,9 @@ for i in range(0,1):
 #current_spectrum.subplot(224)
 #current_spectrum.plt(obs_cube[0,0,3,l_offset:l_offset+nlambda],'o')
 #current_spectrum.tight_layout()
+
+if (NX<=1 and NY<=1):
+	quit();
 
 
 #Here we read the parameter map.
@@ -129,20 +130,20 @@ plt.imshow(parameters[5].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = 0.5$')
 
-i_cont = obs_cube[x_offset:,y_offset:,0,30].transpose()
+i_cont = obs_cube[:,:,0,30].transpose()
 
 i_c_mean = np.mean(i_cont)
 i_cont /= i_c_mean
 
 sigma = np.std(i_cont)
-print i_c_mean, sigma
+#print i_c_mean, sigma
 
 plt.subplot(panelsy*100+panelsx*10+8)
 plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Continuum intensity')
 
-i_core = obs_cube[x_offset:,y_offset:,0,l_offset+160].transpose()
+i_core = obs_cube[:,:,0,160].transpose()
 i_core_mean = np.mean(i_core)
 i_core /= i_core_mean
 sigma = np.std(i_cont)
@@ -159,16 +160,6 @@ plt.imshow(parameters[8].transpose(),origin='lower',vmin=-1000,vmax=1000)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('$\mathrm{B\,[Gauss]}$')
 
-noise = np.average(obs_cube[x_offset:,y_offset:,0,30]) * 5E-3
-
-print 'noise is = ', noise
-
-obs_cube = obs_cube.transpose(1,0,2,3)
-
-residual = np.abs((obs_cube[x_offset:,y_offset:,0,l_offset:] - fitted_cube[x_offset:,y_offset:,0,l_offset:]))
-chisq = np.sum(residual,axis=2)
-#chisq /= noise**2.0
-#chisq /= 280.0
 
 plt.subplot(panelsy*100+panelsx*10+4)
 plt.imshow(parameters[7].transpose(),origin='lower')

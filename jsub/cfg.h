@@ -16,7 +16,7 @@ struct ocfg{                  // configuration per object ("color")
   char *name;
   int nlambda;
   int to_invert;
-  int xl,xh,yl,yh;
+  int xl,xh,yl,yh,ll,lh;
   int return_model; // After inverting, should we return model? 
   int return_atmos; // After inverting, should we return full atmosphere?
 //

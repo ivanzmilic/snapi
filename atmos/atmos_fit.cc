@@ -38,7 +38,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   // Series of files where we will store fitting related quantities. This is basically DEBUG  
   FILE * fitting_log;
-  fitting_log = fopen("fitting_log.txt", "w");
+  //fitting_log = fopen("fitting_log.txt", "w");
   fp_t * chi_to_track=0; int n_to_track = 0;
   //FILE * detailed_log;
   //detailed_log = fopen("detailed_log.txt", "w");
@@ -153,8 +153,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       // Also add it to the array of tracked chisq:
       chi_to_track = add_to_1d_array(chi_to_track,n_to_track,metric_reference);
       if (n_to_track >=2)
-        if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 1E-2)
-          to_break=1;
+        if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 1E-3)
+          to_break=0;
     }
     else{
       lm_parameter *= 10.0;
@@ -179,19 +179,19 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](correction+1);
     metric = 0.0;
 
-    //printf("Fitting iteration %d \n",iter);
     if (to_break)
       break;
   }
 
-  for (int i=0;i<n_to_track;++i)
-    fprintf(fitting_log,"%d %e \n",i,chi_to_track[i]);
+  //for (int i=0;i<n_to_track;++i)
+  //  fprintf(fitting_log,"%d %e \n",i,chi_to_track[i]);
 
-  fclose(fitting_log);
+  //fclose(fitting_log);
   //fclose(detailed_log);
   //fclose(result);
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
+  //fprintf(stderr, "fitting complete. Total number of iterations is : %d \n", iter-1);
 
   // Clean-up:
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);

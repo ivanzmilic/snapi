@@ -73,6 +73,7 @@ int main(int argc,char *argv[])
   ji.return_atmos = new int [ji.no];
   ji.xl = new int [ji.no]; ji.xh = new int [ji.no];
   ji.yl = new int [ji.no]; ji.yh = new int [ji.no];
+  ji.ll = new int [ji.no]; ji.lh = new int [ji.no];
   ji.lambda=new fp_t* [ji.no];
   ji.name=new char* [ji.no];
   for(int o=0;o<ji.no;++o){
@@ -84,6 +85,7 @@ int main(int argc,char *argv[])
     ji.return_atmos[o]=cfg.obs[o]->return_atmos;
     ji.xl[o] = cfg.obs[o]->xl;ji.xh[o] = cfg.obs[o]->xh;
     ji.yl[o] = cfg.obs[o]->yl;ji.yh[o] = cfg.obs[o]->yh;
+    ji.ll[o] = cfg.obs[o]->ll;ji.lh[o] = cfg.obs[o]->lh;
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
     ji.name[o]=strcpy(new char [strlen(cfg.obs[o]->name)+1],cfg.obs[o]->name);

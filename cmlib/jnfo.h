@@ -28,7 +28,7 @@ struct jnfo{
   int *nlambda;
   char **name;
   int *to_invert; ///whether to invert or not.
-  int *xl,*xh,*yl,*yh;
+  int *xl,*xh,*yl,*yh,*ll,*lh;
   int *return_model; //whether to return model as the result of the inversion
   int *return_atmos; //whether to return full atmosphere as the result of the inversion
 //

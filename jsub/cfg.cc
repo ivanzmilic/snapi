@@ -152,6 +152,15 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     delete[] tmp_str;
     delete[] yrange;
   }else yl=yh=0; // default
+  if(char *tmp_str=get_arg(odata,"LRANGE",0)){
+    fp_t * lrange;
+    int temp=0;
+    if(get_numbers(tmp_str,lrange,temp)<0) io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: failed to convert VALUE argument \"%s\" to floating point values\n",id,tmp_str);
+    lrange +=1;
+    ll = int(lrange[0]);lh=int(lrange[1]);
+    delete[] tmp_str;
+    delete[] lrange;
+  }else ll=lh=0; // default
 
 //
   if(char *s=arg_test(odata)) io.msg(IOL_WARN,"obs \"%s\" config: the following lines were not processed:%s\n",id,s);

@@ -308,24 +308,32 @@ int job_class::start(void)
          del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
          obs->normalize();
 
-         // Save normalized:
-         fp_t **** S_to_save = obs->get_S();
-         write_file((char*)"cube_test_3_normalized.f0",S_to_save,n4,n3,4,ji.nlambda[o],*io);
-         del_ft4dim(S_to_save,1,n4,1,n3,1,n2,1,n1);
 
+         io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d; yrange = %d, %d; lrange = %d, %d \n",
+          ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
 
-         // Implement more formal way how to do this
          nx=ji.xh[o]-ji.xl[o]+1;
          ny=ji.yh[o]-ji.yl[o]+1;
-         io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d and yrange = %d, %d \n",
-          ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o]);
+         int nl=ji.lh[o]-ji.ll[o]+1;
+          // Save normalized:
+         class observable *obs_to_fit=obs->extract(ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
+         fp_t **** S_to_save = obs_to_fit->get_S();
+         write_file((char*)"mag_test.f0",S_to_save,nx,ny,4,nl,*io);
+         del_ft4dim(S_to_save,1,nx,1,ny,1,4,1,nl);
+         delete obs;
+         // Write down lambda
+         FILE * output = fopen("lambda_to_fit.dat","w");
+         fp_t * lambda_to_fit = obs_to_fit->get_lambda();
+         for (int l=1;l<=obs_to_fit->get_n_lambda();++l)
+           fprintf(output,"%d %1.10e \n", l,lambda_to_fit[l]);
+         fclose(output);
+         delete[](lambda_to_fit+1);
+
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
 
-           	 int x_coordinate = x+ji.xl[o]-1;
-           	 int y_coordinate = y+ji.yl[o]-1;
-             class observable *obs_subset=obs->extract(x_coordinate,x_coordinate,y_coordinate,y_coordinate,678,ji.nlambda[o]);
+             class observable *obs_subset=obs_to_fit->extract(x,x,y,y,1,nl);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
@@ -386,8 +394,9 @@ int job_class::stop(void)
 //
   for(int o=0;o<ji.no;++o){
     modelcube *test_cube=new modelcube(ji.models[0],nx,ny);
-    fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,ji.nlambda[o]);
-    memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*ji.nlambda[o]*sizeof(fp_t));
+    int nl = ji.lh[o]-ji.ll[o]+1;
+    fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,nl);
+    memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -435,13 +444,9 @@ int job_class::stop(void)
             }
 //					
             fp_t **S_temp=obs->get_S(1,1);
-            //obs->write("test_me.dat",*io,1,1);
             int n_lambda_fitted = obs->get_n_lambda();
-            printf("%d \n",n_lambda_fitted);
             for (int s=1;s<=4;++s)
               memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
-           // for (int l=1;l<=n_lambda_fitted;++l)
-            //  printf("%d %e %e \n",l,S_temp[4][l],fitted_spectra[y][x][4][l]);
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
             delete obs;
             
@@ -455,10 +460,11 @@ int job_class::stop(void)
        }
 //
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
-    test_cube->simple_print("output_test_3.dat");
-    write_file((char*)"cube_test_3_fitted.f0",fitted_spectra,ny,nx,4,ji.nlambda[o],*io);
+    test_cube->simple_print("output_mag_test.dat");
+    write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
     delete test_cube;
-    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,ji.nlambda[o]);
+    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
+
   }
   del_v2dim((void***)chunks,1,nx,1,ny);
 /******************************

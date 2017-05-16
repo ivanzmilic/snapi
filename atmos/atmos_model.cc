@@ -802,8 +802,10 @@ int model::correct(fp_t * correction){
   }
   for (int i=1;i<=N_nodes_vt;++i)
     if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
-  for (int i=1;i<=N_nodes_B;++i)
+  for (int i=1;i<=N_nodes_B;++i){
     if (B_nodes_B[i] < 0) B_nodes_B[i] *= (-1.0);
+    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0;
+  }
   /*for (int i=1;i<=N_nodes_theta;++i){
     if (theta_nodes_theta[i] < 0) theta_nodes_theta[i] *= -1.0;
     if (theta_nodes_theta[i] > pi) theta_nodes_theta[i] = 2.0*pi - theta_nodes_theta[i];
