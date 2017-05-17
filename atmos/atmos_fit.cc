@@ -24,6 +24,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
   int nlambda = spectrum_to_fit->get_n_lambda();
   fp_t * lambda = spectrum_to_fit->get_lambda();
+  fprintf(stderr,"HEYAAAAAAA\n");
+  fp_t * mask = spectrum_to_fit->get_mask();
+  fprintf(stderr,"HEYAAAAAAA\n");
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
@@ -32,8 +35,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters, perhaps those should be read from the file? We can keep them like this for now.
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 20;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0;
+  int MAX_ITER = 30;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0;
   fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
 
   // Series of files where we will store fitting related quantities. This is basically DEBUG  
@@ -88,7 +91,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=4;++s){
       residual[(l-1)*4+s] = stokes_vector_to_fit[s][l] - S[s][l]; 
-      metric += residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
+      metric += mask[l]*residual[(l-1)*4+s] * residual[(l-1)*4+s] * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     }
     //fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
 
@@ -140,7 +143,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
         for (int s=1;s<=4;++s)
-        metric_reference += (stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
+        metric_reference += mask[l]*(stokes_vector_to_fit[s][l] - S_reference[s][l]) * (stokes_vector_to_fit[s][l] - S_reference[s][l])
          * ws[s-1] / noise / noise / (4.0*nlambda-N_parameters);
     
     //fprintf(fitting_log, "%d %e \n", iter, metric);  
@@ -154,7 +157,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       chi_to_track = add_to_1d_array(chi_to_track,n_to_track,metric_reference);
       if (n_to_track >=2)
         if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 1E-3)
-          to_break=0;
+          to_break=1;
     }
     else{
       lm_parameter *= 10.0;
@@ -196,6 +199,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Clean-up:
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
+  delete[](mask+1);
   delete[]chi_to_track;
   
   return current_obs;

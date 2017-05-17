@@ -46,6 +46,7 @@ for i in range(0,1):
 		plt.figure(figsize=[6,10])
 		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:])
+		plt.xlim([170,270])
 		plt.plot(obs_cube[j,i,0,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")

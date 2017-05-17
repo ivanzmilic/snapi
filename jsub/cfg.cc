@@ -161,6 +161,28 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     delete[] tmp_str;
     delete[] lrange;
   }else ll=lh=0; // default
+  if(char *tmp_str=get_arg(odata,"MASK",0)){
+    FILE * tmpinpt = fopen(tmp_str,"r");
+    int N_points = 0;
+    if (fscanf(tmpinpt,"%d", &N_points)!=EOF)
+      weight = new fp_t [N_points];
+    else weight = 0;
+    if (weight){
+      fp_t tmp;
+      for (int i=0;i<N_points;++i)
+        if (fscanf(tmpinpt,"%lf",&tmp)!=EOF){
+          weight[i] = tmp;
+        }
+        else {
+          io.msg(IOL_WARN,"obs \"%s\" config: could not read wavelength mask propely. Using 1 everywhere\n",id);
+          delete[](weight);
+          weight = 0;
+          break;
+        }
+    }
+    fclose(tmpinpt);
+    delete[] tmp_str;
+  }else weight = 0;
 
 //
   if(char *s=arg_test(odata)) io.msg(IOL_WARN,"obs \"%s\" config: the following lines were not processed:%s\n",id,s);
@@ -171,6 +193,7 @@ ocfg::~ocfg(void)
   if(id) delete[] id;
   if(lambda) delete[] lambda;
   if(name) delete[] name;
+  if(weight) delete[]weight;
 }
 
 mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)

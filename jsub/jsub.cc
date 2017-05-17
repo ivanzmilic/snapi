@@ -75,6 +75,7 @@ int main(int argc,char *argv[])
   ji.yl = new int [ji.no]; ji.yh = new int [ji.no];
   ji.ll = new int [ji.no]; ji.lh = new int [ji.no];
   ji.lambda=new fp_t* [ji.no];
+  ji.weights=new fp_t* [ji.no];
   ji.name=new char* [ji.no];
   for(int o=0;o<ji.no;++o){
     ji.az[o]=cfg.obs[o]->az;
@@ -88,6 +89,12 @@ int main(int argc,char *argv[])
     ji.ll[o] = cfg.obs[o]->ll;ji.lh[o] = cfg.obs[o]->lh;
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
+    ji.weights[o] = new fp_t [ji.nlambda[o]];
+    if (cfg.obs[o]->weight)
+      memcpy(ji.weights[o],cfg.obs[o]->weight,ji.nlambda[o]*sizeof(fp_t));
+    else 
+      for (int i=0;i<ji.nlambda[o];++i) ji.weights[o][i] = 1.0;
+
     ji.name[o]=strcpy(new char [strlen(cfg.obs[o]->name)+1],cfg.obs[o]->name);
   }
 //

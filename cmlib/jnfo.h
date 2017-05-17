@@ -31,6 +31,7 @@ struct jnfo{
   int *xl,*xh,*yl,*yh,*ll,*lh;
   int *return_model; //whether to return model as the result of the inversion
   int *return_atmos; //whether to return full atmosphere as the result of the inversion
+  fp_t **weights; // weights for fitting, allows us to mask out some things 
 //
   uid_t uid;
   gid_t gid;

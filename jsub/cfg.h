@@ -17,6 +17,7 @@ struct ocfg{                  // configuration per object ("color")
   int nlambda;
   int to_invert;
   int xl,xh,yl,yh,ll,lh;
+  fp_t * weight; // what are the weights for the fitting
   int return_model; // After inverting, should we return model? 
   int return_atmos; // After inverting, should we return full atmosphere?
 //

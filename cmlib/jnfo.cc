@@ -47,9 +47,11 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,ll=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,lh=new int [no],0,no-1,swap_endian);
     lambda=new fp_t* [no];
+    weights = new fp_t*[no];
     name=new char* [no];
     for(int o=0;o<no;++o){
       offs+=unpack(data+offs,lambda[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
+      offs+=unpack(data+offs,weights[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
       offs+=unpack(data+offs,name[o]);
     }
  }
@@ -97,6 +99,8 @@ jnfo::~jnfo(void)
     if (lh) delete[] lh;
     if(lambda) for(int o=0;o<no;++o) if(lambda[o]) delete[] lambda[o];
     if(lambda) delete[] lambda;
+    if(weights) for(int o=0;o<no;++o) if(weights[o]) delete[] weights[o];
+    if(weights) delete[] weights;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
     if(name) delete[] name;
   }
@@ -119,7 +123,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     usize+=no*sizeof(int);                       // nlambda
     usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
-      usize+=nlambda[o]*sizeof(fp_t);  // lambda
+      usize+=2*nlambda[o]*sizeof(fp_t);  // lambda,weights
       usize+=strlen(name[o])+1;        // file name
     }
   }
@@ -151,6 +155,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,lh,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
+      offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,name[o]);
     }
   }

@@ -305,6 +305,7 @@ int job_class::start(void)
          obs = new observable(n4,n3,n2,n1);
          obs->set(test);
          obs->setlambda(ji.lambda[o]-1);
+         obs->setmask(ji.weights[o]-1);
          del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
          obs->normalize();
 
@@ -328,7 +329,6 @@ int job_class::start(void)
            fprintf(output,"%d %1.10e \n", l,lambda_to_fit[l]);
          fclose(output);
          delete[](lambda_to_fit+1);
-
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece

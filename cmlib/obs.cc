@@ -32,6 +32,8 @@ observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
   memset(S[1][1][1]+1,0,nx*ny*ns*nlambda*sizeof(fp_t));
   lambda = new fp_t[nlambda]-1;
   memset(lambda+1,0,nlambda*sizeof(fp_t));
+  mask = new fp_t[nlambda]-1;
+  memset(mask+1,0,nlambda*sizeof(fp_t));
 }
 
 observable::observable(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
@@ -43,6 +45,7 @@ observable::~observable(void){
   if(nlambda){
     del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
     delete[] (lambda+1);
+    delete[] (mask+1);
   }
 }
 
@@ -124,6 +127,10 @@ void observable::setlambda(fp_t * lambda_in){
   memcpy(lambda+1,lambda_in+1,nlambda*sizeof(fp_t));
 }
 
+void observable::setmask(fp_t * mask_in){
+  memcpy(mask+1,mask_in+1,nlambda*sizeof(fp_t));
+}
+
 fp_t **** observable::get_S(){
 
   fp_t **** S_copy;
@@ -149,6 +156,13 @@ fp_t * observable::get_lambda(){
   memcpy(lambda_copy+1,lambda+1,nlambda*sizeof(fp_t));
   //printf("Does it work?\n");
   return lambda_copy;
+}
+
+fp_t * observable::get_mask(){
+  fp_t * mask_copy;
+  mask_copy = new fp_t [nlambda]-1;
+  memcpy(mask_copy+1,mask+1,nlambda*sizeof(fp_t));
+  return mask_copy;
 }
 
 int observable::get_n_lambda(){
@@ -186,6 +200,12 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
     lambda_small[l-ll+1] = lambda[l];
   obs_small->setlambda(lambda_small);
   delete[](lambda_small+1);
+
+  fp_t * mask_small = new fp_t [nln]-1;
+  for (int l=ll;l<=lh;++l)
+    mask_small[l-ll+1] = mask[l];
+  obs_small->setmask(mask_small);
+  delete[](mask_small+1);
   return obs_small;
 
 }

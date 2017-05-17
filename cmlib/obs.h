@@ -7,7 +7,7 @@
 #include "ana_io.h"
 
 class observable{
-  fp_t ****S,*lambda; // Stokes vector (N_stokes components x N_wvl)
+  fp_t ****S,*lambda,*mask; // Stokes vector (N_stokes components x N_wvl)
   int ns,nlambda,nx,ny;
 public:
   observable(int ns_in);
@@ -27,6 +27,7 @@ public:
   void set(fp_t **,int,int);
   void set(fp_t ****);
   void setlambda(fp_t *);
+  void setmask(fp_t*);
   void normalize();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
@@ -35,6 +36,7 @@ public:
   fp_t **** get_S();
   fp_t ** get_S(int,int);
   fp_t * get_lambda();
+  fp_t * get_mask();
   int get_n_lambda();
   int get_nx();
   int get_ny();
