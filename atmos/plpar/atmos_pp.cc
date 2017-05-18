@@ -81,65 +81,82 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   // Temperature:
   fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
   atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h);
+  delete[](temp_nodes_tau+1);
+  delete[](temp_nodes_temp+1);
+  
 
   // Microturbulent velocity:
   int N_nodes_vt = atmos_model->get_N_nodes_vt();
-  fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
-  fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
-  atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h);
+  if (N_nodes_vt){
+    fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
+    fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
+    atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h);
+    delete[](vt_nodes_tau+1);
+    delete[](vt_nodes_vt+1);
+  }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      Vt[x1l][x2l][x3i] = 0.0;
   
   // Systematic velocity: 
   int N_nodes_vs = atmos_model->get_N_nodes_vs();
-  fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
-  fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
-  atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h);
+  if (N_nodes_vs){
+    fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
+    fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
+    atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h);
+    delete[](vs_nodes_tau+1);
+    delete[](vs_nodes_vs+1);
+  }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      Vz[x1l][x2l][x3i] = 0.0;
 
   // Magnetic field:
-  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
-  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
-  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
 
   int N_nodes_B = atmos_model->get_N_nodes_B();
-  fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
-  fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
   int N_nodes_theta = atmos_model->get_N_nodes_theta();
-  fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
-  fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
   int N_nodes_phi = atmos_model->get_N_nodes_phi();
-  fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
-  fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();
   
-  atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h);
-  atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h);
-  atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h);
-
   if (N_nodes_B && N_nodes_theta && N_nodes_phi){
+    fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
+    fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
+    fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
+    fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
+    fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
+    fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();
+
+    fp_t * B = new fp_t[x3h-x3l+1] - x3l;
+    fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
+    fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
+  
+    atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h);
+    atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h);
+    atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h);
+
     for (int x3i=x3l;x3i<=x3h;++x3i){
       Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
       By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
       Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
       //printf("%d %e %e %e \n", x3i, Bx[x1l][x2l][x3i], By[x1l][x2l][x3i], Bz[x1l][x2l][x3i]);
     }
+    delete[](B_nodes_tau+1);
+    delete[](B_nodes_B+1);
+    delete[](theta_nodes_tau+1);
+    delete[](theta_nodes_theta+1);
+    delete[](phi_nodes_tau+1);
+    delete[](phi_nodes_phi+1);
+    delete[](B+x3l);
+    delete[](theta+x3l);
+    delete[](phi+x3l);
   }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i){ // WE NEED TO SORT THIS OUT
+      Bx[x1l][x2l][x3i] = 0.001;
+      By[x1l][x2l][x3i] = 0.001;
+      Bz[x1l][x2l][x3i] = 0.001;
+    }
 
   // We do not need the nodes any more.
-  delete[](temp_nodes_tau+1);
-  delete[](temp_nodes_temp+1);
-  delete[](vt_nodes_tau+1);
-  delete[](vt_nodes_vt+1);
-  delete[](vs_nodes_tau+1);
-  delete[](vs_nodes_vs+1);
-  delete[](B_nodes_tau+1);
-  delete[](B_nodes_B+1);
-  delete[](theta_nodes_tau+1);
-  delete[](theta_nodes_theta+1);
-  delete[](phi_nodes_tau+1);
-  delete[](phi_nodes_phi+1);
-  delete[](B+x3l);
-  delete[](theta+x3l);
-  delete[](phi+x3l);
-
-
 
   //FILE * out;
   //out = fopen("t_test.txt", "w");

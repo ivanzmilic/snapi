@@ -211,6 +211,12 @@ model::model(mcfg *cfg,io_class &io_in){
 
   N_depths = 0;
   N_nodes_temp = N_nodes_vt = N_nodes_vs = N_nodes_B = N_nodes_theta = N_nodes_phi = 0;
+  temp_nodes_tau = temp_nodes_temp = 0;
+  vt_nodes_tau = vt_nodes_vt = 0;
+  vs_nodes_tau = vs_nodes_vs = 0;
+  B_nodes_tau = B_nodes_B = 0;
+  theta_nodes_tau = theta_nodes_theta = 0;
+  phi_nodes_tau = phi_nodes_phi = 0;
   for (int p=0;p<cfg->np;++p){
     if (strcmp(cfg->par[p]->id,"TEMP") == 0){
       N_nodes_temp = cfg->par[p]->n;
@@ -311,22 +317,34 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
   int32_t offs=::pack(buf,N_depths,do_swap);
-  int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,0};
-  for (int i=0;P[i];++i) offs+=::pack(buf+offs,P[i],do_swap);
+  int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,-1};
+  for (int i=0;P[i]>-1;++i) offs+=::pack(buf+offs,P[i],do_swap);
   
 //  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
-  offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
-  offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
-  offs+=::pack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
-  offs+=::pack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
-  offs+=::pack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
-  offs+=::pack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
-  offs+=::pack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
-  offs+=::pack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
-  offs+=::pack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
-  offs+=::pack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
-  offs+=::pack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
-  offs+=::pack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+  if (N_nodes_temp){
+    offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
+    offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
+  }
+  if (N_nodes_vt){
+    offs+=::pack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
+    offs+=::pack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
+  }
+  if (N_nodes_vs){
+    offs+=::pack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
+    offs+=::pack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
+  }
+  if (N_nodes_B){
+    offs+=::pack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
+    offs+=::pack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
+  }
+  if (N_nodes_theta){
+    offs+=::pack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
+    offs+=::pack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
+  }
+  if (N_nodes_phi){
+    offs+=::pack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
+    offs+=::pack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+  }
 
   return offs;
 }
@@ -341,44 +359,55 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,N_nodes_B,do_swap);
   offs+=::unpack(buf+offs,N_nodes_theta,do_swap);
   offs+=::unpack(buf+offs,N_nodes_phi,do_swap);
+  temp_nodes_tau = 0;
+  temp_nodes_temp = 0;
+  vt_nodes_tau = 0;
+  vt_nodes_vt = 0;
+  vs_nodes_tau = 0;
+  vs_nodes_vs = 0;
+  B_nodes_tau = 0;
+  B_nodes_B = 0;
+  theta_nodes_tau = 0;
+  theta_nodes_theta = 0;
+  phi_nodes_tau = 0;
+  phi_nodes_phi = 0;
 //  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
   if (N_nodes_temp){
     temp_nodes_tau = new fp_t [N_nodes_temp] -1;
     temp_nodes_temp = new fp_t [N_nodes_temp] -1;
+    offs+=::unpack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
+    offs+=::unpack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
   }
   if (N_nodes_vt){
     vt_nodes_tau = new fp_t [N_nodes_vt] -1;
     vt_nodes_vt = new fp_t [N_nodes_vt] -1;
+    offs+=::unpack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
+    offs+=::unpack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
   }
   if (N_nodes_vs){
     vs_nodes_tau = new fp_t [N_nodes_vs] -1;
     vs_nodes_vs = new fp_t [N_nodes_vs] -1;
+    offs+=::unpack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
+    offs+=::unpack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
   }
   if (N_nodes_B){
     B_nodes_tau = new fp_t [N_nodes_B] -1;
     B_nodes_B = new fp_t [N_nodes_B] -1;
+    offs+=::unpack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
+    offs+=::unpack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
   }
   if (N_nodes_theta){
     theta_nodes_tau = new fp_t [N_nodes_theta] -1;
     theta_nodes_theta = new fp_t [N_nodes_theta] -1;
+    offs+=::unpack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
+    offs+=::unpack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
   }
   if (N_nodes_phi){
     phi_nodes_tau = new fp_t [N_nodes_phi] -1;
     phi_nodes_phi = new fp_t [N_nodes_phi] -1;
-  }
-  
-  offs+=::unpack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
-  offs+=::unpack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
-  offs+=::unpack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
-  offs+=::unpack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
-  offs+=::unpack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
-  offs+=::unpack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
-  offs+=::unpack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
-  offs+=::unpack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
-  offs+=::unpack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
-  offs+=::unpack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
-  offs+=::unpack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
-  offs+=::unpack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+    offs+=::unpack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
+    offs+=::unpack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
+  }  
 //
   response_to_parameters = 0;
   return offs;
@@ -891,6 +920,16 @@ modelcube::modelcube(){
 
 modelcube::modelcube(model * make_from, int nx_in, int ny_in){
 
+  // Initialize
+  N_nodes_temp=N_nodes_vt=N_nodes_vs=N_nodes_B=N_nodes_theta=N_nodes_phi=0;
+  nx=ny=0;
+  data = 0;
+  temp_nodes_tau = 0;
+  vt_nodes_tau = 0;
+  vs_nodes_tau = 0;
+  theta_nodes_tau = 0;
+  phi_nodes_tau = 0;
+  // Set proper values (if we have them)
   N_nodes_temp=make_from->get_N_nodes_temp();
   N_nodes_vt=make_from->get_N_nodes_vt();
   N_nodes_vs=make_from->get_N_nodes_vs();
@@ -901,36 +940,48 @@ modelcube::modelcube(model * make_from, int nx_in, int ny_in){
   N_parameters = make_from->get_N_nodes_total();
 
   fp_t * temp; // temporary array
-  temp = make_from->get_temp_nodes_tau();
-  temp_nodes_tau = new fp_t [N_nodes_temp] - 1;
-  for (int i=1;i<=N_nodes_temp;++i)
-    temp_nodes_tau[i] = temp[i];
-  delete[](temp+1);
-  temp = make_from->get_vt_nodes_tau();
-  vt_nodes_tau = new fp_t [N_nodes_vt] - 1;
-  for (int i=1;i<=N_nodes_vt;++i)
-    vt_nodes_tau[i] = temp[i];
-  delete[](temp+1);
-  temp = make_from->get_vs_nodes_tau();
-  vs_nodes_tau = new fp_t [N_nodes_vs] - 1;
-  for (int i=1;i<=N_nodes_vs;++i)
-    vs_nodes_tau[i] = temp[i];
-  delete[](temp+1);
-  temp = make_from->get_B_nodes_tau();
-  B_nodes_tau = new fp_t [N_nodes_B] - 1;
-  for (int i=1;i<=N_nodes_B;++i)
-    B_nodes_tau[i] = temp[i];
-  delete[](temp+1);
-  temp = make_from->get_theta_nodes_tau();
-  theta_nodes_tau = new fp_t [N_nodes_theta] - 1;
-  for (int i=1;i<=N_nodes_theta;++i)
-    theta_nodes_tau[i] = temp[i];
-  delete[](temp+1);
-  temp = make_from->get_vt_nodes_tau();
-  phi_nodes_tau = new fp_t [N_nodes_phi] - 1;
-  for (int i=1;i<=N_nodes_phi;++i)
-    phi_nodes_tau[i] = temp[i];
-  delete[](temp+1);
+  if (N_nodes_temp){
+    temp = make_from->get_temp_nodes_tau();
+    temp_nodes_tau = new fp_t [N_nodes_temp] - 1;
+    for (int i=1;i<=N_nodes_temp;++i)
+      temp_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
+  if (N_nodes_vt){
+    temp = make_from->get_vt_nodes_tau();
+    vt_nodes_tau = new fp_t [N_nodes_vt] - 1;
+    for (int i=1;i<=N_nodes_vt;++i)
+      vt_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
+  if (N_nodes_vs){
+    temp = make_from->get_vs_nodes_tau();
+    vs_nodes_tau = new fp_t [N_nodes_vs] - 1;
+    for (int i=1;i<=N_nodes_vs;++i)
+      vs_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
+  if (N_nodes_B){
+    temp = make_from->get_B_nodes_tau();
+    B_nodes_tau = new fp_t [N_nodes_B] - 1;
+    for (int i=1;i<=N_nodes_B;++i)
+      B_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
+  if (N_nodes_theta){
+    temp = make_from->get_theta_nodes_tau();
+    theta_nodes_tau = new fp_t [N_nodes_theta] - 1;
+    for (int i=1;i<=N_nodes_theta;++i)
+      theta_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
+  if (N_nodes_phi){
+    temp = make_from->get_vt_nodes_tau();
+    phi_nodes_tau = new fp_t [N_nodes_phi] - 1;
+    for (int i=1;i<=N_nodes_phi;++i)
+      phi_nodes_tau[i] = temp[i];
+    delete[](temp+1);
+  }
 
   nx = nx_in;ny=ny_in;
   data=ft3dim(1,nx,1,ny,1,N_parameters);
@@ -943,13 +994,13 @@ modelcube::~modelcube(){
     delete[](temp_nodes_tau+1);
   if (vt_nodes_tau)
     delete[](vt_nodes_tau+1);
-  if (vs_nodes_tau);
+  if (vs_nodes_tau)
     delete[](vs_nodes_tau+1);
   if (B_nodes_tau)
     delete[](B_nodes_tau+1);
-  if (theta_nodes_tau);
+  if (theta_nodes_tau)
     delete[](theta_nodes_tau+1);
-  if (phi_nodes_tau);
+  if (phi_nodes_tau)
     delete[](phi_nodes_tau+1);
   if (data)
     del_ft3dim(data,1,nx,1,ny,1,N_parameters);

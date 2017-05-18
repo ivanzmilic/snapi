@@ -27,7 +27,7 @@ struct ocfg{                  // configuration per object ("color")
 
 struct parcfg{ // configuration for each of the parameter, nodes and values
   char *id;
-  int n;
+  int n; // number of nodes
   fp_t *tau;
   fp_t *value;
 

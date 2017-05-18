@@ -344,6 +344,8 @@ int job_class::start(void)
              pthread_mutex_unlock(&active_lock);
            }
        }else{
+         ji.atmos[a]->set_grid(1);
+         ji.atmos[a]->build_from_nodes(ji.models[0]);
          obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o],ji.nlambda[o]);
          obs->write(ji.name[o],*io,1,1);
        }
@@ -449,10 +451,8 @@ int job_class::stop(void)
               memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
             delete obs;
-            
             test_cube->add_model(mod,x,y);
             delete mod;
-            
          }
        }else{
          chunks[x][y]->free(); // free memory in case of read error        

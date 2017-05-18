@@ -1148,8 +1148,11 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
       quantity[i] = node_value[1];
     return 0;
   }
-  else if (N_nodes == 0)
+  else if (N_nodes == 0){
+    for (int i=from;i<=to;++i)
+      quantity[i] = 0.0;
     return 0;
+  }
 
   printf("Error in atmospheric interpolation : you are not supposed to pass negative number of nodes.\n");
   return 1;

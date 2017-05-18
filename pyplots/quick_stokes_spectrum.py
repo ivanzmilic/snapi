@@ -18,7 +18,7 @@ lambda_m = 1.5
 #To compare with fits atlas
 #V_over_I = spectrum[:,4] / max(spectrum[:,1])
 #V_over_I /= max(V_over_I/2.0)
-#sigma = 0.0
+#sigma = 2.0
 #sigma *= 5896.0 / 2.997E5 # Angstrom
 #sigma /= (spectrum[1,0]-spectrum[0,0])
 #V_over_I = flt.gaussian_filter(V_over_I,sigma)

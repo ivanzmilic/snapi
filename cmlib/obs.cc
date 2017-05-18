@@ -52,7 +52,7 @@ observable::~observable(void){
 int32_t observable::size(io_class &io_in){
 
   int32_t sz = 4*sizeof(int); // ns, nlambda,nx,ny
-  sz += nlambda*sizeof(fp_t); // lambda
+  sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
   return sz;
 }
@@ -66,6 +66,7 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,nlambda,do_swap);
   
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
+  offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 
   return offs;
@@ -81,9 +82,11 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   //printf("Unpacking : %d %d %d %d \n",nx,ny,ns,nlambda);
 
   lambda = new fp_t [nlambda]-1;
+  mask = new fp_t [nlambda]-1;
   S=ft4dim(1,nx,1,ny,1,ns,1,nlambda);
 
   offs+=::unpack(buf+offs,lambda,1,nlambda,do_swap);
+  offs+=::unpack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::unpack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 
   return offs;
