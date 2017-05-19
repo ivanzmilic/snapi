@@ -142,7 +142,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
           if (tau_grid) normalize_to_referent_opacity(op,em);
 
-          
           if(int rv=formal(rt_grid, S,L,op,em,th[tp],ph[tp], boundary_condition_for_rt)){ // solution and approximate operator
             io.msg(IOL_ERROR,"atmosphere::nltepops: for angle (%d), wavelength %d\n",tp,l);
             del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -153,7 +152,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
             del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
             return rv; // pass error to parent level
           }  
-
           if (tau_grid) de_normalize(op,em);   
          
           for(int a=0;a<natm;++a) atml[a]->add(S, L, op, lambda[l], lambda_w[l], bin[tp]); // give each species access to radiation field, that is, add the radiation field to the mean intensity
@@ -165,7 +163,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
       }
 
-    
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
     //io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
@@ -174,7 +171,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     if (relative_change < 1E-3)
       break; 
   }
-
+  io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
   //fclose(test_intensity);
   //fclose(test_opem);
   

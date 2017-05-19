@@ -28,7 +28,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
 
   //for (int l=1;l<=nlambda;++l)
-    //fprintf(stderr,"%d %e \n",l,mask[l]);
+  //  fprintf(stderr,"%d %e \n",l,mask[l]);
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
@@ -38,7 +38,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int iter = 0;
   int MAX_ITER = 20;
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0;
-  fp_t noise = stokes_vector_to_fit[1][1] / 1E4;
+  fp_t *noise = new fp_t [nlambda]-1;
+  for (int l=1;l<=nlambda;++l)
+   noise[l] = stokes_vector_to_fit[1][l] / 1E3;
 
   // Series of files where we will store fitting related quantities. This is basically DEBUG  
   FILE * fitting_log;
@@ -108,7 +110,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         residual[(l-1)*n_stokes_to_fit+s] = stokes_vector_to_fit[stf][l] - S[stf][l]; 
         
         metric += mask[l]*residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
-         *ws[stf-1] / noise / noise / (n_stokes_to_fit*nlambda-N_parameters);
+         *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
     }
     //fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
 
@@ -166,7 +168,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf=stokes_to_fit[s-1];
         metric_reference += mask[l]*(stokes_vector_to_fit[stf][l] - S_reference[stf][l]) * (stokes_vector_to_fit[stf][l] - S_reference[stf][l])
-         *ws[stf-1] / noise / noise / (n_stokes_to_fit*nlambda-N_parameters);
+         *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
        }
     
     //fprintf(fitting_log, "%d %e \n", iter, metric);  
@@ -223,6 +225,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
   delete[](mask+1);
+  delete[](noise+1);
   delete[]chi_to_track;
   
   return current_obs;

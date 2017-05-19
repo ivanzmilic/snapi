@@ -309,6 +309,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // Add it to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
+
   
   end = clock();
   time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
@@ -336,7 +337,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     fclose(out);
   }
   
-    
   del_ft4dim(S,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft3dim(Lambda_approx,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -358,10 +358,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if (input_model)
     del_ft3dim(atm_resp_to_parameters,1,N_parameters,1,7,1,x3h-x3l+1);
 //
+
   respclean();
   popclean(); // all done
   // We can put this here. Does this need a separate function?
-  del_ft5dim(op_referent_derivative,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+  //printf("Hi Andrej, how are you?\n");
+  if (tau_grid) del_ft5dim(op_referent_derivative,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+  //printf("Hi Andrej, how are you?\n");
 
   io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 

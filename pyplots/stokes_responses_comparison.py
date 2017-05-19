@@ -95,6 +95,8 @@ h = h[0,:,0]# / 1E5
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
+hmax = 1200E5
+
 for p in range(0,N_Parameters_to_plot):
 
 	v_min = np.zeros(4)
@@ -112,7 +114,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.cla()
 		plt.subplot(221)
 		plt.xlim([lambda_l, lambda_m])
-		plt.ylim([h[0], h[n_depths-1]])
+		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,I$')
 		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel('$h\,\mathrm{[km]}$')
@@ -121,7 +123,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.tight_layout()
 		plt.subplot(222)
 		plt.xlim([lambda_l, lambda_m])
-		plt.ylim([h[0], h[n_depths-1]])
+		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,Q$')
 		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel('$h\,\mathrm{[km]}$')
@@ -131,7 +133,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.subplot(223)
 		plt.title('$\mathrm{Stokes}\,U$')
 		plt.xlim([lambda_l, lambda_m])
-		plt.ylim([h[0], h[n_depths-1]])
+		plt.ylim([h[0], hmax])
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel('$h\,\mathrm{[km]}$')
 		plt.pcolormesh(wvl, h, rn[2,p,:,:], vmin = v_min[2], vmax = v_max[2], rasterized=True)
@@ -139,7 +141,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.tight_layout()
 		plt.subplot(224)
 		plt.xlim([lambda_l, lambda_m])
-		plt.ylim([h[0], h[n_depths-1]])
+		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,V$')
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel('$h\,\mathrm{[km]}$')
@@ -157,7 +159,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.cla()
 	plt.subplot(221)
 	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([h[0], h[n_depths-1]])
+	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,I$')
 	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel('$h\,\mathrm{[km]}$')
@@ -166,7 +168,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.tight_layout()
 	plt.subplot(222)
 	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([h[0], h[n_depths-1]])
+	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,Q$')
 	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel('$h\,\mathrm{[km]}$')
@@ -175,7 +177,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.tight_layout()
 	plt.subplot(223)
 	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([h[0], h[n_depths-1]])
+	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,U$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel('$h\,\mathrm{[km]}$')
@@ -184,7 +186,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.tight_layout()
 	plt.subplot(224)
 	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([h[0], h[n_depths-1]])
+	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,V$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel('$h\,\mathrm{[km]}$')

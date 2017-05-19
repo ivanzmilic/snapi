@@ -14,6 +14,8 @@ input_nodes = sys.argv[5] #inferred values of the nodes
 
 print_maps_here = sys.argv[6]
 
+#mask = np.loadtxt(sys.argv[7])
+
 #matplotlib.rcParams['figure.figsize'] = 7, 10 #do I even want this?
 
 #l = np.loadtxt(input_lambda)
@@ -35,6 +37,7 @@ obs_cube = b["data"]
 
 #print obs_cube.shape
 
+l_offset = 660
 
 #print fitted_cube[0,0,3,:]
 
@@ -47,6 +50,10 @@ for i in range(0,1):
 		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
+		plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red')
+		plt.axvspan(725-l_offset,770-l_offset, alpha=0.5, color='red')
+		plt.axvspan(870-l_offset,905-l_offset, alpha=0.5, color='red')
+		plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		plt.subplot(212)
