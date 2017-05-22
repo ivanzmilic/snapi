@@ -258,7 +258,7 @@ int atmos_ppbez::optical_depth_scale(fp_t ***tau,fp_t ***op,fp_t t,fp_t p){
     }
   }
   // Then from there the optical depth scale:
-  tt[zl] = 0.0; // By default.
+  tt[zl] = 1E-8; // By default.
   for (int z = zl+dz;(z-zh-dz)*dz<0;z+=dz){
     fp_t C0 = oo[z] - (x3[z] - x3[z-dz]) / (-ct) / 2.0 * opp_derivative[z];
     fp_t C1 = oo[z-dz] + (x3[z] - x3[z-dz]) / (-ct) / 2.0 * opp_derivative[z-dz];

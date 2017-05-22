@@ -36,8 +36,10 @@ public:
   fp_t **** get_S();
   fp_t ** get_S(int,int);
   fp_t * get_lambda();
+  fp_t * get_lambda_to_fit();
   fp_t * get_mask();
   int get_n_lambda();
+  int get_n_lambda_to_fit();
   int get_nx();
   int get_ny();
 };

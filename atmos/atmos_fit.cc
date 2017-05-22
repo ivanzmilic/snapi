@@ -21,14 +21,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Perform LM fitting and return the best fitting spectrum
   // First extract the spectrum from the observation:
 
-  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
-  int nlambda = spectrum_to_fit->get_n_lambda();
-  fp_t * lambda = spectrum_to_fit->get_lambda();
-  fp_t * mask = spectrum_to_fit->get_mask();
+  fp_t ** S_to_fit = spectrum_to_fit->get_S(1,1);
+  int nlambda = spectrum_to_fit->get_n_lambda_to_fit();
+  fp_t * lambda = spectrum_to_fit->get_lambda_to_fit();
   set_grid(1);
-
-  //for (int l=1;l<=nlambda;++l)
-  //  fprintf(stderr,"%d %e \n",l,mask[l]);
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E-3;
@@ -37,41 +33,25 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t metric = 0.0;
   int iter = 0;
   int MAX_ITER = 20;
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0;
-  fp_t *noise = new fp_t [nlambda]-1;
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
+  fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = stokes_vector_to_fit[1][l] / 1E3;
-
-  // Series of files where we will store fitting related quantities. This is basically DEBUG  
-  FILE * fitting_log;
-  //fitting_log = fopen("fitting_log.txt", "w");
-  fp_t * chi_to_track=0; int n_to_track = 0;
-  //FILE * detailed_log;
-  //detailed_log = fopen("detailed_log.txt", "w");
-  //FILE * result;
-  //result = fopen("fitted_spectrum.dat", "w");
-  //FILE * nodes;
-  //nodes = fopen("fitted_nodes.dat", "w");
+   noise[l] = sqrt(S_to_fit[1][l]/1E6); 
   
   observable * current_obs;
-  
-  //fprintf(detailed_log,"Starting model:\n");
-  //model_to_fit->print_to_file(detailed_log);
   
   int N_parameters = model_to_fit->get_N_nodes_total();
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
-  for (iter = 1; iter <=MAX_ITER; ++iter){
+  for (iter=1;iter<=MAX_ITER;++iter){
 
-    int to_break = 0;
+    int to_break=0; // we are not breaking anything
   
-    //fp_t *** derivatives_to_parameters_num = ft3dim(1,N_parameters,1,nlambda,1,4); // DEBUG/test
-    //memset(derivatives_to_parameters_num[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t)); // DEBUG/test
     fp_t *** derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
     memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
 
-    int n_stokes_to_fit = 0;
+    int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
     for (int s=0;s<4;++s) 
       if (ws[s]) 
         ++n_stokes_to_fit;
@@ -86,37 +66,22 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
     // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
    
-    //model_to_fit->print();
     current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
- 
-    //obs_stokes_num_responses_to_nodes(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
-
-    // Very much DEBUG:
-    /*FILE * response_comparison;
-    response_comparison = fopen("responses_comparison.txt","w");
-    for (int p=1;p<=N_parameters;++p)
-      for (int l=1;l<=nlambda;++l)
-        for (int s=1;s<=4;++s)
-          fprintf(response_comparison,"%d %d %d %e %e %e \n",p,l,s,derivatives_to_parameters[p][l][s],derivatives_to_parameters_num[p][l][s],
-            (derivatives_to_parameters[p][l][s]-derivatives_to_parameters_num[p][l][s])/derivatives_to_parameters_num[p][l][s]);
-    fclose(response_comparison);*/
-    
-    fp_t ** S = current_obs->get_S(1,1);
+    fp_t ** S_current = current_obs->get_S(1,1);
     metric = 0.0;
     
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf = stokes_to_fit[s-1];
-        residual[(l-1)*n_stokes_to_fit+s] = stokes_vector_to_fit[stf][l] - S[stf][l]; 
+        residual[(l-1)*n_stokes_to_fit+s] = S_to_fit[stf][l] - S_current[stf][l]; 
         
-        metric += mask[l]*residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
+        metric += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
     }
-    //fprintf(detailed_log, "Start of iteration # : %d Chisq : %e \n", iter, metric);
 
     if (metric < 1.0){ // Maybe the solution is already good, in that case we stop:
       to_break =1;
-      del_ft2dim(S,1,4,1,nlambda);
+      del_ft2dim(S_current,1,4,1,nlambda);
       del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
       delete [](residual+1);
       break;
@@ -144,57 +109,35 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
     
-    //current_model->print();
-    //fprintf(detailed_log, "Model after the correction.\n");
-    //test_model->print_to_file(detailed_log);
 
     build_from_nodes(test_model);
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
-    // Print out everything that we are interesed in:
-    //fprintf(detailed_log,"Iteration # %d .Current spectrum:\n", iter);
-    
-    /*for (int l=1;l<=nlambda;++l){
-      fprintf(result,"%e", lambda[l]);
-      for (int s=1;s<=4;++s)
-        fprintf(result, " %e", S[s][l]);
-      fprintf(result,"\n");
-    }*/
-  
     // Compute new chi sq
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf=stokes_to_fit[s-1];
-        metric_reference += mask[l]*(stokes_vector_to_fit[stf][l] - S_reference[stf][l]) * (stokes_vector_to_fit[stf][l] - S_reference[stf][l])
+        metric_reference += (S_to_fit[stf][l] - S_reference[stf][l]) * (S_to_fit[stf][l] - S_reference[stf][l])
          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
        }
     
-    //fprintf(fitting_log, "%d %e \n", iter, metric);  
-    //fprintf(detailed_log, "Iteration # %d chisq after correction %e \n", iter, metric_reference);  
     
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
       lm_parameter /= 10.0;
       model_to_fit->cpy_values_from(test_model);
-      // Also add it to the array of tracked chisq:
-      chi_to_track = add_to_1d_array(chi_to_track,n_to_track,metric_reference);
-      if (n_to_track >=2)
-        if ((chi_to_track[n_to_track-2] - chi_to_track[n_to_track-1])/chi_to_track[n_to_track-1] < 1E-3)
-          to_break=1;
     }
     else{
       lm_parameter *= 10.0;
-      //fprintf(detailed_log, "Bad step! Undoing modification and increasing lm parameter.\n");  
     }
     delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
     del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
     del_ft2dim(J,1,nlambda*n_stokes_to_fit,1,N_parameters);
     del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
-    //del_ft3dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda,1,4);
-    del_ft2dim(S,1,4,1,nlambda);
+    del_ft2dim(S_current,1,4,1,nlambda);
     del_ft2dim(S_reference,1,4,1,nlambda);
     
     if(iter<MAX_ITER && !to_break)
@@ -211,24 +154,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       break;
   }
 
-  //for (int i=0;i<n_to_track;++i)
-  //  fprintf(fitting_log,"%d %e \n",i,chi_to_track[i]);
-
-  //fclose(fitting_log);
-  //fclose(detailed_log);
-  //fclose(result);
-
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
-  //fprintf(stderr, "fitting complete. Total number of iterations is : %d \n", iter-1);
-
-  // Clean-up:
-  del_ft2dim(stokes_vector_to_fit,1,4,1,nlambda);
-  delete[](lambda+1);
-  delete[](mask+1);
-  delete[](noise+1);
-  delete[]chi_to_track;
   
-  return current_obs;
+  // Clean-up:
+  del_ft2dim(S_to_fit,1,4,1,nlambda);
+  delete[](lambda+1);
+  delete[](noise+1);
+  
+  lambda = spectrum_to_fit->get_lambda();
+  nlambda = spectrum_to_fit->get_n_lambda();
+  observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
+  delete[](lambda+1);
+  return obs_to_return;
 }
 
 // ======================================================================================================================================================

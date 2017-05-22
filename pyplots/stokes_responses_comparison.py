@@ -95,7 +95,8 @@ h = h[0,:,0]# / 1E5
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
-hmax = 1200E5
+hmax = -6.0
+yname = '$\log\,\\tau_{500}$'
 
 for p in range(0,N_Parameters_to_plot):
 
@@ -117,7 +118,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,I$')
 		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-		plt.ylabel('$h\,\mathrm{[km]}$')
+		plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True)
 		plt.colorbar()
 		plt.tight_layout()
@@ -126,7 +127,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,Q$')
 		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-		plt.ylabel('$h\,\mathrm{[km]}$')
+		#plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[1,p,:,:], vmin = v_min[1], vmax = v_max[1], rasterized=True)
 		plt.colorbar()
 		plt.tight_layout()
@@ -135,7 +136,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.xlim([lambda_l, lambda_m])
 		plt.ylim([h[0], hmax])
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-		plt.ylabel('$h\,\mathrm{[km]}$')
+		#plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[2,p,:,:], vmin = v_min[2], vmax = v_max[2], rasterized=True)
 		plt.colorbar()
 		plt.tight_layout()
@@ -144,7 +145,7 @@ for p in range(0,N_Parameters_to_plot):
 		plt.ylim([h[0], hmax])
 		plt.title('$\mathrm{Stokes}\,V$')
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-		plt.ylabel('$h\,\mathrm{[km]}$')
+		plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[3,p,:,:], vmin = v_min[3], vmax = v_max[3], rasterized=True)
 		plt.colorbar()
 		plt.tight_layout()
@@ -162,7 +163,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,I$')
 	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel('$h\,\mathrm{[km]}$')
+	plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True)
 	plt.colorbar()
 	plt.tight_layout()
@@ -171,7 +172,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,Q$')
 	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel('$h\,\mathrm{[km]}$')
+	#plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[1,p,:,:], vmin = v_min[1], vmax = v_max[1], rasterized=True)
 	plt.colorbar()
 	plt.tight_layout()
@@ -180,7 +181,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,U$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel('$h\,\mathrm{[km]}$')
+	plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[2,p,:,:], vmin = v_min[2], vmax = v_max[2], rasterized=True)
 	plt.colorbar()
 	plt.tight_layout()
@@ -189,7 +190,7 @@ for p in range(0,N_Parameters_to_plot):
 	plt.ylim([hmax, h[n_depths-1]])
 	plt.title('$\mathrm{Stokes}\,V$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel('$h\,\mathrm{[km]}$')
+	#plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[3,p,:,:], vmin = v_min[3], vmax = v_max[3], rasterized=True)
 	plt.colorbar()
 	plt.tight_layout()

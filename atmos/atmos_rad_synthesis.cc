@@ -166,12 +166,17 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);// all atoms now have pointer to this atmosphere
 
-  if(tau_grid) compute_op_referent_derivative();
+  compute_op_referent();
+  compute_tau_referent();
+  set_grid(1);
 
+  if(tau_grid) compute_op_referent_derivative();
+  
   nltepops();
   respsetup();
   ne_lte_derivatives();
   //compute_nlte_population_responses_numerical(x3l,x3h);
+
   compute_nlte_population_responses(0);//
 
   io.msg(IOL_INFO,"atmosphere::obs: synthesizing observable and responses: theta=%f phi=%f\n",theta,phi);

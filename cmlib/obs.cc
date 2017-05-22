@@ -155,11 +155,24 @@ fp_t ** observable::get_S(int i, int j){
 fp_t * observable::get_lambda(){
   fp_t * lambda_copy;
   lambda_copy = new fp_t [nlambda]-1;
-  //printf("I am trying to copy an array of length %d \n", nlambda);
   memcpy(lambda_copy+1,lambda+1,nlambda*sizeof(fp_t));
-  //printf("Does it work?\n");
   return lambda_copy;
 }
+
+fp_t * observable::get_lambda_to_fit(){
+  fp_t * lambda_copy;
+  int nl_to_fit = get_n_lambda_to_fit();
+  lambda_copy = new fp_t [nl_to_fit]-1;
+  int lf=1;
+  for (int l=1;l<=nlambda;++l)
+    if (mask[l]){
+      lambda_copy[lf] = lambda[l];
+      ++lf;
+    }
+
+  return lambda_copy;
+}
+
 
 fp_t * observable::get_mask(){
   fp_t * mask_copy;
@@ -170,6 +183,12 @@ fp_t * observable::get_mask(){
 
 int observable::get_n_lambda(){
   return nlambda;
+}
+int observable::get_n_lambda_to_fit(){
+  int nl=0;
+  for (int l=1;l<=nlambda;++l)
+    if (mask[l]) nl+=1;
+  return nl;
 }
 
 void observable::write(const char *name,io_class &io,int i, int j)
