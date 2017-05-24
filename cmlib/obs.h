@@ -35,6 +35,7 @@ public:
   observable* extract(int,int,int,int,int,int);
   fp_t **** get_S();
   fp_t ** get_S(int,int);
+  fp_t ** get_S_to_fit(int,int);
   fp_t * get_lambda();
   fp_t * get_lambda_to_fit();
   fp_t * get_mask();

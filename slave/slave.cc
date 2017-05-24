@@ -121,15 +121,16 @@ int main(int argc,char *argv[])
 
           class observable *fit=atmos->stokes_lm_fit(obs,3.14,0.0,mod);
           
-          int32_t rsz=mod->size(io);
+          int32_t rsz=atmos->size(io);
+          rsz+=mod->size(io);
           rsz+=fit->size(io);
           rsz+=3*sizeof(int32_t);
           uint08_t *data=new uint08_t [rsz];
-          offs=mod->pack(data,0,io);
+          offs=atmos->pack(data,0,io);
+          offs+=mod->pack(data+offs,0,io);
           offs+=fit->pack(data+offs,0,io);
           delete fit;
           delete[](lambda+1);
-          
 //
           struct tms t_end;
           clock_t t1=times(&t_end);

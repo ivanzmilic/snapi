@@ -401,6 +401,10 @@ int job_class::stop(void)
     int nl = ji.lh[o]-ji.ll[o]+1;
     fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,nl);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
+
+    int ND=21;
+    int NP=7;
+    fp_t ****fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -413,6 +417,7 @@ int job_class::stop(void)
             chunks[x][y]->free(); // free up the compressed  buffer in swap mode
 
             int32_t offs=0;
+            class atmosphere *atmos = atmos_new(data,offs,0,*io);
             class model* mod=model_new(data,offs,0,*io);
             class observable *obs=obs_new(data,offs,0,*io);
             delete[] data;
@@ -455,6 +460,10 @@ int job_class::stop(void)
             delete obs;
             test_cube->add_model(mod,x,y);
             delete mod;
+            fp_t ** atm_array = atmos->return_as_array();
+            memcpy(fitted_atmos[x][y][1]+1,atm_array[1]+1,ND*NP*sizeof(fp_t));
+            del_ft2dim(atm_array,1,NP,1,ND);
+            delete atmos;
          }
        }else{
          chunks[x][y]->free(); // free memory in case of read error        
@@ -462,10 +471,16 @@ int job_class::stop(void)
        }
 //
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
+    
     test_cube->simple_print("output_mag_test.dat");
-    write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
     delete test_cube;
+    
+    write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
+
+    write_file((char*)"mag_test_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
+    del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
+
 
   }
   del_v2dim((void***)chunks,1,nx,1,ny);

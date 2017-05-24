@@ -827,13 +827,15 @@ int model::correct(fp_t * correction){
   // Check temperatures:
   for (int i=1;i<=N_nodes_temp;++i){
     if (temp_nodes_temp[i] < 3400.0) temp_nodes_temp[i] = 3400.0; // Lowest possible T
-    if (temp_nodes_temp[i] > 10000.0) temp_nodes_temp[i] = 10000.0; // Highest possible T (?)
+    if (temp_nodes_temp[i] > 12000.0) temp_nodes_temp[i] = 12000.0; // Highest possible T (?)
   }
-  for (int i=1;i<=N_nodes_vt;++i)
+  for (int i=1;i<=N_nodes_vt;++i){
     if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
+    if (vt_nodes_vt[i] > 5E5) vt_nodes_vt[i] = 5E5; // highest possible vt
+  }
   for (int i=1;i<=N_nodes_B;++i){
     if (B_nodes_B[i] < 0) B_nodes_B[i] *= (-1.0);
-    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0;
+    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0; // highest possible B
   }
   /*for (int i=1;i<=N_nodes_theta;++i){
     if (theta_nodes_theta[i] < 0) theta_nodes_theta[i] *= -1.0;

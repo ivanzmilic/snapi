@@ -44,13 +44,13 @@ atmol::atmol(const char *name_in,const char *id_in,io_class &io_in):io(io_in)
 {
   name=dup_str(name_in);
   id=dup_str(id_in);
-  io_in.msg(IOL_INFO,"atmol::atmol: %s [%s]\n",name,id);
+  io_in.msg(IOL_DEB1,"atmol::atmol: %s [%s]\n",name,id);
 }
 
 atmol::atmol(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):io(io_in)
 {
   offs+=unpack(buf+offs,do_swap,io_in);
-  io_in.msg(IOL_INFO,"atmol::atmol: %s [%s]\n",name,id);
+  io_in.msg(IOL_DEB1,"atmol::atmol: %s [%s]\n",name,id);
 }
 
 atmol::~atmol(void)

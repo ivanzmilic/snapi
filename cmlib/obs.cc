@@ -152,6 +152,23 @@ fp_t ** observable::get_S(int i, int j){
   return S_copy;
 }
 
+fp_t ** observable::get_S_to_fit(int i, int j){
+
+  fp_t ** S_copy;
+  int nl_to_fit = get_n_lambda_to_fit();
+  S_copy = ft2dim(1,ns,1,nlambda);
+  int lf=1;
+  for (int l=1;l<=nlambda;++l)
+    if (mask[l]){
+      for (int s=1;s<=4;++s) S_copy[s][lf] = S[i][j][s][l];
+      ++lf;
+  }
+
+  return S_copy;
+}
+
+
+
 fp_t * observable::get_lambda(){
   fp_t * lambda_copy;
   lambda_copy = new fp_t [nlambda]-1;

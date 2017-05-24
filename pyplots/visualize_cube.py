@@ -65,27 +65,6 @@ for i in range(0,1):
 		plt.tight_layout()
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
 		
-#plt.cla()		
-
-#now let's start by plotting observed map
-
-#obsmap = plt.figure()
-#obsmap.ion()
-#obsmap.clf()
-#obsmap.pcolormesh(obs_cube[:,:,0,0]) #plots stokes I at the first wavelength by default
-
-#current_spectrum = plt.figure()
-#current_spectrum.ion()
-#current_spectrum.clf()
-#current_spectrum.subplot(221)
-#current_spectrum.plt(obs_cube[0,0,0,l_offset:l_offset+nlambda],'o')
-#current_spectrum.subplot(222)
-#current_spectrum.plt(obs_cube[0,0,1,l_offset:l_offset+nlambda],'o')
-#current_spectrum.subplot(223)
-#current_spectrum.plt(obs_cube[0,0,2,l_offset:l_offset+nlambda],'o')
-#current_spectrum.subplot(224)
-#current_spectrum.plt(obs_cube[0,0,3,l_offset:l_offset+nlambda],'o')
-#current_spectrum.tight_layout()
 
 if (NX<=1 and NY<=1):
 	quit();
@@ -96,15 +75,11 @@ parameters = np.loadtxt(input_nodes,unpack=True)
 temp = parameters.shape
 NN = temp[0] #total number of nodes
 
-
 parameters = parameters.reshape(NN,NX,NY) #we do this without checking but we should 
 										  #probably check to see if dimensions match
-
 parameters[7] /= 1E5 #convert to km/s
 
 #Hard-coded plotting of some images.
-
-
 
 barshrink = 0.8
 
@@ -113,6 +88,8 @@ plt.cla()
 
 panelsx=2
 panelsy=4
+
+l_core = 175
 
 
 plt.figure(figsize=[10,12])
@@ -150,7 +127,7 @@ plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Continuum intensity')
 
-i_core = obs_cube[:,:,0,160].transpose()
+i_core = obs_cube[:,:,0,l_core].transpose()
 i_core_mean = np.mean(i_core)
 i_core /= i_core_mean
 sigma = np.std(i_cont)
@@ -158,14 +135,24 @@ sigma = np.std(i_cont)
 plt.subplot(panelsy*100+panelsx*10+6)
 plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Na D1 line core intensity')
+plt.title('Observed Na D1 line core intensity')
 
-parameters[8] *= np.cos(parameters[9]*np.pi/180.0)
+#parameters[8] *= np.cos(parameters[9]*np.pi/180.0)
 
+#plt.subplot(panelsy*100+panelsx*10+2)
+#plt.imshow(parameters[8].transpose(),origin='lower',vmin=-1000,vmax=1000)
+#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+#plt.title('$\mathrm{B\,[Gauss]}$')
+
+i_core = fitted_cube[:,:,0,l_core]
+i_core_mean = np.mean(i_core)
+i_core /= i_core_mean
+sigma = np.std(i_cont)
 plt.subplot(panelsy*100+panelsx*10+2)
-plt.imshow(parameters[8].transpose(),origin='lower',vmin=-1000,vmax=1000)
+plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\mathrm{B\,[Gauss]}$')
+plt.title('Fitted Na D1 line core intensity')
+
 
 
 plt.subplot(panelsy*100+panelsx*10+4)

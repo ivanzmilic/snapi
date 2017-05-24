@@ -373,11 +373,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
 
-  compute_op_referent();
-  compute_tau_referent();
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  printf("%d %e \n",x3i,log10(-tau_referent[x1l][x2l][x3i]));
-  set_grid(0);
   nltepops();
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection

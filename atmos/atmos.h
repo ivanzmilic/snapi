@@ -283,6 +283,8 @@ public:
   fp_t get_op_referent_der(int p, int x3k, int x1i, int x2i, int x3i){
     return op_referent_derivative[p][x3k][x1i][x2i][x3i];
   };
+  int get_N_depths();
+  fp_t ** return_as_array();
 //
 // ----------------------------------------------------------------------------------------------------------------
 // -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------

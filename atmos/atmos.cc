@@ -6,6 +6,7 @@
 #include "pack.h"
 #include "struts.h"
 #include "const.h"
+#include "math.h"
 
 //#include "obs/obs.h"
 #include "atmol/atmol.h"
@@ -210,7 +211,7 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 //
   offs+=::unpack(buf+offs,natm,do_swap);
   offs+=::pack(buf+offs,boundary_condition_for_rt,do_swap);
-  io_in.msg(IOL_INFO,"atmosphere::atmosphere: natmol=%d\n",natm);
+  io_in.msg(IOL_DEB1,"atmosphere::atmosphere: natmol=%d\n",natm);
   atml=new atmol* [natm];
   for(int a=0;a<natm;++a) atml[a]=atmol_new(buf,offs,do_swap,atml,a,io_in);
 //
@@ -324,6 +325,28 @@ int atmosphere::set_Nt(int x1i, int x2i, int x3i, fp_t Nt_in){
 
 fp_t atmosphere::get_vt(int x1i, int x2i, int x3i){
   return Vt[x1i][x2i][x3i];
+}
+
+int atmosphere::get_N_depths(){
+  return x3h-x3l+1;
+}
+
+fp_t ** atmosphere::return_as_array(){
+  fp_t ** atmos;
+  int ND = x3h-x3l+1;
+  int NP = 7;
+  atmos = ft2dim(1,NP,1,ND);
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    int i=x3i-x3l+1;
+    atmos[1][i] = log10(-tau_referent[x1l][x2l][x3i]);
+    atmos[2][i] = T[x1l][x2l][x3i];
+    atmos[3][i] = Vt[x1l][x2l][x3i];
+    atmos[4][i] = Vz[x1l][x2l][x3i];
+    atmos[5][i] = Bx[x1l][x2l][x3i];
+    atmos[6][i] = By[x1l][x2l][x3i];
+    atmos[7][i] = Bz[x1l][x2l][x3i];
+  }
+  return atmos;
 }
 
 int atmosphere::build_from_nodes(model *){
