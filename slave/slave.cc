@@ -106,12 +106,9 @@ int main(int argc,char *argv[])
           int32_t size;
           uint08_t *ubuf=z_uncompress(buf,size,0,io); // decompress results
           delete[] buf;
-          if(atmos) delete atmos;         // cleanup old structure
           int32_t offs=0;
           atmos=atmos_new(ubuf,offs,swap_endian,io);  // create atmospheric structure
-          if(mod) delete mod;         // cleanup old structure
           mod=model_new(ubuf,offs,swap_endian,io);  // create model
-          if(obs) delete obs;         // cleanup old structure
           obs=obs_new(ubuf,offs,swap_endian,io);  // create observbable
           delete[] ubuf;
           if(offs!=size) io.msg(IOL_ERROR,"inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,size);
@@ -129,8 +126,13 @@ int main(int argc,char *argv[])
           offs=atmos->pack(data,0,io);
           offs+=mod->pack(data+offs,0,io);
           offs+=fit->pack(data+offs,0,io);
+          // I prefer deleting immediately after. 
           delete fit;
+          delete mod;
+          delete atmos;
+          delete obs;
           delete[](lambda+1);
+          
 //
           struct tms t_end;
           clock_t t1=times(&t_end);

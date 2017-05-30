@@ -166,10 +166,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);// all atoms now have pointer to this atmosphere
 
-  compute_op_referent();
-  compute_tau_referent();
-  set_grid(1);
-
   if(tau_grid) compute_op_referent_derivative();
   
   nltepops();
@@ -366,11 +362,9 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   respclean();
   popclean(); // all done
-  // We can put this here. Does this need a separate function?
-  //printf("Hi Andrej, how are you?\n");
+  
   if (tau_grid) del_ft5dim(op_referent_derivative,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-  //printf("Hi Andrej, how are you?\n");
-
+  
   io.msg(IOL_INFO,"atmosphere::obs_stokes_responses: observable and responses synthesized...\n");
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
