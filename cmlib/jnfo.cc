@@ -27,6 +27,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
   if(nm){
     models=new model* [nm];
     for(int m=0;m<nm;++m) models[m]=model_new(data,offs,swap_endian,io);
+
   }else models=0;
   
 //
@@ -54,7 +55,16 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
       offs+=unpack(data+offs,weights[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
       offs+=unpack(data+offs,name[o]);
     }
- }
+  }
+  if (nm){
+    offs+=unpack(data+offs,read_model_from_file=new int [nm],0,nm-1,swap_endian);
+    input_models = new char*[nm];
+    for (int m=0;m<nm;++m)
+      if (read_model_from_file[m])
+        offs+=unpack(data+offs,input_models[m]);
+      else 
+        input_models[m]=0;
+  }
 //
   offs+=unpack(data+offs,uid,swap_endian);
   offs+=unpack(data+offs,gid,swap_endian);
@@ -83,6 +93,12 @@ jnfo::~jnfo(void)
   if (nm){
     for (int m=0;m<nm;++m) delete models[m];
     delete[]models;
+    for (int m=0;m<nm;++m)
+      if (input_models[m])
+        delete[]input_models[m];
+    delete[]input_models;
+    delete[]read_model_from_file;
+
   }
   if(no){
     if(az) delete[] az;
@@ -127,6 +143,12 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
       usize+=strlen(name[o])+1;        // file name
     }
   }
+  if (nm){
+    usize +=nm*sizeof(int); // read_model_from_file
+    for (int m=0;m<nm;++m)
+      if (input_models[m])
+        usize+=strlen(input_models[m])+1;
+  }
   usize+=sizeof(uid_t)+sizeof(gid_t);            // uid,gid
   usize+=strlen(uname)+1;                        // uname
   usize+=4*sizeof(uint08_t);                     // cdcl,nmth,nsth,nsln
@@ -135,6 +157,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   int offs=pack(data,na,swap_endian);
   for(int a=0;a<na;++a) offs+=atmos[a]->pack(data+offs,swap_endian,io);
+  
   offs+=pack(data+offs,nm,swap_endian);
   for(int m=0;m<nm;++m) offs+=models[m]->pack(data+offs,swap_endian,io);
 //  io.msg(IOL_INFO,"jnfo::compress: %d %d\n",offs,usize);
@@ -159,6 +182,13 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
       offs+=pack(data+offs,name[o]);
     }
   }
+  if (nm){
+    offs+=pack(data+offs,read_model_from_file,0,nm-1,swap_endian);
+    for (int m=0;m<nm;++m)
+      if (read_model_from_file[m])
+        offs+=pack(data+offs,input_models[m]);
+  }
+
 //
   offs+=pack(data+offs,uid,swap_endian);
   offs+=pack(data+offs,gid,swap_endian);

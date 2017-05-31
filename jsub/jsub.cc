@@ -102,6 +102,17 @@ int main(int argc,char *argv[])
   ji.nm = cfg.nm;
   ji.models = new model* [ji.nm];
   for (int m=0;m<ji.nm;++m) ji.models[m]=model_new(cfg.mod[m],io);
+
+  ji.read_model_from_file = new int [ji.nm];
+  ji.input_models = new char* [ji.nm];
+  for (int m=0;m<ji.nm;++m){ 
+    ji.read_model_from_file[m] = cfg.mod[m]->read_from_file;
+    if (ji.read_model_from_file[m])
+      ji.input_models[m]=strcpy(new char [strlen(cfg.mod[m]->filename)+1],cfg.mod[m]->filename);
+    else 
+      ji.input_models[m]=0;
+
+  }
 //
   ji.uid=getuid();
   ji.gid=getgid();

@@ -40,6 +40,8 @@ struct mcfg{                  // configuration for model, which consists from no
   char *id;
   parcfg **par;
   int np;
+  int read_from_file; // whetwher to read cube of models from file. Needed for multi-step approach.
+  char *filename;
   mcfg(char *mdata,struct gcfg &gdata,io_class&);
   ~mcfg(void);
 };

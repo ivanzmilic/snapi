@@ -329,6 +329,12 @@ int job_class::start(void)
            fprintf(output,"%d %1.10e \n", l,lambda_to_fit[l]);
          fclose(output);
          delete[](lambda_to_fit+1);
+
+         // If model is supplied as input file, read it from there. For the moment we are only concerned with first model
+         fp_t *** model_cube = 0;
+         if (ji.read_model_from_file[0]){
+           model_cube = read_file(ji.input_models[0],n1,n2,n3,*io); 
+         }
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
@@ -337,16 +343,19 @@ int job_class::start(void)
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
-             chk->pack(ji.atmos[a],ji.models[0],obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
+             class model * model_to_fit = clone(ji.models[0]);
+             if (ji.read_model_from_file[0])
+               model_to_fit->set_parameters(model_cube[x][y]);
+               
+             chk->pack(ji.atmos[a],model_to_fit,obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
 
              pthread_mutex_lock(&active_lock);
              ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
              pthread_mutex_unlock(&active_lock);
-           }
+          }
+          if (model_cube) del_ft3dim(model_cube,1,n1,1,n2,1,n3);
        }else{
          ji.atmos[a]->set_grid(0);
-         //ji.atmos[a]->build_from_nodes(ji.models[0]);
-         //obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
          obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
          obs->write(ji.name[o],*io,1,1);
          exit(0);
@@ -472,9 +481,11 @@ int job_class::stop(void)
 //
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
     
-    test_cube->simple_print("output_mag_test.dat");
-    delete test_cube;
-    
+    int np;
+    fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
+    write_file((char*)"mag_test_nodes.f0",nodes_cube,ny,nx,np,*io);
+    del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
+
     write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
 

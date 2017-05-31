@@ -19,11 +19,11 @@ print_maps_here = sys.argv[7]
 
 #matplotlib.rcParams['figure.figsize'] = 7, 10 #do I even want this?
 
-l_fit = np.loadtxt(input_lambdaf,unpack = True)
-l_obs = np.loadtxt(input_lambdao,unpack = True)
+#l_fit = np.loadtxt(input_lambdaf,unpack = True)
+#l_obs = np.loadtxt(input_lambdao,unpack = True)
 
-l_fit[1]*=1E8
-l_obs[1]*=1E8
+#l_fit[1]*=1E8
+#l_obs[1]*=1E8
 
 a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
@@ -82,6 +82,8 @@ atmospheres = a_read["data"]
 
 parameters = parameters.reshape(NN,NX,NY) #we do this without checking but we should 
 										  #probably check to see if dimensions match
+
+parameters[6] /= 1E5 #convert to km/s										  
 parameters[7] /= 1E5 #convert to km/s
 
 #Hard-coded plotting of some images.
@@ -95,12 +97,14 @@ plt.cla()
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 panelsx=2
-panelsy=4
+panelsy=5
 
 l_core = 175
 
 
-plt.figure(figsize=[10,12])
+plt.figure(figsize=[10,15])
+
+#Nodes panels:
 
 plt.subplot(panelsy*100+panelsx*10+1)
 plt.imshow(parameters[2].transpose(),origin='lower')
@@ -122,41 +126,58 @@ plt.imshow(parameters[5].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = 0.5$')
 
+plt.subplot(panelsy*100+panelsx*10+9)
+plt.imshow(parameters[6].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Microturbulent velocity')
+
+plt.subplot(panelsy*100+panelsx*10+2)
+plt.imshow(parameters[7].transpose(),origin='lower')
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('$\mathrm{v_{los}\,[km/s]}$')
+
+# Right hand side panels:
+
 i_cont = obs_cube[:,:,0,30].transpose()
 i_c_mean = np.mean(i_cont)
 i_cont /= i_c_mean
 sigma = np.std(i_cont)
 
-plt.subplot(panelsy*100+panelsx*10+8)
+plt.subplot(panelsy*100+panelsx*10+4)
 plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Continuum intensity')
+
+i_cont = fitted_cube[:,:,0,30]
+i_c_mean = np.mean(i_cont)
+i_cont /= i_c_mean
+sigma = np.std(i_cont)
+
+plt.subplot(panelsy*100+panelsx*10+6)
+plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Fitted continuum intensity')
 
 i_core = obs_cube[:,:,0,l_core].transpose()
 i_core_mean = np.mean(i_core)
 i_core /= i_core_mean
 sigma = np.std(i_cont)
 
-plt.subplot(panelsy*100+panelsx*10+6)
+plt.subplot(panelsy*100+panelsx*10+8)
 plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Observed Na D1 line core intensity')
 
 
-i_core = fitted_cube[:,:,0,l_core]
-i_core_mean = np.mean(i_core)
-i_core /= i_core_mean
-sigma = np.std(i_cont)
-plt.subplot(panelsy*100+panelsx*10+2)
-plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Fitted Na D1 line core intensity')
+#i_core = fitted_cube[:,:,0,l_core]
+#i_core_mean = np.mean(i_core)
+#i_core /= i_core_mean
+#sigma = np.std(i_cont)
+#plt.subplot(panelsy*100+panelsx*10+10)
+#plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
+#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+#plt.title('Fitted Na D1 line core intensity')
 
-
-plt.subplot(panelsy*100+panelsx*10+4)
-plt.imshow(parameters[7].transpose(),origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\mathrm{v_{los}\,[km/s]}$')
 
 plt.tight_layout()
 plt.savefig(print_maps_here+'.eps',fmt='eps')

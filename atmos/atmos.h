@@ -420,6 +420,7 @@ public:
   fp_t *** get_response_to_parameters();
 
   int correct(fp_t * correction);
+  int set_parameters(fp_t * par_input);
   
   int cpy_values_from(model *);
 
@@ -450,7 +451,10 @@ public:
   modelcube(model*, int nx, int ny);
   ~modelcube();
   void add_model(model*,int i, int j);
+  fp_t *** get_data(int &nx_in, int &ny_in, int &np_in);
+  void set_data(fp_t ***);
   void simple_print(const char*);
+
   //void anaprint(const * char,);
 };
 

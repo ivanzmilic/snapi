@@ -27,6 +27,8 @@ struct jnfo{
   fp_t *az,*el,**lambda;
   int *nlambda;
   char **name;
+  int *read_model_from_file;
+  char **input_models;
   int *to_invert; ///whether to invert or not.
   int *xl,*xh,*yl,*yh,*ll,*lh;
   int *return_model; //whether to return model as the result of the inversion

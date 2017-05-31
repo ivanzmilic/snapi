@@ -204,6 +204,18 @@ mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)
 //
   if(!(id=get_arg(mdata,"ID",0))) io.msg(IOL_ERROR|IOL_FATAL,"mod config: model has no ID\n");
 //
+  if(char *tmp_str=get_arg(mdata,"READ_FROM_FILE",0)){
+    get_number(tmp_str,read_from_file);
+    delete[] tmp_str;
+  }else read_from_file=0; // default
+  
+  if(!(filename=get_arg(mdata,"FILENAME",0)) && read_from_file){ 
+    io.msg(IOL_ERROR|IOL_FATAL,"mod config: filename needed but not specified\n");
+    filename = 0;
+  }else filename=0;
+  if (!read_from_file)
+    filename=0;
+  
   np=0;
   par=0;
   if(pars){
@@ -223,7 +235,9 @@ mcfg::~mcfg(void)
     for (int p=0;p<np;++p)
       if (par[p]) delete par[p];
     delete []par;
-  }  
+  }
+  if (filename) delete[] filename;
+
 }
 
 parcfg::parcfg(char* pardata, io_class &io){

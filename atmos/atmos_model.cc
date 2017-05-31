@@ -848,6 +848,19 @@ int model::correct(fp_t * correction){
   return 0;
 }
 
+int model::set_parameters(fp_t * par_input){
+
+  // This functions sets the values of the parameters to the values specified in the input array
+  int N_parameters = N_nodes_temp+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta+N_nodes_phi;
+  
+  for (int i=1;i<=N_parameters;++i){
+    fp_t old = get_parameter(i);
+    fp_t difference = par_input[i]-old;
+    perturb_node_value(i,difference);
+  }
+  return 0;
+}
+
 model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){
   return new model(N_nodes_temp_in, N_nodes_vt_in, N_nodes_vs_in, N_nodes_B_in);
 }
@@ -1031,3 +1044,20 @@ void modelcube::simple_print(const char* printhere){
   fclose(output);
 }
 
+fp_t *** modelcube::get_data(int &nx_in, int &ny_in, int &np_in){
+  // Returns the copy of the datacube, which we write down then. 
+  // This might get us in trouble with memory with larger cubes, but datacube is private so we 
+  // cannot really return pointer, can we. Maybe we can and we should, not sure though.
+
+  fp_t *** data_copy = ft3dim(1,nx,1,ny,1,N_parameters);
+  memcpy(data_copy[1][1]+1,data[1][1]+1,nx*ny*N_parameters*sizeof(fp_t));
+  nx_in = nx;
+  ny_in = ny;
+  np_in = N_parameters;
+
+  return data_copy;
+}
+
+void modelcube::set_data(fp_t *** data_in){
+  memcpy(data[1][1]+1,data_in[1][1]+1,nx*ny*N_parameters*sizeof(fp_t));
+}
