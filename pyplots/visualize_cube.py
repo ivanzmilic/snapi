@@ -71,7 +71,8 @@ if (NX<=1 and NY<=1):
 
 
 #Here we read the parameter map.
-parameters = np.loadtxt(input_nodes,unpack=True)
+pin = pyana.fzread(input_nodes)
+parameters = pin["data"]
 temp = parameters.shape
 NN = temp[0] #total number of nodes
 
@@ -80,11 +81,8 @@ NN = temp[0] #total number of nodes
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
 
-parameters = parameters.reshape(NN,NX,NY) #we do this without checking but we should 
-										  #probably check to see if dimensions match
-
-parameters[6] /= 1E5 #convert to km/s										  
-parameters[7] /= 1E5 #convert to km/s
+parameters[4] /= 1E5 #convert to km/s										  
+parameters[5] /= 1E5 #convert to km/s
 
 #Hard-coded plotting of some images.
 
@@ -107,32 +105,32 @@ plt.figure(figsize=[10,15])
 #Nodes panels:
 
 plt.subplot(panelsy*100+panelsx*10+1)
-plt.imshow(parameters[2].transpose(),origin='lower')
+plt.imshow(parameters[0],origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log\,\\tau = -5$')
 
 plt.subplot(panelsy*100+panelsx*10+3)
-plt.imshow(parameters[3].transpose(),origin='lower')
+plt.imshow(parameters[1],origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = -3.2$')
 
 plt.subplot(panelsy*100+panelsx*10+5)
-plt.imshow(parameters[4].transpose(),origin='lower')
+plt.imshow(parameters[2],origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log\,\\tau = -1.4$')
 
 plt.subplot(panelsy*100+panelsx*10+7)
-plt.imshow(parameters[5].transpose(),origin='lower')
+plt.imshow(parameters[3],origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Temperature at $\log \\tau = 0.5$')
 
 plt.subplot(panelsy*100+panelsx*10+9)
-plt.imshow(parameters[6].transpose(),origin='lower')
+plt.imshow(parameters[4],origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Microturbulent velocity')
 
 plt.subplot(panelsy*100+panelsx*10+2)
-plt.imshow(parameters[7].transpose(),origin='lower')
+plt.imshow(parameters[5].transpose(),origin='lower')
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('$\mathrm{v_{los}\,[km/s]}$')
 
@@ -169,14 +167,14 @@ plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Observed Na D1 line core intensity')
 
 
-#i_core = fitted_cube[:,:,0,l_core]
-#i_core_mean = np.mean(i_core)
-#i_core /= i_core_mean
-#sigma = np.std(i_cont)
-#plt.subplot(panelsy*100+panelsx*10+10)
-#plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
-#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-#plt.title('Fitted Na D1 line core intensity')
+i_core = fitted_cube[:,:,0,l_core]
+i_core_mean = np.mean(i_core)
+i_core /= i_core_mean
+sigma = np.std(i_cont)
+plt.subplot(panelsy,panelsx,10)
+plt.imshow(i_core,origin='lower',vmin=1.0-3*sigma,vmax=1.0+3*sigma)
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('Fitted Na D1 line core intensity')
 
 
 plt.tight_layout()
