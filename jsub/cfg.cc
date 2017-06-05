@@ -208,14 +208,15 @@ mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)
     get_number(tmp_str,read_from_file);
     delete[] tmp_str;
   }else read_from_file=0; // default
-  
-  if(!(filename=get_arg(mdata,"FILENAME",0)) && read_from_file){ 
-    io.msg(IOL_ERROR|IOL_FATAL,"mod config: filename needed but not specified\n");
-    filename = 0;
-  }else filename=0;
+  if (read_from_file){
+    if(!(filename=get_arg(mdata,"FILENAME",0))){ 
+      io.msg(IOL_ERROR|IOL_FATAL,"mod config: filename needed but not specified\n");
+      filename = 0;
+    }
+  }
   if (!read_from_file)
     filename=0;
-  
+
   np=0;
   par=0;
   if(pars){
