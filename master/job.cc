@@ -347,7 +347,7 @@ int job_class::start(void)
              class model * model_to_fit = clone(ji.models[0]);
              if (ji.read_model_from_file[0]){
                model_to_fit->set_parameters(model_cube[x][y]);
-               model_to_fit->print();
+               //model_to_fit->print();
              }
                
              chk->pack(ji.atmos[a],model_to_fit,obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
