@@ -171,6 +171,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   }
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
+
+  model_to_fit->print();
   
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);

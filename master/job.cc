@@ -345,8 +345,10 @@ int job_class::start(void)
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
              class model * model_to_fit = clone(ji.models[0]);
-             if (ji.read_model_from_file[0])
+             if (ji.read_model_from_file[0]){
                model_to_fit->set_parameters(model_cube[x][y]);
+               model_to_fit->print();
+             }
                
              chk->pack(ji.atmos[a],model_to_fit,obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
 
@@ -412,7 +414,7 @@ int job_class::stop(void)
     fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,nl);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
 
-    int ND=21;
+    int ND = ji.atmos[0]->get_N_depths();
     int NP=7;
     fp_t ****fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
     
