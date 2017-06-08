@@ -24,7 +24,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t ** S_to_fit = spectrum_to_fit->get_S_to_fit(1,1);
   int nlambda = spectrum_to_fit->get_n_lambda_to_fit();
   fp_t * lambda = spectrum_to_fit->get_lambda_to_fit();
-  
+
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
@@ -71,7 +71,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       // These quantities are only re-computed if the model has been modified:
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+      current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
       S_current = current_obs->get_S(1,1);
     }
     
@@ -119,7 +119,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
-    
     build_from_nodes(test_model);
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     fp_t ** S_reference = reference_obs->get_S(1,1);
@@ -148,6 +147,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       lm_parameter *= 10.0;
       corrected = 0;
     }
+
+    //printf("Iter %d \n",iter);
+    //model_to_fit->print();
 
     if(corrected || to_break || iter==MAX_ITER){
       

@@ -29,7 +29,7 @@ a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
 
-l_offset = 659
+l_offset = 650
 
 
 #keep in mind this one is transposed:
@@ -50,10 +50,10 @@ for i in range(0,1):
 		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
-		plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red') #masks
-		plt.axvspan(725-l_offset,770-l_offset, alpha=0.5, color='red')
-		plt.axvspan(870-l_offset,905-l_offset, alpha=0.5, color='red')
-		plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
+		#plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red') #masks
+		#plt.axvspan(725-l_offset,770-l_offset, alpha=0.5, color='red')
+		#plt.axvspan(870-l_offset,905-l_offset, alpha=0.5, color='red')
+		#plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		plt.subplot(212)
