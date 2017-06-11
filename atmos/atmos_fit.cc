@@ -69,9 +69,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (corrected){
       
       // These quantities are only re-computed if the model has been modified:
+      
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
+      
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+      //printf("Computed stokes responses to nodes...\n");
       S_current = current_obs->get_S(1,1);
     }
     
@@ -107,6 +110,15 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
     }
 
+    /*FILE * test_output = fopen("jacobian.txt","w");
+    for (int i=1;i<=N_parameters;++i) 
+      for (int l=1;l<=nlambda;++l) 
+        for (int s=1;s<=n_stokes_to_fit;++s){
+          int stf = stokes_to_fit[s-1];
+            fprintf(test_output,"%e \n",J[(l-1)*n_stokes_to_fit+s][i]);
+          }
+    fclose(test_output);*/
+    
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     
@@ -115,11 +127,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
+    //printf("Corrections..\n");
+    //for (int i = 1;i<=N_parameters;++i)
+      //printf("%d %f \n", i, correction[i]);
+
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
+    //printf("Model corrected\n");
+    //test_model->print();
     build_from_nodes(test_model);
+    //printf("Atmosphere built\n");
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
@@ -174,7 +193,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
 
-  model_to_fit->print();
+  //model_to_fit->print();
   
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
@@ -729,6 +748,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
  observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
 
   // We first need to create the atmosphere from the model and compute the observable:
+  
   build_from_nodes(atmos_model);
   
   int N_parameters = atmos_model->get_N_nodes_total();

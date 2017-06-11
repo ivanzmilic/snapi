@@ -83,6 +83,9 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h);
   delete[](temp_nodes_tau+1);
   delete[](temp_nodes_temp+1);
+
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+    //fprintf(stderr,"%d %f \n", x3i, T[x1l][x2l][x3i]);
   
 
   // Microturbulent velocity:

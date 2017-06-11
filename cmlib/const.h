@@ -23,7 +23,7 @@
 #define ev  1.602189E-12             // erg
 #define saha_const 2.0706615382E-16 // In cgs units
 
-#define delta_T 0.1 // step for the computation of numerical derivatives
+#define delta_T 1.0 // step for the computation of numerical derivatives
 #define delta_vt 20.0 // step for the computation of numerical derivative
 #define delta_Nt_frac 1E-3 
 #define delta_vr 20.0 // same as for delta_vt

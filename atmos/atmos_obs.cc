@@ -602,7 +602,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
   fp_t **** d_obs = ft4dim(1,7,x3l, x3h, 1, ns, 1, nlambda);
   memset(d_obs[1][x3l][1]+1,0,(x3h-x3l+1)*(ns)*(nlambda)*sizeof(fp_t));
 
-  if (intensity_responses) // If provided, copy the intensity to the input array
+  if (intensity_responses) // If provided, copy the intensity responses to the input array
     memset(intensity_responses[1][x3l][1]+1,0,(7*nlambda*4*(x3h-x3l+1))*sizeof(fp_t));
 
   for (int x3i = x3l;x3i<=x3h;++x3i){
@@ -825,12 +825,6 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
       
   }
 
-  // Please write it down:
-
-  fp_t * lambda_air = new fp_t [nlambda];
-  for (int l=0;l<nlambda;++l)
-    lambda_air[l] = vactoair(lambda[l]);
-
   if (intensity_responses){
     for (int param=1;param<=7;++param)
       for (int x3i=x3l;x3i<=x3h;++x3i)
@@ -844,12 +838,11 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
   out = fopen("stokes_intensity_responses_fin_diff.txt", "w");
   for (int param=1;param<=7;++param){
     fp_t norm = 1.0;
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      //norm = (param == 2) ? Nt[x1l][x2l][x3i] : 1.0;  
+    for (int x3i=x3l;x3i<=x3h;++x3i){ 
       for (int l=1;l<=nlambda;++l){
         fp_t loc = 0;
         if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
-        fprintf(out,"%10.10e %10.10e", loc, lambda_air[l-1]);
+        fprintf(out,"%10.10e %10.10e", loc, lambda[l]);
         for (int s=1;s<=ns;++s)
           fprintf(out," %10.10e", d_obs[param][x3i][s][l]*norm);
         fprintf(out," \n");
@@ -863,7 +856,6 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
   
   io.msg(IOL_INFO, "atmosphere::obs_scalar_num_responses: computed responses of the intensity numericaly...\n");
   
-  delete []lambda_air;
   del_ft4dim(d_obs,1,7,x3l,x3h,1,ns,1,nlambda);
 
   return o;

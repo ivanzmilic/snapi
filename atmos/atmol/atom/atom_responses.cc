@@ -327,12 +327,77 @@ void atom::compute_lte_population_responses(){
             response_matrix[(l-x3l) * nmap + nmap][(ll-x3l) * nmap + ii] = 0.0;
     }
 
+    /*if (strcmp(id,"Fe") == 0){
+      printf("I AM IRON!\n");
+      FILE * rm = fopen("Fe_response_matrix.dat","w");
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        for (int i=1;i<=nmap;++i){
+          for (int x3ii=x3l;x3ii<=x3h;++x3ii)
+            for (int ii=1;ii<=nmap;++ii)
+              fprintf(rm,"%e ",response_matrix[(x3i-x3l)*nmap+i][(x3ii-x3l)*nmap+ii]);
+        fprintf(rm,"\n");
+        }
+      fclose(rm);
+      FILE * rt = fopen("Fe_beta_T.dat","w");
+      for (int x3i=x3l;x3i<=x3h;++x3i){
+          for (int x3ii=x3l;x3ii<=x3h;++x3ii)
+            for (int ii=1;ii<=nmap;++ii)
+              fprintf(rt,"%e ",beta_Temp[x3i][(x3ii-x3l)*nmap+ii]);
+        fprintf(rt,"\n");
+        }
+      fclose(rt);
+      FILE * rd = fopen("Fe_beta_dens.dat","w");
+      for (int x3i=x3l;x3i<=x3h;++x3i){
+          for (int x3ii=x3l;x3ii<=x3h;++x3ii)
+            for (int ii=1;ii<=nmap;++ii)
+              fprintf(rd,"%e ",beta_density[x3i][(x3ii-x3l)*nmap+ii]);
+        fprintf(rd,"\n");
+        }
+      fclose(rd);
+    }*/
+
     // Finally we need to compute all the responses and that really means invert response matrix and then multiply by the right hand side:
    
-    fp_t * M_to_solve = response_matrix[1] +1;
+    // DEBUG: --- this is the version where we invert matrix by matrix at each depth. 
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+
+      fp_t * M_to_solve = new fp_t[nmap*nmap];
+      for (int i=1;i<=nmap;++i)
+        for (int ii=1;ii<=nmap;++ii)
+          M_to_solve[(i-1)*nmap+ii-1] = response_matrix[(x3i-x3l)*nmap+i][(x3i-x3l)*nmap+ii];
+      fp_t * M_LU = new fp_t[nmap*nmap];
+      fp_t * b = new fp_t[nmap]; // rhs
+      fp_t * solution = new fp_t[nmap];
+
+      Crout(nmap,M_to_solve,M_LU);
+      int x3k=x3i;
+      memcpy(b,beta_Temp[x3k]+(x3i-x3l)*nmap+1,nmap*sizeof(fp_t));
+      solveCrout(nmap,M_LU,b,solution);
+      for (int i=1;i<=nmap;++i)
+        level_responses[1][(x3i-x3l)*nmap+i][x3k] = solution[i-1];
+      
+      memcpy(b,beta_density[x3k]+(x3i-x3l)*nmap+1,nmap*sizeof(fp_t));
+      solveCrout(nmap,M_LU,b,solution);
+      for (int i=1;i<=nmap;++i)
+        level_responses[2][(x3i-x3l)*nmap+i][x3k] = solution[i-1];
+      
+      memcpy(b,beta_v_micro[x3k]+(x3i-x3l)*nmap+1,nmap*sizeof(fp_t));
+      solveCrout(nmap,M_LU,b,solution);
+      for (int i=1;i<=nmap;++i)
+        level_responses[3][(x3i-x3l)*nmap+i][x3k] = solution[i-1];
+
+      delete[]M_to_solve;
+      delete[]M_LU;
+      delete[]b;
+      delete[]solution;
+
+    }
+    /*fp_t * M_to_solve = response_matrix[1] +1;
     fp_t * M_LU = new fp_t [N_depths * N_depths * nmap * nmap];
     fp_t * b; // Right hand side
     fp_t * solution = new fp_t [N_depths * nmap];
+    }
    
 // ------------------------------------------------------------------------------------------------------------------------------------------------
     Crout(nmap * N_depths,M_to_solve, M_LU);
@@ -371,10 +436,17 @@ void atom::compute_lte_population_responses(){
           level_responses[3][(x3ii - x3l) * nmap + i][x3i] = solution[(x3ii-x3l) * nmap + i -1];
       }
 
+
     }
+    */
     io.msg(IOL_INFO, "responses computed for the atom with Z = %d using analytical approximation \n", Z);
-    delete []M_LU;
-    delete []solution;
+
+    //if (strcmp(id,"Fe")==0){
+    //  print_population_responses("Fe_population_responses.dat",x3l,x3h);
+    //  print_populations();
+    //}
+    //delete []M_LU;
+    //delete []solution;
   }
 }
 
