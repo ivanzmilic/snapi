@@ -48,6 +48,7 @@ int08_t atmosphere::read_spinor(const char *wd,const char *filename,io_class *io
 //
       io_in->msg(IOL_XNFO,"atmosphere::read_spinor: %E %E %E %E %E %E %E %E %E %E %E %E\n",lt,hh,tm,pg,pe,aa,rr,bb,vt,vd,el,az);
 //
+      tau_referent[x1l][x2l][ix3] = -pow(10.0,lt);
       x3[ix3]=hh;
       T[x1l][x2l][ix3]=tm;
       rho[x1l][x2l][ix3]=rr;

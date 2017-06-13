@@ -91,15 +91,17 @@ h = h.reshape(N_Parameters,n_depths, n_wvl)
 wvl = wvl[0][0]
 wvl *= 1E8
 wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
-h = h[0,:,0] / 1E5
+#h = h[0,:,0] / 1E5
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
-#hmax = -6.0
-hmax = 1200
+hmax = -6.0
+
+h = h[0,:,0]
+#print h
 yname = '$\log\,\\tau_{500}$'
 
-for p in range(0,4):
+for p in range(0,7):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)

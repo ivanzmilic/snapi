@@ -29,7 +29,7 @@ a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
 
-l_offset = 650
+l_offset = 495
 
 
 #keep in mind this one is transposed:
@@ -64,25 +64,24 @@ for i in range(0,1):
 		plt.ylabel("Stokes V")
 		plt.tight_layout()
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
-		
-
-if (NX<=1 and NY<=1):
-	quit();
-
 
 #Here we read the parameter map.
 pin = pyana.fzread(input_nodes)
 parameters = pin["data"]
 temp = parameters.shape
 NN = temp[0] #total number of nodes
+parameters[-2] /= 1E5 #convert to km/s										  
+parameters[-1] /= 1E5 #convert to km/s
+		
+#print parameters[:,0,0]
+
+if (NX<=1 and NY<=1):
+	quit();
 
 #Then we can also read atmospheres
-
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
 
-parameters[4] /= 1E5 #convert to km/s										  
-parameters[5] /= 1E5 #convert to km/s
 
 #Hard-coded plotting of some images.
 
