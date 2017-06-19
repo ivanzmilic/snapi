@@ -17,30 +17,31 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 
 	io.msg(IOL_INFO, "nlte population responses::computing level population responses using analytical approach with [%d]\n", lvl_of_approximation);
 
+	
+	// Some continuum wavelengths, not sure if they are needed:
+	int32_t nlambda=0;
+  fp_t *lambda;           // wavelengths for NLTE calculations, these are @ several pre-defined positions, for the continuum. 
+  if (nlambda){
+    lambda = new fp_t [nlambda];
+    for (int l=0;l<nlambda;++l)
+    	lambda[l] = 300E-7 + (2200E-7 - 300E-7) / (nlambda-1) * l;
+  }
+  if (nlambda == 1)
+	lambda[0] = 300E-7;
+	//Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
+  for(int a=0;a<natm;++a) atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
+  for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
+	// This we can keep, why not.
+	for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each species
+	for(int a=0;a<natm;++a) if(atml[a]->check_if_nlte()) atml[a]->responses_init(); // clear response parameters for each species
+	
 	// First solve ones which are in lte:
 	for (int a=0;a<natm;++a)
 		if(!atml[a]->check_if_nlte()){
 			atml[a]->responses_init();
-			atml[a]->compute_lte_population_responses();
-			//atml[a]->print_population_responses("responses_analytical.txt", x3l, x3h);
-		}
-	
-	// Some continuum wavelengths, not sure if they are needed:
-	int32_t nlambda=0;
-    fp_t *lambda;           // wavelengths for NLTE calculations, these are @ several pre-defined positions, for the continuum. 
-    if (nlambda){
-    	lambda = new fp_t [nlambda];
-    	for (int l=0;l<nlambda;++l)
-    		lambda[l] = 300E-7 + (2200E-7 - 300E-7) / (nlambda-1) * l;
-    }
-    if (nlambda == 1)
-		lambda[0] = 300E-7;
-	//Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
-  	for(int a=0;a<natm;++a) atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
-  	for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
-	// This we can keep, why not.
-	for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each species
-	for(int a=0;a<natm;++a) if(atml[a]->check_if_nlte()) atml[a]->responses_init(); // clear response parameters for each species
+			atml[a]->compute_lte_population_responses_analytical(T,Ne);
+			//atml[a]->compute_lte_population_responses();
+	}
 	
 	// Same ordering like in the case of NLTEpop
 	if (nlambda ==0){
@@ -460,16 +461,18 @@ void atmosphere::ne_lte_derivatives(){
 				execute_chemeq_for_point(x1i,x2i,x3i);
 				Ne_lte_der[1][x1i][x2i][x3i] = Ne[x1i][x2i][x3i];
 
-				atml[0]->add_to_ion_responses(1,x3i, 1.0);
+				for (int a=0;a<natm;++a)
+					atml[a]->add_to_ion_responses(1,x3i, 1.0);
 
 				T[x1i][x2i][x3i] -= delta_T;
 				execute_chemeq_for_point(x1i,x2i,x3i);
 				Ne_lte_der[1][x1i][x2i][x3i] -= Ne[x1i][x2i][x3i];
 				Ne_lte_der[1][x1i][x2i][x3i] /= delta_T;
 
-					atml[0]->add_to_ion_responses(1,x3i, -1.0);
-					atml[0]->divide_ion_responses(1,x3i,delta_T);
-					//printf(">> %e \n", atml[0]->get_population_response(1,x3i,x1i,x2i,x3i,0));	
+				for (int a=0;a<natm;++a){
+					atml[a]->add_to_ion_responses(1,x3i, -1.0);
+					atml[a]->divide_ion_responses(1,x3i,delta_T);
+				}
 
 				T[x1i][x2i][x3i] += delta_T * 0.5;
 				
@@ -479,10 +482,18 @@ void atmosphere::ne_lte_derivatives(){
 				execute_chemeq_for_point(x1i,x2i,x3i);
 				Ne_lte_der[2][x1i][x2i][x3i] = Ne[x1i][x2i][x3i];
 
+				for (int a=0;a<natm;++a)
+					atml[a]->add_to_ion_responses(2,x3i, 1.0);
+
 				Nt[x1i][x2i][x3i] -= Nt_step;
 				execute_chemeq_for_point(x1i,x2i,x3i);
 				Ne_lte_der[2][x1i][x2i][x3i] -= Ne[x1i][x2i][x3i];
 				Ne_lte_der[2][x1i][x2i][x3i] /= Nt_step;
+
+				for (int a=0;a<natm;++a){
+					atml[a]->add_to_ion_responses(2,x3i, -1.0);
+					atml[a]->divide_ion_responses(2,x3i,Nt_step);
+				}
 
 				Nt[x1i][x2i][x3i] += Nt_step * 0.5;
 				execute_chemeq_for_point(x1i,x2i,x3i);
@@ -490,6 +501,7 @@ void atmosphere::ne_lte_derivatives(){
 }
 
 fp_t atmosphere::get_neutral_H_derivative_lte(int x1i, int x2i, int x3i){
+
 	return atml[0]->get_population_response(1,x3i,x1i,x2i,x3i,0);
 }
 

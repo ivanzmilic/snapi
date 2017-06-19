@@ -171,6 +171,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   nltepops();
   respsetup();
   ne_lte_derivatives();
+  
   //compute_nlte_population_responses_numerical(x3l,x3h);
 
   compute_nlte_population_responses(0);//

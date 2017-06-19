@@ -120,6 +120,7 @@ public:
   // And there have to be some related to computing the responses:
   virtual void compute_lte_population_responses();
   virtual void compute_nlte_population_responses();
+  virtual void compute_lte_population_responses_analytical(fp_t ***, fp_t ***);
   virtual int responses_clear();
   virtual fp_t get_population_response(int parameter, int x3k, int x1i, int x2i, int x3i, int z);
 

@@ -421,6 +421,10 @@ void h_minus_mol::compute_lte_population_responses(){
       }
 }
 
+void h_minus_mol::compute_lte_population_responses_analytical(fp_t ***, fp_t ***){
+  compute_lte_population_responses();
+}
+
 fp_t h_minus_mol::get_population_response(int parameter, int x3k, int x1i, int x2i, int x3i, int z){
     if (x3k==x3i)
       return dN[parameter][x1l][x2l][x3i];

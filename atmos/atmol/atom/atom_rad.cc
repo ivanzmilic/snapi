@@ -1856,6 +1856,16 @@ fp_t atom::C_i_cont(int z, int i, fp_t T, fp_t n_e){
 
 }
 
+fp_t atom::C_i_cont_dummy(int z, int i, fp_t T, fp_t n_e){
+  return 1E5;
+}
+fp_t atom::C_cont_i_dummy(int z, int i, fp_t T, fp_t n_e){
+  fp_t dE=ip[z]-ee[z][i];
+  fp_t rate = C_i_cont_dummy(z, i, T, n_e) * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp(dE / k / T) * pow(T, -1.5) * n_e * saha_const;
+
+  return rate;
+}
+
   
 
 fp_t atom::C_cont_i(int z, int i, fp_t T, fp_t n_e){

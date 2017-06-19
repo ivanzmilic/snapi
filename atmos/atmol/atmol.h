@@ -221,8 +221,8 @@ public:
   // ------------------------------------------------------------------------------------------------------------------------------------------------------
   // Some response function related stuff:
   virtual void compute_nlte_population_responses(){}
-
   virtual void compute_lte_population_responses(){}
+  virtual void compute_lte_population_responses_analytical(fp_t ***, fp_t ***){}
 
   virtual int check_if_nlte(){
     return 0; // By default it is not nlte, because it is not an atom.

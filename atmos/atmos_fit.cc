@@ -33,7 +33,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 50;
+  int MAX_ITER = 30;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -195,36 +195,20 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   //model_to_fit->print();
   
+  
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
   delete[](noise+1);
   if (chi_to_track)
     delete[]chi_to_track;
-  
-  observable *obs_to_test = obs_stokes(theta, phi, lambda, nlambda);
-  fp_t ** S_to_test = obs_to_test->get_S(1,1);
 
-  FILE * test_fit = fopen("test_fit.txt","w");
-  for (int l=1;l<=nlambda;++l)
-    fprintf(test_fit,"%e %e %e \n",lambda[l], S_to_fit[1][l],S_to_test[1][l]);
-  fclose(test_fit);
-  delete obs_to_test;
-  del_ft2dim(S_to_test,1,4,1,nlambda);
-
+  // Full version:
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
-  fp_t ** S_full_to_test = obs_to_return->get_S(1,1);
-
-  test_fit = fopen("test_fit_full.txt","w");
-  for (int l=1;l<=nlambda;++l)
-    fprintf(test_fit,"%e %e \n",lambda[l], S_full_to_test[1][l]);
-  fclose(test_fit);
-  del_ft2dim(S_full_to_test,1,4,1,nlambda);
-
-
+  
   delete[](lambda+1);
   return obs_to_return;
 }

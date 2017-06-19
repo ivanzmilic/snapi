@@ -450,6 +450,50 @@ void atom::compute_lte_population_responses(){
   }
 }
 
+void atom::compute_lte_population_responses_analytical(fp_t *** T, fp_t *** Ne){
+
+  // We just start from Saha boltzman distribution and solve everything. 
+  if (ntr){
+    for(int z=0;z<=Z;++z)
+      for(int x1i=x1l;x1i<=x1h;++x1i)
+        for(int x2i=x2l;x2i<=x2h;++x2i)
+          for(int x3i=x3l;x3i<=x3h;++x3i){
+
+            fp_t U=partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i],io);
+            
+            fp_t dU_dT = partf[z]->U(T[x1i][x2i][x3i]+0.5*delta_T,Ne[x1i][x2i][x3i],io);
+            dU_dT -= partf[z]->U(T[x1i][x2i][x3i]-0.5*delta_T,Ne[x1i][x2i][x3i],io);
+            dU_dT /= delta_T;
+
+            fp_t dne = delta_Nt_frac*Ne[x1i][x2i][x3i];
+            fp_t dU_dne = partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]+dne*0.5,io);
+            dU_dne -= partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]-dne*0.5,io);
+            dU_dne /= dne;
+            
+            fp_t d_ne_d_T = parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i);
+            fp_t d_ne_d_Nt = parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i);
+            
+            for(int l=0;l<nl[z];++l){ 
+              int i = rmap[z][l];
+
+              level_responses[1][(x3i-x3l)*nmap+i+1][x3i] = ionization_stage_responses[1][x3i][z]*
+                (fp_t)(g[z][l])*exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U;
+              level_responses[1][(x3i-x3l)*nmap+i+1][x3i] -= pop[x1i][x2i][x3i].N[z]*(fp_t)(g[z][l])
+              *exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U/U*(dU_dT + dU_dne*d_ne_d_T);
+              level_responses[1][(x3i-x3l)*nmap+i+1][x3i] += pop[x1i][x2i][x3i].N[z]*(fp_t)(g[z][l])
+              *exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U*ee[z][l]/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i];
+
+              level_responses[2][(x3i-x3l)*nmap+i+1][x3i] = ionization_stage_responses[2][x3i][z]*
+                (fp_t)(g[z][l])*exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U;
+              level_responses[2][(x3i-x3l)*nmap+i+1][x3i] -= pop[x1i][x2i][x3i].N[z]*(fp_t)(g[z][l])
+              *exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U/U*(dU_dne*d_ne_d_Nt);
+              
+            }
+      }
+  }        
+}
+
+
 fp_t atom::derivative_collisions_Temp(int x1i, int x2i, int x3i, int from, int to){
   return 0;
 }
@@ -552,10 +596,15 @@ int atom::responses_setup(){
     beta_v_r = ft2dim(1, N_depths, 1, N_depths * nmap);
     response_matrix = ft2dim(1, N_depths * nmap, 1, N_depths * nmap);
     level_responses = ft3dim(1,N_atm_parameters,1, N_depths * nmap, 1, N_depths);
+    
+
     ionization_stage_responses = ft3dim(1,N_atm_parameters,x3l,x3h,0,Z);
+    //printf("I allocated memory for onization responses for atom %s \n",id);
     memset(ionization_stage_responses[1][x3l]+0,0,N_atm_parameters*(x3h-x3l+1)*(Z+1)*sizeof(fp_t));
     
   }
+  else 
+   ionization_stage_responses = 0; 
 
   return 0;
 }
@@ -590,21 +639,22 @@ int atom::responses_clear(){
     del_ft2dim(beta_density, 1, N_depths, 1, N_depths * nmap);
     del_ft2dim(beta_v_micro, 1, N_depths, 1, N_depths * nmap);
     del_ft2dim(beta_v_r, 1, N_depths, 1, N_depths * nmap);
-    del_ft3dim(ionization_stage_responses,1,N_atm_parameters,x3l,x3h,0,Z);    
+    if (ionization_stage_responses) del_ft3dim(ionization_stage_responses,1,N_atm_parameters,x3l,x3h,0,Z);    
   }
   return 0;
 }
 
 void atom::add_to_ion_responses(int param,int x3i, fp_t sign){
 
-  for (int z=0;z<=Z;++z)
-    ionization_stage_responses[param][x3i][z] += pop[x1l][x2l][x3i].N[z] * sign;
+  if (ionization_stage_responses)
+    for (int z=0;z<=Z;++z)
+      ionization_stage_responses[param][x3i][z] += pop[x1l][x2l][x3i].N[z] * sign;
 
 }
 void atom::divide_ion_responses(int param, int x3i, fp_t step){
-
-  for (int z=0;z<=Z;++z)
-    ionization_stage_responses[param][x3i][z] /= step;
+  if (ionization_stage_responses)
+    for (int z=0;z<=Z;++z)
+      ionization_stage_responses[param][x3i][z] /= step;
 
 }
 

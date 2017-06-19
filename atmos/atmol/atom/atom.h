@@ -248,6 +248,8 @@ protected:
   virtual fp_t R_cont_i(int z, int i, fp_t JJ, fp_t T, fp_t n_e);
   virtual fp_t C_i_cont(int z, int i, fp_t T, fp_t n_e);
   virtual fp_t C_cont_i(int z, int i, fp_t T, fp_t n_e);
+  virtual fp_t C_i_cont_dummy(int z, int i, fp_t T, fp_t n_e);
+  virtual fp_t C_cont_i_dummy(int z, int i, fp_t T, fp_t n_e);
 
   // Then we need to modify radiative rates with alo:
   virtual fp_t R_ij_local_ALO(int, int, int, fp_t, fp_t, fp_t, fp_t); 
@@ -403,6 +405,7 @@ public:
   virtual int print_population_responses(const char *, int, int);
   virtual void compute_nlte_population_responses();
   virtual void compute_lte_population_responses();
+  virtual void compute_lte_population_responses_analytical(fp_t ***, fp_t ***);
   virtual void add_to_ion_responses(int param,int x3i, fp_t sign);
   virtual void divide_ion_responses(int param,int x3i, fp_t step);
   virtual fp_t get_population_response(int parameter, int x3k, int x1i, int x2i, int x3i, int z);
