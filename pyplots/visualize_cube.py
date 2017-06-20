@@ -40,14 +40,18 @@ NL = dims[3]
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
+a_read = pyana.fzread(input_atmos)
+atmospheres = a_read["data"]
+
+print atmospheres.shape
 
 #These are debug lines
 for i in range(0,1):
 	for j in range (0,1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[6,10])
-		plt.subplot(211)
+		plt.figure(figsize=[6,14])
+		plt.subplot(311)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
 		#plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red') #masks
@@ -56,14 +60,22 @@ for i in range(0,1):
 		#plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
-		plt.subplot(212)
+		plt.subplot(312)
 		#print fitted_cube[i,j,3,:290]
 		plt.plot(fitted_cube[i,j,3,:])
 		plt.plot(obs_cube[j,i,3,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
+
+		plt.subplot(313)
+		#print fitted_cube[i,j,3,:290]
+		plt.plot(atmospheres[i,j,0],atmospheres[i,j,1])
+		
+		plt.xlabel("$\log \\tau$")
+		plt.ylabel("$\mathrm{T\,[K]}$")
 		plt.tight_layout()
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
+
 
 #Here we read the parameter map.
 pin = pyana.fzread(input_nodes)
@@ -72,15 +84,15 @@ temp = parameters.shape
 NN = temp[0] #total number of nodes
 parameters[-2] /= 1E5 #convert to km/s										  
 parameters[-1] /= 1E5 #convert to km/s
+
+
 		
 #print parameters[:,0,0]
 
 if (NX<=1 and NY<=1):
 	quit();
 
-#Then we can also read atmospheres
-a_read = pyana.fzread(input_atmos)
-atmospheres = a_read["data"]
+
 
 
 #Hard-coded plotting of some images.

@@ -1163,7 +1163,16 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
       }
     }
     delete[](derivatives+1);
+
+    if (is_temp){
+      // Polish temperature stratification:
+      for (int i=from;i<=to;++i){
+        if (quantity[i] < 3400.0) quantity[i] = 3400.0;
+        if (quantity[i] > 12000.0) quantity[i] = 12000.0; // put these in constants
+      }
+    }
     return 0;
+    
   }
   else if (N_nodes == 1){ // Everything is constant
     for (int i=from;i<=to;++i)

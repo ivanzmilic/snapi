@@ -73,7 +73,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
       
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+      current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
       //printf("Computed stokes responses to nodes...\n");
       S_current = current_obs->get_S(1,1);
     }
@@ -160,15 +160,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       if (n_chi_to_track >=3)
         if ((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1] < 1E-2 &&
           (chi_to_track[n_chi_to_track-3] - chi_to_track[n_chi_to_track-2]) / chi_to_track[n_chi_to_track-2] < 1E-2)
-          to_break = 1;
+          to_break = 0;
     }
     else{
       lm_parameter *= 10.0;
       corrected = 0;
     }
-
-    //printf("Iter %d \n",iter);
-    //model_to_fit->print();
 
     if(corrected || to_break || iter==MAX_ITER){
       

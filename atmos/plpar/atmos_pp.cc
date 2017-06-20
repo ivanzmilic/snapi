@@ -87,10 +87,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   delete[](temp_nodes_tau+1);
   delete[](temp_nodes_temp+1);
 
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-    //fprintf(stderr,"%d %f \n", x3i, T[x1l][x2l][x3i]);
-  
-
   // Microturbulent velocity:
   int N_nodes_vt = atmos_model->get_N_nodes_vt();
   if (N_nodes_vt){
