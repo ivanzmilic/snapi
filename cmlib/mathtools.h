@@ -58,7 +58,7 @@ fp_t interpol_1d_linear(fp_t * f, fp_t * x, int N, fp_t x_to_interpol);
 
 fp_t * add_to_1d_array(fp_t * x, int &n, fp_t to_add);
 
-int atmospheric_interpolation(fp_t *, fp_t *, int, fp_t *, fp_t *, int, int);
+int atmospheric_interpolation(fp_t *, fp_t *, int, fp_t *, fp_t *, int, int, int);
 
 fp_t Planck_f(fp_t lambda, fp_t T);
 fp_t Planck_f_derivative(fp_t lambda, fp_t T);

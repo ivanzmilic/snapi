@@ -1088,7 +1088,7 @@ fp_t compute_w1(fp_t tb){
     
 }
 
-int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, fp_t * tau_grid, fp_t * quantity, int from, int to){
+int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, fp_t * tau_grid, fp_t * quantity, int from, int to, int is_temp){
 
   // This is the function which performs a specific kind of interpolation for atmospheric quantities. We will use third order, strictly monotoneous interpolation. 
   // Best choice for this are probably Bezier splines as in De La Cruz Rodriguez & Piskunov (2013)
@@ -1099,8 +1099,26 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     // First thing is to compute the derivatives everywhere: 
     fp_t * derivatives = new fp_t [N_nodes] - 1;
 
-    derivatives[1] = 0.0;
-    derivatives[N_nodes] = 0.0; // Derivative zero on the edges
+    // at the top we want linear extrapolation:
+    derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
+    // at the bottom let's do the same as as FALC:
+
+    fp_t d_T_falc[11] = {1694.91525424, 2164.5021645, 2342.50815695, 2289.18827635, 2155.92183045,
+      2094.90240415, 2080.69183003, 2066.44925898, 1960.27182436, 1826.11342193, 1729.74468968};
+
+    fp_t tau_falc[11] = {-0.01232, 0.08798, 0.2002, 0.32704, 0.46667, 0.61462, 0.7674, 
+      0.92221, 1.07711, 1.22829, 1.37282};
+
+    // If it is out of bounds, just set to closest one
+    if (node_tau[N_nodes] < tau_falc[0])
+      derivatives[N_nodes] = d_T_falc[0];
+
+    else if (node_tau[N_nodes] > tau_falc[10])
+      derivatives[N_nodes] = d_T_falc[10];
+
+    else 
+      derivatives[N_nodes] = interpol_1d(d_T_falc,tau_falc,11,node_tau[N_nodes]);
+
 
     // In between:
     for (int i=2; i<=N_nodes-1;++i){
@@ -1121,10 +1139,10 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
 
       // If we are out of bounds, just set to const:
       if (tau_grid[i] < node_tau[1])
-        quantity[i] = node_value[1];
+        quantity[i] = node_value[1] + derivatives[1] * (tau_grid[i]-node_tau[1]);
 
       else if (tau_grid[i] > node_tau[N_nodes])
-        quantity[i] = node_value[N_nodes];
+        quantity[i] = node_value[N_nodes] + derivatives[N_nodes] * (tau_grid[i]-node_tau[N_nodes]);
 
       else{
 
@@ -1150,7 +1168,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
       quantity[i] = node_value[1];
     return 0;
   }
-  else if (N_nodes == 0){
+  else if (N_nodes == 0){ // Everything is zero
     for (int i=from;i<=to;++i)
       quantity[i] = 0.0;
     return 0;

@@ -488,12 +488,13 @@ int job_class::stop(void)
     
     int np;
     fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
-    write_file((char*)"mag_test_nodes.f0",nodes_cube,ny,nx,np,*io);
+    
+    write_file((char*)"mag_test_nodes.f0",nodes_cube,nx,ny,np,*io);
     del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
-
+        
     write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
-
+    
     write_file((char*)"mag_test_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
     del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
 
