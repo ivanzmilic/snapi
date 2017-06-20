@@ -1103,21 +1103,23 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
     // at the bottom let's do the same as as FALC:
 
-    fp_t d_T_falc[11] = {1694.91525424, 2164.5021645, 2342.50815695, 2289.18827635, 2155.92183045,
-      2094.90240415, 2080.69183003, 2066.44925898, 1960.27182436, 1826.11342193, 1729.74468968};
+    if (!is_temp)
+      derivatives[N_nodes] = (node_value[N_nodes] - node_value[N_nodes-1]) / (node_tau[N_nodes]-node_tau[N_nodes-1]);
+    else {
 
-    fp_t tau_falc[11] = {-0.01232, 0.08798, 0.2002, 0.32704, 0.46667, 0.61462, 0.7674, 
-      0.92221, 1.07711, 1.22829, 1.37282};
+      fp_t d_T_falc[11] = {1694.91525424, 2164.5021645, 2342.50815695, 2289.18827635, 2155.92183045,
+        2094.90240415, 2080.69183003, 2066.44925898, 1960.27182436, 1826.11342193, 1729.74468968};
+      fp_t tau_falc[11] = {-0.01232, 0.08798, 0.2002, 0.32704, 0.46667, 0.61462, 0.7674, 
+        0.92221, 1.07711, 1.22829, 1.37282};
 
-    // If it is out of bounds, just set to closest one
-    if (node_tau[N_nodes] < tau_falc[0])
-      derivatives[N_nodes] = d_T_falc[0];
-
-    else if (node_tau[N_nodes] > tau_falc[10])
-      derivatives[N_nodes] = d_T_falc[10];
-
-    else 
-      derivatives[N_nodes] = interpol_1d(d_T_falc,tau_falc,11,node_tau[N_nodes]);
+      // If it is out of bounds, just set to closest one
+      if (node_tau[N_nodes] < tau_falc[0])
+        derivatives[N_nodes] = d_T_falc[0];
+      else if (node_tau[N_nodes] > tau_falc[10])
+        derivatives[N_nodes] = d_T_falc[10];
+      else 
+        derivatives[N_nodes] = interpol_1d(d_T_falc,tau_falc,11,node_tau[N_nodes]);
+    }
 
 
     // In between:
@@ -1137,7 +1139,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     // And then use the derivative to interpolate:
     for (int i=from;i<=to;++i){
 
-      // If we are out of bounds, just set to const:
+      // If we are out of bounds, extrapolate linearly
       if (tau_grid[i] < node_tau[1])
         quantity[i] = node_value[1] + derivatives[1] * (tau_grid[i]-node_tau[1]);
 
