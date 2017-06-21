@@ -333,8 +333,9 @@ int job_class::start(void)
          // If model is supplied as input file, read it from there. For the moment we are only concerned with first model
          fp_t *** model_cube = 0;
          if (ji.read_model_from_file[0]){
-           int nn1,nn2,nn3;
-           model_cube = read_file(ji.input_models[0],nn1,nn2,nn3,*io); 
+          int nn1,nn2,nn3;
+          model_cube = read_file(ji.input_models[0],nn1,nn2,nn3,*io);
+          io->msg(IOL_INFO,"master::job:: modelcube sucessfully read from file and will be used.\n");
          }
                   
          for(int x=1,n=1;x<=nx;++x)
