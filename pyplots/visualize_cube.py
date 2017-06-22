@@ -46,12 +46,12 @@ atmospheres = a_read["data"]
 print atmospheres.shape
 
 #These are debug lines
-for i in range(0,1):
-	for j in range (0,1):
+for i in range(10,11):
+	for j in range (30,31):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[6,14])
-		plt.subplot(311)
+		plt.figure(figsize=[6,10])
+		plt.subplot(211)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
 		#plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red') #masks
@@ -60,14 +60,14 @@ for i in range(0,1):
 		#plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
-		plt.subplot(312)
+		plt.subplot(212)
 		#print fitted_cube[i,j,3,:290]
-		plt.plot(fitted_cube[i,j,3,:])
-		plt.plot(obs_cube[j,i,3,:])
-		plt.xlabel("Wavelength")
-		plt.ylabel("Stokes V")
+		#plt.plot(fitted_cube[i,j,3,:])
+		#plt.plot(obs_cube[j,i,3,:])
+		#plt.xlabel("Wavelength")
+		#plt.ylabel("Stokes V")
 
-		plt.subplot(313)
+		plt.subplot(212)
 		#print fitted_cube[i,j,3,:290]
 		plt.plot(atmospheres[i,j,0],atmospheres[i,j,1])
 		

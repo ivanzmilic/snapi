@@ -98,13 +98,13 @@ suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 
 h = h[0,:,0]
-h/= 1E5
+#h/= 1E5
 
-hmax = 1200
+hmax = -5.0
 hmin = h[-1]
 
-#yname = '$\log\,\\tau_{500}$'
-yname = '$h\,[\mathrm{km}]$'
+yname = '$\log\,\\tau_{500}$'
+#yname = '$h\,[\mathrm{km}]$'
 for p in range(0,7):
 
 	v_min = np.zeros(4)

@@ -54,7 +54,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
 
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][1] * S_to_fit[1][1]) * 1E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
