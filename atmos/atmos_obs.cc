@@ -38,23 +38,23 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   for (int a = 0; a<natm; ++a)
     atml[a]->prof_setup();
 
-  class observable *o=new observable(1);
+  class observable *o=new observable(1,1,1,nlambda);
+  fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
+  lambda_vacuum -=1;
 
-  for(int l=0;l<nlambda;++l){
+  for(int l=1;l<=nlambda;++l){
 
     for (int a = 0; a<natm; ++a)
       atml[a]->prof_init();
 
-    fp_t ***op=opacity(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
-    fp_t ***em=emissivity(T,Ne,Vr,Vt,B,theta,phi,lambda[l]);
+    fp_t ***op=opacity(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
+    fp_t ***em=emissivity(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
     
     //formal(tau_referent[x1l][x2l], S,Lambda_approx,op_rel,em_rel,theta,phi, boundary_condition_for_rt);      // [Stokes] solution and approximate operator
     formal(x3, S,Lambda_approx,op,em,theta,phi, boundary_condition_for_rt);
 
-    fp_t lambda_air = vactoair(lambda[l]);
-
     // Add it to the observable
-    o->add(&(S[x1l][x2l][x3l])-1,lambda_air);
+    o->set(&S[x1l][x2l][x3l],lambda[l],1,1,l);
     // Delete all wavelength dependent quantities:            
     del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
     del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -70,7 +70,7 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
   popclean(); // all done
-
+  delete[](lambda_vacuum+1);
   io.msg(IOL_INFO,"atmosphere::obs: observable synthesized...\n");
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,6 +374,15 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     atml[a]->set_parent_atmosphere(this);
 
   nltepops();
+
+  // DEBUG LINE:
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+  //  printf("%d %f %f\n",x3i,x3[x3i],log10(-tau_referent[x1l][x2l][x3i]));
+  //FILE * tau = fopen("tau.dat","w");
+  //compute_op_referent();
+  //compute_tau_referent();
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+  //  fprintf("tau,%d %f %f\n",x3i,x3[x3i],log10(-tau_referent[x1l][x2l][x3i]));
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection

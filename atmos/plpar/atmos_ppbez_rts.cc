@@ -10,7 +10,7 @@
 
 #include "atmos_ppbez.h"
 
-double const bezier_delimiter = 1E-20;
+double const bezier_delimiter = 1E-10;
 int const tau_switch_debug = 0;
 double const expansion_delimiter = 1E-2;
 bool const disable_monotonicity = false;
