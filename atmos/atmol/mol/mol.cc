@@ -705,6 +705,28 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
+  // New approach, following John 1988 
+  
+  fp_t lambda_0 = 1.6419E-4;// in cm
+
+  if (lambda > lambda_0)
+    return op;
+
+  /*fp_t C_n[6] = {152.519,49.534,-118.858,92.536,34.194,4.982};
+  fp_t f_lambda = 0.0;
+  fp_t lam_diff = (1.0/lambda/1E4 - 1.0/lambda_0/1E4);
+  for (int n=0;n<6;n++)
+    f_lambda += C_n[n] * pow(lam_diff,n*0.5); // this is in cm^2
+
+  fp_t sigma = 1E-18 * pow(lambda/1E4,3.0) * pow(lam_diff,1.5) * f_lambda;
+  
+  // We now need to take into account the temperature dependence:
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){
+
+  } */
+
   // For each point in the medium compute the opacity:  
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
