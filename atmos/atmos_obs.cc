@@ -375,14 +375,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   nltepops();
 
-  // DEBUG LINE:
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  printf("%d %f %f\n",x3i,x3[x3i],log10(-tau_referent[x1l][x2l][x3i]));
-  //FILE * tau = fopen("tau.dat","w");
-  //compute_op_referent();
-  //compute_tau_referent();
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  fprintf("tau,%d %f %f\n",x3i,x3[x3i],log10(-tau_referent[x1l][x2l][x3i]));
+  FILE * H_pops = fopen("hpops.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    fprintf(H_pops,"%e %e \n",get_pop(x1l,x2l,x3i,0,0),get_Ne(x1l,x2l,x3i));
+  fclose(H_pops);
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection

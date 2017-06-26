@@ -7,6 +7,7 @@ file1 = sys.argv[1]
 file2 = sys.argv[2]
 output = sys.argv[3]
 v_macro = float(sys.argv[4])
+scaling = float(sys.argv[5])
 
 spectra1 = np.loadtxt(file1, unpack = True)
 spectra2 = np.loadtxt(file2, unpack = True)
@@ -37,7 +38,7 @@ lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
 plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = file1)
-plt.plot(spectra2[0,:], spectra2[1,:],color = 'blue', label = file2)
+plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
 
 #plt.xlim([5892,5893])
 plt.xlim([lambda_min,lambda_max])
