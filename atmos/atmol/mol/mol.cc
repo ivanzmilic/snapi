@@ -520,34 +520,28 @@ fp_t ******* h_minus_mol::opacity_vector_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,
 fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda){
 
   // 05/11/2014: Ok here we will now try to implement the tables and exponents from John(1988). 
+  // We gave this up on 25/06/2017 to implement the method from Gray:
 
-  // First we write down polynomial coefficients for wavelengts greated then 0.3645 micrometer.
-
-  fp_t C_L[6][6]; // The first index goes from A to F, second one from 1 to 6
-
-  C_L[0][0] = 0.0; C_L[0][1] = 2483.3460; C_L[0][2] = -3449.889; C_L[0][3] = 2200.04; C_L[0][4] = -696.271; C_L[0][5] = 88.283;
-  C_L[1][0] = 0.0; C_L[1][1] = 285.827; C_L[1][2] = -1158.382; C_L[1][3] = 2427.719; C_L[1][4] = -1841.4; C_L[1][5] = 444.517;
-  C_L[2][0] = 0.0; C_L[2][1] = -2054.291; C_L[2][2] = 8746.523; C_L[2][3] = -13651.105; C_L[2][4] = 8624.97; C_L[2][5] = -1863.864;
-  C_L[3][0] = 0.0; C_L[3][1] = 2827.776; C_L[3][2] = -11485.632; C_L[3][3] = 16755.524; C_L[3][4] = -10051.53; C_L[3][5] = 2095.288;
-  C_L[4][0] = 0.0; C_L[4][1] = -1341.537; C_L[4][2] = 5303.609; C_L[4][3] = -7510.494; C_L[4][4] = 4400.067; C_L[4][5] = -901.788;
-  C_L[5][0] = 0.0; C_L[5][1] = 208.952; C_L[5][2] = -812.939; C_L[5][3] = 1132.738; C_L[5][4] = -655.02; C_L[5][5] = 132.985;
-
+  
   fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   fp_t T_P = 0.0; // 5040./T 
-  fp_t lam = lambda * 1E4;
+  
+  // Now approach from Grey, as suggested by RMS:
+  fp_t l = log10(lambda*1E8);
+  fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
+  fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
+  fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
 
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
-        op[x1i][x2i][x3i] = 0.0;
         T_P = 5040. / T[x1i][x2i][x3i];
-        for (int n =0; n<6; ++n){
-          op[x1i][x2i][x3i] += pow(T_P, (n+2) * 0.5) * (C_L[0][n] * lam * lam + C_L[1][n] + C_L[2][n] / lam +
-            C_L[3][n] / lam / lam + C_L[4][n] / lam / lam / lam + C_L[5][n] / lam / lam / lam / lam);
-        }
-        op[x1i][x2i][x3i] *= N[x1i][x2i][x3i] * 1.33E-29 * pow(T[x1i][x2i][x3i], 2.5) * exp(-8750.0 / T[x1i][x2i][x3i]);
-      }
+        op[x1i][x2i][x3i] = 1E-26 * Ne[x1i][x2i][x3i]*k*T[x1i][x2i][x3i] * 
+          pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0);
+  }
+
+
   return op;
 }
 
@@ -614,15 +608,20 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
-  // For each point in the medium compute the opacity:  
+  //
+  // We are computing the opacity following the book of Gray:
+  fp_t a[7]={1.99654,-1.18267E-5,2.64243E-6,-4.40524E-10,3.23992E-14,-1.39568E-18,2.78701E-23};
+  fp_t alpha = 0.0;
+  for (int i=0;i<7;++i)
+    alpha += a[i] * pow(lambda*1E8,i);
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
-        fp_t h_nu = 19.8581e-17 / lambda;
-        fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-         op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
-      }
-//
+        fp_t T = fetch_temperature(x1i,x2i,x3i);
+        fp_t T_P = 5040./T;
+        op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
+          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-8764.2/T));
+  }
   return op;
 }
 
@@ -651,29 +650,26 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
 
   // Basically we just add the contributions for ff and b-f opacity together in the body of the function. 
   // There has to be more elegant way to work on this. But ok, let it be.
-  fp_t op_bf=0;
-  // Add b-f
-  fp_t h_nu = 19.8581e-17 / lambda;
-  fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-  op_bf = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
-  // And then f-f
-
-  fp_t C_L[6][6]; // The first index goes from A to F, second one from 1 to 6
-  C_L[0][0] = 0.0; C_L[0][1] = 2483.3460; C_L[0][2] = -3449.889; C_L[0][3] = 2200.04; C_L[0][4] = -696.271; C_L[0][5] = 88.283;
-  C_L[1][0] = 0.0; C_L[1][1] = 285.827; C_L[1][2] = -1158.382; C_L[1][3] = 2427.719; C_L[1][4] = -1841.4; C_L[1][5] = 444.517;
-  C_L[2][0] = 0.0; C_L[2][1] = -2054.291; C_L[2][2] = 8746.523; C_L[2][3] = -13651.105; C_L[2][4] = 8624.97; C_L[2][5] = -1863.864;
-  C_L[3][0] = 0.0; C_L[3][1] = 2827.776; C_L[3][2] = -11485.632; C_L[3][3] = 16755.524; C_L[3][4] = -10051.53; C_L[3][5] = 2095.288;
-  C_L[4][0] = 0.0; C_L[4][1] = -1341.537; C_L[4][2] = 5303.609; C_L[4][3] = -7510.494; C_L[4][4] = 4400.067; C_L[4][5] = -901.788;
-  C_L[5][0] = 0.0; C_L[5][1] = 208.952; C_L[5][2] = -812.939; C_L[5][3] = 1132.738; C_L[5][4] = -655.02; C_L[5][5] = 132.985;
-
-  fp_t lam = lambda * 1E4;
-  fp_t T_P = 5040. / T;
-  fp_t op_ff = 0.0;
-  for (int n =0; n<6; ++n)
-    op_ff += pow(T_P, (n+2) * 0.5) * (C_L[0][n] * lam * lam + C_L[1][n] + C_L[2][n] / lam +
-      C_L[3][n] / lam / lam + C_L[4][n] / lam / lam / lam + C_L[5][n] / lam / lam / lam / lam);
   
-  op_ff *= N[x1i][x2i][x3i] * 1.33E-29 * pow(T, 2.5) * exp(-8750.0 / T);
+  // Grey:
+  fp_t a[7]={1.99654,-1.18267E-5,2.64243E-6,-4.40524E-10,3.23992E-14,-1.39568E-18,2.78701E-23};
+  fp_t alpha = 0.0;
+  for (int i=0;i<7;++i)
+    alpha += a[i] * pow(lambda*1E8,i);  
+  fp_t T_P = 5040./T;
+  fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)*
+  (1.0 - exp(-8764.2/T));
+
+
+  // Grey:
+  fp_t l = log10(lambda*1E8);
+  fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
+  fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
+  fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
+
+  T_P = 5040. / T;
+  fp_t op_ff = 1E-26 * Ne*k*T * pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*
+    fetch_population(x1i,x2i,x3i,0,0);
 
   return op_bf + op_ff;
 

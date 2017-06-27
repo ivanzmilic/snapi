@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "types.h"
 #include "io.h"
@@ -39,6 +40,7 @@ void atmosphere::ltepops(void) // compute the populations in LTE
 
   io.msg(IOL_INFO,"atmosphere::ltepops:\n");  
   for(int a=0;a<natm;++a) atml[a]->info();
+
 }
 
 fp_t atmosphere::ne_derivative(int x1i, int x2i, int x3i){
@@ -82,6 +84,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   if (nlambda == 0){
 
     io.msg(IOL_INFO, "atmosphere::nltepops : no iterative procedure necessary, no nlte processes. we are done here.\n");
+    for(int a=0;a<natm;++a) atml[a]->rtclean(0,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
     return 0; 
   }
 

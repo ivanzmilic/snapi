@@ -302,7 +302,7 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // * density is so low that it is of the order of the numerical accuracy of particle 
 // * conservation perhaps it should be treated separately in that regime...?
 // **********************************************************************************
-  }while(!converged(1E-10,N,d,natoms));
+  }while(!converged(1E-12,N,d,natoms));
 //
   io.msg(IOL_XNFO,"atmosphere::chemeq: final values: T=%E, Nt=%E:\n",T_in,Nt_in);
   Ne_in=N[0];

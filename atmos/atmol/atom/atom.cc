@@ -713,7 +713,9 @@ void atom::lte(fp_t ***T,fp_t ***Ne)
             *exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U:1.0);
 
           }
-    }        
+  }
+  //if (strcmp(id,"Na")==0)
+  //print_populations();
 }
 
 void atom::lte(fp_t T, fp_t Ne, int x1i, int x2i, int x3i){
@@ -1952,12 +1954,15 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       exit(1);*/
     } 
   }
+  //if (strcmp(id,"Na")==0)
+  //print_populations();
  
   del_ft2dim(M,1,nmap,1,nmap);
   delete []M_LU;
   delete []b;
   delete []solution;
   return delta;
+
   }
 return 0.0;
 }
@@ -2319,6 +2324,7 @@ fp_t atom::damp_col(fp_t lambda_0,fp_t Temp_in,fp_t Ne_in,fp_t El,fp_t Eu, fp_t 
 }
 fp_t atom::damp_col(fp_t lambda_0,fp_t Temp_in,fp_t Ne_in,fp_t El,fp_t Eu, int08_t z)
 {
+
   // Here we might have some approximate treatment.
 
   printf("Warning: obsolete function fp_t atom::damp_col(fp_t lambda_0,fp_t Temp_in,fp_t Ne_in,fp_t El,fp_t Eu, int08_t z) !\n");

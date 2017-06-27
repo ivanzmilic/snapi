@@ -1297,7 +1297,8 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ****S,fp_t ***L,fp_t *****op,f
     solveCrout(4,A_decomposed_by_LU,b,I_solution);
     memcpy(I[z]+1,I_solution,4*sizeof(fp_t));
 
-    /*for (int s=1;s<=4;++s){
+    /*printf("Point #%d \n",z);
+    for (int s=1;s<=4;++s){
       for (int sp=1;sp<=4;++sp)
         printf("%e ", A[s][sp]);
       printf("   %e %e\n", B[s], I[z][s]);

@@ -35,7 +35,7 @@ fp_t ***atom::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_
 {
   fp_t ***op=freefree_op(T,Ne,Vlos,lambda); // free-free opacity
   op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
-  memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  //memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   
   op=add(boundfree_op(Vlos,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);          // bound-free ionization
   op=add(boundbound_op(T,Ne,Vlos,Vt, B_vec, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h); // bound-bound transitions
@@ -53,7 +53,7 @@ fp_t ***atom::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t ****
     for(int x2i=x2l;x2i<=x2h;++x2i)
         for(int x3i=x3l;x3i<=x3h;++x3i)
             em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
-  memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
+  //memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
   
   em=add(boundfree_em(Vlos,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
   em=add(boundbound_em(T,Ne,Vlos,Vt, B_vec, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -265,8 +265,7 @@ fp_t *** atom::rayleigh_op(fp_t lambda){
 	memset(op[x1l][x2l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
   if (Z == 1){ // if Hydrogen
-
-    
+   
     fp_t cross_section = 0;
     // Add all the possible resonances:
     int i = 0;
