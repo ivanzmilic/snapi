@@ -714,8 +714,6 @@ void atom::lte(fp_t ***T,fp_t ***Ne)
 
           }
   }
-  //if (strcmp(id,"Na")==0)
-  //print_populations();
 }
 
 void atom::lte(fp_t T, fp_t Ne, int x1i, int x2i, int x3i){
@@ -908,6 +906,7 @@ fp_t atom::damp_col(int ix1, int ix2, int ix3, int z, int i_from, int i_to, fp_t
   // And then we add resonance broadening, which depends on the ground level of the same ion:
   //w += pop[ix1][ix2][ix3].N[z] * 4.0 * e * e / mass * lambda_0 / c;
   
+  // TWEAK: Broadening multiplied by sqrt(2). Not sure why but this helps! 
   return w;
 }
 
@@ -924,20 +923,9 @@ fp_t atom::damp_col_der_T(int ix1, int ix2, int ix3, int z, int i_from, int i_to
   
   w_der += fetch_population(ix1, ix2, ix3, 0, 0) * col_dam_cross_section[z][i_from][i_to] * 
     (vmean_der * pow(vmean/1E6, -alpha) - vmean * alpha * pow(vmean/1E6, -alpha-1.0) * vmean_der / 1E6);
-
-  w_der += parent_atm->get_neutral_H_derivative_lte(ix1,ix2,ix3) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
-
-  //if (z==0) // Van der Waals
-  //  w+= 8.08 * 8.31E-13 * pow(vmean,0.6) * fetch_population(ix1, ix2, ix3, 0, 0);
-  //if (z == 1)
-  //printf("%e \n", w/fetch_population(ix1, ix2, ix3, 0, 0));
-   
-  //if (Z == 2)
-    //printf("Z = %d d = %d from = %d to = %d  w = %e colliders = %e \n",Z, ix3, i_from, i_to,  w, fetch_population(ix1, ix2, ix3, 0, 0, 0));
-
-  // And then we add resonance broadening, which depends on the ground level of the same ion:
-  //w += pop[ix1][ix2][ix3].N[z] * 4.0 * e * e / mass * lambda_0 / c;
   
+  w_der += parent_atm->get_neutral_H_derivative_lte(ix1,ix2,ix3) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
+ 
   return w_der;
 }
 
@@ -982,8 +970,6 @@ int atom::compute_damp_col(int z, int lu, int ll){
     fp_t R_lower = n_eff_l * n_eff_l / 2.0 / (z+1) / (z+1) * (5.0 * n_eff_l * n_eff_l + 1.0); // This is Unsold, this is actually rsq
 
     fp_t C6 = 6.46E-34 * (R_upper - R_lower);
-    //printf("C6 = %e \n", C6);
-
   	col_dam_cross_section[z][lu][ll] = col_dam_cross_section[z][ll][lu] = 17.0 * pow(C6, 0.4) / 251.0;
   }
 

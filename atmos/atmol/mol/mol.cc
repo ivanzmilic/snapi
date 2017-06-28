@@ -657,8 +657,8 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
   for (int i=0;i<7;++i)
     alpha += a[i] * pow(lambda*1E8,i);  
   fp_t T_P = 5040./T;
-  fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)*
-  (1.0 - exp(-8764.2/T));
+  fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)
+    *(1.0 - exp(-8764.2/T));
 
 
   // Grey:

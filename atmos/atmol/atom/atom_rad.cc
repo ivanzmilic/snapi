@@ -174,13 +174,13 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
     }
 
   // And then add Rayleigh scattering:
-  if (Z == 1){ // if H  
+  /*if (Z == 1){ // if H  
     // Using expression found in Lee & Kim (2002), equation 16.
     // This is valid far from resonances
     fp_t ratio = 141E-7 / lambda;
     fp_t cross_section = 8.41E-25  * pow(ratio,4) + 3.37E-24 * pow(ratio,6) + 4.71E-22 * pow(ratio,14);
     op_cont += cross_section * pop[x1i][x2i][x3i].N[0];
-  }
+  }*/
 
   return op_cont;
 }

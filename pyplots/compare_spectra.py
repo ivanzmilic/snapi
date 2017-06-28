@@ -40,7 +40,7 @@ lambda_max = spectra1[0,-1]
 plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = file1)
 plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
 
-#plt.xlim([5892,5893])
+#plt.xlim([6301,6303])
 plt.xlim([lambda_min,lambda_max])
 plt.ylim([0,1.2])
 #plt.ylim([0,1E14])
