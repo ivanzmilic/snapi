@@ -275,6 +275,8 @@ int atmos_ppbez::optical_depth_scale(fp_t ***tau,fp_t ***op,fp_t t,fp_t p){
 int atmos_ppbez::compute_op_referent(){
 
   // First we have to compute the opacity.
+
+  fp_t lr = airtovac(lambda_referent);
   
   for (int x1i=x1l;x1i<=x1h;++x1i)
     for (int x2i=x2l;x2i<=x2h;++x2i)
@@ -282,12 +284,14 @@ int atmos_ppbez::compute_op_referent(){
         fp_t T_local = T[x1i][x2i][x3i];
         chemeq(atml, natm, T_local, Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T_local, Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        op_referent[x1i][x2i][x3i] = opacity_continuum(T_local,Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
+        op_referent[x1i][x2i][x3i] = opacity_continuum(T_local,Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
       }
   return 0;
 }
 
 int atmos_ppbez::compute_op_referent_derivative(){
+
+  fp_t lr = airtovac(lambda_referent);
 
   op_referent_derivative = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_referent_derivative[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
@@ -300,12 +304,12 @@ int atmos_ppbez::compute_op_referent_derivative(){
         T[x1i][x2i][x3i] += delta_T*0.5;
         chemeq(atml, natm, T[x1i][x2i][x3i], Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        op_referent_derivative[1][x3i][x1i][x2i][x3i] = opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
+        op_referent_derivative[1][x3i][x1i][x2i][x3i] = opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
 
         T[x1i][x2i][x3i] -= delta_T;
         chemeq(atml, natm, T[x1i][x2i][x3i], Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        op_referent_derivative[1][x3i][x1i][x2i][x3i] -= opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
+        op_referent_derivative[1][x3i][x1i][x2i][x3i] -= opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
         op_referent_derivative[1][x3i][x1i][x2i][x3i] /= delta_T;
         T[x1i][x2i][x3i] += delta_T*0.5;
 
@@ -314,12 +318,12 @@ int atmos_ppbez::compute_op_referent_derivative(){
         Nt[x1i][x2i][x3i] += delta_Nt*0.5;
         chemeq(atml, natm, T[x1i][x2i][x3i], Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        op_referent_derivative[2][x3i][x1i][x2i][x3i] = opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
+        op_referent_derivative[2][x3i][x1i][x2i][x3i] = opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
 
         Nt[x1i][x2i][x3i] -= delta_Nt;
         chemeq(atml, natm, T[x1i][x2i][x3i], Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         for (int a=0;a<natm;++a) atml[a]->lte(T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
-        op_referent_derivative[2][x3i][x1i][x2i][x3i] -= opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], 500E-7, x1i,x2i,x3i);
+        op_referent_derivative[2][x3i][x1i][x2i][x3i] -= opacity_continuum(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
         op_referent_derivative[2][x3i][x1i][x2i][x3i] /= delta_Nt;
         Nt[x1i][x2i][x3i] += delta_Nt*0.5;
 

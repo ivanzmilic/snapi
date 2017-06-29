@@ -160,7 +160,7 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
   for (int z=1;z<=Z;++z)
     op_cont += a*sqr((fp_t)z)*pop[x1i][x2i][x3i].N[z];
   fp_t b=-(h*c)/(k*T_in);
-  op_cont *= lambda*sqr(lambda)*(1.0-exp(b/lambda));
+  op_cont *= 0.0*lambda*sqr(lambda)*(1.0-exp(b/lambda));
 
   // And then directly add B-F
   for (int z=0;z<Z;++z)
@@ -168,8 +168,13 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
       
       fp_t sigma = (bf[z][l]) ? bf[z][l]->U(lambda) : 0.0;
       if (sigma){
-        fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * Ne_in * 2.07E-16 * pow(T_in, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][l]) / k /  T_in);
+        fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * Ne_in * saha_const * pow(T_in, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][l]) / k /  T_in);
         op_cont += sigma * (pop[x1i][x2i][x3i].n[z][l] - pop_mod * exp(- h * c / lambda / k / T_in));
+        /*if (x3i==x3h && Z==1){
+          printf("I am continuum function.\n");
+          printf("%e \n",op_cont);
+          printf("pop_mod = %e \n",pop_mod);
+        }*/
       }   
     }
 
