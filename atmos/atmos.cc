@@ -331,6 +331,10 @@ int atmosphere::get_N_depths(){
   return x3h-x3l+1;
 }
 
+fp_t atmosphere::get_partf(int who, int z, fp_t T_in, fp_t Ne_in){
+  return atml[who]->get_partf(z,T_in,Ne_in);
+}
+
 fp_t ** atmosphere::return_as_array(){
   fp_t ** atmos;
   int ND = x3h-x3l+1;

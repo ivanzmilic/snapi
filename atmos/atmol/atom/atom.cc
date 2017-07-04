@@ -726,6 +726,10 @@ void atom::lte(fp_t T, fp_t Ne, int x1i, int x2i, int x3i){
   }
 }
 
+fp_t atom::get_partf(int z, fp_t T, fp_t Ne){
+  return partf[z]->U(T,Ne,io);
+}
+
 void atom::compute_active_population(fp_t *** T, fp_t *** Ne){
 
 for(int x1i=x1l;x1i<=x1h;++x1i)

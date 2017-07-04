@@ -170,11 +170,6 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
       if (sigma){
         fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * Ne_in * saha_const * pow(T_in, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][l]) / k /  T_in);
         op_cont += sigma * (pop[x1i][x2i][x3i].n[z][l] - pop_mod * exp(- h * c / lambda / k / T_in));
-        /*if (x3i==x3h && Z==1){
-          printf("I am continuum function.\n");
-          printf("%e \n",op_cont);
-          printf("pop_mod = %e \n",pop_mod);
-        }*/
       }   
     }
 
@@ -389,7 +384,7 @@ fp_t ***atom::boundfree_em(fp_t ***Vlos,fp_t lambda) // emissivity
             fp_t sigma = (bf[z][l]) ? bf[z][l]->U(lambda * (1.0 + 0.0*Vlos[x1i][x2i][x3i]/c)) : 0;
             if (sigma){
             // But we also need some corrections now.
-              fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * 2.07E-16 * pow(fetch_temperature(x1i, x2i, x3i), -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0])
+              fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(fetch_temperature(x1i, x2i, x3i), -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0])
               * exp((ip[z] - ee[z][l]) / k /  fetch_temperature(x1i, x2i, x3i));          
               em[x1i][x2i][x3i] += sigma * pop_mod * (1.0 - exp(- h * c / lambda / k / fetch_temperature(x1i, x2i, x3i))) * Planck_f(lambda, fetch_temperature(x1i,x2i,x3i));
             }

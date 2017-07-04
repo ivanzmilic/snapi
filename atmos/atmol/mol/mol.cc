@@ -533,12 +533,20 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
   fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
 
+  fp_t magic_T = h*c/1.6421E-4/k;
+  printf("Magic Temperature is %e \n", magic_T);
+
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         T_P = 5040. / T[x1i][x2i][x3i];
         op[x1i][x2i][x3i] = 1E-26 * Ne[x1i][x2i][x3i]*k*T[x1i][x2i][x3i] * 
           pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0);
+
+        printf("H - pop directly: %e \n", N[x1i][x2i][x3i]);
+        fp_t H_m_test = fetch_population(x1i,x2i,x3i,0,0,0) * Ne[x1i][x2i][x3i] * saha_const *
+          pow(T[x1i][x2i][x3i],-1.5) * 1.0/2.0 * exp(magic_T/T[x1i][x2i][x3i]);
+        printf("H - pop indirectly : %e \n",H_m_test);
   }
 
 
@@ -547,50 +555,17 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
 
 fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda){
 
-  // 05/11/2014: Ok here we will now try to implement the tables and exponents from John(1988). 
-
-  // First we write down polynomial coefficients for wavelengts greated then 0.3645 micrometer.
-
-  fp_t C_L[6][6]; // The first index goes from A to F, second one from 1 to 6
-
-  C_L[0][0] = 0.0; C_L[0][1] = 2483.3460; C_L[0][2] = -3449.889; C_L[0][3] = 2200.04; C_L[0][4] = -696.271; C_L[0][5] = 88.283;
-  C_L[1][0] = 0.0; C_L[1][1] = 285.827; C_L[1][2] = -1158.382; C_L[1][3] = 2427.719; C_L[1][4] = -1841.4; C_L[1][5] = 444.517;
-  C_L[2][0] = 0.0; C_L[2][1] = -2054.291; C_L[2][2] = 8746.523; C_L[2][3] = -13651.105; C_L[2][4] = 8624.97; C_L[2][5] = -1863.864;
-  C_L[3][0] = 0.0; C_L[3][1] = 2827.776; C_L[3][2] = -11485.632; C_L[3][3] = 16755.524; C_L[3][4] = -10051.53; C_L[3][5] = 2095.288;
-  C_L[4][0] = 0.0; C_L[4][1] = -1341.537; C_L[4][2] = 5303.609; C_L[4][3] = -7510.494; C_L[4][4] = 4400.067; C_L[4][5] = -901.788;
-  C_L[5][0] = 0.0; C_L[5][1] = 208.952; C_L[5][2] = -812.939; C_L[5][3] = 1132.738; C_L[5][4] = -655.02; C_L[5][5] = 132.985;
-
+  // Will be the same approach as outlined above:
   fp_t *****op_pert = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_pert[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  fp_t T_P = 0.0; // 5040./T 
-  fp_t lam = lambda * 1E4;
 
-  for(int x1i=x1l;x1i<=x1h;++x1i)
-    for(int x2i=x2l;x2i<=x2h;++x2i)
-      for(int x3i=x3l;x3i<=x3h;++x3i){
-        
-        fp_t sigma = 0.0;
-        fp_t d_sigma_dT = 0.0;
+  fp_t l = log10(lambda*1E8);
+  fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
+  fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
+  fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
+  // These do not change with the temperature, this is only lambda dependence:
 
-        T_P = 5040. / T[x1i][x2i][x3i];
-        for (int n =0; n<6; ++n)
-          d_sigma_dT += ((n+2.0) * 0.5)* (-T_P) / T[x1i][x2i][x3i] * pow(T_P, n * 0.5) * (C_L[0][n] * lam * lam + C_L[1][n] + C_L[2][n] / lam +
-            C_L[3][n] / lam / lam + C_L[4][n] / lam / lam / lam + C_L[5][n] / lam / lam / lam / lam);
-
-        
-        for (int n =0; n<6; ++n)
-          sigma += pow(T_P, (n+2.0) * 0.5) * (C_L[0][n] * lam * lam + C_L[1][n] + C_L[2][n] / lam +
-            C_L[3][n] / lam / lam + C_L[4][n] / lam / lam / lam + C_L[5][n] / lam / lam / lam / lam);
-       
-        op_pert[1][x3i][x1i][x2i][x3i] = sigma * dN[1][x1i][x2i][x3i] * 1.33E-29 * pow(T[x1i][x2i][x3i], 2.5) * exp(-8750.0 / T[x1i][x2i][x3i]);
-        op_pert[1][x3i][x1i][x2i][x3i] += N[x1i][x2i][x3i] * 1.33E-29 * pow(T[x1i][x2i][x3i], 2.5) * exp(-8750.0 / T[x1i][x2i][x3i]) * d_sigma_dT;
-        op_pert[1][x3i][x1i][x2i][x3i] += sigma * N[x1i][x2i][x3i] * 1.33E-29 * 2.5 * pow(T[x1i][x2i][x3i], 1.5) * exp(-8750.0 / T[x1i][x2i][x3i]);
-        op_pert[1][x3i][x1i][x2i][x3i] += sigma * N[x1i][x2i][x3i] * 1.33E-29 * pow(T[x1i][x2i][x3i], 2.5) * exp(-8750.0 / T[x1i][x2i][x3i]) 
-          * 8750.0 / T[x1i][x2i][x3i] / T[x1i][x2i][x3i];
-
-        op_pert[2][x3i][x1i][x2i][x3i] = sigma * dN[2][x1i][x2i][x3i] * 1.33E-29 * pow(T[x1i][x2i][x3i], 2.5) * exp(-8750.0 / T[x1i][x2i][x3i]);
-      }
-
+  
   return op_pert;
 }
 
@@ -620,9 +595,9 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
         op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
           pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-8764.2/T));
 
-        //fp_t h_nu = 19.8581e-17 / lambda;
-        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-        //op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
+        fp_t h_nu = 19.8581e-17 / lambda;
+        fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+          op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
   }
   return op;
 }
@@ -662,9 +637,9 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
   fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)
     *(1.0 - exp(-8764.2/T));
 
-  //fp_t h_nu = 19.8581e-17 / lambda;
-  //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-  //op_bf = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
+  fp_t h_nu = 19.8581e-17 / lambda;
+  fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+  op_bf = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
 
 
   // Grey:

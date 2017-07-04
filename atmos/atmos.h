@@ -263,6 +263,7 @@ public:
   fp_t get_Nt(int, int, int);
   fp_t get_ne_lte_derivative(int, int, int, int);
   fp_t get_neutral_H_derivative_lte(int, int, int);
+  fp_t get_partf(int who, int z, fp_t T_in, fp_t Ne_in);
   fp_t get_vt(int, int, int);
   fp_t * get_magnetic_field(int, int, int);
   int execute_chemeq_for_point(int, int, int); // Just to execture chemeq in point x1i, x2i, x3i, populations will be automatically updated

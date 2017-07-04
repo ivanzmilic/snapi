@@ -217,6 +217,9 @@ public:
   virtual fp_t get_active_pop(int, int, int){
     return 0;
   }
+  virtual fp_t get_partf(int z, fp_t T, fp_t){
+    return 1.0;
+  };
 
   // ------------------------------------------------------------------------------------------------------------------------------------------------------
   // Some response function related stuff:

@@ -386,6 +386,7 @@ public:
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int index_ion);
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int index_ion, int index_lvl);
   virtual fp_t get_active_pop(int x1i, int x2i, int x3i);
+  virtual fp_t get_partf(int z, fp_t T, fp_t Ne);
 
   virtual fp_t get_J(int x1i, int x2i, int x3i, int transition);
   virtual fp_t get_L(int x1i, int x2i, int x3i, int transition);

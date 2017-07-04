@@ -376,9 +376,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   if (tau_grid)
     compute_op_referent();
 
-  compute_op_referent();
-  compute_tau_referent();
-
   nltepops();
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
@@ -398,15 +395,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
-
-  FILE * tau = fopen("tau.dat","w");
-  FILE * H_pops = fopen("hpops.dat","w");
-  for (int x3i=x3l;x3i<=x3h;++x3i){
-    fprintf(H_pops,"%e %e %e \n",x3[x3i], get_pop(x1l,x2l,x3i,0,0),get_Ne(x1l,x2l,x3i));
-    fprintf(tau, "%e %e %e %e \n", x3[x3i],op_vector[1][x1l][x2l][x3i][1][1], op_referent[x1l][x2l][x3i],log10(-tau_referent[x1l][x2l][x3i]));
-  }
-  fclose(H_pops);
-  fclose(tau);
 
   for (int l = 1; l<=nlambda; ++l){
 
@@ -653,7 +641,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     T[x1l][x2l][x3i] += 0.5 * d_T;
     
     // Density finite difference perturbations:
-    
+    /*
     fp_t d_Nt = delta_Nt_frac * Nt[x1l][x2l][x3i];
     Nt[x1l][x2l][x3i] += 0.5 * d_Nt;
 
