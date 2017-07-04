@@ -42,6 +42,8 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
   // theta,phi,lambda and nlambda give us angles and wavelengths for which to compute opacity/emissivity
   // contributions from given atom are added to op_vector and em_vector.
 
+  //rayleigh_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
+  //freefree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
   boundfree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
   boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
 
@@ -61,6 +63,39 @@ int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, f
   return 0;
 }
 
+int atom::freefree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
+  fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
+
+  fp_t lambda_mean = 0.5*(lambda[1]+lambda[nlambda]);
+  fp_t *** op = freefree_op(T,Ne,Vlos,lambda_mean);
+
+  for (int l=1;l<=nlambda;++l)
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i){
+          op_vector[l][x1i][x2i][x3i][1][1] += op[x1i][x2i][x3i];
+          em_vector[l][x1i][x2i][x3i][1] += op[x1i][x2i][x3i]*Planck_f(lambda_mean,T[x1i][x2i][x3i]);
+  }
+  del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
+  return 0;
+}
+
+int atom::rayleigh_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
+  fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
+
+  fp_t lambda_mean = 0.5*(lambda[1]+lambda[nlambda]);
+  fp_t *** op = rayleigh_op(lambda_mean);
+
+  for (int l=1;l<=nlambda;++l)
+    for (int x1i=x1l;x1i<=x1h;++x1i)
+      for (int x2i=x2l;x2i<=x2h;++x2i)
+        for (int x3i=x3l;x3i<=x3h;++x3i){
+          op_vector[l][x1i][x2i][x3i][1][1] += op[x1i][x2i][x3i];
+          em_vector[l][x1i][x2i][x3i][1] += op[x1i][x2i][x3i]*Planck_f(lambda_mean,T[x1i][x2i][x3i]);
+  }
+  del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
+  return 0;
+}
 
 int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
@@ -87,12 +122,7 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
               * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i])/k/T[x1i][x2i][x3i]);
 
     		    fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod*exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i]));
-            /*if (x3i==x3h && Z==1){
-              printf("I am generic function.\n");
-              printf("%e \n",op_loc);
-              printf("pop_mod = %e \n",pop_mod);
-            }*/
-    		    fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
+            fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
     		    for (int l=1;l<=nlambda_crit;++l){
     			    op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
     			    em_vector[l][x1i][x2i][x3i][1] += em_loc;

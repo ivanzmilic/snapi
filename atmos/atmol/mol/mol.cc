@@ -600,8 +600,6 @@ fp_t *** h_minus_mol::freefree_em(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   return 0;
 }
 
-// 31/10/2014, Halloween: We are implementing b-f opacity and emissivity from a H- ion:
-
 fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   
   // Allocate space for the opacity:
@@ -621,6 +619,10 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
         fp_t T_P = 5040./T;
         op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
           pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-8764.2/T));
+
+        //fp_t h_nu = 19.8581e-17 / lambda;
+        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+        //op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
   }
   return op;
 }
@@ -659,6 +661,10 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
   fp_t T_P = 5040./T;
   fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)
     *(1.0 - exp(-8764.2/T));
+
+  //fp_t h_nu = 19.8581e-17 / lambda;
+  //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+  //op_bf = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
 
 
   // Grey:

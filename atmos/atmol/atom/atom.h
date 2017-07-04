@@ -179,6 +179,9 @@ protected:
 
   // Now the boundbound, boundfree, freefree and Raileygh scattering functions. These ones compute the 
   // opacity and emissivity at once.
+  virtual int freefree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  virtual int rayleigh_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
+  
   virtual int boundbound_op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int boundfree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int boundbound_op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****, fp_t********,fp_t*******);

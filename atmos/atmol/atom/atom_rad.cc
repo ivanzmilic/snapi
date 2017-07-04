@@ -35,7 +35,7 @@ fp_t ***atom::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_
 {
   fp_t ***op=freefree_op(T,Ne,Vlos,lambda); // free-free opacity
   op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
-  //memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   
   op=add(boundfree_op(Vlos,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);          // bound-free ionization
   op=add(boundbound_op(T,Ne,Vlos,Vt, B_vec, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h); // bound-bound transitions
@@ -53,7 +53,7 @@ fp_t ***atom::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t ****
     for(int x2i=x2l;x2i<=x2h;++x2i)
         for(int x3i=x3l;x3i<=x3h;++x3i)
             em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
-  //memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
+  memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
   
   em=add(boundfree_em(Vlos,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
   em=add(boundbound_em(T,Ne,Vlos,Vt, B_vec, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -160,7 +160,7 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
   for (int z=1;z<=Z;++z)
     op_cont += a*sqr((fp_t)z)*pop[x1i][x2i][x3i].N[z];
   fp_t b=-(h*c)/(k*T_in);
-  op_cont *= 0.0*lambda*sqr(lambda)*(1.0-exp(b/lambda));
+  op_cont *= lambda*sqr(lambda)*(1.0-exp(b/lambda));
 
   // And then directly add B-F
   for (int z=0;z<Z;++z)
@@ -179,13 +179,13 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
     }
 
   // And then add Rayleigh scattering:
-  /*if (Z == 1){ // if H  
+  if (strcmp(id,"H")==0){ // if H  
     // Using expression found in Lee & Kim (2002), equation 16.
     // This is valid far from resonances
     fp_t ratio = 141E-7 / lambda;
     fp_t cross_section = 8.41E-25  * pow(ratio,4) + 3.37E-24 * pow(ratio,6) + 4.71E-22 * pow(ratio,14);
     op_cont += cross_section * pop[x1i][x2i][x3i].N[0];
-  }*/
+  }
 
   return op_cont;
 }
