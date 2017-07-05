@@ -928,7 +928,7 @@ fp_t atom::damp_col_der_T(int ix1, int ix2, int ix3, int z, int i_from, int i_to
   w_der += fetch_population(ix1, ix2, ix3, 0, 0) * col_dam_cross_section[z][i_from][i_to] * 
     (vmean_der * pow(vmean/1E6, -alpha) - vmean * alpha * pow(vmean/1E6, -alpha-1.0) * vmean_der / 1E6);
   
-  w_der += parent_atm->get_neutral_H_derivative_lte(ix1,ix2,ix3) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
+  w_der += parent_atm->get_neutral_H_derivative_lte(1,ix1,ix2,ix3) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
  
   return w_der;
 }

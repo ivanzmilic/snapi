@@ -262,7 +262,7 @@ public:
   fp_t get_Ne(int, int, int);
   fp_t get_Nt(int, int, int);
   fp_t get_ne_lte_derivative(int, int, int, int);
-  fp_t get_neutral_H_derivative_lte(int, int, int);
+  fp_t get_neutral_H_derivative_lte(int,int, int, int);
   fp_t get_partf(int who, int z, fp_t T_in, fp_t Ne_in);
   fp_t get_vt(int, int, int);
   fp_t * get_magnetic_field(int, int, int);

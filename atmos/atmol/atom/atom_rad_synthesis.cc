@@ -183,7 +183,7 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 	    			  fp_t* op_pert_loc = new fp_t[7]-1;
 	    			  fp_t* em_pert_loc = new fp_t[7]-1;
 	    			  fp_t op_der_to_level = op_derivative_to_level(x3i, rmap[z][i], lambda_mean);
-              fp_t em_der_to_level = op_derivative_to_level(x3i, rmap[z][i], lambda_mean); 
+              fp_t em_der_to_level = em_derivative_to_level(x3i, rmap[z][i], lambda_mean); 
 	    			  for (int p=1;p<=4;++p){
 	    				 op_pert_loc[p] = op_der_to_level * level_responses[p][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
 	    				 em_pert_loc[p] = em_der_to_level * level_responses[p][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];

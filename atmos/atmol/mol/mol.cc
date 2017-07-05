@@ -533,25 +533,20 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
   fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
 
-  fp_t magic_T = h*c/1.6421E-4/k;
-  printf("Magic Temperature is %e \n", magic_T);
-
+  fp_t T_crit = h*c/1.6421E-4/k;
+  
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         T_P = 5040. / T[x1i][x2i][x3i];
         op[x1i][x2i][x3i] = 1E-26 * Ne[x1i][x2i][x3i]*k*T[x1i][x2i][x3i] * 
           pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0);
-
-        printf("H - pop directly: %e \n", N[x1i][x2i][x3i]);
-        fp_t H_m_test = fetch_population(x1i,x2i,x3i,0,0,0) * Ne[x1i][x2i][x3i] * saha_const *
-          pow(T[x1i][x2i][x3i],-1.5) * 1.0/2.0 * exp(magic_T/T[x1i][x2i][x3i]);
-        printf("H - pop indirectly : %e \n",H_m_test);
   }
-
 
   return op;
 }
+
+// ======================================================================================================
 
 fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda){
 
@@ -559,21 +554,57 @@ fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t 
   fp_t *****op_pert = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_pert[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
+  // These do not change with the temperature, this is only lambda dependence:
   fp_t l = log10(lambda*1E8);
   fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
   fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
   fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
-  // These do not change with the temperature, this is only lambda dependence:
 
-  
+  // Now the temperature/density dependence comes:
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){
+        // Do some step-by-step analytical population of derivatives:
+        fp_t T_P = 5040. / T[x1i][x2i][x3i];
+        fp_t d_T_P_dT = -T_P/T[x1i][x2i][x3i]; // derivative w.r.t T
+        fp_t d_logTP_dT = 1.0/2.302585/T_P * d_T_P_dT;
+        fp_t exp_factor = pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P));
+        fp_t d_exp_factor_dT = exp_factor*2.302585*(f_1 * d_logTP_dT + 2.0*f_2*log10(T_P)*d_logTP_dT);
+
+        fp_t N_H = fetch_population(x1i,x2i,x3i,0,0); // Get population of neutral hydrogen
+        fp_t N_e = Ne[x1i][x2i][x3i]; // Electrons
+        fp_t const_factor = 1E-26*k; // This is the part which does not depend on the temperature.
+
+        // From multiplication by T:
+        op_pert[1][x3i][x1l][x2l][x3i] = const_factor * N_e * exp_factor * N_H;
+        // From the exp_factor derivative:
+        op_pert[1][x3i][x1l][x2l][x3i] += const_factor * T[x1i][x2i][x3i] * N_e * N_H * d_exp_factor_dT;
+        // From the derivatives of N_e and N_H
+        fp_t dN_e_dT = parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i);
+        fp_t dN_H_dT = parent_atm->get_neutral_H_derivative_lte(1,x1i,x2i,x3i);
+        op_pert[1][x3i][x1l][x2l][x3i] += const_factor * T[x1i][x2i][x3i] * exp_factor * 
+          (N_e * dN_H_dT + N_H * dN_e_dT);
+
+        //------ Density now------------------------------------------------------------// 
+
+        // Only derivatives of N_e and N_H
+        fp_t dN_e_dN = parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i);
+        fp_t dN_H_dN = parent_atm->get_neutral_H_derivative_lte(2,x1i,x2i,x3i);
+        op_pert[2][x3i][x1l][x2l][x3i] = const_factor * T[x1i][x2i][x3i] * exp_factor * 
+          (N_e * dN_H_dT + N_H * dN_e_dT);
+  }
   return op_pert;
 }
 
+// ======================================================================================================
+
 fp_t *** h_minus_mol::freefree_em(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda){
 
-  // FIX!
+  fprintf(stderr,"h_minus_mol::freefree_em : You are calling an unfinished function. Please check.\n");
   return 0;
 }
+
+// ======================================================================================================
 
 fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   

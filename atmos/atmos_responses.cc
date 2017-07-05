@@ -500,9 +500,9 @@ void atmosphere::ne_lte_derivatives(){
 			}
 }
 
-fp_t atmosphere::get_neutral_H_derivative_lte(int x1i, int x2i, int x3i){
+fp_t atmosphere::get_neutral_H_derivative_lte(int param, int x1i, int x2i, int x3i){
 
-	return atml[0]->get_population_response(1,x3i,x1i,x2i,x3i,0);
+	return atml[0]->get_population_response(param,x3i,x1i,x2i,x3i,0);
 }
 
 fp_t atmosphere::get_ne_lte_derivative(int param, int x1i, int x2i, int x3i){
