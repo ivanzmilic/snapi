@@ -45,7 +45,7 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
   //rayleigh_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
   //freefree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
   boundfree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
-  boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
+  //boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
 
   return 0;
 }
@@ -58,7 +58,7 @@ int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, f
   // contributions from given atom are added to op_vector and em_vector.
 
   boundfree_op_em_vector_plus_pert(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
-  boundbound_op_em_vector_plus_pert(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
+  //boundbound_op_em_vector_plus_pert(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
 
   return 0;
 }
@@ -122,11 +122,25 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
               * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i])/k/T[x1i][x2i][x3i]);
 
     		    fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod*exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i]));
-            fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
+            fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
     		    for (int l=1;l<=nlambda_crit;++l){
     			    op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
     			    em_vector[l][x1i][x2i][x3i][1] += em_loc;
     		    }
+            if (x3i==x3h){
+              fp_t *** op_comparison=boundfree_op(Vlos,lambda_mean);
+              fp_t *** em_comparison=boundfree_em(Vlos,lambda_mean);
+              printf("op/em :: \n");
+              //printf("pop_mod = %e i=%d, op_loc = %e, em_loc = %e \n",pop_mod,i,op_loc,em_loc);
+              //printf("exp = %e \n", exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i]));
+              //printf("pop_ground = %e \n", pop[x1i][x2i][x3i].n[z][i]);
+              //printf("sigma = %e\n",sigma);
+              printf("new function : pop_mod = %e, exp=%e, B_lambda = %e \n",pop_mod,(1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i])),Planck_f(lambda_mean, T[x1i][x2i][x3i]));
+              printf("op = %e referent_op = %e \n",op_loc,op_comparison[x1l][x2l][x3i]);
+              printf("em = %e referent_em = %e \n",em_loc,em_comparison[x1l][x2l][x3i]);
+              del_ft3dim(op_comparison,x1l,x2h,x2l,x2h,x3l,x3h);
+              del_ft3dim(em_comparison,x1l,x2h,x2l,x2h,x3l,x3h);
+            }
           }
  	  }
   } 
@@ -135,7 +149,11 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
 
 int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector, fp_t********op_vector_pert,fp_t*******em_vector_pert){
-
+  
+  memset(op_vector_pert[1][1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*16*sizeof(fp_t));;
+  memset(em_vector_pert[1][1][x3l][x1l][x2l][x3l]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
+  memset(op_vector[1][x1l][x2l][x3l][1]+1,0,(x3h-x3l+1)*16*sizeof(fp_t));;
+  memset(em_vector[1][x1l][x2l][x3l]+1,0,(x3h-x3l+1)*4*sizeof(fp_t));
   for (int z=0;z<=Z;++z) // For each stage that can be ionized (i.e. not the last one)
     for (int i=0;i<nl[z];++i){ // for each level
 
@@ -157,18 +175,36 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 
 		      	  fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda_mean) : 0.0;
 		      	  fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T[x1i][x2i][x3i], -1.5) 
-		           * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i] - h * c / lambda_mean)/k/T[x1i][x2i][x3i]);
+		           * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i])/k/T[x1i][x2i][x3i]);
 
 		      	  // Opacity, emissivity, and local perturbation to these two
 		      	  if (x3k==x3l){ // This is a trick, so we do it in the first go immediately
 		    	  
-		            // And then local derivative of the popmod:
-		    	  	  fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod);
-		    	  	  fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
+		    	  	  fp_t op_loc = sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod*exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i]));
+                fp_t em_loc = sigma * pop_mod * (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * Planck_f(lambda_mean, T[x1i][x2i][x3i]);
 
-		    	  	  fp_t * op_explicit_pert = op_derivative_explicit(x3i,0,0,lambda_mean);
-		    	  	  fp_t * em_explicit_pert = em_derivative_explicit(x3i,0,0,lambda_mean);
-		    	  
+                // Now analytical derivation of everything w.r.t to T and density, except level populations:
+                fp_t d_pop_mod[2];
+                d_pop_mod[1] = pop_mod * (parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i) + 
+                  (-1.5)/T[x1i][x2i][x3i] + (ee[z][i]-ip[z])/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i]);
+                d_pop_mod[2] = pop_mod * (parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i));
+
+                fp_t op_explicit_pert[2];
+                fp_t em_explicit_pert[2];
+
+                op_explicit_pert[1] = sigma*(-d_pop_mod[1]*exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i]));
+                op_explicit_pert[1] += sigma*(-pop_mod*exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i]) *
+                  h*c/lambda_mean/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i]);
+                op_explicit_pert[2] = sigma*(-d_pop_mod[2]*exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i]));
+                
+                fp_t B_planck = Planck_f(lambda_mean, T[x1i][x2i][x3i]);
+                
+                em_explicit_pert[1] = sigma*d_pop_mod[1]*(1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * B_planck;
+                em_explicit_pert[1] += sigma*pop_mod*(-exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i]))
+                  *h*c/lambda_mean/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i]*B_planck;
+                em_explicit_pert[1] += sigma*pop_mod*(1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i]))*Planck_f_derivative(lambda_mean,T[x1i][x2i][x3i]);
+                em_explicit_pert[2] = sigma*d_pop_mod[2]*(1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x2i])) * B_planck;
+
 		    	  	  for (int l=1;l<=nlambda_crit;++l){
 		    				  op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
 		    				  em_vector[l][x1i][x2i][x3i][1] += em_loc;
@@ -177,7 +213,6 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 		    				  op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_explicit_pert[2];
 		    				  em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_explicit_pert[2];
 		    	  	  }
-		    	  	  delete[](op_explicit_pert+1);delete[](em_explicit_pert+1);
 	    			  }	
 	    			  // But now also responses of opacity and emissivity due to the responses of the levels
 	    			  fp_t* op_pert_loc = new fp_t[7]-1;
@@ -194,6 +229,17 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 	    		  		 em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += em_pert_loc[p];
 	    			  }
 	    			  delete[](op_pert_loc+1); delete[](em_pert_loc+1);
+              if (x3i==x3h && x3i==x3k){
+                fp_t ***** op_comparison=boundfree_op_pert(Vlos,lambda_mean);
+                fp_t ***** em_comparison=boundfree_em_pert(Vlos,lambda_mean);
+
+                fp_t *** oo_c = boundfree_op(Vlos,lambda_mean);
+                fp_t *** ee_c = boundfree_em(Vlos,lambda_mean);
+                printf("op_der = %e referent_op_der = %e \n",op_vector_pert[1][1][x3i][x1l][x2l][x3i][1][1],op_comparison[1][x3i][x1l][x2l][x3i]);
+                printf("em_der = %e referent_em_der = %e \n",em_vector_pert[1][1][x3i][x1l][x2l][x3i][1],em_comparison[1][x3i][x1l][x2l][x3i]);
+                printf("op = %e referent_op = %e \n",op_vector[1][x1l][x2l][x3l][1][1],oo_c[x1l][x2l][x3i]);
+                printf("em = %e referent_em = %e \n",em_vector[1][x1l][x2l][x3l][1],ee_c[x1l][x2l][x3i]);
+              }
       }
  		}
   } 

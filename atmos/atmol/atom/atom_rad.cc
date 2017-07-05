@@ -387,6 +387,8 @@ fp_t ***atom::boundfree_em(fp_t ***Vlos,fp_t lambda) // emissivity
               fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(fetch_temperature(x1i, x2i, x3i), -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0])
               * exp((ip[z] - ee[z][l]) / k /  fetch_temperature(x1i, x2i, x3i));          
               em[x1i][x2i][x3i] += sigma * pop_mod * (1.0 - exp(- h * c / lambda / k / fetch_temperature(x1i, x2i, x3i))) * Planck_f(lambda, fetch_temperature(x1i,x2i,x3i));
+              if (x3i==x3h)
+              printf("basic function : pop_mod = %e, exp=%e, B_lambda = %e \n",pop_mod,(1.0 - exp(- h * c / lambda / k / fetch_temperature(x1i, x2i, x3i))),Planck_f(lambda, fetch_temperature(x1i,x2i,x3i)));
             }
   }
   return em;
