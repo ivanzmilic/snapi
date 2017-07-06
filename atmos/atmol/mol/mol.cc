@@ -525,10 +525,10 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   
   fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  fp_t T_P = 0.0; // 5040./T 
   
-  // Now approach from Grey, as suggested by RMS:
-  fp_t l = log10(lambda*1E8);
+  // Now approach from Grey p. 155-156:
+  
+  fp_t l = log10(lambda*1E8); // lambda in Angstroms:
   fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
   fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
   fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
@@ -538,10 +538,10 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
-        T_P = 5040. / T[x1i][x2i][x3i];
+        fp_t T_P = 5040. / T[x1i][x2i][x3i];
         op[x1i][x2i][x3i] = 1E-26 * Ne[x1i][x2i][x3i]*k*T[x1i][x2i][x3i] * 
           pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0);
-  }
+  } // points in the atmosphere
 
   return op;
 }
@@ -550,12 +550,12 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
 
 fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda){
 
-  // Will be the same approach as outlined above:
+  // Will be the same approach as above (Gray book):
   fp_t *****op_pert = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_pert[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
   // These do not change with the temperature, this is only lambda dependence:
-  fp_t l = log10(lambda*1E8);
+  fp_t l = log10(lambda*1E8); // lambda in Angstrom
   fp_t f_0 = -2.2763 - 1.6850*l + 0.76661*l*l - 0.053346*l*l*l;
   fp_t f_1 = 15.2827 - 9.2846*l + 1.99381*l*l - 0.142631*l*l*l;
   fp_t f_2 = -197.789 + 190.266*l - 67.9775*l*l + 10.6913*l*l*l - 0.625151*l*l*l*l;
@@ -565,6 +565,7 @@ fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t 
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         // Do some step-by-step analytical population of derivatives:
+        // Temperature: 
         fp_t T_P = 5040. / T[x1i][x2i][x3i];
         fp_t d_T_P_dT = -T_P/T[x1i][x2i][x3i]; // derivative w.r.t T
         fp_t d_logTP_dT = 1.0/2.302585/T_P * d_T_P_dT;
@@ -585,8 +586,7 @@ fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t 
         op_pert[1][x3i][x1l][x2l][x3i] += const_factor * T[x1i][x2i][x3i] * exp_factor * 
           (N_e * dN_H_dT + N_H * dN_e_dT);
 
-        //------ Density now------------------------------------------------------------// 
-
+        // Density:
         // Only derivatives of N_e and N_H
         fp_t dN_e_dN = parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i);
         fp_t dN_H_dN = parent_atm->get_neutral_H_derivative_lte(2,x1i,x2i,x3i);
@@ -618,18 +618,19 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   fp_t alpha = 0.0;
   for (int i=0;i<7;++i)
     alpha += a[i] * pow(lambda*1E8,i);
+  
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         fp_t T = fetch_temperature(x1i,x2i,x3i);
         fp_t T_P = 5040./T;
         op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
-          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-8764.2/T));
+          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-h*c/lambda/k/T));
 
-        fp_t h_nu = 19.8581e-17 / lambda;
-        fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-          op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
-  }
+        //fp_t h_nu = 19.8581e-17 / lambda;
+        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+          //op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
+  } // points in the atmosphere
   return op;
 }
 
@@ -639,15 +640,34 @@ fp_t ***** h_minus_mol::boundfree_op_pert(fp_t*** Vlos, fp_t lambda){
   fp_t *****op_pert=ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op_pert[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
-  // For each point in the medium compute the opacity:  
+  fp_t a[7]={1.99654,-1.18267E-5,2.64243E-6,-4.40524E-10,3.23992E-14,-1.39568E-18,2.78701E-23};
+  fp_t alpha = 0.0;
+  for (int i=0;i<7;++i)
+    alpha += a[i] * pow(lambda*1E8,i);
+  
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
-          //op[x1i][x2i][x3i] = 3.95E-17 * exp(- (lambda - 8.5E-5) * (lambda - 8.5E-5) /6.02 / 6.02 * 1E6) * N[x1i][x2i][x3i];
-        fp_t h_nu = 19.8581e-17 / lambda;
-        fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-        op_pert[1][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[1][x1i][x2i][x3i];
-        op_pert[2][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[2][x1i][x2i][x3i];
+        
+        fp_t T = fetch_temperature(x1i,x2i,x3i);
+        fp_t T_P = 5040.0/T;
+
+        fp_t op = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
+          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-h*c/lambda/k/T));
+        
+        op_pert[1][x3i][x1i][x2i][x3i]  = op * (1.0/T + 2.5 * 1.0/T_P * (-5040.0/T/T)); // direct T dependence
+        op_pert[1][x3i][x1i][x2i][x3i] += op * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i);
+        op_pert[1][x3i][x1i][x2i][x3i] += op * parent_atm->get_neutral_H_derivative_lte(1,x1i,x2i,x3i)/fetch_population(x1i,x2i,x3i,0,0);
+        op_pert[1][x3i][x1i][x2i][x3i] += op * (2.302585*0.754*5040.0/T/T);
+        op_pert[1][x3i][x1i][x2i][x3i] += op * (- exp(-h*c/lambda/k/T) * h*c/lambda/k/T/T)/ (1.0 - exp(-h*c/lambda/k/T));
+
+        op_pert[2][x3i][x1i][x2i][x3i]  = op * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i);
+        op_pert[2][x3i][x1i][x2i][x3i] += op * parent_atm->get_neutral_H_derivative_lte(2,x1i,x2i,x3i)/fetch_population(x1i,x2i,x3i,0,0);
+
+        //fp_t h_nu = 19.8581e-17 / lambda;
+        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
+        //op_pert[1][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[1][x1i][x2i][x3i];
+        //op_pert[2][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[2][x1i][x2i][x3i];
       }
 //
   return op_pert;

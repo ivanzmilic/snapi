@@ -32,8 +32,13 @@
 // A separate file versions of functions which compute opacity, emissivity, and their perturbation variants. 
 // We compute opacity and emissivity separately 
 // The file contains following methods: 
-// int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta,fp_t phi,
+//
+// 1) int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta,fp_t phi,
 //   fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector);
+// 
+// 2) int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
+//   fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector, fp_t ********op_vector_pert, fp_t*******em_vector_pert)
+
 
 int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
@@ -42,10 +47,10 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
   // theta,phi,lambda and nlambda give us angles and wavelengths for which to compute opacity/emissivity
   // contributions from given atom are added to op_vector and em_vector.
 
-  //rayleigh_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
-  //freefree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
+  //rayleigh_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector); //not implemented
+  //freefree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector); //not implemented 
   boundfree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
-  //boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
+  boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
 
   return 0;
 }
@@ -58,7 +63,7 @@ int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, f
   // contributions from given atom are added to op_vector and em_vector.
 
   boundfree_op_em_vector_plus_pert(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
-  //boundbound_op_em_vector_plus_pert(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
+  boundbound_op_em_vector_plus_pert(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
 
   return 0;
 }
@@ -105,19 +110,21 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
 
     fp_t lambda_crit = (bf[z][i]) ? bf[z][i]->getlambda_crit() : 0.0;
     int nlambda_crit = 0;
-    for (int l=1;l<=nlambda;++l){
+    for (int l=1;l<=nlambda;++l){ // find out if there is 'edge'
     	if (lambda[l] > lambda_crit)
     		break;
     	++nlambda_crit;
     }
     fp_t lambda_mean = lambda[nlambda_crit];
 
+    // then compute op/em for referent wavelength, and assign that value to all wavelengths 
+    // that can ionize, i.e. to all the ones <= than lambda[nlambda_crit]
  	  if (nlambda_crit){
 	    for (int x1i=x1l;x1i<=x1h;++x1i)
 	      for (int x2i=x2l;x2i<=x2h;++x2i)
 	        for (int x3i=x3l;x3i<=x3h;++x3i){
     		    fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda_mean) : 0.0;
-    		    // Then compute referent opacity and emissivity:
+    		    
     		    fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T[x1i][x2i][x3i], -1.5) 
               * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i])/k/T[x1i][x2i][x3i]);
 
@@ -126,20 +133,20 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
     		    for (int l=1;l<=nlambda_crit;++l){
     			    op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
     			    em_vector[l][x1i][x2i][x3i][1] += em_loc;
-    		    }
-          }
- 	  }
-  } 
+    		    } // wvl
+          } // points in the atmosphere
+ 	  } // endif
+  } // ionization stages, levels
   return 0;
 }
 
 int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector, fp_t********op_vector_pert,fp_t*******em_vector_pert){
   
-  memset(op_vector_pert[1][1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*16*sizeof(fp_t));;
-  memset(em_vector_pert[1][1][x3l][x1l][x2l][x3l]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
-  memset(op_vector[1][x1l][x2l][x3l][1]+1,0,(x3h-x3l+1)*16*sizeof(fp_t));;
-  memset(em_vector[1][x1l][x2l][x3l]+1,0,(x3h-x3l+1)*4*sizeof(fp_t));
+  //memset(op_vector_pert[1][1][x3l][x1l][x2l][x3l][1]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*16*sizeof(fp_t));;
+  //memset(em_vector_pert[1][1][x3l][x1l][x2l][x3l]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
+  //memset(op_vector[1][x1l][x2l][x3l][1]+1,0,(x3h-x3l+1)*16*sizeof(fp_t));;
+  //memset(em_vector[1][x1l][x2l][x3l]+1,0,(x3h-x3l+1)*4*sizeof(fp_t));
   
   for (int z=0;z<Z;++z) // For each stage that can be ionized, except the last one
     for (int i=0;i<nl[z];++i){ // for each level
@@ -242,7 +249,8 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
       } // points in the atmosphere
  		} // endif
   } // ionization stages & levels
-  if(strcmp(id,"H")==0){
+  
+  if(0==1){ // DEBUG
     fp_t ***** op_comparison=boundfree_op_pert(Vlos,lambda[1]);
     fp_t ***** em_comparison=boundfree_em_pert(Vlos,lambda[1]);
 

@@ -162,6 +162,7 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
   fp_t b=-(h*c)/(k*T_in);
   op_cont *= lambda*sqr(lambda)*(1.0-exp(b/lambda));
 
+  op_cont = 0.0;
   // And then directly add B-F
   for (int z=0;z<Z;++z)
     for (int l=0;l<nl[z];++l){
@@ -171,7 +172,7 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
         fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * Ne_in * saha_const * pow(T_in, -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][l]) / k /  T_in);
         op_cont += sigma * (pop[x1i][x2i][x3i].n[z][l] - pop_mod * exp(- h * c / lambda / k / T_in));
       }   
-    }
+  }
 
   // And then add Rayleigh scattering:
   if (strcmp(id,"H")==0){ // if H  
@@ -179,7 +180,7 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
     // This is valid far from resonances
     fp_t ratio = 141E-7 / lambda;
     fp_t cross_section = 8.41E-25  * pow(ratio,4) + 3.37E-24 * pow(ratio,6) + 4.71E-22 * pow(ratio,14);
-    op_cont += cross_section * pop[x1i][x2i][x3i].N[0];
+    //op_cont += cross_section * pop[x1i][x2i][x3i].N[0];
   }
 
   return op_cont;
