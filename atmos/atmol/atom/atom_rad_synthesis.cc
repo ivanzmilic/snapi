@@ -140,12 +140,13 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
   memset(em_vector_pert[1][1][x3l][x1l][x2l][x3l]+1,0,7*(x3h-x3l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
   memset(op_vector[1][x1l][x2l][x3l][1]+1,0,(x3h-x3l+1)*16*sizeof(fp_t));;
   memset(em_vector[1][x1l][x2l][x3l]+1,0,(x3h-x3l+1)*4*sizeof(fp_t));
+  
   for (int z=0;z<Z;++z) // For each stage that can be ionized, except the last one
     for (int i=0;i<nl[z];++i){ // for each level
 
     fp_t lambda_crit = (bf[z][i]) ? bf[z][i]->getlambda_crit() : 0.0;
     int nlambda_crit = 0;
-    for (int l=1;l<=nlambda;++l){
+    for (int l=1;l<=nlambda;++l){ // find the 'edge' is there is one
     	if (lambda[l] > lambda_crit)
     		break;
     	++nlambda_crit;
@@ -170,57 +171,95 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
               op_vector[l][x1i][x2i][x3i][1][1] += op_loc;
               em_vector[l][x1i][x2i][x3i][1] += em_loc;
             }
-            // This basically just repeats what has been done in the upper part.
-            // Now we are dealing with the responses. 
             // ====================================================================================
             // Local, i.e. explicit dependence of opacity and emissivity on Temperature and density:
-            // We will try to do it as explicitly as possible:
-
-            fp_t pop_mod_factor = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T[x1i][x2i][x3i], -1.5) 
-              * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i] - h*c/lambda_mean)/k/T[x1i][x2i][x3i]);
+            // We will compute it for each term (f) separately by computing op_loc * f'/f
 
             fp_t op_loc_pert[3];
             fp_t em_loc_pert[3];
-            // Temperature dependence:      
-            op_loc_pert[0] = -pop_mod_factor * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
-            op_loc_pert[0] += -pop_mod_factor * (-1.5)/T[x1i][x2i][x3i];
-            op_loc_pert[0] += pop_mod_factor * (ip[z] - ee[z][i] - h*c/lambda_mean)/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i];
-            // Density dependence:
-            op_loc_pert[1] = -pop_mod_factor * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
             
+            // -- Opacity : -------------------------------
+            // We need this temporary variable because there are two contributors, so we cannot simply 
+            // scale the whole opacity with this. This is only the second one:
+            fp_t pop_mod_factor = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T[x1i][x2i][x3i], -1.5) 
+              * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i] - h*c/lambda_mean)/k/T[x1i][x2i][x3i]);
+            // Temperature dependence:      
+            op_loc_pert[0] =  -pop_mod_factor * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
+            op_loc_pert[0] += -pop_mod_factor * (-1.5)/T[x1i][x2i][x3i];
+            op_loc_pert[0] +=  pop_mod_factor * (ip[z] - ee[z][i] - h*c/lambda_mean)/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i];
+            // Density dependence:
+            op_loc_pert[1] =  -pop_mod_factor * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
+            
+            // Add explicit dependencies:
             for (int l=1;l<=nlambda_crit;++l){
-              op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[0]*sigma;
-              op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[1]*sigma;
+              op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += sigma*op_loc_pert[0];
+              op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += sigma*op_loc_pert[1];
+            }
+            // -- Emissivity : ----------------------------
+            // Temperature dependence:
+            em_loc_pert[0] =  em_loc * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
+            em_loc_pert[0] += em_loc * (-1.5)/T[x1i][x2i][x3i];
+            em_loc_pert[0] += em_loc * -(ip[z] - ee[z][i])/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i];
+            em_loc_pert[0] += em_loc * (-exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i])*h*c/lambda_mean/k/T[x1i][x2i][x3i]/T[x1i][x2i][x3i]) / 
+              (1.0-exp(-h*c/lambda_mean/k/T[x1i][x2i][x3i]));
+            em_loc_pert[0] += em_loc * Planck_f_derivative(lambda_mean,T[x1i][x2i][x3i]) / Planck_f(lambda_mean,T[x1i][x2i][x3i]);
+            // Density dependence:
+            em_loc_pert[1] =  em_loc * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
+            // Add explicit dependencies:
+            for (int l=1;l<=nlambda_crit;++l){
+              em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_loc_pert[0];
+              em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_loc_pert[1];
             }
 
+            // ====================================================================================
+            // Implicit dependencies. I.e. factors which depend on the level perturbations:
             for (int x3k=x3l;x3k<=x3h;++x3k){
-              op_loc_pert[0] = -pop_mod_factor * level_responses[1][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
-              op_loc_pert[0] += level_responses[1][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+              op_loc_pert[0] =  -sigma * pop_mod_factor * level_responses[1][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+              op_loc_pert[0] +=  sigma * level_responses[1][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
 
-              op_loc_pert[1] = -pop_mod_factor * level_responses[2][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3i]/pop[x1i][x2i][x3i].n[z+1][0];
-              op_loc_pert[1] += level_responses[2][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+              op_loc_pert[1] =  -sigma * pop_mod_factor * level_responses[2][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+              op_loc_pert[1] +=  sigma * level_responses[2][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
 
-              op_loc_pert[2] = -pop_mod_factor * level_responses[3][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3i]/pop[x1i][x2i][x3i].n[z+1][0];
-              op_loc_pert[2] += level_responses[3][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+              op_loc_pert[2] =  -sigma * pop_mod_factor * level_responses[3][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+              op_loc_pert[2] +=  sigma * level_responses[3][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
+
+              em_loc_pert[0] =   em_loc * level_responses[1][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+              em_loc_pert[1] =   em_loc * level_responses[2][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+              em_loc_pert[2] =   em_loc * level_responses[3][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
+
 
               for (int l=1;l<=nlambda_crit;++l){
-                op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[0]*sigma;
-                op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[1]*sigma;
-                op_vector_pert[l][3][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[2]*sigma;
-              }
-            }
-      }
- 		}
-  } 
+                op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[0];
+                op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[1];
+                op_vector_pert[l][3][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[2];
+
+                em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_loc_pert[0];
+                em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_loc_pert[1];
+                em_vector_pert[l][3][x3i][x1i][x2i][x3i][1] += em_loc_pert[2];
+              } // wvl
+            } // depths of perturbation
+            // ====================================================================================
+      } // points in the atmosphere
+ 		} // endif
+  } // ionization stages & levels
   if(strcmp(id,"H")==0){
     fp_t ***** op_comparison=boundfree_op_pert(Vlos,lambda[1]);
     fp_t ***** em_comparison=boundfree_em_pert(Vlos,lambda[1]);
+
+    fp_t *** op=boundfree_op(Vlos,lambda[1]);
+    fp_t *** em=boundfree_em(Vlos,lambda[1]);
+
+
     printf("New function:\n");
+    printf("Op_loc = %1.10e op_ref = %1.10e \n",op_vector[1][x1l][x2l][x3h][1][1],op[x1l][x2l][x3h]);
+    printf("Em_loc = %1.10e em_ref = %1.10e \n",em_vector[1][x1l][x2l][x3h][1],em[x1l][x2l][x3h]);
+    printf("Temperature:\n");
     printf("Op_loc_pert = %e op_ref_pert = %e \n",op_vector_pert[1][1][x3h][x1l][x2l][x3h][1][1],op_comparison[1][x3h][x1l][x2l][x3h]);
     printf("Em_loc_pert = %e em_ref_pert = %e \n",em_vector_pert[1][1][x3h][x1l][x2l][x3h][1],em_comparison[1][x3h][x1l][x2l][x3h]);
+    printf("Density:\n");
+    printf("Op_loc_pert = %e op_ref_pert = %e \n",op_vector_pert[1][2][x3h][x1l][x2l][x3h][1][1],op_comparison[2][x3h][x1l][x2l][x3h]);
+    printf("Em_loc_pert = %e em_ref_pert = %e \n",em_vector_pert[1][2][x3h][x1l][x2l][x3h][1],em_comparison[2][x3h][x1l][x2l][x3h]);
   }
-
-
   return 0;
 }
 
