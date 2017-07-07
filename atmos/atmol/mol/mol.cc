@@ -658,7 +658,7 @@ fp_t ***** h_minus_mol::boundfree_op_pert(fp_t*** Vlos, fp_t lambda){
         op_pert[1][x3i][x1i][x2i][x3i]  = op * (1.0/T + 2.5 * 1.0/T_P * (-5040.0/T/T)); // direct T dependence
         op_pert[1][x3i][x1i][x2i][x3i] += op * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i);
         op_pert[1][x3i][x1i][x2i][x3i] += op * parent_atm->get_neutral_H_derivative_lte(1,x1i,x2i,x3i)/fetch_population(x1i,x2i,x3i,0,0);
-        op_pert[1][x3i][x1i][x2i][x3i] += op * (2.302585*0.754*5040.0/T/T);
+        op_pert[1][x3i][x1i][x2i][x3i] += op * (-2.302585*0.754*5040.0/T/T);
         op_pert[1][x3i][x1i][x2i][x3i] += op * (- exp(-h*c/lambda/k/T) * h*c/lambda/k/T/T)/ (1.0 - exp(-h*c/lambda/k/T));
 
         op_pert[2][x3i][x1i][x2i][x3i]  = op * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i);
