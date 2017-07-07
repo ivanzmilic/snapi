@@ -1,5 +1,6 @@
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "types.h"
 #include "uts.h"
@@ -456,14 +457,15 @@ int h_minus_mol::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t**
   }
 
   // And the same for responses:
-  for (int p=1;p<=2;++p)
-    for (int l=1;l<=nlambda;++l)
+  for (int l=1;l<=nlambda;++l)
+    for (int p=1;p<=2;++p)
       for (int x1i = x1l; x1i <= x1h; ++x1i)
         for (int x2i = x2l; x2i <= x2h; ++x2i)
           for (int x3i = x3l; x3i <= x3h; ++x3i){
             op_vector_pert[l][p][x3i][x1i][x2i][x3i][1][1] += op_scalar_pert[p][x3i][x1i][x2i][x3i];
             em_vector_pert[l][p][x3i][x1i][x2i][x3i][1]    += em_scalar_pert[p][x3i][x1i][x2i][x3i];
   }
+  
   del_ft3dim(op_scalar,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(em_scalar,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft5dim(op_scalar_pert,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -583,15 +585,17 @@ fp_t ***** h_minus_mol::freefree_op_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t 
         // From the derivatives of N_e and N_H
         fp_t dN_e_dT = parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i);
         fp_t dN_H_dT = parent_atm->get_neutral_H_derivative_lte(1,x1i,x2i,x3i);
-        op_pert[1][x3i][x1l][x2l][x3i] += const_factor * T[x1i][x2i][x3i] * exp_factor * 
+        op_pert[1][x3i][x1i][x2i][x3i] += const_factor * T[x1i][x2i][x3i] * exp_factor * 
           (N_e * dN_H_dT + N_H * dN_e_dT);
 
         // Density:
         // Only derivatives of N_e and N_H
         fp_t dN_e_dN = parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i);
         fp_t dN_H_dN = parent_atm->get_neutral_H_derivative_lte(2,x1i,x2i,x3i);
-        op_pert[2][x3i][x1l][x2l][x3i] = const_factor * T[x1i][x2i][x3i] * exp_factor * 
-          (N_e * dN_H_dT + N_H * dN_e_dT);
+        op_pert[2][x3i][x1i][x2i][x3i] = const_factor * T[x1i][x2i][x3i] * exp_factor * 
+          (N_e * dN_H_dN + N_H * dN_e_dN);
+        //fp_t op_test = const_factor * T[x1i][x2i][x3i] * exp_factor * N_e * N_H;
+        //printf("Op = %e Op_der = %e \n",op_test,op_pert[2][x3i][x1i][x2i][x3i]);
   }
   return op_pert;
 }
@@ -626,10 +630,6 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
         fp_t T_P = 5040./T;
         op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
           pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-h*c/lambda/k/T));
-
-        //fp_t h_nu = 19.8581e-17 / lambda;
-        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-          //op[x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
   } // points in the atmosphere
   return op;
 }
@@ -663,11 +663,6 @@ fp_t ***** h_minus_mol::boundfree_op_pert(fp_t*** Vlos, fp_t lambda){
 
         op_pert[2][x3i][x1i][x2i][x3i]  = op * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i,x2i,x3i);
         op_pert[2][x3i][x1i][x2i][x3i] += op * parent_atm->get_neutral_H_derivative_lte(2,x1i,x2i,x3i)/fetch_population(x1i,x2i,x3i,0,0);
-
-        //fp_t h_nu = 19.8581e-17 / lambda;
-        //fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-        //op_pert[1][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[1][x1i][x2i][x3i];
-        //op_pert[2][x3i][x1i][x2i][x3i] = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * dN[2][x1i][x2i][x3i];
       }
 //
   return op_pert;
@@ -686,12 +681,7 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
     alpha += a[i] * pow(lambda*1E8,i);  
   fp_t T_P = 5040./T;
   fp_t op_bf = 4.158E-28 * alpha * Ne*k*T * pow(T_P,2.5) * pow(10.0,0.754*T_P) * fetch_population(x1i,x2i,x3i,0,0)
-    *(1.0 - exp(-8764.2/T));
-
-  fp_t h_nu = 19.8581e-17 / lambda;
-  fp_t arg_temp = ((h_nu - 1.20823E-12) / h_nu / h_nu);
-  op_bf = 4.19648E-34 * sqrt(arg_temp * arg_temp * arg_temp) * N[x1i][x2i][x3i];
-
+    *(1.0 - exp(-h*c/lambda/k/T));
 
   // Grey:
   fp_t l = log10(lambda*1E8);
@@ -709,14 +699,12 @@ fp_t h_minus_mol::opacity_continuum(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x
 
 fp_t** h_minus_mol::opacity_continuum_pert(fp_t T, fp_t Ne, fp_t lambda, int x1i, int x2i, int x3i){
 
-  fp_t ** op_continuum_pert = ft2dim(1,7,x3l,x3h);
-  memset(op_continuum_pert[1]+x3l,0,7*(x3h-x3l+1)*sizeof(fp_t));
-  fp_t op_cont = opacity_continuum(T, Ne, lambda, x1i, x2i, x3i);
-  op_continuum_pert[1][x3i] = op_cont * dN[1][x1i][x2i][x3i] / N[x1i][x2i][x3i];
-  op_continuum_pert[2][x3i] = op_cont * dN[2][x1i][x2i][x3i] / N[x1i][x2i][x3i];
-  return op_continuum_pert;
+  printf("h_minus_mol::opacity_continuum_pert : this function is not finished!\n");
+  exit(1);
 }
 
 fp_t *** h_minus_mol::boundfree_em(fp_t*** Vlos, fp_t lambda){
+  printf("h_minus_mol::boundfree_em : this function is not finished!\n");
+  exit(1);
   return 0;
 }

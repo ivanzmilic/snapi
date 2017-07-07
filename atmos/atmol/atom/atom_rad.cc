@@ -188,6 +188,8 @@ fp_t atom::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2
 
 fp_t ** atom::opacity_continuum_pert(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2i, int x3i){
 
+  printf("atom::opacity_continuum_pert : this function is not finished!\n");
+  exit(1);
   return 0;
  
 }

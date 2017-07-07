@@ -370,9 +370,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   boundary_condition_for_rt = -1;
   popsetup(); // 
-  for (int a = 0; a<natm; ++a)
-    atml[a]->set_parent_atmosphere(this);
-
+  
   if (tau_grid)
     compute_op_referent();
 
@@ -641,7 +639,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     T[x1l][x2l][x3i] += 0.5 * d_T;
     
     // Density finite difference perturbations:
-    /*
+    
     fp_t d_Nt = delta_Nt_frac * Nt[x1l][x2l][x3i];
     Nt[x1l][x2l][x3i] += 0.5 * d_Nt;
 

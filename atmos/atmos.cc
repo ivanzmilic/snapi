@@ -222,6 +222,9 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   else
     for(int i=0;p[i];++i) (*(p[i]))=0;
 
+  for (int a = 0; a<natm; ++a)
+    atml[a]->set_parent_atmosphere(this);
+
   return offs;
 }
 

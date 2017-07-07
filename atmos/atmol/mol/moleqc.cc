@@ -1,5 +1,6 @@
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "types.h"
 #include "io.h"
@@ -156,7 +157,12 @@ fp_t eqc_hmin::K(fp_t T,fp_t ne)
   fp_t xx=1.202E9/(x*x*sqrt(x));
   return 2.0*xx*exp(-2.302585*(0.754-2.0*dxi)*x); // H-
 */
+  // Note by Ivan: 07/07/2017: This number is actually not so important since we 
+  // will be computing opacity of H- from number densities of H and e- anyway! 
   fp_t x=5040.0/T;
   fp_t sum=0.1249+(2.5*log(T)/2.302585)-0.747*x;
+
+  fp_t old_value = exp(2.302585093*sum);
+
   return exp(2.302585093*sum); // 10^sum
 }

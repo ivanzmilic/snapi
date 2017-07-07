@@ -165,7 +165,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   //for (int x3i=x3l;x3i<=x3h;++x3i)
   //  fprintf(out,"%d %e %e \n", x3i, logtau[x3i], T[x1l][x2l][x3i]);
   //fclose(out);
-
   
 // -----------------------------------------------------------------------------------------------------------------------------------------
   
@@ -177,7 +176,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
 
   fp_t const grav_acc = 274.88E2; // cm/s^2
 
-  fp_t lambda_reference = 500E-7; // Usually a referent lambda is 500 nm, but in general could be different
   int MAX_ITER = 20;
   fp_t break_me = 1E-2;
   
@@ -191,7 +189,7 @@ int atmos_pp::build_from_nodes(model * atmos_model){
     chemeq(atml, natm, T[x1l][x2l][x3l], Nt[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
     for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
     // Now from this we need to get mass density and opacity
-    op_referent[x1l][x2l][x3l] = opacity_continuum(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], lambda_reference, x1l,x2l,x3l);
+    op_referent[x1l][x2l][x3l] = opacity_continuum(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], lambda_referent, x1l,x2l,x3l);
     rho[x1l][x2l][x3l] = atml[0]->get_total_pop(x1l,x2l,x3l) * 1.4 * 1.67E-24; // in gram/cm^3, approximate.
     
     fp_t dN = (pow(10.0, logtau[x3l]) * rho[x1l][x2l][x3l] * grav_acc / op_referent[x1l][x2l][x3l]) / k / T[x1l][x2l][x3l] - Nt[x1l][x2l][x3l];
@@ -214,7 +212,7 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
       for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
       
-      op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_reference, x1l,x2l,x3i); // New opacity
+      op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i); // New opacity
       rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24; // New mass density
       fp_t kappa_mean = sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1] / rho[x1l][x2l][x3i] / rho[x1l][x2l][x3i-1]); // Geometrical mean of the value of kappa
       // New correction:
@@ -226,12 +224,12 @@ int atmos_pp::build_from_nodes(model * atmos_model){
 
   // Recompute, just in case referent opacity (DEBUG)
   for (int x3i=x3l;x3i<=x3h;++x3i)
-    op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_reference, x1l,x2l,x3i); // New opacity
+    op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i); // New opacity
 
   for (int x3i=x3l;x3i<=x3h;++x3i){
     chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
     for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
-    op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_reference, x1l,x2l,x3i);
+    op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i);
     rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24;
   }
 
