@@ -28,7 +28,6 @@ public:
   void set(fp_t ****);
   void setlambda(fp_t *);
   void setmask(fp_t*);
-  void normalize();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);
@@ -43,6 +42,10 @@ public:
   int get_n_lambda_to_fit();
   int get_nx();
   int get_ny();
+
+  void normalize();
+  void correct_for_scattered_light(fp_t);
+  void spectral_convolve(fp_t);
 };
 
 observable * obs_new(int nx,int ny,int ns,int nlambda);

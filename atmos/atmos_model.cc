@@ -820,6 +820,10 @@ int model::correct(fp_t * correction){
   // We need to backup node values so that we can properly set-up "correction" array, so that we can
   // later, if necessary, "revert" to the old model. Is this most convenient? Probably not, but it 
   // is the fastest, and does not require writing new models and things like that.
+
+  // First make sure that corrections are not too big:
+  for (int i=1;i<=N_nodes_temp;++i)
+    if (correction[i] > 1000.0) correction[i] = 1000.0;
   
   for (int i=1;i<=N_parameters;++i)
     this->perturb_node_value(i,correction[i]);
