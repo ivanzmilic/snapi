@@ -1,5 +1,6 @@
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #include "types.h"
 #include "io.h"
 #include "fileio.h"
@@ -7,6 +8,7 @@
 #include "obs.h"
 #include "mem.h"
 #include "pack.h"
+#include "mathtools.h"
 
 observable::observable(int ns_in):ns(ns_in)
 {
@@ -302,7 +304,7 @@ void observable::correct_for_scattered_light(fp_t ratio){
 
 // ================================================================================================
 
-void observable::spectral_convolution(fp_t width){
+void observable::spectral_convolve(fp_t width, int i, int j){
 
   // Here we convolve the observation with a gaussian of given width. 
   // There has to be a function in all those libraries we are including which does this
@@ -315,13 +317,14 @@ void observable::spectral_convolution(fp_t width){
   int N_lambda_fine;
 
   // Guesstimate N_lambda_fine;
-  fp_t l_min = lambda[1] - 5.0*width;
-  fp_t l_max = lambda[nlambda] + 5.0*width;
+  fp_t l_min = lambda[1] - 10.0*width;
+  fp_t l_max = lambda[nlambda] + 10.0*width;
   N_lambda_fine = int((l_max-l_min)/(0.2*width))+1;
-  fp_t step = (l_min-l_max) / (N_lambda_fine-1);
+  fp_t step = (l_max-l_min) / (N_lambda_fine-1);
   lambda_fine = new fp_t [N_lambda_fine]-1;
-  for (int l=1;l<=N_lambda_fine;++l) 
-    lambda_fine[l] = lambda_min + (l-1)*step;
+  for (int l=1;l<=N_lambda_fine;++l){ 
+    lambda_fine[l] = l_min + (l-1)*step;
+  }
 
   // Set-up a array for  keeping the kernel:
   fp_t * kernel = new fp_t [N_lambda_fine]-1;
@@ -332,12 +335,18 @@ void observable::spectral_convolution(fp_t width){
   for (int s=1;s<=4;++s)
     for (int l=1;l<=N_lambda_fine;++l)
       // This interpolation also extrapolates using constant values:
-      S_intepolated[s][l] = interpol_1d(S[s]+1,lambda+1,nlambda,lambda_fine[l]);
+      S_intepolated[s][l] = interpol_1d(S[i][j][s]+1,lambda+1,nlambda,lambda_fine[l]);
+
+  //FILE * test_output = fopen("spectrum_interpolated.dat","w");
+  //for (int l=1;l<=N_lambda_fine;++l)
+  //  fprintf(test_output,"%e %e \n",lambda_fine[l],S_intepolated[1][l]);
+  //fclose(test_output);
+
 
   fp_t ** S_convolved;
   S_convolved = ft2dim(1,4,1,N_lambda_fine);
 
-  fp_t * w_lambda = new fp_t [N_lambda_fine];
+  fp_t * w_lambda = new fp_t [N_lambda_fine]-1;
   w_lambda[1] = w_lambda[N_lambda_fine] = step*0.5; 
   for (int l=2;l<N_lambda_fine;++l)
     w_lambda[l] = step;
@@ -348,21 +357,26 @@ void observable::spectral_convolution(fp_t width){
     fp_t temp_to_integrate[N_lambda_fine]; 
     // Compute kernel:
     for (int ll=1;ll<=N_lambda_fine;++ll)
-      kernel[ll] = 0.56418958354/width * exp(-(lambda[ll]-lambda[l])*(lambda[ll]-lambda[l])/width/width);
+      kernel[ll] = 0.56418958354/width * exp(-(lambda_fine[ll]-lambda_fine[l])*(lambda_fine[ll]-lambda_fine[l])/width/width);
     // Multiply:
     for (int s=1;s<=4;++s){
       S_convolved[s][l] = 0.0;
       for (int ll=1;ll<=N_lambda_fine;++ll){
         temp_to_integrate[ll] = S_intepolated[s][ll] * kernel[ll];
-        S_convolved += temp_to_integrate[ll] * w_lambda[ll];
+        S_convolved[s][l] += temp_to_integrate[ll] * w_lambda[ll];
       } // each lambda'
     } // each stokes component
   } // each lambda
 
+  //test_output = fopen("spectrum_convolved.dat","w");
+  //for (int l=1;l<=N_lambda_fine;++l)
+  //  fprintf(test_output,"%e %e \n",lambda_fine[l],S_convolved[1][l]);
+  //fclose(test_output);
+
   // Interpolate back:
   for (int s=1;s<=4;++s)
     for (int l=1;l<=nlambda;++l)
-      S[s][l] = interpol_1d(S_convolved[s],lambda_fine,N_lambda_fine,lambda[l]);
+      S[i][j][s][l] = interpol_1d(S_convolved[s],lambda_fine,N_lambda_fine,lambda[l]);
 
   //cleanup:
   delete[](w_lambda+1);

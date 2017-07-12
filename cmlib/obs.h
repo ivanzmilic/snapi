@@ -45,7 +45,7 @@ public:
 
   void normalize();
   void correct_for_scattered_light(fp_t);
-  void spectral_convolve(fp_t);
+  void spectral_convolve(fp_t,int,int);
 };
 
 observable * obs_new(int nx,int ny,int ns,int nlambda);
