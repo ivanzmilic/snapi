@@ -46,8 +46,8 @@ atmospheres = a_read["data"]
 print atmospheres.shape
 
 #These are debug lines
-for i in range(0,1):
-	for j in range (0,1):
+for i in range(0,3):
+	for j in range (0,3):
 		plt.clf()
 		plt.cla()
 		plt.figure(figsize=[6,10])

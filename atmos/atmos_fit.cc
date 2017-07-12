@@ -75,7 +75,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
       current_obs->add_scattered_light(0.04);
-      current_obs->spectral_convolve(50*1E-11,1,1);   
+      current_obs->spectral_convolve(50*1E-11,1,1);
+      convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,50*1E-11);   
       S_current = current_obs->get_S(1,1);
     }
     

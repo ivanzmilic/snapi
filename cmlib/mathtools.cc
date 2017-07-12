@@ -1219,3 +1219,108 @@ fp_t * vactoair(fp_t * lambda_vac, int N){
   //delete[]lambda_vac;
   return lambda_out;
 }
+
+// ================================================================================================
+
+int convolve_spectra_with_gauss(fp_t ** S, fp_t * lambda,int N, fp_t width){
+
+  // This function takes Stokes spectra, and corresponding lambda and convolves it with 
+  // Gaussian of a given width. Since lambda can be unevenly spaced, function: 
+  // 1) Extrapolates given spectra a little bit outside given wavelength range
+  // 2) Makes appropriate lambda mesh, and interpolates original spectra to it
+  // 3) Convolves
+  // 4) Interpolates back to the original wavelength mesh
+  // fp_t ** S  - input stokes spectra
+  // fp_t *     - input lambda corresponding to the spectra
+  // int N      - number of wavelength points 
+  // fp_t width - width of the Gaussian, in cm (CGS)
+
+  fp_t * lambda_fine; 
+  int N_lambda_fine;
+
+  // Guesstimate N_lambda_fine;
+  fp_t l_min = lambda[1] - 10.0*width;
+  fp_t l_max = lambda[N] + 10.0*width;
+  N_lambda_fine = int((l_max-l_min)/(0.2*width))+1;
+  fp_t step = (l_max-l_min) / (N_lambda_fine-1);
+  lambda_fine = new fp_t [N_lambda_fine]-1;
+  for (int l=1;l<=N_lambda_fine;++l){ 
+    lambda_fine[l] = l_min + (l-1)*step;
+  }
+
+  // Set-up a array for  keeping the kernel:
+  fp_t * kernel = new fp_t [N_lambda_fine]-1;
+
+  // Interpolate S to the existing grid:
+  fp_t ** S_intepolated;
+  S_intepolated = ft2dim(1,4,1,N_lambda_fine);
+  for (int s=1;s<=4;++s)
+    for (int l=1;l<=N_lambda_fine;++l)
+      // This interpolation also extrapolates using constant values:
+      S_intepolated[s][l] = interpol_1d(S[s]+1,lambda+1,N,lambda_fine[l]);
+
+  fp_t ** S_convolved;
+  S_convolved = ft2dim(1,4,1,N_lambda_fine);
+
+  fp_t * w_lambda = new fp_t [N_lambda_fine]-1;
+  w_lambda[1] = w_lambda[N_lambda_fine] = step*0.5; 
+  for (int l=2;l<N_lambda_fine;++l)
+    w_lambda[l] = step;
+
+  // Then finally, convolve:
+  for (int l=1;l<=N_lambda_fine;++l){ // for each lambda, convolve
+
+    fp_t temp_to_integrate[N_lambda_fine]; 
+    // Compute kernel:
+    for (int ll=1;ll<=N_lambda_fine;++ll)
+      kernel[ll] = 0.56418958354/width * exp(-(lambda_fine[ll]-lambda_fine[l])*(lambda_fine[ll]-lambda_fine[l])/width/width);
+    // Multiply:
+    for (int s=1;s<=4;++s){
+      S_convolved[s][l] = 0.0;
+      for (int ll=1;ll<=N_lambda_fine;++ll){
+        temp_to_integrate[ll] = S_intepolated[s][ll] * kernel[ll];
+        S_convolved[s][l] += temp_to_integrate[ll] * w_lambda[ll];
+      } // each lambda'
+    } // each stokes component
+  } // each lambda
+
+  // Interpolate back:
+  for (int s=1;s<=4;++s)
+    for (int l=1;l<=N;++l)
+      S[s][l] = interpol_1d(S_convolved[s],lambda_fine,N_lambda_fine,lambda[l]);
+
+  //cleanup:
+  delete[](w_lambda+1);
+  delete[](lambda_fine+1);
+  delete[](kernel+1);
+  del_ft2dim(S_convolved,1,4,1,N_lambda_fine);
+  del_ft2dim(S_intepolated,1,4,1,N_lambda_fine);
+
+  return 0;
+}
+
+// ================================================================================================
+
+int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, 
+  fp_t width){
+
+  // This function convolves responses to nodes with a gaussian. It uses above convolve_spectra_with_gauss
+  // The awkward moment is that the ordering is differnet and hence we need to 'transpose' first
+
+  fp_t ** S_temp = ft2dim(1,4,1,N_lambda);
+
+  for (int p=1;p<=N_parameters;++p){
+    
+    for (int s=1;s<=4;++s)
+      for (int l=1;l<=N_lambda;++l)
+        S_temp[s][l] = response[p][l][s];
+
+    convolve_spectra_with_gauss(S_temp,lambda,N_lambda,width);
+
+    for (int s=1;s<=4;++s)
+      for (int l=1;l<=N_lambda;++l)
+        response[p][l][s] = S_temp[s][l];
+  } // each parameter
+  
+  del_ft2dim(S_temp,1,4,1,N_lambda);
+}

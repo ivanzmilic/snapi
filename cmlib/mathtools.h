@@ -73,5 +73,8 @@ fp_t airtovac(fp_t);
 fp_t * airtovac(fp_t *, int);
 fp_t * vactoair(fp_t *, int);
 
+int convolve_spectra_with_gauss(fp_t **, fp_t *,int, fp_t);
+int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, fp_t);
+
 
 #endif                        // __MATHTOOLS_H__
