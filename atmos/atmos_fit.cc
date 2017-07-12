@@ -74,7 +74,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
-      current_obs->correct_for_scattered_light(0.03);
+      current_obs->add_scattered_light(0.04);
       current_obs->spectral_convolve(50*1E-11,1,1);   
       S_current = current_obs->get_S(1,1);
     }
@@ -141,7 +141,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(test_model);
     //printf("Atmosphere built\n");
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    reference_obs->correct_for_scattered_light(0.03);
+    reference_obs->add_scattered_light(0.04);
     reference_obs->spectral_convolve(50*1E-11,1,1);  
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
@@ -209,7 +209,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
-  obs_to_return->correct_for_scattered_light(0.03);
+  obs_to_return->add_scattered_light(0.04);
   obs_to_return->spectral_convolve(50*1E-11,1,1);
       
   delete[](lambda+1);

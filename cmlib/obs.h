@@ -44,7 +44,7 @@ public:
   int get_ny();
 
   void normalize();
-  void correct_for_scattered_light(fp_t);
+  void add_scattered_light(fp_t);
   void spectral_convolve(fp_t,int,int);
 };
 

@@ -282,7 +282,7 @@ void observable::normalize(){
 
 // ================================================================================================
 
-void observable::correct_for_scattered_light(fp_t ratio){
+void observable::add_scattered_light(fp_t ratio){
 
   // Here we basically subtract the fixed ratio of scattered light from all the data. 
   // We DON't want to do this externally since maybe we will want to fit for
@@ -296,8 +296,7 @@ void observable::correct_for_scattered_light(fp_t ratio){
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
       for (int l=1;l<=nlambda;++l){
-        S[i][j][1][l] -= qs*ratio;
-        if (S[i][j][1][l] < 0) S[i][j][1][l] = 0.0; // Can't be negative!
+        S[i][j][1][l] += qs*ratio;
   } // wvl, spatial 
 
 }
