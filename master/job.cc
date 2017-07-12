@@ -365,10 +365,7 @@ int job_class::start(void)
          //obs=ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0);
          obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
          obs->write(ji.name[o],*io,1,1);
-      	 obs->correct_for_scattered_light(0.03);
-      	 obs->spectral_convolve(50*1E-11,1,1);
-      	 obs->write("spectrum_corrected.dat",*io,1,1);
-         delete obs;
+      	 delete obs;
          delete ji.atmos[a];
          exit(0);
        }
