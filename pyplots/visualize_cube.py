@@ -46,8 +46,8 @@ atmospheres = a_read["data"]
 print atmospheres.shape
 
 #These are debug lines
-for i in range(0,3):
-	for j in range (0,3):
+for i in range(0,1):
+	for j in range (0,1):
 		plt.clf()
 		plt.cla()
 		plt.figure(figsize=[6,10])
@@ -90,6 +90,7 @@ parameters[-1] /= 1E5 #convert to km/s
 #print parameters[:,0,0]
 
 if (NX<=1 and NY<=1):
+	print parameters[:,0,0]
 	quit();
 
 #Hard-coded plotting of some images.

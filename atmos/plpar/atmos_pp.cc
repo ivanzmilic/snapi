@@ -12,7 +12,7 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TAU_MIN -5.0
+#define TAU_MIN -4.0
 #define TAU_MAX  1.0
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
