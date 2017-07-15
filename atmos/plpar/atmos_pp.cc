@@ -12,7 +12,7 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TAU_MIN -5.0
+#define TAU_MIN -4.0
 #define TAU_MAX  1.0
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
@@ -158,14 +158,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       Bz[x1l][x2l][x3i] = 0.001;
     }
 
-  // We do not need the nodes any more.
-
-  //FILE * out;
-  //out = fopen("t_test.txt", "w");
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  fprintf(out,"%d %e %e \n", x3i, logtau[x3i], T[x1l][x2l][x3i]);
-  //fclose(out);
-  
 // -----------------------------------------------------------------------------------------------------------------------------------------
   
   // Now we need to iterate for the top pressure (density), initial guess can be the initial pressure on top:
@@ -193,38 +185,48 @@ int atmos_pp::build_from_nodes(model * atmos_model){
     rho[x1l][x2l][x3l] = atml[0]->get_total_pop(x1l,x2l,x3l) * 1.4 * 1.67E-24; // in gram/cm^3, approximate.
     
     fp_t dN = (pow(10.0, logtau[x3l]) * rho[x1l][x2l][x3l] * grav_acc / op_referent[x1l][x2l][x3l]) / k / T[x1l][x2l][x3l] - Nt[x1l][x2l][x3l];
-    Nt[x1l][x2l][x3l] += dN; 
-    
+    Nt[x1l][x2l][x3l] += dN;
+    if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
+      break;
   }
-
-  //printf("Iterated top density to is : %e pressure %e \n", Nt[x1l][x2l][x3l], Nt[x1l][x2l][x3l] * k * T[x1l][x2l][x3l]);
 
   // Now we have converged the pressure at the top. We can now start integrating downward, the simplest way is to use linear approximation for the pressure and opacity derivative
   
-  for (int x3i=x3l+1;x3i<=x3h;++x3i){
+  for (int x3i=x3l+1;x3i<=x3h;++x3i){ 
 
-    fp_t delta_tau = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1]));
-    fp_t delta_p =  rho[x1l][x2l][x3i-1] * grav_acc / op_referent[x1l][x2l][x3i-1] * delta_tau; // Initial value for delta_p
-    
+    // We have the eq: delta_p/delta_tau = g / kappa_mean
+    // where delta_p is STEP (not correction) in pressure, delta_tau in optical depth and 
+    // kappa_mean is sqrt(chi_i * chi_i+1 / rho_i / rho_i+1
+    // we know everything except p_i+1 and chi/rho _i+1,so we are going to assume
+
+    // delta_tau we know 
+    fp_t delta_tau = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1])); 
+    // inital guess for the step in p
+    fp_t delta_p =  rho[x1l][x2l][x3i-1] * grav_acc / op_referent[x1l][x2l][x3i-1] * delta_tau; 
+    // and initial guess for the local Nt:
+    Nt[x1l][x2l][x3i] = (Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + delta_p) / k / T[x1l][x2l][x3i];
+
+    // Now we iterate using HE equation and rho(N),chi(N)
     for (int iter=0;iter<MAX_ITER;++iter){
       
-      Nt[x1l][x2l][x3i] = (Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + delta_p) / k / T[x1l][x2l][x3i];
       chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
       for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
       
+      // new opacity:
       op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i); // New opacity
-      rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24; // New mass density
+      // new mass density:
+      rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24;
       fp_t kappa_mean = sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1] / rho[x1l][x2l][x3i] / rho[x1l][x2l][x3i-1]); // Geometrical mean of the value of kappa
-      // New correction:
-      fp_t P_local_correction = Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + grav_acc / kappa_mean * delta_tau - Nt[x1l][x2l][x3i] * k * T[x1l][x2l][x3i];
+      // follows new value of delta_p
+      delta_p = grav_acc/kappa_mean * delta_tau; 
+      fp_t dN = (Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + delta_p) / k / T[x1l][x2l][x3i] -Nt[x1l][x2l][x3i];
+      Nt[x1l][x2l][x3i] += dN;
+      if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
+        break;
     }
 
     fp_t d_h = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1])) / sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1]);
   }
-
-  // Recompute, just in case referent opacity (DEBUG)
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i); // New opacity
 
   for (int x3i=x3l;x3i<=x3h;++x3i){
     chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
