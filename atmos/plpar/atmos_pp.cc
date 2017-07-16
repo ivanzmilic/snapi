@@ -53,35 +53,40 @@ atmos_pp::atmos_pp(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in)
 atmos_pp::~atmos_pp(void)
 {
 }
+// ================================================================================================
 
 int atmos_pp::build_from_nodes(model * atmos_model){
   
-  // This is a working version which modifies the atmosphere with respect to given 'model'
+  // We create the atmosphere on the basis of the previous atmosphere from given model. 
+  // Model is the set of nodes for Temperature, microturbulent/systematic velocity and mag field. 
+  // We enforce hydrostatic equilibrium by using the first order numerical scheme for differential eq. 
+  // dp/dh = - \rho * g
 
-  io.msg(IOL_INFO, "atmos_pp::building from nodes (%d..%d)\n",x3h,x3l);
+  io.msg(IOL_INFO, "atmos_pp::build_from_nodes : building from nodes (%d..%d)\n",x3h,x3l);
   
-  // First you need to make a grid in tau. This is like this by default
+  // Grid in tau, equidistantly spaced in log scale:
   int N_depths = x3h-x3l+1;
   fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
-  // Uniform in log_tau from the uppeermost to the lowermost node
-  int N_nodes_temp = atmos_model->get_N_nodes_temp();
-  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
-  
   fp_t tau_min = TAU_MIN;
   fp_t tau_max = TAU_MAX;
   
   for (int x3i=x3l;x3i<=x3h;++x3i)
     logtau[x3i] = tau_min + (tau_max-tau_min) / (x3h-x3l) * (x3i-x3l);
-
   for (int x1i=x1l;x1i<=x1h;++x1i)
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i)
         tau_referent[x1i][x2i][x3i] = -pow(10.0,logtau[x3i]);
 
 
-  // Then we need to interpolate all the quantities to this tau grid:
+  // Interpolate from nodes all the quantities to this tau grid.
 
   // Temperature:
+  int N_nodes_temp = atmos_model->get_N_nodes_temp();
+  if (N_nodes_temp < 1){
+    io.msg(IOL_ERROR, "atmos_pp::build_from_nodes : can't make atmosphere with less than one T node. Quitting...\n");
+    return 1;  
+  }
+  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
   fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
   atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h, 1);
   delete[](temp_nodes_tau+1);
@@ -139,8 +144,8 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
       By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
       Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
-      //printf("%d %e %e %e \n", x3i, Bx[x1l][x2l][x3i], By[x1l][x2l][x3i], Bz[x1l][x2l][x3i]);
     }
+  // cleanup:
     delete[](B_nodes_tau+1);
     delete[](B_nodes_B+1);
     delete[](theta_nodes_tau+1);
@@ -152,58 +157,48 @@ int atmos_pp::build_from_nodes(model * atmos_model){
     delete[](phi+x3l);
   }
   else 
-    for (int x3i=x3l;x3i<=x3h;++x3i){ // WE NEED TO SORT THIS OUT
+    for (int x3i=x3l;x3i<=x3h;++x3i){ // we put some very small non-zero values to avoid bad behavior
       Bx[x1l][x2l][x3i] = 0.001;
       By[x1l][x2l][x3i] = 0.001;
       Bz[x1l][x2l][x3i] = 0.001;
-    }
+  }
 
-// -----------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
   
-  // Now we need to iterate for the top pressure (density), initial guess can be the initial pressure on top:
-  
-  //io.msg(IOL_INFO, "atmos_pp::enforcing HD equilibrium. \n");
+  // Density is not given, it is deduced from the temperature using hydrostatic equilibrium. 
+  // Need populations to compute opacity correctly:
   popsetup();
-
-
-  fp_t const grav_acc = 274.88E2; // cm/s^2
-
+  
   int MAX_ITER = 20;
   fp_t break_me = 1E-2;
   
+  // Initial guess for particple density at the top. Assume pressure of 0.3 in CGS
   Nt[x1l][x2l][x3l] = 0.3/k/T[x1l][x2l][x3l];
 
   // Solve chemeq and ltepops to get the numbers and to compute density and opacity
-  
-
-  for (int iter=0;iter<MAX_ITER;++iter){ // No more than 20 iterations
-    
+  for (int iter=0;iter<MAX_ITER;++iter){
     chemeq(atml, natm, T[x1l][x2l][x3l], Nt[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
     for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);
-    // Now from this we need to get mass density and opacity
     op_referent[x1l][x2l][x3l] = opacity_continuum(T[x1l][x2l][x3l], Ne[x1l][x2l][x3l], lambda_referent, x1l,x2l,x3l);
-    rho[x1l][x2l][x3l] = atml[0]->get_total_pop(x1l,x2l,x3l) * 1.4 * 1.67E-24; // in gram/cm^3, approximate.
-    
+    rho[x1l][x2l][x3l] = atml[0]->get_total_pop(x1l,x2l,x3l) * 1.4 * 1.67E-24; // in gram/cm^3, approximate
+    // Correction to local particle density:
     fp_t dN = (pow(10.0, logtau[x3l]) * rho[x1l][x2l][x3l] * grav_acc / op_referent[x1l][x2l][x3l]) / k / T[x1l][x2l][x3l] - Nt[x1l][x2l][x3l];
     Nt[x1l][x2l][x3l] += dN;
     if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
       break;
   }
-
-  // Now we have converged the pressure at the top. We can now start integrating downward, the simplest way is to use linear approximation for the pressure and opacity derivative
-  
+  // Go downward, enforcing differential form of HE equation:
   for (int x3i=x3l+1;x3i<=x3h;++x3i){ 
 
     // We have the eq: delta_p/delta_tau = g / kappa_mean
     // where delta_p is STEP (not correction) in pressure, delta_tau in optical depth and 
     // kappa_mean is sqrt(chi_i * chi_i+1 / rho_i / rho_i+1
-    // we know everything except p_i+1 and chi/rho _i+1,so we are going to assume
-
-    // delta_tau we know 
+    // we know everything except p_i+1 and chi/rho _i+1,so we iterate on these
+    // delta_tau is known:
     fp_t delta_tau = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1])); 
     // inital guess for the step in p
     fp_t delta_p =  rho[x1l][x2l][x3i-1] * grav_acc / op_referent[x1l][x2l][x3i-1] * delta_tau; 
-    // and initial guess for the local Nt:
+    // initial guess for the local Nt:
     Nt[x1l][x2l][x3i] = (Nt[x1l][x2l][x3i-1] * k * T[x1l][x2l][x3i-1] + delta_p) / k / T[x1l][x2l][x3i];
 
     // Now we iterate using HE equation and rho(N),chi(N)
@@ -211,7 +206,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       
       chemeq(atml, natm, T[x1l][x2l][x3i], Nt[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
       for (int a=0;a<natm;++a) atml[a]->lte(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], x1l, x2l, x3i);
-      
       // new opacity:
       op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i); // New opacity
       // new mass density:
@@ -224,7 +218,7 @@ int atmos_pp::build_from_nodes(model * atmos_model){
       if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
         break;
     }
-
+    // new height grid, rarely needed
     fp_t d_h = (pow(10,logtau[x3i]) - pow(10,logtau[x3i-1])) / sqrt(op_referent[x1l][x2l][x3i] * op_referent[x1l][x2l][x3i-1]);
   }
 
@@ -234,16 +228,17 @@ int atmos_pp::build_from_nodes(model * atmos_model){
     op_referent[x1l][x2l][x3i] = opacity_continuum(T[x1l][x2l][x3i], Ne[x1l][x2l][x3i], lambda_referent, x1l,x2l,x3i);
     rho[x1l][x2l][x3i] = atml[0]->get_total_pop(x1l,x2l,x3i) * 1.4 * 1.67E-24;
   }
-
   delete [](logtau+x3l);
-
   popclean();
   return 0;
 }
 
+// ================================================================================================
+
 int atmos_pp::interpolate_from_nodes(model * atmos_model){
   
-  // This is a working version which modifies the atmosphere with respect to given 'model'
+  // Similar to atmos_pp:build_from_nodes(model * atmos_model) 
+  // except there is no HE enforcing part. We only interpolate quantities:
 
   io.msg(IOL_INFO, "atmos_pp::interpolating from nodes \n");
   
@@ -306,7 +301,6 @@ int atmos_pp::interpolate_from_nodes(model * atmos_model){
       Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
       By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
       Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
-      //printf("%d %e %e %e \n", x3i, Bx[x1l][x2l][x3i], By[x1l][x2l][x3i], Bz[x1l][x2l][x3i]);
     }
   }
 
