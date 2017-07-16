@@ -543,8 +543,6 @@ int job_class::stop(void)
   }
   pthread_mutex_unlock(&swapfile_lock);
 
-  // DOES THIS WORK:
-  exit(0);
   return 0;
 }
 
