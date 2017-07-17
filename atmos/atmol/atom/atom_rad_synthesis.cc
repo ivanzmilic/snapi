@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <math.h>
+#include <ctime>
 
 #include "types.h"
 #include "uts.h"
@@ -51,7 +52,7 @@ int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bm
   //freefree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector); //not implemented 
   boundfree_op_em_vector(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector);
   boundbound_op_em_vector(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector);
-
+  
   return 0;
 }
 
@@ -61,9 +62,12 @@ int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, f
   // Input quantities are usual ones, T, Ne, Vlos, Vt, B are atmospheric quantities
   // theta,phi,lambda and nlambda give us angles and wavelengths for which to compute opacity/emissivity
   // contributions from given atom are added to op_vector and em_vector.
-
   boundfree_op_em_vector_plus_pert(T,Ne,Vlos,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
+  
+  //clock_t b=clock();
   boundbound_op_em_vector_plus_pert(T,Ne,Vlos,Vt,Bmag,theta,phi,lambda,nlambda,op_vector,em_vector,op_vector_pert,em_vector_pert);
+  //clock_t a=clock();
+  //printf("Time spent on BB op/em + pert = %f\n",double(a-b)/CLOCKS_PER_SEC);
 
   return 0;
 }
@@ -159,6 +163,11 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
     	++nlambda_crit;
     }
     fp_t lambda_mean = lambda[nlambda_crit];
+
+    fp_t ***** op_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+    fp_t ***** em_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+    memset(op_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1));
+    memset(em_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1));
  
  	  // We proceed the same way as above, except we need to loop over parameters and depths
     // which correspond to perturbation at some point.
@@ -198,10 +207,11 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
             op_loc_pert[1] =  -pop_mod_factor * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
             
             // Add explicit dependencies:
-            for (int l=1;l<=nlambda_crit;++l){
-              op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += sigma*op_loc_pert[0];
-              op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += sigma*op_loc_pert[1];
-            }
+            op_loc_pert[0] *= sigma;
+            op_loc_pert[1] *= sigma;
+            for (int p=1;p<=2;++p)
+              op_pert_transition[p][x3i][x1i][x2i][x3i] = op_loc_pert[p-1];
+              
             // -- Emissivity : ----------------------------
             // Temperature dependence:
             em_loc_pert[0] =  em_loc * parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
@@ -213,11 +223,9 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
             // Density dependence:
             em_loc_pert[1] =  em_loc * parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i)/fetch_Ne(x1i, x2i, x3i);
             // Add explicit dependencies:
-            for (int l=1;l<=nlambda_crit;++l){
-              em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_loc_pert[0];
-              em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_loc_pert[1];
-            }
-
+            for (int p=1;p<=2;++p)
+              em_pert_transition[p][x3i][x1i][x2i][x3i] = em_loc_pert[p-1];
+            
             // ====================================================================================
             // Implicit dependencies. I.e. factors which depend on the level perturbations:
             for (int x3k=x3l;x3k<=x3h;++x3k){
@@ -234,40 +242,24 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
               em_loc_pert[1] =   em_loc * level_responses[2][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
               em_loc_pert[2] =   em_loc * level_responses[3][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
 
-
-              for (int l=1;l<=nlambda_crit;++l){
-                op_vector_pert[l][1][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[0];
-                op_vector_pert[l][2][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[1];
-                op_vector_pert[l][3][x3i][x1i][x2i][x3i][1][1] += op_loc_pert[2];
-
-                em_vector_pert[l][1][x3i][x1i][x2i][x3i][1] += em_loc_pert[0];
-                em_vector_pert[l][2][x3i][x1i][x2i][x3i][1] += em_loc_pert[1];
-                em_vector_pert[l][3][x3i][x1i][x2i][x3i][1] += em_loc_pert[2];
-              } // wvl
+              for (int p=1;p<=3;++p){
+                op_pert_transition[p][x3k][x1i][x2i][x3i] += op_loc_pert[p-1];
+                em_pert_transition[p][x3k][x1i][x2i][x3i] += em_loc_pert[p-1];
+              } // parameter
             } // depths of perturbation
             // ====================================================================================
       } // points in the atmosphere
  		} // endif
+    for (int l=1;l<=nlambda_crit;++l)
+      for (int p=1;p<=3;++p)
+        for (int x3k=x3l;x3k<=x3h;++x3k)
+          for (int x1i=x1l;x1i<=x1h;++x1i)
+            for (int x2i=x2l;x2i<=x2h;++x2i)
+              for (int x3i=x3l;x3i<=x3h;++x3i){
+                op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += op_pert_transition[p][x3k][x1i][x2i][x3i];
+                em_vector_pert[l][p][x3k][x1i][x2i][x3i][1]    += em_pert_transition[p][x3k][x1i][x2i][x3i];
+    }
   } // ionization stages & levels
-  
-  if(0==1){ // DEBUG
-    fp_t ***** op_comparison=boundfree_op_pert(Vlos,lambda[1]);
-    fp_t ***** em_comparison=boundfree_em_pert(Vlos,lambda[1]);
-
-    fp_t *** op=boundfree_op(Vlos,lambda[1]);
-    fp_t *** em=boundfree_em(Vlos,lambda[1]);
-
-
-    printf("New function:\n");
-    printf("Op_loc = %1.10e op_ref = %1.10e \n",op_vector[1][x1l][x2l][x3h][1][1],op[x1l][x2l][x3h]);
-    printf("Em_loc = %1.10e em_ref = %1.10e \n",em_vector[1][x1l][x2l][x3h][1],em[x1l][x2l][x3h]);
-    printf("Temperature:\n");
-    printf("Op_loc_pert = %e op_ref_pert = %e \n",op_vector_pert[1][1][x3h][x1l][x2l][x3h][1][1],op_comparison[1][x3h][x1l][x2l][x3h]);
-    printf("Em_loc_pert = %e em_ref_pert = %e \n",em_vector_pert[1][1][x3h][x1l][x2l][x3h][1],em_comparison[1][x3h][x1l][x2l][x3h]);
-    printf("Density:\n");
-    printf("Op_loc_pert = %e op_ref_pert = %e \n",op_vector_pert[1][2][x3h][x1l][x2l][x3h][1][1],op_comparison[2][x3h][x1l][x2l][x3h]);
-    printf("Em_loc_pert = %e em_ref_pert = %e \n",em_vector_pert[1][2][x3h][x1l][x2l][x3h][1],em_comparison[2][x3h][x1l][x2l][x3h]);
-  }
   return 0;
 }
 
@@ -391,6 +383,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
           int lower_map = rmap[z][ii];
           int upper_map = rmap[z][i];
           // Then spatially dependent stuff
+          for (int l=1;l<=nlambda;++l)
           for (int x1i=x1l;x1i<=x1h;++x1i)
 	    			for (int x2i=x2l;x2i<=x2h;++x2i)
 	      	  	for (int x3i=x3l;x3i<=x3h;++x3i){
@@ -419,7 +412,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
 
             	// Check if the line is sensitive to zeeman effect
             	if (split[tr]==0){ // If not sensitive
-            	  for (int l=1;l<=nlambda;++l){
+            	  //for (int l=1;l<=nlambda;++l){
             	  	fp_t x=(lam-lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
             	  	fp_t H,F,dH,dF;
             	  	fvoigtn(x,a,H,F,dH,dF);
@@ -444,7 +437,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 		em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Aul*constant_factor * H/dld;
                 	}
                 	delete[](x_der+1);delete[](a_der+1);delete[](dld_der+1);
-              	}
+              	//}
               }
               else {
             	  // Derivative of a and allocating memory for all the derivatives of the profiles:
@@ -454,7 +447,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                 H_p_der = new fp_t [7] - 1; H_b_der = new fp_t [7] - 1; H_r_der = new fp_t [7] - 1;
                 F_p_der = new fp_t [7] - 1; F_b_der = new fp_t [7] - 1; F_r_der = new fp_t [7] - 1;
                 
-		          	for (int l=1;l<=nlambda;++l){
+		          	//for (int l=1;l<=nlambda;++l){
 
 		          		memset(H_p_der+1,0,7*sizeof(fp_t));
 	                memset(H_b_der+1,0,7*sizeof(fp_t));
@@ -613,7 +606,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
 	                // And to emissivity:
 	               	em_vector_pert[l][7][x3i][x1i][x2i][x3i][2] += -0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*sp * em_loc;
                 	em_vector_pert[l][7][x3i][x1i][x2i][x3i][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*cp * em_loc;        
-		          }
+		          //}
 		          delete[](H_p_der+1);delete[](H_r_der+1);delete[](H_b_der+1);
 		          delete[](F_p_der+1);delete[](F_r_der+1);delete[](F_b_der+1);
 		          delete[](a_der+1);

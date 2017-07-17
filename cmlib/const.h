@@ -22,7 +22,7 @@
 #define R   8.31447215E7             // erg mol-1 K-1
 #define ev  1.602189E-12             // erg
 #define saha_const 2.0706615382E-16 // In cgs units
-#define grav_acc 274.88E2; // gravitational acceleration at solar surface cm/s^2
+#define grav_acc 274.88E2 // gravitational acceleration at solar surface cm/s^2
 
 #define delta_T 1.0 // step for the computation of numerical derivatives
 #define delta_vt 20.0 // step for the computation of numerical derivative

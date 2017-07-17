@@ -29,7 +29,7 @@ a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
 
-l_offset = 600
+l_offset = 495
 
 
 #keep in mind this one is transposed:
@@ -81,13 +81,7 @@ pin = pyana.fzread(input_nodes)
 parameters = pin["data"]
 temp = parameters.shape
 NN = temp[0] #total number of nodes
-parameters[-5] /= 1E5 #convert to km/s										  
-parameters[-4] /= 1E5 #convert to km/s
-
-
 		
-#print parameters[:,0,0]
-
 if (NX<=1 and NY<=1):
 	print parameters[:,0,0]
 	quit();
@@ -102,8 +96,19 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
+
+T_nodes = [0,1,2,3,4]
+T_nodes_tau = [-4,-3,-2,-1,0]
+vt_nodes = [5]
+vs_nodes = [6,7]
+vs_nodes_tau = [-5,1]
+B_nodes = [8,9,10]
+B_nodes_tau = [-4,-2.5,0]
+theta_nodes = [11]
+phi_nodes = [12]
+
 panelsx=8
-panelsy=3
+panelsy=4
 
 #pre-determined wavelengths
 l_core_Na = 837-l_offset
@@ -118,49 +123,36 @@ plt.cla()
 plt.figure(figsize=[5*panelsx, 5*panelsy])
 
 #Nodes panels:
+#Row1&2: Temperature and microturbulentce
 
-plt.subplot(panelsy,panelsx,1)
-plt.imshow(parameters[0],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Temperature at $\log\,\\tau = -4$')
+for i in range(T_nodes[0],T_nodes[-1]+1):
+	plt.subplot(panelsy,panelsx,i+1)
+	plt.imshow(parameters[i],origin='lower')
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.title('Temperature at $\log\,\\tau$ = '+str(T_nodes_tau[i-T_nodes[0]]))
 
-plt.subplot(panelsy,panelsx,2)
-plt.imshow(parameters[1],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Temperature at $\log \\tau = -2.6$')
 
-plt.subplot(panelsy,panelsx,3)
-plt.imshow(parameters[2],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Temperature at $\log\,\\tau = -1.2$')
+for i in range(vt_nodes[0],vt_nodes[-1]+1):
+	parameters[i] /= 1E5
+	plt.subplot(panelsy,panelsx,i+1)
+	plt.imshow(parameters[i],origin='lower')
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.title('Microturbulent velocity')
 
-plt.subplot(panelsy,panelsx,4)
-plt.imshow(parameters[3],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Temperature at $\log \\tau = 0.2$')
+for i in range(vs_nodes[0],vs_nodes[-1]+1):
+	parameters[i] /= 1E5
+	plt.subplot(panelsy,panelsx,i+1)
+	plt.imshow(parameters[i],origin='lower')
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.title('Systematic velocity at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 
-plt.subplot(panelsy,panelsx,5)
-plt.imshow(parameters[4],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Temperature at $\log \\tau = 0$')
+for i in range(B_nodes[0],B_nodes[-1]+1):
+	parameters[i] *= np.cos(parameters[theta_nodes[0]]*3.14/180.0)
+	plt.subplot(panelsy,panelsx,i+1)
+	plt.imshow(parameters[i],origin='lower')
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 
-plt.subplot(panelsy,panelsx,6)
-plt.imshow(parameters[5],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\mathrm{v_{t}\,[km/s]}$')
-
-plt.subplot(panelsy,panelsx,7)
-plt.imshow(parameters[6],origin='lower')
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\mathrm{v_{los}\,[km/s]}$')
-
-B = parameters[7]*np.cos(parameters[8]*3.14/180.0)
-mean = np.mean(B)
-span = np.std(B)
-plt.subplot(panelsy,panelsx,8)
-plt.imshow(B,origin='lower',vmin=mean-3.0*span,vmax=mean+3.0*span)
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\mathrm{B\,[Gauss]}$')
 
 
 # Right hand side panels:
@@ -173,7 +165,7 @@ if (l_c >= 0):
 	i_cont /= i_c_mean
 	sigma = np.std(i_cont)
 	
-	plt.subplot(panelsy,panelsx,9)
+	plt.subplot(panelsy,panelsx,2*panelsx+1)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed continuum intensity')
@@ -181,7 +173,7 @@ if (l_c >= 0):
 	i_cont = np.copy(fitted_cube[:,:,0,l_c])
 	i_cont /= i_c_mean
 
-	plt.subplot(panelsy,panelsx,10)
+	plt.subplot(panelsy,panelsx,2*panelsx+2)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted continuum intensity')
@@ -194,7 +186,7 @@ if (l_core_Fe >= 0):
 	i_cont /= i_c_mean
 	sigma = np.std(i_cont)
 
-	plt.subplot(panelsy,panelsx,11)
+	plt.subplot(panelsy,panelsx,2*panelsx+3)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Fe line core')
@@ -202,7 +194,7 @@ if (l_core_Fe >= 0):
 	i_cont = np.copy(fitted_cube[:,:,0,l_core_Fe])
 	i_cont /= i_c_mean
 
-	plt.subplot(panelsy,panelsx,12)
+	plt.subplot(panelsy,panelsx,2*panelsx+4)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Fe line core')
@@ -215,7 +207,7 @@ if (l_core_Ni >= 0):
 	i_cont /= i_c_mean
 	sigma = np.std(i_cont)
 
-	plt.subplot(panelsy,panelsx,13)
+	plt.subplot(panelsy,panelsx,2*panelsx+5)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Ni line core')
@@ -223,7 +215,7 @@ if (l_core_Ni >= 0):
 	i_cont = np.copy(fitted_cube[:,:,0,l_core_Ni])
 	i_cont /= i_c_mean
 
-	plt.subplot(panelsy,panelsx,14)
+	plt.subplot(panelsy,panelsx,2*panelsx+6)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Ni line core')
@@ -236,7 +228,7 @@ if (l_core_Na >= 0):
 	i_cont /= i_c_mean
 	sigma = np.std(i_cont)
 
-	plt.subplot(panelsy,panelsx,15)
+	plt.subplot(panelsy,panelsx,2*panelsx+7)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Na D1 line core')
@@ -244,7 +236,7 @@ if (l_core_Na >= 0):
 	i_cont = np.copy(fitted_cube[:,:,0,l_core_Na+15])
 	i_cont /= i_c_mean
 
-	plt.subplot(panelsy,panelsx,16)
+	plt.subplot(panelsy,panelsx,2*panelsx+8)
 	plt.imshow(i_cont,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Na D1 line core')
@@ -255,14 +247,14 @@ if (l_core_Na >= 0):
 	m = np.mean(V)
 	s = np.std(V)
 	
-	plt.subplot(panelsy,panelsx,23)
+	plt.subplot(panelsy,panelsx,3*panelsx+7)
 	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Na Stokes V')
 
 	V = fitted_cube[:,:,3,l_core_Na+15]/obs_cube[:,:,0,l_c]
 	
-	plt.subplot(panelsy,panelsx,24)
+	plt.subplot(panelsy,panelsx,3*panelsx+8)
 	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Na Stokes V')

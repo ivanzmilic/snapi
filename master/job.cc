@@ -361,9 +361,9 @@ int job_class::start(void)
        }else{
          //ji.atmos[a]->build_from_nodes(ji.models[0]);
          ji.atmos[a]->set_grid(0);
-         //obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
+         obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
          //obs=ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0);
-         obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
+         //obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
          obs->write(ji.name[o],*io,1,1);
       	 delete obs;
          delete ji.atmos[a];
@@ -542,7 +542,7 @@ int job_class::stop(void)
     swapfilename=0;
   }
   pthread_mutex_unlock(&swapfile_lock);
-
+  exit(1);
   return 0;
 }
 

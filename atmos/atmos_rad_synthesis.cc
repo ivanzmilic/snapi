@@ -15,6 +15,8 @@
 // This source file contains following functions/methods:
 // int int op_em_vector(fp_t,fp_t,fp_t*,int,fp_t***,fp_t**); - op and em for the 1D atmosphere, all wavelengths at once
 
+// ================================================================================================
+
 int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_t* lambda,int nlambda,fp_t****** op_vector,fp_t***** em_vector){
   // This function computes opacity and emissivity for atmosphere, all wavelengths at once. 
   // Returns 0 for success, 1 for error. 
@@ -66,6 +68,8 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
 
   return 0;
 }
+
+// ================================================================================================
 
 int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_t* lambda,int nlambda,
   fp_t****** op_vector,fp_t***** em_vector,fp_t******** op_vector_pert,fp_t******* em_vector_pert){
@@ -152,13 +156,15 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
   return 0;
 }
 
-// Now we will put the function whih synthesizes spectrum and responses and returns them back here:
+// ================================================================================================
 
 observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** intensity_responses, model* input_model)
+{
   // This function synthesises the spectrum, and computes the response functions of the 
   // unpolarized intensity. It can compute the derivatives of populations and number densities
   // analyticaly or numerically, but the final computation of perturbation is computed analyticaly.
-{
+
+  clock_t begin=clock();
 
   boundary_condition_for_rt = -1;
   popsetup(); // setup
@@ -169,6 +175,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   if(tau_grid) compute_op_referent_derivative();
   
   nltepops();
+  clock_t cp0=clock();
+  //printf("Time spent on nlte solution = %f \n",double(cp0-begin)/CLOCKS_PER_SEC);
   respsetup();
   ne_lte_derivatives();
   
@@ -199,15 +207,16 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   class observable *o=new observable(1,1,4,nlambda);
 
-  clock_t begin = clock();
-  clock_t end = clock();
-  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  
   fp_t****** op = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t***** em = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   fp_t******** op_pert = ft8dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t******* em_pert = ft7dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+
+  clock_t cp1 = clock();
+  //printf("Time until op/em pert = %f \n",double(cp1-begin)/CLOCKS_PER_SEC);
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
+  clock_t cp2 = clock();
+  //printf("Time spent on op/em pert = %f \n",double(cp2-cp1)/CLOCKS_PER_SEC);
   
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
@@ -218,10 +227,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   fp_t *** atm_resp_to_parameters;
   int N_parameters = 0;
+
   if (input_model){
     atm_resp_to_parameters =  input_model->get_response_to_parameters();
     N_parameters = input_model->get_N_nodes_total();
   }
+  clock_t cp3 = clock();
+  //printf("Time elapsed until formal solution(s)=%f \n",double(cp3-cp2)/CLOCKS_PER_SEC);
   
   for(int l=1;l<=nlambda;++l){
 
@@ -298,7 +310,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
       if (intensity_responses)
       for (int p=1;p<=N_parameters;++p){
-        //printf("Parameter %d has type %d\n", p, input_model->which_parameter(p));
         if (input_model->which_parameter(p)==5 || input_model->which_parameter(p)==6)
           normalizer = delta_angle;
         else 
@@ -311,14 +322,16 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // Add it to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
-
-  
-  end = clock();
-  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  //printf("Time spent on op/em + pert = %f \n", time_spent);
+  clock_t cp4 = clock();
+  //printf("Time spent on formal solution(s)=%f \n",double(cp4-cp3)/CLOCKS_PER_SEC);
+    
 
   // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
+
+  clock_t end = clock();
+  //printf("Total time = %f \n",double(end-begin)/CLOCKS_PER_SEC);
+  
 
     // Write down the intensity perturbations:
   if (!intensity_responses && !input_model){
