@@ -234,7 +234,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
   obs_to_return->add_scattered_light(0.04);
   obs_to_return->spectral_convolve(50*1E-11,1,1);
-  obs_to_return->write("spectrum_fitted.dat",io,1,1);
+  //obs_to_return->write("spectrum_fitted.dat",io,1,1);
       
   delete[](lambda+1);
   return obs_to_return;
