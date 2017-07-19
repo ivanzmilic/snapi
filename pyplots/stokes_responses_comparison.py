@@ -19,8 +19,8 @@ plt.plot(spectrum[:,0] * 1E8, spectrum[:,1])
 spectrum[:,0] *= 1E8
 spectrum[:,0] -= (spectrum[-1,0] + spectrum[0,0]) * 0.5 
 
-lambda_l = min(spectrum[:,0]+0.0)
-lambda_m = max(spectrum[:,0]-0.0)
+lambda_l = min(spectrum[:,0]+0.2)
+lambda_m = max(spectrum[:,0]-0.2)
 #spectrum[:,1] /= max(spectrum[:,1])
 
 mpl.rcParams['font.size'] = 10
@@ -95,14 +95,14 @@ wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 h = h[0,:,0]
-#h/= 1E5
+h/= 1E5
 
-hmax = -5
+hmax = 1300.0
 hmin = h[-1]
 
 #yname = '$\log\,\\tau_{500}$'
 yname = '$h\,[\mathrm{km}]$'
-for p in range(0,3):
+for p in range(0,7):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)

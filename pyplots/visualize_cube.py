@@ -100,12 +100,12 @@ plt.cla()
 T_nodes = [0,1,2,3]
 T_nodes_tau = [-3.5,-2.2,-1,0]
 #vt_nodes = [5]
-vs_nodes = [4,5,6]
-vs_nodes_tau = [-5,-2,1]
-B_nodes = [8,9,10]
-B_nodes_tau = [-4,-2.5,-0.5]
-theta_nodes = [11]
-phi_nodes = [12]
+vs_nodes = [4]
+vs_nodes_tau = [0]
+B_nodes = [5,6]
+B_nodes_tau = [-3.5,-1.0]
+theta_nodes = [7]
+phi_nodes = [8]
 
 panelsx=8
 panelsy=4
