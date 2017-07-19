@@ -1101,7 +1101,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
 
     // at the top we want linear extrapolation:
     derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
-    derivatives[1] = 0.0; // FLAT!
+    //derivatives[1] = 0.0; // FLAT! <--- DOES THIS WORK BAD?
     // at the bottom let's do the same as as FALC:
 
     if (!is_temp)
