@@ -228,7 +228,12 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
             
             // ====================================================================================
             // Implicit dependencies. I.e. factors which depend on the level perturbations:
-            for (int x3k=x3l;x3k<=x3h;++x3k){
+            int x3l_p=x3l, x3h_p=x3h; // limits for computing perturbations
+            if (!NLTE){
+              x3l_p=x3h_p=x3i;
+            }
+
+            for (int x3k=x3l_p;x3k<=x3h_p;++x3k){
               op_loc_pert[0] =  -sigma * pop_mod_factor * level_responses[1][(x3i-x3l)*nmap+rmap[z+1][0]+1][x3k]/pop[x1i][x2i][x3i].n[z+1][0];
               op_loc_pert[0] +=  sigma * level_responses[1][(x3i-x3l)*nmap+rmap[z][i]+1][x3k];
 
@@ -694,8 +699,12 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                   }
 
                   // But then also depth dependent responses coming from level responses.
+                  int x3l_p=x3l, x3h_p=x3h; // limits for computing perturbations
+                  if (!NLTE){
+                    x3l_p=x3h_p=x3i;
+                  }
                   for (int p=1;p<=5;++p)
-                    for (int x3k=x3l;x3k<=x3h;++x3k){
+                    for (int x3k=x3l_p;x3k<=x3h_p;++x3k){
                     op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += (level_responses[p][(x3i-x3l)*nmap+lower_map+1][x3k]*Blu - 
                       level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Bul) * constant_factor * H/dld;
                     em_vector_pert[l][p][x3k][x1i][x2i][x3i][1] += level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k]*Aul*constant_factor * H/dld;
@@ -776,11 +785,6 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                     delete[](x_der+1);
                   }
 
-                  //if (x3i==x3h){
-                  //  printf("Atom %s wavelength %e ", id, lambda[l]);
-                  //  printf("%e %e %e %e %e %e \n",H_p_der[1],H_b_der[1],H_r_der[1],F_p_der[1],F_b_der[1],F_r_der[1]);
-                  //}
-
                   // Normalize with dld
                   H_p /= dld; H_b /= dld; H_r /= dld;
                   F_p /= dld; F_b /= dld; F_r /= dld;
@@ -798,8 +802,13 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                   em_vector[l][x1i][x2i][x3i][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*sp * em_loc;
                   em_vector[l][x1i][x2i][x3i][4] += 0.5 * (H_r - H_b) * ct * em_loc;
 
+                  int x3l_p=x3l, x3h_p=x3h; // limits for computing perturbations
+                  if (!NLTE){
+                    x3l_p=x3h_p=x3i;
+                  }
+
                   for (int p=1;p<=5;++p)
-                    for (int x3k=x3l;x3k<=x3h;++x3k){
+                    for (int x3k=x3l_p;x3k<=x3h_p;++x3k){
                       fp_t op_loc_pert = (level_responses[p][(x3i-x3l) * nmap+lower_map+1][x3k] * Blu - level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k] * Bul) * constant_factor;
                       fp_t em_loc_pert = level_responses[p][(x3i-x3l)*nmap+upper_map+1][x3k] * Aul * constant_factor;
 

@@ -97,13 +97,13 @@ plt.cla()
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2,3,4]
-T_nodes_tau = [-4,-3,-2,-1,0]
-vt_nodes = [5]
-vs_nodes = [6,7]
-vs_nodes_tau = [-5,1]
+T_nodes = [0,1,2,3]
+T_nodes_tau = [-3.5,-2.2,-1,0]
+#vt_nodes = [5]
+vs_nodes = [4,5,6]
+vs_nodes_tau = [-5,-2,1]
 B_nodes = [8,9,10]
-B_nodes_tau = [-4,-2.5,0]
+B_nodes_tau = [-4,-2.5,-0.5]
 theta_nodes = [11]
 phi_nodes = [12]
 
@@ -132,12 +132,12 @@ for i in range(T_nodes[0],T_nodes[-1]+1):
 	plt.title('Temperature at $\log\,\\tau$ = '+str(T_nodes_tau[i-T_nodes[0]]))
 
 
-for i in range(vt_nodes[0],vt_nodes[-1]+1):
-	parameters[i] /= 1E5
-	plt.subplot(panelsy,panelsx,i+1)
-	plt.imshow(parameters[i],origin='lower')
-	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-	plt.title('Microturbulent velocity')
+#for i in range(vt_nodes[0],vt_nodes[-1]+1):
+#	parameters[i] /= 1E5
+#	plt.subplot(panelsy,panelsx,i+1)
+#	plt.imshow(parameters[i],origin='lower')
+#	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+#	plt.title('Microturbulent velocity')
 
 for i in range(vs_nodes[0],vs_nodes[-1]+1):
 	parameters[i] /= 1E5

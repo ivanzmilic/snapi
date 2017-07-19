@@ -176,7 +176,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   
   nltepops();
   clock_t cp0=clock();
-  //printf("Time spent on nlte solution = %f \n",double(cp0-begin)/CLOCKS_PER_SEC);
+  printf("Time spent on nlte solution = %f \n",double(cp0-begin)/CLOCKS_PER_SEC);
   respsetup();
   ne_lte_derivatives();
   
@@ -213,10 +213,10 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   fp_t******* em_pert = ft7dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
   clock_t cp1 = clock();
-  // /printf("Time until op/em pert = %f \n",double(cp1-begin)/CLOCKS_PER_SEC);
+  printf("Time until op/em pert = %f \n",double(cp1-begin)/CLOCKS_PER_SEC);
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
   clock_t cp2 = clock();
-  //printf("Time spent on op/em pert = %f \n",double(cp2-cp1)/CLOCKS_PER_SEC);
+  printf("Time spent on op/em pert = %f \n",double(cp2-cp1)/CLOCKS_PER_SEC);
   
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
@@ -233,7 +233,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     N_parameters = input_model->get_N_nodes_total();
   }
   clock_t cp3 = clock();
-  //printf("Time elapsed until formal solution(s)=%f \n",double(cp3-cp2)/CLOCKS_PER_SEC);
+  printf("Time elapsed until formal solution(s)=%f \n",double(cp3-cp2)/CLOCKS_PER_SEC);
   
   for(int l=1;l<=nlambda;++l){
 
@@ -323,14 +323,14 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
   clock_t cp4 = clock();
-  //printf("Time spent on formal solution(s)=%f \n",double(cp4-cp3)/CLOCKS_PER_SEC);
+  printf("Time spent on formal solution(s)=%f \n",double(cp4-cp3)/CLOCKS_PER_SEC);
     
 
   // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
   clock_t end = clock();
-  //printf("Total time = %f \n",double(end-begin)/CLOCKS_PER_SEC);
+  printf("Total time = %f \n",double(end-begin)/CLOCKS_PER_SEC);
   
 
     // Write down the intensity perturbations:
