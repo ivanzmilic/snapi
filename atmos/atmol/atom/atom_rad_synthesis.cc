@@ -264,6 +264,8 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
                 op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += op_pert_transition[p][x3k][x1i][x2i][x3i];
                 em_vector_pert[l][p][x3k][x1i][x2i][x3i][1]    += em_pert_transition[p][x3k][x1i][x2i][x3i];
     }
+    del_ft5dim(op_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+    del_ft5dim(em_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
   } // ionization stages & levels
   return 0;
 }

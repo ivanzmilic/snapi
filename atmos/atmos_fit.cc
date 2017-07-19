@@ -196,7 +196,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       del_ft2dim(S_current,1,4,1,nlambda);
     }
 
-    printf("atmos::atmos_fit : iteration %d done.\n",iter);
+    //printf("atmos::atmos_fit : iteration %d done.\n",iter);
     delete[](residual+1);
     delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
