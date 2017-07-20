@@ -66,9 +66,10 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   io.msg(IOL_INFO,"atmosphere::atmosphere: grid=%E x %E x %E\n",cfg->dx,cfg->dy,cfg->dz);
 // initialize variables
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
-  for(int i=0;p[i];++i){
-    (*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-    memset((*(p[i]))[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  if (x1h-x1l+1 && x2h-x2l+1 && x3h-x3l+1)
+    for(int i=0;p[i];++i){
+      (*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+      memset((*(p[i]))[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   }
 // setup atomic and molecular data
   natm=cfg->natm+cfg->nmol;

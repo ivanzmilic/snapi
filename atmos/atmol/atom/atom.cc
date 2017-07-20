@@ -229,7 +229,8 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
   alpha_col_dam = newtrans(Z, nl);
   osc_str = newtrans(Z, nl); // And with the oscillator strength
 //
-  for(int z=0;z<=Z;++z) for(int i=0;i<nl[z];++i) for(int ii=0;ii<nl[z];++ii) A[z][i][ii]=B[z][i][ii]=0.0;
+  for(int z=0;z<=Z;++z) for(int i=0;i<nl[z];++i) for(int ii=0;ii<nl[z];++ii) 
+    A[z][i][ii]=B[z][i][ii]=osc_str[z][i][ii]=alpha_col_dam[z][i][ii]=col_dam_cross_section[z][i][ii]=0.0;
 //
   for(int z=0;z<=Z;++z)
     for(int lu=1;lu<nl[z];++lu) // upper level
@@ -1035,14 +1036,17 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
         cs_table[i][ii] = sigma_sp_table[i][ii];
         alpha_table[i][ii] = alpha_sp_table[i][ii];
       }
-    fp_t s_state[21];
-  	fp_t p_state[18];
+    fp_t * s_state = new fp_t [21];
+  	fp_t * p_state = new fp_t [18];
   	for (int i = 0; i<21; ++i)
   		s_state[i] = 1.0 + i*0.1;
   	for (int i = 0; i<18; ++i)
   		p_state[i] = 1.3 + i*0.1;              
     // First we determine which one is s which one is p
-    fp_t p_for_interpolation, s_for_interpolation;
+    fp_t p_for_interpolation=0.0, s_for_interpolation=0.0;
+
+    //printf("Atom: %s z = %d upperlvl = %d lowerlvl = %d \n", id, z, lu, ll);
+    //printf("%f %f \n", s_for_interpolation, p_for_interpolation);
 
     if (l_qn[z][lu] == 1){
     	p_for_interpolation = n_eff_u;
@@ -1052,6 +1056,8 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
     	s_for_interpolation = n_eff_u;
     	p_for_interpolation = n_eff_l;
     }
+
+    //printf("%f %f \n", s_for_interpolation, p_for_interpolation);
 
     //printf("s_for interpolation = %f p_for interpolation = %f \n", s_for_interpolation, p_for_interpolation);
 
@@ -1067,6 +1073,8 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
     col_dam_cross_section[z][lu][ll] = col_dam_cross_section[z][ll][lu] = cross_section;
     del_ft2dim(cs_table, 0, 20, 0, 17);
     del_ft2dim(alpha_table, 0, 20, 0, 17);
+    delete[]s_state;
+    delete[]p_state;
 
     //printf("sp!\n");
     

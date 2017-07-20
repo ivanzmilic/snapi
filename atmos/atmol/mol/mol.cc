@@ -19,10 +19,10 @@
 
 atmol *mol_new(molcfg *cfg,atmol **atm,int na,io_class &io_in)
 {
-  if (!strcmp("H-", cfg->id))
-    return new h_minus_mol(cfg, atm, na, io_in);
-  
-  return new mol(cfg,atm,na,io_in);
+  if (strcmp("H-", cfg->id)==0)
+    return new h_minus_mol(cfg,atm,na,io_in);
+  else
+    return new mol(cfg,atm,na,io_in);
 }
 
 atmol *mol_new(uint32_t numid,uint08_t *buf,int32_t &offs,uint08_t do_swap,atmol **atm,int na,io_class &io_in)

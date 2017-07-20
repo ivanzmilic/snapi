@@ -905,7 +905,7 @@ fp_t interpol_2d(fp_t ** f, fp_t * x, fp_t * y, int Nx, int Ny, fp_t x_to_interp
     y_interpolated[0] = interpol_1d(f[i-1], y, Ny, y_to_interpol);
     y_interpolated[1] = interpol_1d(f[i], y, Ny, y_to_interpol);
     y_interpolated[2] = interpol_1d(f[i+1], y, Ny, y_to_interpol);
-    x_restricted[0] = x[i-1]; x_restricted[1] = x[i]; x_restricted[2] = x[i+2]; 
+    x_restricted[0] = x[i-1]; x_restricted[1] = x[i]; x_restricted[2] = x[i+1]; 
   }
   else if (i == 0){
     y_interpolated[0] = interpol_1d(f[0], y, Ny, y_to_interpol);
