@@ -1288,7 +1288,7 @@ int convolve_spectra_with_gauss(fp_t ** S, fp_t * lambda,int N, fp_t width){
   // Interpolate back:
   for (int s=1;s<=4;++s)
     for (int l=1;l<=N;++l)
-      S[s][l] = interpol_1d(S_convolved[s],lambda_fine,N_lambda_fine,lambda[l]);
+      S[s][l] = interpol_1d(S_convolved[s]+1,lambda_fine+1,N_lambda_fine,lambda[l]);
 
   //cleanup:
   delete[](w_lambda+1);

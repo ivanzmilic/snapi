@@ -119,11 +119,11 @@ int atom::boundfree_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,f
     		break;
     	++nlambda_crit;
     }
-    fp_t lambda_mean = lambda[nlambda_crit];
-
+      
     // then compute op/em for referent wavelength, and assign that value to all wavelengths 
     // that can ionize, i.e. to all the ones <= than lambda[nlambda_crit]
  	  if (nlambda_crit){
+      fp_t lambda_mean = lambda[nlambda_crit];
 	    for (int x1i=x1l;x1i<=x1h;++x1i)
 	      for (int x2i=x2l;x2i<=x2h;++x2i)
 	        for (int x3i=x3l;x3i<=x3h;++x3i){
@@ -162,17 +162,17 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
     		break;
     	++nlambda_crit;
     }
-    fp_t lambda_mean = lambda[nlambda_crit];
-
-    fp_t ***** op_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-    fp_t ***** em_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-    memset(op_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1));
-    memset(em_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1));
- 
+    
  	  // We proceed the same way as above, except we need to loop over parameters and depths
     // which correspond to perturbation at some point.
  	  if (nlambda_crit){
- 	    for (int x1i=x1l;x1i<=x1h;++x1i)
+      
+      fp_t ***** op_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+      fp_t ***** em_pert_transition = ft5dim(1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+      memset(op_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+      memset(em_pert_transition[1][x3l][x1l][x2l]+x3l,0,7*(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+      fp_t lambda_mean = lambda[nlambda_crit];
+      for (int x1i=x1l;x1i<=x1h;++x1i)
 		    for (int x2i=x2l;x2i<=x2h;++x2i)
 		      for (int x3i=x3l;x3i<=x3h;++x3i){
 
@@ -190,9 +190,13 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
             // ====================================================================================
             // Local, i.e. explicit dependence of opacity and emissivity on Temperature and density:
             // We will compute it for each term (f) separately by computing op_loc * f'/f
-
+            
             fp_t op_loc_pert[3];
             fp_t em_loc_pert[3];
+            for (int p=0;p<3;++p){
+              op_loc_pert[p]=0.0;
+              em_loc_pert[p]=0.0;
+            }
             
             // -- Opacity : -------------------------------
             // We need this temporary variable because there are two contributors, so we cannot simply 
@@ -252,20 +256,22 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
                 em_pert_transition[p][x3k][x1i][x2i][x3i] += em_loc_pert[p-1];
               } // parameter
             } // depths of perturbation
-            // ====================================================================================
       } // points in the atmosphere
+      
+      for (int l=1;l<=nlambda_crit;++l)
+        for (int p=1;p<=3;++p)
+          for (int x3k=x3l;x3k<=x3h;++x3k)
+            for (int x1i=x1l;x1i<=x1h;++x1i)
+              for (int x2i=x2l;x2i<=x2h;++x2i)
+                for (int x3i=x3l;x3i<=x3h;++x3i){
+                  //op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += 0;//op_pert_transition[p][x3k][x1i][x2i][x3i];
+                  em_vector_pert[l][p][x3k][x1i][x2i][x3i][1]    += 0;//em_pert_transition[p][x3k][x1i][x2i][x3i];
+      }
+      del_ft5dim(op_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+      del_ft5dim(em_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
  		} // endif
-    for (int l=1;l<=nlambda_crit;++l)
-      for (int p=1;p<=3;++p)
-        for (int x3k=x3l;x3k<=x3h;++x3k)
-          for (int x1i=x1l;x1i<=x1h;++x1i)
-            for (int x2i=x2l;x2i<=x2h;++x2i)
-              for (int x3i=x3l;x3i<=x3h;++x3i){
-                op_vector_pert[l][p][x3k][x1i][x2i][x3i][1][1] += op_pert_transition[p][x3k][x1i][x2i][x3i];
-                em_vector_pert[l][p][x3k][x1i][x2i][x3i][1]    += em_pert_transition[p][x3k][x1i][x2i][x3i];
-    }
-    del_ft5dim(op_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
-    del_ft5dim(em_pert_transition,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
+    
+    
   } // ionization stages & levels
   return 0;
 }
