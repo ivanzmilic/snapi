@@ -20,7 +20,7 @@
 atmol *mol_new(molcfg *cfg,atmol **atm,int na,io_class &io_in)
 {
   if (strcmp("H-", cfg->id)==0)
-    return new h_minus_mol(cfg,atm,na,io_in);
+    return new h_minus_mol(cfg,atm,na, io_in);
   else
     return new mol(cfg,atm,na,io_in);
 }
