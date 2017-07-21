@@ -12,9 +12,7 @@
 #include "mathtools.h"
 
 #include "molcfg.h"
-
 #include "moleqc.h"
-
 #include "mol.h"
 
 atmol *mol_new(molcfg *cfg,atmol **atm,int na,io_class &io_in)
@@ -29,8 +27,8 @@ atmol *mol_new(uint32_t numid,uint08_t *buf,int32_t &offs,uint08_t do_swap,atmol
 {
   if (numid == 256)
     return new h_minus_mol(buf,offs,do_swap,atm,na,io_in);
-  
-  return new mol(buf,offs,do_swap,atm,na,io_in);
+  else 
+    return new mol(buf,offs,do_swap,atm,na,io_in);
 }
 
 atmol *h_minus_mol_new(molcfg *cfg,atmol **atm,int na,io_class &io_in)
@@ -196,17 +194,7 @@ void h_minus_mol::popsetup(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t 
     x3l=x3l_in;
     x3h=x3h_in;
 //
-    int nx1=x1h-x1l+1,nx2=x2h-x2l+1,nx3=x3h-x3l+1;
-//
-    N=new fp_t** [nx1] - x1l;
-    N[x1l]=new fp_t* [nx1*nx2] - x2l;
-    N[x1l][x2l]=new fp_t [nx1*nx2*nx3] - x3l;
-    for(int x2=x2l+1;x2<=x2h;++x2) N[x1l][x2]=N[x1l][x2-1]+nx3;
-    for(int x1=x1l+1;x1<=x1h;++x1){
-      N[x1]=N[x1-1]+nx2;
-      N[x1][x2l]=N[x1-1][x2l]+nx2*nx3;
-      for(int x2=x2l+1;x2<=x2h;++x2) N[x1][x2]=N[x1][x2-1]+nx3;
-    }
+    N=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   }
 }
 
