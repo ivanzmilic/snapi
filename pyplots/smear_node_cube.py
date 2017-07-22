@@ -19,7 +19,9 @@ for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],7)
 	an_conv[i] = filters.gaussian_filter(an[i],sigma)
 
-an_conv[-1] = 0.0
-an_conv[-2] = 0.0
+#an_conv[-1] = 0.0
+#an_conv[-2] = 0.0
+
+print an_conv[:,0,0]
 	
 pyana.fzwrite(sys.argv[2]+'_'+file_in,an_conv,0,'bla')

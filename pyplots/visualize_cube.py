@@ -31,6 +31,11 @@ dims = fitted_cube.shape
 
 l_offset = 495
 
+#Here we read the parameter map.
+pin = pyana.fzread(input_nodes)
+parameters = pin["data"]
+temp = parameters.shape
+NN = temp[0] #total number of nodes
 
 #keep in mind this one is transposed:
 NY = dims[0]
@@ -42,6 +47,9 @@ obs_cube = b["data"]
 
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
+
+l = np.loadtxt(input_lambdaf,unpack=True)
+wvl = l[1]*1E8
 
 print atmospheres.shape
 
@@ -62,8 +70,23 @@ for i in range(0,1):
 		plt.ylabel("Stokes I")
 		
 		plt.subplot(312)
-		plt.plot(fitted_cube[i,j,3,:])
-		plt.plot(obs_cube[j,i,3,:])
+
+		plt.plot(wvl,fitted_cube[i,j,3,:],label='Fitted')
+		plt.plot(wvl,obs_cube[j,i,3,:],label='Observed')
+
+		#V_weak_field = np.gradient(obs_cube[j,i,0,:])/np.gradient(wvl)
+		#B_los = parameters[5,i,j]*np.cos(parameters[6,i,j])
+		#print B_los
+		#V_weak_field *= -4.697E-13*1.33*(np.mean(wvl)**2.0)*B_los
+		#plt.plot(wvl,V_weak_field,label='WF from obs')
+		#V_weak_field = np.gradient(fitted_cube[i,j,0,:])/np.gradient(wvl)
+		#V_weak_field *= -4.697E-13*1.33*(np.mean(wvl)**2.0)*B_los
+		#plt.plot(wvl,V_weak_field,label='WF from fit')
+		plt.xlim([5895,5897])
+		plt.ylim(-2.5E13,4E13)
+		plt.legend()
+		
+		
 
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
@@ -76,11 +99,6 @@ for i in range(0,1):
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
 
 
-#Here we read the parameter map.
-pin = pyana.fzread(input_nodes)
-parameters = pin["data"]
-temp = parameters.shape
-NN = temp[0] #total number of nodes
 		
 if (NX<=1 and NY<=1):
 	print parameters[:,0,0]
@@ -98,7 +116,7 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,1,2,3]
-T_nodes_tau = [-3.0,-1.4,-0.6,0.2]
+T_nodes_tau = [-3.0,-1.4,-0.6]
 #vt_nodes = [5]
 vs_nodes = [4]
 vs_nodes_tau = [0]
@@ -155,7 +173,7 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 	plt.title('Systematic velocity at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 
 for i in range(B_nodes[0],B_nodes[-1]+1):
-	parameters[i] *= np.cos(parameters[theta_nodes[0]]*3.14/180.0)
+	parameters[i] *= np.cos(parameters[theta_nodes[0]])
 	s = 3.0*np.std(parameters[i])
 	plt.subplot(panelsy,panelsx,i+1)
 	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-s,vmax=s)

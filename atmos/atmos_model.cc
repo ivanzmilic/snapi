@@ -824,9 +824,15 @@ int model::correct(fp_t * correction){
   // First make sure that corrections are not too big:
   for (int i=1;i<=N_nodes_temp;++i)
     if (correction[i] > 1000.0) correction[i] = 1000.0;
-  
+
+  int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
+  int B_stop  = B_start-1+N_nodes_B;
+
+  for (int i=B_start;i<=B_stop;++i)
+    if (correction[i] > 500.0) correction[i] = 500.0;
+
   for (int i=1;i<=N_parameters;++i)
-    this->perturb_node_value(i,correction[i]);
+    perturb_node_value(i,correction[i]);
 
   // Check temperatures:
   for (int i=1;i<=N_nodes_temp;++i){
@@ -839,17 +845,8 @@ int model::correct(fp_t * correction){
     if (vt_nodes_vt[i] > 5E5) vt_nodes_vt[i] = 5E5; // highest possible vt
   }
   for (int i=1;i<=N_nodes_B;++i){
-    if (B_nodes_B[i] < 0) B_nodes_B[i] *= (-1.0);
-    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0; // highest possible B
+    if (fabs(B_nodes_B[i]) > 4000.0) B_nodes_B[i] = 4000.0 * B_nodes_B[i]/fabs(B_nodes_B[i]); // highest possible B
   }
-  /*for (int i=1;i<=N_nodes_theta;++i){
-    if (theta_nodes_theta[i] < 0) theta_nodes_theta[i] *= -1.0;
-    if (theta_nodes_theta[i] > pi) theta_nodes_theta[i] = 2.0*pi - theta_nodes_theta[i];
-  }
-  for (int i=1;i<=N_nodes_phi;++i){
-    if (phi_nodes_phi[i] < 0) theta_nodes_theta[i] += pi;
-    if (phi_nodes_phi[i] > pi) theta_nodes_theta[i] -= pi;
-  }*/ // I am not totally sure what I want to do with angles. I think I want to go back to cost theta and tg(2phi) instead.
   return 0;
 }
 

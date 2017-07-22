@@ -276,7 +276,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     }
     else { // Else input model is provided and we need to extract  needed things from it.
 
-      // Otherwise, if model is supplied as input parameter we are gonna go compute responses to parameters directly
       fp_t ****** op_pert_params = ft6dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
       fp_t ***** em_pert_params = ft5dim(1,N_parameters,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
       memset(op_pert_params[1][x1l][x2l][x3l][1]+1,0,N_parameters*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
@@ -322,18 +321,11 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // Add it to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
-  clock_t cp4 = clock();
-  //printf("Time spent on formal solution(s)=%f \n",double(cp4-cp3)/CLOCKS_PER_SEC);
     
-
   // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
 
-  clock_t end = clock();
-  //printf("Total time = %f \n",double(end-begin)/CLOCKS_PER_SEC);
-  
-
-    // Write down the intensity perturbations:
+  // Write down the intensity perturbations:
   if (!intensity_responses && !input_model){
     FILE * out;
     out = fopen("stokes_intensity_responses_analytical.txt", "w");
@@ -356,11 +348,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   del_ft3dim(Lambda_approx,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
- 
   del_ft5dim(dS,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4); 
-//
   del_ft4dim(d_obs_a,1,7,x3l,x3h,1,nlambda,1,4);
-
   del_ft6dim(op,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   del_ft5dim(em,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   del_ft8dim(op_pert,1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
@@ -372,7 +361,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   }
   if (input_model)
     del_ft3dim(atm_resp_to_parameters,1,N_parameters,1,7,1,x3h-x3l+1);
-//
 
   respclean();
   popclean(); // all done

@@ -14,6 +14,7 @@
 
 #define TAU_MIN -5.0
 #define TAU_MAX  1.0
+#define TINY 1E-5
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
 {
@@ -121,47 +122,58 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   // Magnetic field:
 
   int N_nodes_B = atmos_model->get_N_nodes_B();
-  int N_nodes_theta = atmos_model->get_N_nodes_theta();
-  int N_nodes_phi = atmos_model->get_N_nodes_phi();
-  
-  if (N_nodes_B && N_nodes_theta && N_nodes_phi){
+  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
+    
+  if (N_nodes_B){
     fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
     fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
-    fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
-    fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
-    fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
-    fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();
-
-    fp_t * B = new fp_t[x3h-x3l+1] - x3l;
-    fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
-    fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
-  
     atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h, 0);
-    atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h, 0);
-    atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h, 0);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
-      By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
-      Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
-    }
-  // cleanup:
     delete[](B_nodes_tau+1);
     delete[](B_nodes_B+1);
-    delete[](theta_nodes_tau+1);
-    delete[](theta_nodes_theta+1);
-    delete[](phi_nodes_tau+1);
-    delete[](phi_nodes_phi+1);
-    delete[](B+x3l);
-    delete[](theta+x3l);
-    delete[](phi+x3l);
   }
   else 
-    for (int x3i=x3l;x3i<=x3h;++x3i){ // we put some very small non-zero values to avoid bad behavior
-      Bx[x1l][x2l][x3i] = 0.001;
-      By[x1l][x2l][x3i] = 0.001;
-      Bz[x1l][x2l][x3i] = 0.001;
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      B[x3i] = 0.0; 
+
+  
+  int N_nodes_theta = atmos_model->get_N_nodes_theta();
+  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
+    
+  if (N_nodes_theta){
+    fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
+    fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
+    atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h, 0);
+    delete[](theta_nodes_tau+1);
+    delete[](theta_nodes_theta+1);
   }
+  else
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      theta[x3i] = TINY; 
+
+
+  int N_nodes_phi = atmos_model->get_N_nodes_phi();
+  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
+
+  if (N_nodes_phi){
+    fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
+    fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();    
+    atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h, 0);
+    delete[](phi_nodes_tau+1);
+    delete[](phi_nodes_phi+1);
+  }
+  else
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      phi[x3i] = TINY; 
+ 
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
+    By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
+    Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
+  }
+  delete[](B+x3l);
+  delete[](theta+x3l);
+  delete[](phi+x3l);
+
 
 // ------------------------------------------------------------------------------------------------
   
@@ -245,9 +257,6 @@ int atmos_pp::interpolate_from_nodes(model * atmos_model){
   // First you need to make a grid in tau. This is like this by default
   int N_depths = x3h-x3l+1;
   fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
-  // Uniform in log_tau from the uppeermost to the lowermost node
-  int N_nodes_temp = atmos_model->get_N_nodes_temp();
-  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
   
   fp_t tau_min = TAU_MIN;
   fp_t tau_max = TAU_MAX;
@@ -260,68 +269,100 @@ int atmos_pp::interpolate_from_nodes(model * atmos_model){
       for (int x3i=x3l;x3i<=x3h;++x3i)
         tau_referent[x1i][x2i][x3i] = -pow(10.0,logtau[x3i]);
 
-  // Then we need to interpolate all the quantities to this tau grid:
-
+  // Temperature:
+  int N_nodes_temp = atmos_model->get_N_nodes_temp();
+  if (N_nodes_temp < 1){
+    io.msg(IOL_ERROR, "atmos_pp::build_from_nodes : can't make atmosphere with less than one T node. Quitting...\n");
+    return 1;  
+  }
+  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
   fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
   atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h, 1);
+  delete[](temp_nodes_tau+1);
+  delete[](temp_nodes_temp+1);
 
   // Microturbulent velocity:
   int N_nodes_vt = atmos_model->get_N_nodes_vt();
-  fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
-  fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
-  atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h, 0);
+  if (N_nodes_vt){
+    fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
+    fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
+    atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h, 0);
+    delete[](vt_nodes_tau+1);
+    delete[](vt_nodes_vt+1);
+  }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      Vt[x1l][x2l][x3i] = 0.0;
   
   // Systematic velocity: 
   int N_nodes_vs = atmos_model->get_N_nodes_vs();
-  fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
-  fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
-  atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h, 0);
+  if (N_nodes_vs){
+    fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
+    fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
+    atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h, 0);
+    delete[](vs_nodes_tau+1);
+    delete[](vs_nodes_vs+1);
+  }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      Vz[x1l][x2l][x3i] = 0.0;
 
   // Magnetic field:
-  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
-  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
-  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
 
   int N_nodes_B = atmos_model->get_N_nodes_B();
-  fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
-  fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
-  int N_nodes_theta = atmos_model->get_N_nodes_theta();
-  fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
-  fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
-  int N_nodes_phi = atmos_model->get_N_nodes_phi();
-  fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
-  fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();
-  
-  atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h, 0);
-  atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h, 0);
-  atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h, 0);
-
-  if (N_nodes_B && N_nodes_theta && N_nodes_phi){
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
-      By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
-      Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
-    }
+  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
+    
+  if (N_nodes_B){
+    fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
+    fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
+    atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h, 0);
+    delete[](B_nodes_tau+1);
+    delete[](B_nodes_B+1);
   }
+  else 
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      B[x3i] = 0.0; 
 
-  // We do not need the nodes any more.
-  delete[](temp_nodes_tau+1);
-  delete[](temp_nodes_temp+1);
-  delete[](vt_nodes_tau+1);
-  delete[](vt_nodes_vt+1);
-  delete[](vs_nodes_tau+1);
-  delete[](vs_nodes_vs+1);
-  delete[](B_nodes_tau+1);
-  delete[](B_nodes_B+1);
-  delete[](theta_nodes_tau+1);
-  delete[](theta_nodes_theta+1);
-  delete[](phi_nodes_tau+1);
-  delete[](phi_nodes_phi+1);
+  
+  int N_nodes_theta = atmos_model->get_N_nodes_theta();
+  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
+    
+  if (N_nodes_theta){
+    fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
+    fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
+    atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h, 0);
+    delete[](theta_nodes_tau+1);
+    delete[](theta_nodes_theta+1);
+  }
+  else
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      theta[x3i] = TINY;
+
+
+  int N_nodes_phi = atmos_model->get_N_nodes_phi();
+  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
+
+  if (N_nodes_phi){
+    fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
+    fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();    
+    atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h, 0);
+    delete[](phi_nodes_tau+1);
+    delete[](phi_nodes_phi+1);
+  }
+  else
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      phi[x3i] = TINY;
+ 
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
+    By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
+    Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
+  }
   delete[](B+x3l);
   delete[](theta+x3l);
   delete[](phi+x3l);
-  delete[](logtau+x3l);
 
+  delete[](logtau+x3l);
   return 0;
 }
 

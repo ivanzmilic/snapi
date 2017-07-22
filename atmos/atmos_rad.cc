@@ -29,7 +29,7 @@ fp_t ****atmosphere::transform(fp_t ***v1,fp_t ***v2,fp_t ***v3,fp_t theta,fp_t 
   fp_t *p1=v1[ll1][ll2]+ll3,*p2=v2[ll1][ll2]+ll3,*p3=v3[ll1][ll2]+ll3;
   fp_t *mg=vp[1][ll1][ll2]+ll3,*in=vp[2][ll1][ll2]+ll3,*az=vp[3][ll1][ll2]+ll3;
   
-  // Keep in mind that theta is actually pi-theta which we suaually use
+  // Keep in mind that theta is actually pi-theta which we uaually use
   fp_t cp=cos(phi),sp=sin(phi),ct=cos(pi-theta),st=sin(pi-theta);
   
   for(int32_t i=0;i<nn;++i){
@@ -40,10 +40,7 @@ fp_t ****atmosphere::transform(fp_t ***v1,fp_t ***v2,fp_t ***v3,fp_t theta,fp_t 
     fp_t newB_x = ct*cp*p1[i] + sp*p2[i] - st*cp*p3[i];
     fp_t newB_y = -ct*sp*p1[i] + cp*p2[i] + st*sp*p3[i];
     fp_t newB_z = st*p1[i] + ct*p3[i];
-    //printf("%e %e %e \n", p1[i], p2[i], p3[i]);
-    //printf("%e %e %e \n", newB_x, newB_y, newB_z);
-    //exit(1);
-
+    
     in[i] = acos(newB_z/mg[i]) * 180.0/pi;
     az[i] = atan(newB_y/newB_x)* 180.0/pi;
 

@@ -18,12 +18,9 @@
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
-  
   // Perform LM fitting and return the best fitting spectrum
+  
   // First extract the spectrum from the observation:
-
-  //clock_t start = clock();
-
   fp_t ** S_to_fit = spectrum_to_fit->get_S_to_fit(1,1);
   int nlambda = spectrum_to_fit->get_n_lambda_to_fit();
   fp_t * lambda = spectrum_to_fit->get_lambda_to_fit();
@@ -55,7 +52,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   }
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
-
   for (int l=1;l<=nlambda;++l)
    noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
   
@@ -66,24 +62,27 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int N_parameters = model_to_fit->get_N_nodes_total();
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
-
-  for (iter=1;iter<=MAX_ITER;++iter){
+  //model_to_fit->print();
   
+  for (iter=1;iter<=MAX_ITER;++iter){
+
     if (corrected){
       
-      // These quantities are only re-computed if the model has been modified:
-      
+      // These quantities are only re-computed if the model has been modified:    
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
       
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       
-      //clock_t cp1 = clock();
-      //printf("Elapsed time up to responses: %f \n",double(cp1-start)/CLOCKS_PER_SEC);
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);    
+      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);
       
-      //clock_t cp2 = clock();
-      //printf("Time spent on the responses: %f \n",double(cp2-start)/CLOCKS_PER_SEC);
-      
+      /*FILE * rout = fopen("response_od.dat","w");
+      for (int l=1;l<=nlambda;++l){
+        for (int i=1;i<=N_parameters;++i)
+          fprintf(rout,"%e %e ",derivatives_to_parameters[i][l][1],derivatives_to_parameters[i][l][4]);
+        fprintf(rout,"\n");
+      }
+      fclose(rout);*/
+
       current_obs->add_scattered_light(0.04);
       current_obs->spectral_convolve(50*1E-11,1,1);
       convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,50*1E-11);   
@@ -98,12 +97,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf = stokes_to_fit[s-1];
-        // this weighting part is super weird. Do we do it this way? Sounds ad-hoc 
         residual[(l-1)*n_stokes_to_fit+s] = S_to_fit[stf][l] - S_current[stf][l]; 
-    
         metric += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
           *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
-
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
     }
     // Check if fit is good enough:
@@ -122,15 +118,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
     }
 
-    /*FILE * test_output = fopen("jacobian.txt","w");
-    for (int i=1;i<=N_parameters;++i) 
-      for (int l=1;l<=nlambda;++l) 
-        for (int s=1;s<=n_stokes_to_fit;++s){
-          int stf = stokes_to_fit[s-1];
-            fprintf(test_output,"%e \n",J[(l-1)*n_stokes_to_fit+s][i]);
-          }
-    fclose(test_output);*/
-    
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     
@@ -139,40 +126,23 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-    //printf("Corrections..\n");
-    //for (int i = 1;i<=N_parameters;++i)
-      //printf("%d %f \n", i, correction[i]);
-
-
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
-    //printf("Model corrected\n");
-    //test_model->print();
     build_from_nodes(test_model);
-    //printf("Atmosphere built\n");
-
-    //clock_t cp3 = clock();
-    //printf("Elapsed time up to evaluation: %f \n",double(cp3-start)/CLOCKS_PER_SEC);
-      
+    // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-
-    //clock_t cp4 = clock();
-      //printf("Time spent on evaluation: %f \n",double(cp4-cp3)/CLOCKS_PER_SEC);
-      
     reference_obs->add_scattered_light(0.04);
     reference_obs->spectral_convolve(50*1E-11,1,1);  
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
-    // Compute new chi sq
     fp_t metric_reference = 0.0;
     for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf=stokes_to_fit[s-1];
         metric_reference += (S_to_fit[stf][l] - S_reference[stf][l]) * (S_to_fit[stf][l] - S_reference[stf][l])
          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
-       }
-    
+    }
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
       lm_parameter /= 10.0;
@@ -196,7 +166,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       del_ft2dim(S_current,1,4,1,nlambda);
     }
 
-    //printf("atmos::atmos_fit : iteration %d done.\n",iter);
     delete[](residual+1);
     delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
@@ -208,18 +177,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](correction+1);
     metric = 0.0;
 
-    //clock_t cp5 = clock();
-    //printf("Elapsed time until the end of the loop: %f \n",double(cp5-start)/CLOCKS_PER_SEC);
-      
     if (to_break)
       break;
   }
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
-
   //model_to_fit->print();
-  
-  
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
@@ -234,7 +197,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
   obs_to_return->add_scattered_light(0.04);
   obs_to_return->spectral_convolve(50*1E-11,1,1);
-  //obs_to_return->write("spectrum_fitted.dat",io,1,1);
       
   delete[](lambda+1);
   return obs_to_return;
@@ -873,7 +835,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
 
- 
   observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model);
   
   del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
@@ -881,6 +842,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   return o;
   
  }
+
+ // ===============================================================================================
 
  /////////////////////
  // OLD:::::
