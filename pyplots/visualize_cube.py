@@ -48,8 +48,8 @@ obs_cube = b["data"]
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
 
-l = np.loadtxt(input_lambdaf,unpack=True)
-wvl = l[1]*1E8
+#l = np.loadtxt(input_lambdaf,unpack=True)
+#wvl = l[1]*1E8
 
 print atmospheres.shape
 
@@ -71,8 +71,8 @@ for i in range(0,1):
 		
 		plt.subplot(312)
 
-		plt.plot(wvl,fitted_cube[i,j,3,:],label='Fitted')
-		plt.plot(wvl,obs_cube[j,i,3,:],label='Observed')
+		plt.plot(fitted_cube[i,j,3,:],label='Fitted')
+		plt.plot(obs_cube[j,i,3,:],label='Observed')
 
 		#V_weak_field = np.gradient(obs_cube[j,i,0,:])/np.gradient(wvl)
 		#B_los = parameters[5,i,j]*np.cos(parameters[6,i,j])
@@ -116,17 +116,17 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,1,2,3]
-T_nodes_tau = [-3.0,-1.4,-0.6]
+T_nodes_tau = [-4.0,-2.4,-1.2,0.0]
 #vt_nodes = [5]
-vs_nodes = [4]
-vs_nodes_tau = [0]
-B_nodes = [5]
-B_nodes_tau = [0]
-theta_nodes = [6]
-phi_nodes = [7]
+vs_nodes = [4,5,6]
+vs_nodes_tau = [-4.0,-2.8,-1.0]
+B_nodes = [7,8,9]
+B_nodes_tau = [-3.5,-2.0,-1.0]
+theta_nodes = [10]
+phi_nodes = [11]
 
 panelsx=8
-panelsy=3
+panelsy=4
 
 #pre-determined wavelengths
 l_core_Na = 837-l_offset
@@ -134,10 +134,10 @@ l_core_Fe = 505-l_offset
 l_core_Ni = 523-l_offset
 l_c       = 655-l_offset
 
-Tmap = 'Greys'
+Tmap = 'hot'
 Vmap = 'coolwarm'
 Bmap = 'coolwarm'
-Imap = 'Greys'
+Imap = 'hot'
 Pmap = 'Spectral'
 Dmap = 'coolwarm'
 
@@ -146,7 +146,7 @@ plt.cla()
 
 plt.figure(figsize=[5*panelsx, 5*panelsy])
 
-intstart = 1 #row where we intensity starts
+intstart = 2 #row where we intensity starts
 
 #Nodes panels:
 #Row1&2: Temperature and microturbulentce
@@ -172,14 +172,27 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Systematic velocity at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 
+s = np.copy(B_nodes)
 for i in range(B_nodes[0],B_nodes[-1]+1):
 	parameters[i] *= np.cos(parameters[theta_nodes[0]])
-	s = 3.0*np.std(parameters[i])
+	s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
+
+
+for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.subplot(panelsy,panelsx,i+1)
-	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-s,vmax=s)
+	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-max(s),vmax=max(s))
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 
+#Add B gradient if possible:
+
+#B_grad = (parameters[B_nodes[0]]-parameters[B_nodes[1]])
+#m = np.mean(B_grad)
+#s = np.std(B_grad)
+#plt.subplot(panelsy,panelsx,8)
+#plt.imshow(B_grad,origin='lower',cmap='coolwarm',vmin=m-3*s,vmax=m+3*s)
+#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+#plt.title('$\mathrm{B\,[Gauss]}$ difference')
 
 
 # Right hand side panels:
@@ -297,10 +310,10 @@ if (l_core_Na >= 0):
 
 
 #STOKES SIGNAL:
-
+V_shift = -15
 if (l_core_Na >= 0):
 
-	V = obs_cube[:,:,3,l_core_Na+15].transpose()/obs_cube[:,:,0,l_c].transpose()
+	V = obs_cube[:,:,3,l_core_Na+V_shift].transpose()/obs_cube[:,:,0,l_c].transpose()
 	m = np.mean(V)
 	s = np.std(V)
 	
@@ -309,7 +322,7 @@ if (l_core_Na >= 0):
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Na Stokes V')
 
-	V = fitted_cube[:,:,3,l_core_Na+15]/obs_cube[:,:,0,l_c]
+	V = fitted_cube[:,:,3,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+8)
 	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s,cmap=Pmap)

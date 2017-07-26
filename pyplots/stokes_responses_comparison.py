@@ -95,9 +95,9 @@ wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 h = h[0,:,0]
-h/= 1E5
+#h/= 1E5
 
-hmax = 1300.0
+hmax = -5
 hmin = h[-1]
 
 #yname = '$\log\,\\tau_{500}$'
