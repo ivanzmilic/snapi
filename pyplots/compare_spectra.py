@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.ndimage.filters as flt
 import sys
 
+
 file1 = sys.argv[1]
 file2 = sys.argv[2]
 output = sys.argv[3]
@@ -38,13 +39,16 @@ lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
 plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = file1)
-plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
+if (file1 != file2):
+	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
+	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])
 #plt.xlim([5892,5894])
 plt.ylim([0,1.2])
+plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 #plt.ylim([0,1E14])
 plt.xlabel("$\lambda [\AA]$")
 plt.ylabel("Normalized Intensity")
-plt.legend()
+
 plt.savefig(output)

@@ -17,10 +17,11 @@ an_conv = np.zeros(dims)
 
 an[-1] = np.cos(an[-1])
 
+an[7:10] = np.abs(an[7:10])
+an[10] = -np.pi 
+
 for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],5)
 	an_conv[i] = filters.gaussian_filter(an[i],sigma)
 
-an[-1] = np.arccos(an[-1])
-	
 pyana.fzwrite(sys.argv[2]+'_'+file_in,an_conv,0,'bla')

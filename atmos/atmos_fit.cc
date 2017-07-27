@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-2
+#define DELTA 1E-3
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -39,7 +39,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 8.0; // weights for Stokes parameters
   int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
   for (int s=0;s<4;++s) 
     if (ws[s]) 
@@ -103,13 +103,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
     }
     // Check if fit is good enough:
-    if (metric < 1.0){
+    /*if (metric < 1.0){
       delete[](residual+1);
       del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
       delete current_obs;
       del_ft2dim(S_current,1,4,1,nlambda);
       break;
-    }
+    }*/
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
     for (int i=1;i<=N_parameters;++i) 
       for (int l=1;l<=nlambda;++l) 

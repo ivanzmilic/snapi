@@ -845,7 +845,8 @@ int model::correct(fp_t * correction){
     if (vt_nodes_vt[i] > 5E5) vt_nodes_vt[i] = 5E5; // highest possible vt
   }
   for (int i=1;i<=N_nodes_B;++i){
-    if (fabs(B_nodes_B[i]) > 4000.0) B_nodes_B[i] = 4000.0 * B_nodes_B[i]/fabs(B_nodes_B[i]); // highest possible B
+    if (B_nodes_B[i] < 0.0) B_nodes_B[i] = fabs(B_nodes_B[i]);
+    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0; // Highest possible B
   }
   return 0;
 }

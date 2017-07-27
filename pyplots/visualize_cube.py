@@ -86,8 +86,7 @@ for i in range(0,1):
 		plt.ylim(-2.5E13,4E13)
 		plt.legend()
 		
-		
-
+	
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
 
@@ -116,14 +115,13 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,1,2,3]
-T_nodes_tau = [-4.0,-2.4,-1.2,0.0]
+T_nodes_tau = [-3.5,-2.1,-1.0,0.0]
 #vt_nodes = [5]
 vs_nodes = [4,5,6]
-vs_nodes_tau = [-4.0,-2.8,-1.0]
+vs_nodes_tau = [-3.5,-2.2,-1.0]
 B_nodes = [7,8,9]
-B_nodes_tau = [-3.5,-2.0,-1.0]
+B_nodes_tau = [-3.5,-2.2,-1.0]
 theta_nodes = [10]
-phi_nodes = [11]
 
 panelsx=8
 panelsy=4
@@ -146,7 +144,7 @@ plt.cla()
 
 plt.figure(figsize=[5*panelsx, 5*panelsy])
 
-intstart = 2 #row where we intensity starts
+intstart = 2 #row where plotting the intensity starts
 
 #Nodes panels:
 #Row1&2: Temperature and microturbulentce
@@ -166,9 +164,13 @@ for i in range(T_nodes[0],T_nodes[-1]+1):
 #	plt.title('Microturbulent velocity')
 
 for i in range(vs_nodes[0],vs_nodes[-1]+1):
+
 	parameters[i] /= 1E5
+	m = np.mean(parameters[i])
+	s = np.std(parameters[i])
+
 	plt.subplot(panelsy,panelsx,i+1)
-	plt.imshow(parameters[i],origin='lower',cmap=Vmap)
+	plt.imshow(parameters[i],origin='lower',cmap=Vmap,vmin=-5*s,vmax=5*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Systematic velocity at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 
@@ -303,19 +305,15 @@ if (l_core_Na >= 0):
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Na D1 intensity difference')
 
-
-
-
-
-
-
 #STOKES SIGNAL:
 V_shift = -15
 if (l_core_Na >= 0):
 
 	V = obs_cube[:,:,3,l_core_Na+V_shift].transpose()/obs_cube[:,:,0,l_c].transpose()
 	m = np.mean(V)
+	m =0.0
 	s = np.std(V)
+	s = 0.03
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+7)
 	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s,cmap=Pmap)
