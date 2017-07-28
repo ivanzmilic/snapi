@@ -185,6 +185,7 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
           //printf("Z = %d j = %d l = %d \n",Z, j_qn[i][l], l_qn[i][l]);
 
           flags[i][l]=0;
+          
           bf[i][l]=bf_new(ee[i][l],ip[i],j[i][l],i+1,cfg->ion[i]->level[l]->bf,io_in);
         }else{ // no levels specified
           ee[i][l]=0.0;

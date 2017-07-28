@@ -164,19 +164,18 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   // unpolarized intensity. It can compute the derivatives of populations and number densities
   // analyticaly or numerically, but the final computation of perturbation is computed analyticaly.
 
-  clock_t begin=clock();
-
   boundary_condition_for_rt = -1;
   popsetup(); // setup
 
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);// all atoms now have pointer to this atmosphere
 
-  if(tau_grid) compute_op_referent_derivative();
+  if(tau_grid){ 
+    compute_op_referent();
+    compute_op_referent_derivative();
+  }
   
   nltepops();
-  clock_t cp0=clock();
-  //printf("Time spent on nlte solution = %f \n",double(cp0-begin)/CLOCKS_PER_SEC);
   respsetup();
   ne_lte_derivatives();
   
@@ -212,12 +211,9 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   fp_t******** op_pert = ft8dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t******* em_pert = ft7dim(1,nlambda,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
-  clock_t cp1 = clock();
-  //printf("Time until op/em pert = %f \n",double(cp1-begin)/CLOCKS_PER_SEC);
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
-  clock_t cp2 = clock();
-  //printf("Time spent on op/em pert = %f \n",double(cp2-cp1)/CLOCKS_PER_SEC);
   
+
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
     for (int l=1;l<=nlambda;++l){
@@ -232,8 +228,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     atm_resp_to_parameters =  input_model->get_response_to_parameters();
     N_parameters = input_model->get_N_nodes_total();
   }
-  clock_t cp3 = clock();
-  //printf("Time elapsed until formal solution(s)=%f \n",double(cp3-cp2)/CLOCKS_PER_SEC);
   
   for(int l=1;l<=nlambda;++l){
 

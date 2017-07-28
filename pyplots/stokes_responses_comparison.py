@@ -26,6 +26,7 @@ lambda_m = max(spectrum[:,0]-0.2)
 mpl.rcParams['font.size'] = 10
 
 
+
 #plt.ion()
 plt.figure(1)
 plt.clf()
@@ -97,7 +98,7 @@ suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 h = h[0,:,0]
 #h/= 1E5
 
-hmax = -5
+hmax = -4.0
 hmin = h[-1]
 
 #yname = '$\log\,\\tau_{500}$'
@@ -114,6 +115,7 @@ for p in range(0,7):
 
 	#then plot the stuff
 	if (rn_file != ra_file):
+
 		plt.figure(1)
 		plt.clf()
 		plt.cla()
@@ -160,6 +162,7 @@ for p in range(0,7):
 
 	#then plot the stuff
 	plt.figure(1);
+	plt.figure(figsize=[10, 6])
 	plt.clf()
 	plt.cla()
 	plt.subplot(221)

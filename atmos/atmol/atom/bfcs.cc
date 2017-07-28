@@ -29,7 +29,9 @@ class bfcs *bf_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io)
 
 class bfcs *bf_new(fp_t ee,fp_t ip,fp_t n,fp_t Z,struct bfcfg *cfg,io_class &io_in)
 {
-  //if(!cfg) return new tabbf(BFCS_TYPE_NONE);
+  if(!cfg){
+    return new bfcs(BFCS_TYPE_NONE);
+  } 
   if(!strcmp(cfg->bftype,"HYD")){ 
     //printf("HYD \n");
     return new hybf(ee,ip,n,Z,cfg->l,cfg->v,cfg->n,io_in);
@@ -42,7 +44,6 @@ class bfcs *bf_new(fp_t ee,fp_t ip,fp_t n,fp_t Z,struct bfcfg *cfg,io_class &io_
     return new phbf(ee,ip,n,Z,cfg->l,cfg->v,cfg->n,io_in);
     //printf("PHY! \n");
   }
-  //return new bfcs(BFCS_TYPE_NONE);
 }
 
 bfcs::bfcs(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io)
