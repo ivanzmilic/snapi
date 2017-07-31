@@ -29,7 +29,7 @@ a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
 
-l_offset = 495
+l_offset = 650
 
 #Here we read the parameter map.
 pin = pyana.fzread(input_nodes)
@@ -51,7 +51,19 @@ atmospheres = a_read["data"]
 #l = np.loadtxt(input_lambdaf,unpack=True)
 #wvl = l[1]*1E8
 
-print atmospheres.shape
+#print atmospheres.shape
+
+print parameters[:,0,0]
+print parameters[5,0,0]*np.cos(parameters[7,0,0])
+print parameters[6,0,0]*np.cos(parameters[7,0,0])
+
+V_weak_field = np.copy(obs_cube[:,:,3,:])
+
+for i in range(0,NX):
+	for j in range(0,NY):
+		V_weak_field[i,j,:] = np.gradient(fitted_cube[i,j,0,:])/0.00972312703583
+		B_los = parameters[5,i,j]*np.cos(parameters[7,i,j])
+		V_weak_field[i,j,:] *= -4.697E-13*1.33*(5896.0**2.0)*B_los
 
 #These are debug lines
 for i in range(0,1):
@@ -74,17 +86,10 @@ for i in range(0,1):
 		plt.plot(fitted_cube[i,j,3,:],label='Fitted')
 		plt.plot(obs_cube[j,i,3,:],label='Observed')
 
-		#V_weak_field = np.gradient(obs_cube[j,i,0,:])/np.gradient(wvl)
-		#B_los = parameters[5,i,j]*np.cos(parameters[6,i,j])
-		#print B_los
-		#V_weak_field *= -4.697E-13*1.33*(np.mean(wvl)**2.0)*B_los
-		#plt.plot(wvl,V_weak_field,label='WF from obs')
-		#V_weak_field = np.gradient(fitted_cube[i,j,0,:])/np.gradient(wvl)
-		#V_weak_field *= -4.697E-13*1.33*(np.mean(wvl)**2.0)*B_los
-		#plt.plot(wvl,V_weak_field,label='WF from fit')
-		plt.xlim([5895,5897])
-		plt.ylim(-2.5E13,4E13)
-		plt.legend()
+		plt.plot(V_weak_field[i][j],label='WF from obs')
+		#plt.xlim([5895,5897])
+		#plt.ylim(-2.5E13,2.5E13)
+		#plt.legend()
 		
 	
 		plt.xlabel("Wavelength")
@@ -114,14 +119,14 @@ plt.cla()
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2,3]
-T_nodes_tau = [-3.5,-2.1,-1.0,0.0]
+T_nodes = [0,1,2]
+T_nodes_tau = [-3.0,-1.0,0.0]
 #vt_nodes = [5]
-vs_nodes = [4,5,6]
-vs_nodes_tau = [-3.5,-2.2,-1.0]
-B_nodes = [7,8,9]
-B_nodes_tau = [-3.5,-2.2,-1.0]
-theta_nodes = [10]
+vs_nodes = [3,4]
+vs_nodes_tau = [-3.5,-1.0]
+B_nodes = [5,6]
+B_nodes_tau = [-3.5,-1.0]
+theta_nodes = [7]
 
 panelsx=8
 panelsy=4
@@ -310,22 +315,33 @@ V_shift = -15
 if (l_core_Na >= 0):
 
 	V = obs_cube[:,:,3,l_core_Na+V_shift].transpose()/obs_cube[:,:,0,l_c].transpose()
-	m = np.mean(V)
-	m =0.0
-	s = np.std(V)
-	s = 0.03
+	
+	V = np.copy(obs_cube[:,:,3,:])
+	V = np.sum(V,axis=2)
+	V = V.transpose()
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+7)
-	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s,cmap=Pmap)
+	plt.imshow(V,origin='lower',cmap=Pmap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Na Stokes V')
 
 	V = fitted_cube[:,:,3,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
+
+	V = np.copy(fitted_cube[:,:,3,:])
+	V = np.sum(V,axis=2)
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+8)
-	plt.imshow(V,origin='lower',vmin=m-3*s,vmax=m+3*s,cmap=Pmap)
+	plt.imshow(V,origin='lower',cmap=Pmap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Na Stokes V')
+
+	V = V_weak_field[:,:,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
+	
+	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
+	plt.imshow(V,origin='lower',cmap=Pmap)
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.title('Weak field Na Stokes V')
+
 
 
 plt.tight_layout()
