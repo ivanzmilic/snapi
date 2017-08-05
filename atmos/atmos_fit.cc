@@ -39,7 +39,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
   int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
   for (int s=0;s<4;++s) 
     if (ws[s]) 

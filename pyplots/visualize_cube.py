@@ -66,8 +66,8 @@ for i in range(0,NX):
 		V_weak_field[i,j,:] *= -4.697E-13*1.33*(5896.0**2.0)*B_los
 
 #These are debug lines
-for i in range(0,1):
-	for j in range (0,1):
+for i in range(0,10):
+	for j in range (0,10):
 		plt.clf()
 		plt.cla()
 		plt.figure(figsize=[6,10])
@@ -101,6 +101,7 @@ for i in range(0,1):
 		plt.ylabel("$\mathrm{T\,[K]}$")
 		plt.tight_layout()
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
+		plt.close('all')
 
 
 		
@@ -315,30 +316,35 @@ V_shift = -15
 if (l_core_Na >= 0):
 
 	V = obs_cube[:,:,3,l_core_Na+V_shift].transpose()/obs_cube[:,:,0,l_c].transpose()
+	V[np.isnan(V)] = 0
 	
-	V = np.copy(obs_cube[:,:,3,:])
-	V = np.sum(V,axis=2)
-	V = V.transpose()
+	#V = np.copy(obs_cube[:,:,3,:])
+	#l = 165
+	#r = 250
+	#V = np.sum(V[:,:,l:r],axis=2)
+	#V = V.transpose()
+	u = 5*np.std(V)
+	d = -5*np.std(V)
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+7)
-	plt.imshow(V,origin='lower',cmap=Pmap)
+	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Na Stokes V')
 
 	V = fitted_cube[:,:,3,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
 
-	V = np.copy(fitted_cube[:,:,3,:])
-	V = np.sum(V,axis=2)
+	#V = np.copy(fitted_cube[:,:,3,:])
+	#V = np.sum(V[:,:,l:r],axis=2)
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+8)
-	plt.imshow(V,origin='lower',cmap=Pmap)
+	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Na Stokes V')
 
 	V = V_weak_field[:,:,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
-	plt.imshow(V,origin='lower',cmap=Pmap)
+	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Weak field Na Stokes V')
 
