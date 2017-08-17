@@ -45,6 +45,8 @@ NL = dims[3]
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
+print obs_cube[-1,:,0,837-l_offset+15]
+
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
 
@@ -65,19 +67,19 @@ for i in range(0,NX):
 		B_los = parameters[5,i,j]*np.cos(parameters[7,i,j])
 		V_weak_field[i,j,:] *= -4.697E-13*1.33*(5896.0**2.0)*B_los
 
-#These are debug lines
-for i in range(0,10):
-	for j in range (0,10):
+#Here we pring out some profiles
+xl=1
+xh=1
+yl=1
+yh=1
+for i in range(xl,xh+1):
+	for j in range (yl,yh+1):
 		plt.clf()
 		plt.cla()
 		plt.figure(figsize=[6,10])
 		plt.subplot(311)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
-		#plt.axvspan(669-l_offset,690-l_offset, alpha=0.5, color='red') #masks
-		#plt.axvspan(725-l_offset,770-l_offset, alpha=0.5, color='red')
-		#plt.axvspan(870-l_offset,905-l_offset, alpha=0.5, color='red')
-		#plt.axvspan(915-l_offset,945-l_offset, alpha=0.5, color='red')
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		
@@ -87,11 +89,7 @@ for i in range(0,10):
 		plt.plot(obs_cube[j,i,3,:],label='Observed')
 
 		plt.plot(V_weak_field[i][j],label='WF from obs')
-		#plt.xlim([5895,5897])
-		#plt.ylim(-2.5E13,2.5E13)
-		#plt.legend()
 		
-	
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
 
@@ -293,9 +291,13 @@ if (l_core_Na >= 0):
 	i_conto /= i_c_mean
 	sigma = np.std(i_conto)
 
+	#print i_conto[:,-1]
+
 	plt.subplot(panelsy,panelsx,intstart*panelsx+7)
 	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
 	plt.title('Observed Na D1 line core')
 
 	i_contf = np.copy(fitted_cube[:,:,0,l_core_Na+15])
@@ -304,6 +306,8 @@ if (l_core_Na >= 0):
 	plt.subplot(panelsy,panelsx,intstart*panelsx+8)
 	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
 	plt.title('Fitted Na D1 line core')
 
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+4)

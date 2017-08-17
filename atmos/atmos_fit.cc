@@ -75,14 +75,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);
       
-      /*FILE * rout = fopen("response_od.dat","w");
-      for (int l=1;l<=nlambda;++l){
-        for (int i=1;i<=N_parameters;++i)
-          fprintf(rout,"%e %e ",derivatives_to_parameters[i][l][1],derivatives_to_parameters[i][l][4]);
-        fprintf(rout,"\n");
-      }
-      fclose(rout);*/
-
       current_obs->add_scattered_light(0.04);
       current_obs->spectral_convolve(50*1E-11,1,1);
       convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,50*1E-11);   
@@ -102,14 +94,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
     }
-    // Check if fit is good enough:
-    /*if (metric < 1.0){
-      delete[](residual+1);
-      del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
-      delete current_obs;
-      del_ft2dim(S_current,1,4,1,nlambda);
-      break;
-    }*/
+  
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
     for (int i=1;i<=N_parameters;++i) 
       for (int l=1;l<=nlambda;++l) 
