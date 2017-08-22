@@ -293,50 +293,50 @@ int job_class::start(void)
       else 
       	io->msg(IOL_INFO,"master::job : we are synthesizing the data : %s \n",ji.return_model[o]);
       
-       if (ji.to_invert[o]){ // We are going to invert something.
-         io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
-         int n1,n2,n3,n4;
+      if (ji.to_invert[o]){ // We are going to invert something.
+        io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
+        int n1,n2,n3,n4;
 
-         fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
-         test = transpose(test,n1,n2,n3,n4);
-         io->msg(IOL_INFO,"master::job : cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
-         io->msg(IOL_INFO,"master::job : input lambda array has %d wavelengths. \n", ji.nlambda[o]);
+        fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
+        test = transpose(test,n1,n2,n3,n4);
+        io->msg(IOL_INFO,"master::job : cube properly read. dimensions: nx = %d ny = %d ns = %d  nlambda = %d \n",n4,n3,n2,n1);
+        io->msg(IOL_INFO,"master::job : input lambda array has %d wavelengths. \n", ji.nlambda[o]);
 
-         obs = new observable(n4,n3,n2,n1);
-         obs->set(test);
-         obs->setlambda(ji.lambda[o]-1);
-         obs->setmask(ji.weights[o]-1);
-         del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
-         obs->normalize();
+        obs = new observable(n4,n3,n2,n1);
+        obs->set(test);
+        obs->setlambda(ji.lambda[o]-1);
+        obs->setmask(ji.weights[o]-1);
+        del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+        obs->normalize();
 
+       	io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d; yrange = %d, %d; lrange = %d, %d \n",
+        	ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
 
-         io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d; yrange = %d, %d; lrange = %d, %d \n",
-          ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
+       	nx=ji.xh[o]-ji.xl[o]+1;
+       	ny=ji.yh[o]-ji.yl[o]+1;
+       	int nl=ji.lh[o]-ji.ll[o]+1;
+       	// Save normalized:
+       	class observable *obs_to_fit=obs->extract(ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
+       	fp_t **** S_to_save = obs_to_fit->get_S();
+       
+        write_file((char*)"mag_test.f0",S_to_save,nx,ny,4,nl,*io);
+        del_ft4dim(S_to_save,1,nx,1,ny,1,4,1,nl);
+        delete obs;
+        // Write down lambda
+        FILE * output = fopen("lambda_to_fit.dat","w");
+        fp_t * lambda_to_fit = obs_to_fit->get_lambda();
+        for (int l=1;l<=obs_to_fit->get_n_lambda();++l)
+        	fprintf(output,"%d %1.10e \n", l,lambda_to_fit[l]);
+        fclose(output);
+        delete[](lambda_to_fit+1);
 
-         nx=ji.xh[o]-ji.xl[o]+1;
-         ny=ji.yh[o]-ji.yl[o]+1;
-         int nl=ji.lh[o]-ji.ll[o]+1;
-          // Save normalized:
-         class observable *obs_to_fit=obs->extract(ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
-         fp_t **** S_to_save = obs_to_fit->get_S();
-         write_file((char*)"mag_test.f0",S_to_save,nx,ny,4,nl,*io);
-         del_ft4dim(S_to_save,1,nx,1,ny,1,4,1,nl);
-         delete obs;
-         // Write down lambda
-         FILE * output = fopen("lambda_to_fit.dat","w");
-         fp_t * lambda_to_fit = obs_to_fit->get_lambda();
-         for (int l=1;l<=obs_to_fit->get_n_lambda();++l)
-           fprintf(output,"%d %1.10e \n", l,lambda_to_fit[l]);
-         fclose(output);
-         delete[](lambda_to_fit+1);
-
-         // If model is supplied as input file, read it from there. For the moment we are only concerned with first model
-         fp_t *** model_cube = 0;
-         if (ji.read_model_from_file[0]){
-          int nn1,nn2,nn3;
+        // If model is supplied as input file, read it from there. For the moment we are only concerned with first model
+        fp_t *** model_cube = 0;
+        if (ji.read_model_from_file[0]){
+        	int nn1,nn2,nn3;
           model_cube = read_file(ji.input_models[0],nn1,nn2,nn3,*io);
           io->msg(IOL_INFO,"master::job:: modelcube sucessfully read from file and will be used.\n");
-         }
+        }
                   
          for(int x=1,n=1;x<=nx;++x)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece

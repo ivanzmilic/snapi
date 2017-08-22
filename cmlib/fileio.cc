@@ -6,6 +6,7 @@
 #include "fits_read.h"
 #include "fileio.h"
 #include "obs.h"
+#include <stdlib.h>
 
 fp_t *float32to64conv(byte *data,int n_elem)
 {

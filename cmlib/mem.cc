@@ -872,8 +872,6 @@ fp_t ***** ft5dim(int x1l, int x1h, int x2l, int x2h, int x3l, int x3h, int x4l,
   
   int nx1 = x1h - x1l+1, nx2 = x2h - x2l+1, nx3 = x3h - x3l+1, nx4 = x4h - x4l+1, nx5 = x5h - x5l+1; 
 
- // printf("%d %d %d %d %d \n", nx1, nx2, nx3, nx4, nx5);
-
   fp_t ***** p;
 
   // Milic: Let's make sure that I understand this :) 
@@ -932,8 +930,6 @@ fp_t ***** ft5dim(int x1l, int x1h, int x2l, int x2h, int x3l, int x3h, int x4l,
       for (int x3 = x3l; x3<=x3h; ++x3)
         for (int x4 = x4l+1; x4<=x4h; ++x4)
           p[x1][x2][x3][x4] = p[x1][x2][x3][x4-1] + nx5;
-
-  //printf ("Hush-hush. \n What what? \n");
 
   return p;
 }

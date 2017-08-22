@@ -1,4 +1,5 @@
 import numpy as np 
+import scipy.signal as sgn
 import matplotlib.pyplot as plt 
 import sys 
 import pyana 
@@ -45,7 +46,10 @@ NL = dims[3]
 b = pyana.fzread(input_obs)
 obs_cube = b["data"]
 
-print obs_cube[-1,:,0,837-l_offset+15]
+#print obs_cube[-1,:,0,837-l_offset+15]
+#print fitted_cube[:,-1,0,837-l_offset+15]
+#print parameters[0,:,-1]
+
 
 a_read = pyana.fzread(input_atmos)
 atmospheres = a_read["data"]
@@ -55,9 +59,9 @@ atmospheres = a_read["data"]
 
 #print atmospheres.shape
 
-print parameters[:,0,0]
-print parameters[5,0,0]*np.cos(parameters[7,0,0])
-print parameters[6,0,0]*np.cos(parameters[7,0,0])
+#print parameters[:,0,0]
+#print parameters[5,0,0]*np.cos(parameters[7,0,0])
+#print parameters[6,0,0]*np.cos(parameters[7,0,0])
 
 V_weak_field = np.copy(obs_cube[:,:,3,:])
 
@@ -67,36 +71,73 @@ for i in range(0,NX):
 		B_los = parameters[5,i,j]*np.cos(parameters[7,i,j])
 		V_weak_field[i,j,:] *= -4.697E-13*1.33*(5896.0**2.0)*B_los
 
+V_total_obs = np.zeros([NX,NY])
+V_total_fit = np.zeros([NX,NY])
+
+for i in range(0,NX):
+	for j in range (0,NY):
+		line_center = np.where(fitted_cube[i,j,0] == min(fitted_cube[i,j,0]))
+		lc = line_center[0]
+		V_flipped = np.copy(fitted_cube[i,j,3])
+		V_flipped[lc:] *= -1.0
+		V_total_fit[i,j] = np.sum(V_flipped)
+		V_flipped = np.copy(obs_cube[j,i,3])
+		V_flipped[lc:] *= -1.0
+		V_total_obs[i,j] = np.sum(V_flipped)
+
+#Prepare chisq:
+chisq = np.zeros([NX,NY])
+
+noise = np.mean(obs_cube[:,:,0,0]) * 1E-3
+
+for i in range(0,NX):
+	for j in range (0,NY):
+		residual = (fitted_cube[i,j,0,:]-obs_cube[j,i,0,:]) + 9.0*(fitted_cube[i,j,0,:]-obs_cube[j,i,0,:])
+		residual /= noise
+		chisq[i,j] = np.sum(residual*residual)
+		
+
+
+
 #Here we pring out some profiles
-xl=1
-xh=1
-yl=1
-yh=1
+xl=0
+xh=0
+yl=0
+yh=0
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[6,10])
-		plt.subplot(311)
+		plt.figure(figsize=[12,10])
+		plt.subplot(321)
 		plt.plot(fitted_cube[i,j,0,:])
 		plt.plot(obs_cube[j,i,0,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
 		
-		plt.subplot(312)
+		plt.subplot(322)
 
 		plt.plot(fitted_cube[i,j,3,:],label='Fitted')
 		plt.plot(obs_cube[j,i,3,:],label='Observed')
 
-		plt.plot(V_weak_field[i][j],label='WF from obs')
+		#plt.plot(V_weak_field[i][j],label='WF from obs')
 		
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes V")
 
-		plt.subplot(313)
+		plt.subplot(323)
 		plt.plot(atmospheres[i,j,0],atmospheres[i,j,1])
 		plt.xlabel("$\log \\tau$")
 		plt.ylabel("$\mathrm{T\,[K]}$")
+		plt.subplot(324)
+		plt.plot(atmospheres[i,j,0],atmospheres[i,j,3]/1E5)
+		plt.xlabel("$\log \\tau$")
+		plt.ylabel("$v_{los}$")
+		plt.subplot(325)
+		plt.plot(atmospheres[i,j,0],atmospheres[i,j,4])
+		plt.xlabel("$\log \\tau$")
+		plt.ylabel("B [Gauss]")
+		
 		plt.tight_layout()
 		plt.savefig("test_cube"+str(i)+"_"+str(j)+".png")
 		plt.close('all')
@@ -119,13 +160,13 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,1,2]
-T_nodes_tau = [-3.0,-1.0,0.0]
+T_nodes_tau = [-2.5,-1.0,0.0]
 #vt_nodes = [5]
-vs_nodes = [3,4]
-vs_nodes_tau = [-3.5,-1.0]
-B_nodes = [5,6]
-B_nodes_tau = [-3.5,-1.0]
-theta_nodes = [7]
+vs_nodes = [3,4,5]
+vs_nodes_tau = [-3.0,-1.5,0.0]
+B_nodes = [6,7,8]
+B_nodes_tau = [-3.0,-1.5,0.0]
+theta_nodes = [9]
 
 panelsx=8
 panelsy=4
@@ -189,6 +230,13 @@ for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-max(s),vmax=max(s))
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
+
+m = np.mean(chisq)
+s = np.std(chisq)
+plt.subplot(panelsy,panelsx,B_nodes[-1]+2)
+plt.imshow(chisq,origin='lower',cmap=Tmap,vmin=0,vmax=m+5*s)
+plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+plt.title('$\chi^2$')
 
 #Add B gradient if possible:
 
@@ -310,9 +358,11 @@ if (l_core_Na >= 0):
 	plt.ylim([0,NX-1])
 	plt.title('Fitted Na D1 line core')
 
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+4)
+	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+2)
 	plt.imshow((i_conto-i_contf)/i_conto,origin='lower',cmap=Dmap,vmin=-0.2,vmax=0.2)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
 	plt.title('Na D1 intensity difference')
 
 #STOKES SIGNAL:
@@ -322,35 +372,61 @@ if (l_core_Na >= 0):
 	V = obs_cube[:,:,3,l_core_Na+V_shift].transpose()/obs_cube[:,:,0,l_c].transpose()
 	V[np.isnan(V)] = 0
 	
-	#V = np.copy(obs_cube[:,:,3,:])
-	#l = 165
-	#r = 250
-	#V = np.sum(V[:,:,l:r],axis=2)
-	#V = V.transpose()
 	u = 5*np.std(V)
 	d = -5*np.std(V)
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+7)
 	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
 	plt.title('Observed Na Stokes V')
 
 	V = fitted_cube[:,:,3,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
-
-	#V = np.copy(fitted_cube[:,:,3,:])
-	#V = np.sum(V[:,:,l:r],axis=2)
 	
 	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+8)
 	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
 	plt.title('Fitted Na Stokes V')
 
 	V = V_weak_field[:,:,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
 	
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
-	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
+	#plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
+	#plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
+	#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	#plt.xlim([0,NY-1])
+	#plt.ylim([0,NX-1])
+	#plt.title('Weak field Na Stokes V')
+
+
+	u = 5*np.std(V_total_obs)
+	d = -5*np.std(V_total_obs)
+	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+5)
+	plt.imshow(V_total_obs,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-	plt.title('Weak field Na Stokes V')
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
+	plt.title('Total Stokes V - obs')
+
+	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
+	plt.imshow(V_total_fit,origin='lower',cmap=Pmap,vmin=d, vmax=u)
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
+	plt.title('Total Stokes V - fit')
+
+	rel_diff = (V_total_fit-V_total_obs)/np.amin(V_total_obs)
+	print np.std(rel_diff) 
+	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+4)
+	plt.imshow(rel_diff,origin='lower',cmap=Pmap,vmin=-0.5, vmax=0.5)
+	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+	plt.xlim([0,NY-1])
+	plt.ylim([0,NX-1])
+	plt.title('Total Stokes V - relative difference')
+
+
 
 
 

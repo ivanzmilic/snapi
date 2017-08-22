@@ -17,8 +17,8 @@ an_conv = np.zeros(dims)
 
 an[-1] = np.cos(an[-1])
 
-an[7:10] = np.abs(an[7:10])
-an[10] = -np.pi 
+an[6:9] *= an[-1]
+an[9] = 0.01 
 
 for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],5)

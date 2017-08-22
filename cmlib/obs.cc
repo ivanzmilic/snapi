@@ -1,6 +1,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <stdlib.h>
 #include "types.h"
 #include "io.h"
 #include "fileio.h"
@@ -61,7 +62,6 @@ int32_t observable::size(io_class &io_in){
 
 int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
 
-  //printf("Packing : %d %d %d %d \n",nx,ny,ns,nlambda);
   int32_t offs=::pack(buf,nx,do_swap);
   offs+=::pack(buf+offs,ny,do_swap);
   offs+=::pack(buf+offs,ns,do_swap);
@@ -80,8 +80,6 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::unpack(buf+offs,ny,do_swap);
   offs+=::unpack(buf+offs,ns,do_swap);
   offs+=::unpack(buf+offs,nlambda,do_swap);
-
-  //printf("Unpacking : %d %d %d %d \n",nx,ny,ns,nlambda);
 
   lambda = new fp_t [nlambda]-1;
   mask = new fp_t [nlambda]-1;
@@ -121,11 +119,6 @@ void observable::set(fp_t * S_in, fp_t lambda_in, int i, int j, int l){
 
 void observable::set(fp_t **** S_in){
   memcpy(S[1][1][1]+1,S_in[1][1][1]+1,nx*ny*ns*nlambda*sizeof(fp_t));
-  /*for (int i=1;i<=nx;++i)
-    for (int j=1;j<=ny;++j)
-      for (int s=1;s<=ns;++s)
-        for (int l=1;l<=nlambda;++l)
-          S[i][j][s][l] = S_in[l][s][j][i];*/
 }
 
 void observable::setlambda(fp_t * lambda_in){
@@ -161,7 +154,6 @@ fp_t ** observable::get_S_to_fit(int i, int j){
   S_copy = ft2dim(1,ns,1,nl_to_fit);
   int lf=1;
   for (int l=1;l<=nlambda;++l){
-    //printf("%d %f %e \n",l,mask[l],S[i][j][1][l]);
     if (mask[l]){
       for (int s=1;s<=4;++s) S_copy[s][lf] = S[i][j][s][l];
       ++lf;
@@ -234,6 +226,7 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
       for (int s=1;s<=ns;++s)
         for (int l=ll;l<=lh;++l)
           S_small[i-xl+1][j-yl+1][s][l-ll+1] = S[i][j][s][l];
+
   obs_small->set(S_small);
 
   del_ft4dim(S_small,1,nxn,1,nyn,1,ns,1,nln);
@@ -312,16 +305,6 @@ void observable::spectral_convolve(fp_t width, int i, int j){
 // ================================================================================================
 
 void observable::read(char * name, io_class &io){
-
-  // First, delete the arrays if they exist:
-  //if (S)
-  //  del_ft4dim(S,1,nx,1,ny,1,ns,1,nlambda);
-
-  // WHY DOES THIS NOT WORK?
-  //int n1,n2,n3,n4;
-  //fp_t **** test = read_file(name,n1,n2,n3,n4,io);
-  //S = read_file(name,nx,ny,ns,nlambda,io);
-  //printf("I read an array with dimensions : %d %d %d %d \n", nx,ny,ns,nlambda);
 }
 
 observable * obs_new(int nx,int ny,int ns,int nlambda){

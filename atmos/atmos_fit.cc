@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-2
+#define DELTA 1E-3
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -33,7 +33,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 30;
+  int MAX_ITER = 50;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
