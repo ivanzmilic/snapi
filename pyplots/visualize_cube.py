@@ -100,10 +100,10 @@ for i in range(0,NX):
 
 
 #Here we pring out some profiles
-xl=0
-xh=0
-yl=0
-yh=0
+xl=21
+xh=30
+yl=21
+yh=30
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
