@@ -40,6 +40,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int to_break = 0;
   
   fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t scattered_light = 0.12;
+  fp_t spectral_broadening = 150E-11; // in mA
   int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
   for (int s=0;s<4;++s) 
     if (ws[s]) 
@@ -75,9 +77,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);
       
-      current_obs->add_scattered_light(0.04);
-      current_obs->spectral_convolve(50*1E-11,1,1);
-      convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,50*1E-11);   
+      current_obs->add_scattered_light(scattered_light);
+      current_obs->spectral_convolve(spectral_broadening,1,1);
+      convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       S_current = current_obs->get_S(1,1);
     }
     
@@ -117,8 +119,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    reference_obs->add_scattered_light(0.04);
-    reference_obs->spectral_convolve(50*1E-11,1,1);  
+    reference_obs->add_scattered_light(scattered_light);
+    reference_obs->spectral_convolve(spectral_broadening,1,1);  
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
     fp_t metric_reference = 0.0;
@@ -180,8 +182,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
-  obs_to_return->add_scattered_light(0.04);
-  obs_to_return->spectral_convolve(50*1E-11,1,1);
+  obs_to_return->add_scattered_light(scattered_light);
+  obs_to_return->spectral_convolve(spectral_broadening,1,1);
       
   delete[](lambda+1);
   return obs_to_return;

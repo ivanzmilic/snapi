@@ -39,8 +39,8 @@ temp = parameters.shape
 NN = temp[0] #total number of nodes
 
 #keep in mind this one is transposed:
-NY = dims[0]
-NX = dims[1]
+NY = dims[1]
+NX = dims[0]
 NL = dims[3]
 
 b = pyana.fzread(input_obs)
@@ -63,7 +63,7 @@ atmospheres = a_read["data"]
 #print parameters[5,0,0]*np.cos(parameters[7,0,0])
 #print parameters[6,0,0]*np.cos(parameters[7,0,0])
 
-V_weak_field = np.copy(obs_cube[:,:,3,:])
+V_weak_field = np.copy(fitted_cube[:,:,3,:])
 
 for i in range(0,NX):
 	for j in range(0,NY):
@@ -88,22 +88,22 @@ for i in range(0,NX):
 #Prepare chisq:
 chisq = np.zeros([NX,NY])
 
-noise = np.mean(obs_cube[:,:,0,0]) * 1E-3
+noise = 3E12
 
 for i in range(0,NX):
 	for j in range (0,NY):
-		residual = (fitted_cube[i,j,0,:]-obs_cube[j,i,0,:]) + 9.0*(fitted_cube[i,j,0,:]-obs_cube[j,i,0,:])
-		residual /= noise
-		chisq[i,j] = np.sum(residual*residual)
+		chisq[i,j] = np.sum(((fitted_cube[i,j,0,:]-obs_cube[j,i,0,:])/noise)**2.0)
+		chisq[i,j] += 4.0*np.sum(((fitted_cube[i,j,3,:]-obs_cube[j,i,3,:])/noise)**2.0)
+		chisq[i,j] /= (NL-9.0)
 		
 
 
 
 #Here we pring out some profiles
-xl=21
-xh=30
-yl=21
-yh=30
+xl=0
+xh=-1
+yl=0
+yh=-1
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
@@ -159,17 +159,17 @@ plt.cla()
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2]
-T_nodes_tau = [-2.5,-1.0,0.0]
+T_nodes = [0,1,2,3]
+T_nodes_tau = [-2.4,-1.6,-0.8,0.0]
 #vt_nodes = [5]
-vs_nodes = [3,4,5]
-vs_nodes_tau = [-3.0,-1.5,0.0]
-B_nodes = [6,7,8]
-B_nodes_tau = [-3.0,-1.5,0.0]
-theta_nodes = [9]
+vs_nodes = [4,5,6]
+vs_nodes_tau = [-3.5,-2.0,-0.5]
+B_nodes = [7,8,9]
+B_nodes_tau = [-3.5,-2.0,-0.5]
+theta_nodes = [10]
 
-panelsx=8
-panelsy=4
+panelsx=4
+panelsy=7
 
 #pre-determined wavelengths
 l_core_Na = 837-l_offset
@@ -187,9 +187,10 @@ Dmap = 'coolwarm'
 plt.clf()
 plt.cla()
 
-plt.figure(figsize=[5*panelsx, 5*panelsy])
+defsize = 3
+plt.figure(figsize=[defsize*3*panelsx, defsize*panelsy])
 
-intstart = 2 #row where plotting the intensity starts
+intstart = 4 #row where plotting the intensity starts
 
 #Nodes panels:
 #Row1&2: Temperature and microturbulentce
@@ -210,12 +211,12 @@ for i in range(T_nodes[0],T_nodes[-1]+1):
 
 for i in range(vs_nodes[0],vs_nodes[-1]+1):
 
-	parameters[i] /= 1E5
+	parameters[i] /= -1E5
 	m = np.mean(parameters[i])
 	s = np.std(parameters[i])
 
 	plt.subplot(panelsy,panelsx,i+1)
-	plt.imshow(parameters[i],origin='lower',cmap=Vmap,vmin=-5*s,vmax=5*s)
+	plt.imshow(parameters[i],origin='lower',cmap=Vmap,vmin=-3*s,vmax=3*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Systematic velocity at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 
@@ -226,17 +227,17 @@ for i in range(B_nodes[0],B_nodes[-1]+1):
 
 
 for i in range(B_nodes[0],B_nodes[-1]+1):
-	plt.subplot(panelsy,panelsx,i+1)
-	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-max(s),vmax=max(s))
+	plt.subplot(panelsy,panelsx,i+2)
+	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-1500,vmax=1500)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 
-m = np.mean(chisq)
-s = np.std(chisq)
-plt.subplot(panelsy,panelsx,B_nodes[-1]+2)
-plt.imshow(chisq,origin='lower',cmap=Tmap,vmin=0,vmax=m+5*s)
-plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('$\chi^2$')
+#m = np.mean(chisq)
+#s = np.std(chisq)
+#plt.subplot(panelsy,panelsx,B_nodes[-1]+2)
+#plt.imshow(chisq,origin='lower',cmap=Tmap,vmin=0,vmax=m+5*s)
+#plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
+#plt.title('$\chi^2_{\mathrm{reduced}}$')
 
 #Add B gradient if possible:
 
@@ -271,7 +272,7 @@ if (l_c >= 0):
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted continuum intensity')
 
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+1)
+	plt.subplot(panelsy,panelsx,(intstart)*panelsx+3)
 	plt.imshow((i_conto-i_contf)/i_conto,origin='lower',cmap=Dmap,vmin=-0.2,vmax=0.2)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Continuum intensity difference')
@@ -341,7 +342,7 @@ if (l_core_Na >= 0):
 
 	#print i_conto[:,-1]
 
-	plt.subplot(panelsy,panelsx,intstart*panelsx+7)
+	plt.subplot(panelsy,panelsx,intstart*panelsx+5)
 	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
@@ -351,14 +352,14 @@ if (l_core_Na >= 0):
 	i_contf = np.copy(fitted_cube[:,:,0,l_core_Na+15])
 	i_contf /= i_c_mean
 
-	plt.subplot(panelsy,panelsx,intstart*panelsx+8)
+	plt.subplot(panelsy,panelsx,intstart*panelsx+6)
 	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])
 	plt.title('Fitted Na D1 line core')
 
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+2)
+	plt.subplot(panelsy,panelsx,intstart*panelsx+7)
 	plt.imshow((i_conto-i_contf)/i_conto,origin='lower',cmap=Dmap,vmin=-0.2,vmax=0.2)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
@@ -375,23 +376,23 @@ if (l_core_Na >= 0):
 	u = 5*np.std(V)
 	d = -5*np.std(V)
 	
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+7)
+	plt.subplot(panelsy,panelsx,(intstart+2)*panelsx+1)
 	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])
 	plt.title('Observed Na Stokes V')
 
-	V = fitted_cube[:,:,3,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
+	V = fitted_cube[:,:,3,l_core_Na+V_shift]/fitted_cube[:,:,0,l_c]
 	
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+8)
+	plt.subplot(panelsy,panelsx,(intstart+2)*panelsx+2)
 	plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])
 	plt.title('Fitted Na Stokes V')
 
-	V = V_weak_field[:,:,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
+	#V = V_weak_field[:,:,l_core_Na+V_shift]/obs_cube[:,:,0,l_c]
 	
 	#plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
 	#plt.imshow(V,origin='lower',cmap=Pmap,vmin=d, vmax=u)
@@ -403,14 +404,14 @@ if (l_core_Na >= 0):
 
 	u = 5*np.std(V_total_obs)
 	d = -5*np.std(V_total_obs)
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+5)
+	plt.subplot(panelsy,panelsx,(intstart+2)*panelsx+3)
 	plt.imshow(V_total_obs,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])
 	plt.title('Total Stokes V - obs')
 
-	plt.subplot(panelsy,panelsx,(intstart+1)*panelsx+6)
+	plt.subplot(panelsy,panelsx,(intstart+2)*panelsx+4)
 	plt.imshow(V_total_fit,origin='lower',cmap=Pmap,vmin=d, vmax=u)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])

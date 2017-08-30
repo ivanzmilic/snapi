@@ -252,7 +252,8 @@ void observable::normalize(){
   // Normalizes already arranged observable to physical units. 
   // This is quite ad-hoc at the moment and we will need this as an input.
 
-  fp_t qs = 3.275E14; // quiet sun reference continuum
+  //fp_t qs = 3.275E14; // quiet sun reference continuum @ Sodium line
+  fp_t qs = 4.434E13; // At 1.5 micron
 
   // Average continuum in all field, assume here for simplicity that point #30 is continuum:
   int l_ref = 30;
@@ -262,6 +263,7 @@ void observable::normalize(){
       mean += S[i][j][1][30] / nx / ny;
 
   mean = 28.69; // We did the above externally. Probably we neeed a way to do this better.
+  mean = 100876.0;
   fp_t scale = qs/mean;
 
   for (int i=1;i<=nx;++i)
@@ -282,7 +284,8 @@ void observable::add_scattered_light(fp_t ratio){
   // scattered light at some point. 
   // Also quite ad hoc
 
-  fp_t qs = 3.275E14; // quiet sun reference continuum
+  //fp_t qs = 3.275E14; // quiet sun reference continuum
+  fp_t qs = 4.434E13; // At 1.5 micron
 
   // This is performed AFTER the normalization:
 
