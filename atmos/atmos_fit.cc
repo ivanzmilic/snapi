@@ -39,7 +39,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
   fp_t scattered_light = 0.12;
   fp_t spectral_broadening = 150E-11; // in mA
   int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
@@ -107,11 +107,22 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
+
+    //for (int i=1;i<=N_parameters;++i){
+    //  for (int j=1;j<=N_parameters;++j)
+    //    printf("%e   ", JTJ[i][j]);
+    //  printf("\n");
+   ///}
+
     
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
+
+    for (int i=1;i<=N_parameters;++i)
+      fprintf(stderr,"%d %e\n",i,correction[i]);
+    exit(1);
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);

@@ -68,7 +68,7 @@ V_weak_field = np.copy(fitted_cube[:,:,3,:])
 for i in range(0,NX):
 	for j in range(0,NY):
 		V_weak_field[i,j,:] = np.gradient(fitted_cube[i,j,0,:])/0.00972312703583
-		B_los = parameters[5,i,j]*np.cos(parameters[7,i,j])
+		B_los = 0.0#parameters[5,i,j]*np.cos(parameters[4,i,j])
 		V_weak_field[i,j,:] *= -4.697E-13*1.33*(5896.0**2.0)*B_los
 
 V_total_obs = np.zeros([NX,NY])
@@ -101,9 +101,9 @@ for i in range(0,NX):
 
 #Here we pring out some profiles
 xl=0
-xh=-1
+xh=0
 yl=0
-yh=-1
+yh=0
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
