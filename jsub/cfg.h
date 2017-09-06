@@ -20,6 +20,11 @@ struct ocfg{                  // configuration per object ("color")
   fp_t * weight; // what are the weights for the fitting
   int return_model; // After inverting, should we return model? 
   int return_atmos; // After inverting, should we return full atmosphere?
+  fp_t scattered_light; // percentage of gray, scattered light in the image.
+  fp_t spectral_broadening; // spectral broadening due to the instrument
+  fp_t obs_qs; // observed quiet sun intensity (in observed units)
+  fp_t synth_qs; // quiet sun resulting from falc (or other) model
+
 //
   ocfg(char *odata,struct gcfg &gdata,io_class&);
   ~ocfg(void);

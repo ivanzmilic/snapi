@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-3
+#define DELTA 1E-2
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -33,15 +33,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 50;
+  int MAX_ITER = 30;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
-  fp_t scattered_light = 0.12;
-  fp_t spectral_broadening = 150E-11; // in mA
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t scattered_light = spectrum_to_fit->get_scattered_light();
+  fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
+  fp_t qs_level = spectrum_to_fit->get_synth_qs();
   int n_stokes_to_fit = 0; // A complicated piece of code to list what we want to fit
   for (int s=0;s<4;++s) 
     if (ws[s]) 
@@ -75,9 +76,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters);
-      
-      current_obs->add_scattered_light(scattered_light);
+      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters); 
+      current_obs->add_scattered_light(scattered_light,qs_level);
       current_obs->spectral_convolve(spectral_broadening,1,1);
       convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       S_current = current_obs->get_S(1,1);
@@ -120,9 +120,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-    for (int i=1;i<=N_parameters;++i)
-      fprintf(stderr,"%d %e\n",i,correction[i]);
-    exit(1);
+    //for (int i=1;i<=N_parameters;++i)
+    //  fprintf(stderr,"%d %e\n",i,correction[i]);
+    //exit(1);
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);
@@ -130,7 +130,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    reference_obs->add_scattered_light(scattered_light);
+    reference_obs->add_scattered_light(scattered_light,qs_level);
     reference_obs->spectral_convolve(spectral_broadening,1,1);  
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
@@ -193,7 +193,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
-  obs_to_return->add_scattered_light(scattered_light);
+  obs_to_return->add_scattered_light(scattered_light,qs_level);
   obs_to_return->spectral_convolve(spectral_broadening,1,1);
       
   delete[](lambda+1);

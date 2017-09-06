@@ -160,12 +160,12 @@ plt.cla()
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,1,2,3]
-T_nodes_tau = [-2.4,-1.6,-0.8,0.0]
+T_nodes_tau = [-2.6,-1.6,-0.7,0.0]
 #vt_nodes = [5]
 vs_nodes = [4,5,6]
-vs_nodes_tau = [-3.5,-2.0,-0.5]
+vs_nodes_tau = [-3.5,-1.7,-0.5]
 B_nodes = [7,8,9]
-B_nodes_tau = [-3.5,-2.0,-0.5]
+B_nodes_tau = [-3.5,-1.7,-0.5]
 theta_nodes = [10]
 
 panelsx=4
@@ -180,7 +180,7 @@ l_c       = 655-l_offset
 Tmap = 'hot'
 Vmap = 'coolwarm'
 Bmap = 'coolwarm'
-Imap = 'hot'
+Imap = 'gray'
 Pmap = 'Spectral'
 Dmap = 'coolwarm'
 
@@ -260,7 +260,7 @@ if (l_c >= 0):
 	sigma = np.std(i_conto)
 	
 	plt.subplot(panelsy,panelsx,intstart*panelsx+1)
-	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_conto,origin='lower',vmin = 1.0-2*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed continuum intensity')
 
@@ -268,7 +268,7 @@ if (l_c >= 0):
 	i_contf /= i_c_mean
 
 	plt.subplot(panelsy,panelsx,intstart*panelsx+2)
-	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_contf,origin='lower',vmin = 1.0-2*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted continuum intensity')
 
@@ -287,7 +287,7 @@ if (l_core_Fe >= 0):
 	sigma = np.std(i_conto)
 
 	plt.subplot(panelsy,panelsx,intstart*panelsx+3)
-	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Observed Fe line core')
 
@@ -295,7 +295,7 @@ if (l_core_Fe >= 0):
 	i_contf /= i_c_mean
 
 	plt.subplot(panelsy,panelsx,intstart*panelsx+4)
-	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Fitted Fe line core')
 
@@ -343,7 +343,7 @@ if (l_core_Na >= 0):
 	#print i_conto[:,-1]
 
 	plt.subplot(panelsy,panelsx,intstart*panelsx+5)
-	plt.imshow(i_conto,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_conto,origin='lower',vmin = 1.0-2*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])
@@ -353,7 +353,7 @@ if (l_core_Na >= 0):
 	i_contf /= i_c_mean
 
 	plt.subplot(panelsy,panelsx,intstart*panelsx+6)
-	plt.imshow(i_contf,origin='lower',vmin = 1.0-3*sigma,vmax = 1.0+3*sigma,cmap=Imap)
+	plt.imshow(i_contf,origin='lower',vmin = 1.0-2*sigma,vmax = 1.0+2*sigma,cmap=Imap)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.xlim([0,NY-1])
 	plt.ylim([0,NX-1])

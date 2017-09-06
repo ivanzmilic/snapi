@@ -47,6 +47,10 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,yh=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,ll=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,lh=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,scattered_light=new fp_t [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,spectral_broadening=new fp_t [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,obs_qs=new fp_t [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,synth_qs=new fp_t [no],0,no-1,swap_endian);
     lambda=new fp_t* [no];
     weights = new fp_t*[no];
     name=new char* [no];
@@ -135,7 +139,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   usize+=sizeof(int);                            // no
   if(no){
-    usize+=2*no*sizeof(fp_t);                    // az,el
+    usize+=6*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth
     usize+=no*sizeof(int);                       // nlambda
     usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
@@ -176,6 +180,10 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,yh,0,no-1,swap_endian);
     offs+=pack(data+offs,ll,0,no-1,swap_endian);
     offs+=pack(data+offs,lh,0,no-1,swap_endian);
+    offs+=pack(data+offs,scattered_light,0,no-1,swap_endian);
+    offs+=pack(data+offs,spectral_broadening,0,no-1,swap_endian);
+    offs+=pack(data+offs,obs_qs,0,no-1,swap_endian);
+    offs+=pack(data+offs,synth_qs,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);

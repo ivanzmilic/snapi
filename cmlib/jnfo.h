@@ -33,6 +33,10 @@ struct jnfo{
   int *xl,*xh,*yl,*yh,*ll,*lh;
   int *return_model; //whether to return model as the result of the inversion
   int *return_atmos; //whether to return full atmosphere as the result of the inversion
+  fp_t *scattered_light; // amount of scattered gray light
+  fp_t *spectral_broadening; // spectral broaddening due to the instrument
+  fp_t *obs_qs; // observed quiet sun level
+  fp_t *synth_qs; // calculated qs level (in physical units)
   fp_t **weights; // weights for fitting, allows us to mask out some things 
 //
   uid_t uid;

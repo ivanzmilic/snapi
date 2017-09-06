@@ -193,12 +193,7 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
-
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i)
-    //for (int j=1;j<=7;++j)
-    //offs+=::pack(buf+offs,*(pp[i][j]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
-//
+ //
   return offs;
 }
 

@@ -9,6 +9,7 @@
 class observable{
   fp_t ****S,*lambda,*mask; // Stokes vector (N_stokes components x N_wvl)
   int ns,nlambda,nx,ny;
+  fp_t scattered_light,spectral_broadening,obs_qs,synth_qs;
 public:
   observable(int ns_in);
   observable(int ns_in, int nx_in, int ny_in);
@@ -28,6 +29,7 @@ public:
   void set(fp_t ****);
   void setlambda(fp_t *);
   void setmask(fp_t*);
+  void set_inv_parameters(fp_t,fp_t,fp_t,fp_t);
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);
@@ -42,9 +44,13 @@ public:
   int get_n_lambda_to_fit();
   int get_nx();
   int get_ny();
+  fp_t get_scattered_light();
+  fp_t get_spectral_broadening();
+  fp_t get_synth_qs();
+
 
   void normalize();
-  void add_scattered_light(fp_t);
+  void add_scattered_light(fp_t, fp_t);
   void spectral_convolve(fp_t,int,int);
 };
 

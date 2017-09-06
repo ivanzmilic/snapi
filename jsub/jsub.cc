@@ -74,6 +74,10 @@ int main(int argc,char *argv[])
   ji.xl = new int [ji.no]; ji.xh = new int [ji.no];
   ji.yl = new int [ji.no]; ji.yh = new int [ji.no];
   ji.ll = new int [ji.no]; ji.lh = new int [ji.no];
+  ji.scattered_light = new fp_t [ji.no];
+  ji.spectral_broadening = new fp_t [ji.no];
+  ji.obs_qs = new fp_t [ji.no];
+  ji.synth_qs = new fp_t [ji.no];
   ji.lambda=new fp_t* [ji.no];
   ji.weights=new fp_t* [ji.no];
   ji.name=new char* [ji.no];
@@ -87,7 +91,16 @@ int main(int argc,char *argv[])
     ji.xl[o] = cfg.obs[o]->xl;ji.xh[o] = cfg.obs[o]->xh;
     ji.yl[o] = cfg.obs[o]->yl;ji.yh[o] = cfg.obs[o]->yh;
     ji.ll[o] = cfg.obs[o]->ll;ji.lh[o] = cfg.obs[o]->lh;
+    if (ji.to_invert[o]){
+      ji.scattered_light[o] = cfg.obs[o]->scattered_light;
+      ji.spectral_broadening[o] = cfg.obs[o]->spectral_broadening;
+      ji.obs_qs[o] = cfg.obs[o]->obs_qs;
+      ji.synth_qs[o] = cfg.obs[o]->synth_qs;
+    }
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
+    if (ji.return_model[0]){
+
+    }
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
     ji.weights[o] = new fp_t [ji.nlambda[o]];
     if (cfg.obs[o]->weight)

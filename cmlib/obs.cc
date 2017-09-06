@@ -55,6 +55,7 @@ observable::~observable(void){
 int32_t observable::size(io_class &io_in){
 
   int32_t sz = 4*sizeof(int); // ns, nlambda,nx,ny
+  sz += 4*sizeof(fp_t); // scattered light, 
   sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
   return sz;
@@ -66,7 +67,10 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,ny,do_swap);
   offs+=::pack(buf+offs,ns,do_swap);
   offs+=::pack(buf+offs,nlambda,do_swap);
-  
+  offs+=::pack(buf+offs,scattered_light,do_swap);
+  offs+=::pack(buf+offs,spectral_broadening,do_swap);
+  offs+=::pack(buf+offs,obs_qs,do_swap);
+  offs+=::pack(buf+offs,synth_qs,do_swap);
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
@@ -80,6 +84,10 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::unpack(buf+offs,ny,do_swap);
   offs+=::unpack(buf+offs,ns,do_swap);
   offs+=::unpack(buf+offs,nlambda,do_swap);
+  offs+=::unpack(buf+offs,scattered_light,do_swap);
+  offs+=::unpack(buf+offs,spectral_broadening,do_swap);
+  offs+=::unpack(buf+offs,obs_qs,do_swap);
+  offs+=::unpack(buf+offs,synth_qs,do_swap);
 
   lambda = new fp_t [nlambda]-1;
   mask = new fp_t [nlambda]-1;
@@ -127,6 +135,13 @@ void observable::setlambda(fp_t * lambda_in){
 
 void observable::setmask(fp_t * mask_in){
   memcpy(mask+1,mask_in+1,nlambda*sizeof(fp_t));
+}
+
+void observable::set_inv_parameters(fp_t sl_in, fp_t sb_in, fp_t obs_qs_in, fp_t synth_qs_in){
+  scattered_light = sl_in;
+  spectral_broadening = sb_in;
+  obs_qs = obs_qs_in;
+  synth_qs = synth_qs_in;
 }
 
 fp_t **** observable::get_S(){
@@ -182,10 +197,8 @@ fp_t * observable::get_lambda_to_fit(){
       lambda_copy[lf] = lambda[l];
       ++lf;
     }
-
   return lambda_copy;
 }
-
 
 fp_t * observable::get_mask(){
   fp_t * mask_copy;
@@ -202,6 +215,18 @@ int observable::get_n_lambda_to_fit(){
   for (int l=1;l<=nlambda;++l)
     if (mask[l]) nl+=1;
   return nl;
+}
+
+fp_t observable::get_scattered_light(){
+  return scattered_light;
+}
+
+fp_t observable::get_spectral_broadening(){
+  return spectral_broadening;
+}
+
+fp_t observable::get_synth_qs(){
+  return synth_qs;
 }
 
 void observable::write(const char *name,io_class &io,int i, int j)
@@ -236,6 +261,7 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
     lambda_small[l-ll+1] = lambda[l];
   obs_small->setlambda(lambda_small);
   delete[](lambda_small+1);
+  obs_small->set_inv_parameters(scattered_light,spectral_broadening,obs_qs,synth_qs);
 
   fp_t * mask_small = new fp_t [nln]-1;
   for (int l=ll;l<=lh;++l)
@@ -250,21 +276,8 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
 
 void observable::normalize(){
   // Normalizes already arranged observable to physical units. 
-  // This is quite ad-hoc at the moment and we will need this as an input.
-
-  //fp_t qs = 3.275E14; // quiet sun reference continuum @ Sodium line
-  fp_t qs = 4.434E13; // At 1.5 micron
-
-  // Average continuum in all field, assume here for simplicity that point #30 is continuum:
-  int l_ref = 30;
-  fp_t mean = 0.0;
-  for (int i=1;i<=nx;++i)
-    for (int j=1;j<=ny;++j)
-      mean += S[i][j][1][30] / nx / ny;
-
-  mean = 28.69; // We did the above externally. Probably we neeed a way to do this better.
-  mean = 100876.0;
-  fp_t scale = qs/mean;
+  
+  fp_t scale = synth_qs/obs_qs;
 
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
@@ -272,29 +285,25 @@ void observable::normalize(){
         S[i][j][1][l] *= scale;
         for (int s=2;s<=4;++s)
           S[i][j][s][l] *= S[i][j][1][l];
-      }
+  }
 }
 
 // ================================================================================================
 
-void observable::add_scattered_light(fp_t ratio){
+void observable::add_scattered_light(fp_t fraction, fp_t continuum_level){
 
   // Here we basically subtract the fixed ratio of scattered light from all the data. 
   // We DON't want to do this externally since maybe we will want to fit for
   // scattered light at some point. 
   // Also quite ad hoc
 
-  //fp_t qs = 3.275E14; // quiet sun reference continuum
-  fp_t qs = 4.434E13; // At 1.5 micron
-
   // This is performed AFTER the normalization:
 
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
       for (int l=1;l<=nlambda;++l){
-        S[i][j][1][l] += qs*ratio;
+        S[i][j][1][l] += fraction * continuum_level;
   } // wvl, spatial 
-
 }
 
 // ================================================================================================

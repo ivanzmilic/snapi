@@ -307,6 +307,7 @@ int job_class::start(void)
         obs->setlambda(ji.lambda[o]-1);
         obs->setmask(ji.weights[o]-1);
         del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
+        obs->set_inv_parameters(ji.scattered_light[o],ji.spectral_broadening[o],ji.obs_qs[o],ji.synth_qs[o]);
         obs->normalize();
 
        	io->msg(IOL_INFO,"master::job : inverting subfield with xrange = %d, %d; yrange = %d, %d; lrange = %d, %d \n",

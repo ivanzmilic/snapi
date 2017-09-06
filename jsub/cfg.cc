@@ -99,7 +99,27 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     get_number(tmp_str,tempfp);
     delete[] tmp_str;
     if (tempfp) return_atmos = 1;
-  }  
+  }
+  //
+  if (to_invert == 1){ // read inversion parameters only if we are in the invert mode
+    if(char *tmp_str=get_arg(odata,"SCATTERED_LIGHT",0)){
+      get_number(tmp_str,scattered_light);
+      delete[] tmp_str;
+    }else scattered_light = 0.0;//default
+    if(char *tmp_str=get_arg(odata,"SPECTRAL_BROADENING",0)){
+      get_number(tmp_str,spectral_broadening);
+      delete[] tmp_str;
+      spectral_broadening *= 1E-11;//convert to cm from mA
+    }else spectral_broadening = 30.0*1E-11;//default
+    if(char *tmp_str=get_arg(odata,"OBSERVED_CONTINUUM",0)){
+      get_number(tmp_str,obs_qs);
+      delete[] tmp_str;
+    } else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting observed continuum level\n",id);
+    if(char *tmp_str=get_arg(odata,"CGS_CONTINUUM",0)){
+      get_number(tmp_str,synth_qs);
+      delete[] tmp_str;
+    } else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting calculated continuum level\n",id);
+  }
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
     get_number(tmp_str,az);
