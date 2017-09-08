@@ -271,11 +271,12 @@ int job_class::start(void)
   io=new io_class(wd,lgfname,id_str,ji.uid,ji.gid,verb_level,time_stamping);
 //
   io->msg(IOL_INFO,"job ID = %s\n",id_str);
-
 //
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
+    printf("Atmosphere initialized\n");
+    exit(1);
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation

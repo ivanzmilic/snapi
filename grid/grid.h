@@ -23,6 +23,7 @@ public:
   virtual int32_t size(void);
   virtual int32_t pack(uint08_t*,uint08_t,io_class&);
   virtual int32_t unpack(uint08_t *,uint08_t,io_class&);
+  //virtual grid* extract(int i, int j, io_class&);
 //
 };
 

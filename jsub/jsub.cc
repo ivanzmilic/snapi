@@ -98,9 +98,6 @@ int main(int argc,char *argv[])
       ji.synth_qs[o] = cfg.obs[o]->synth_qs;
     }
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
-    if (ji.return_model[0]){
-
-    }
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
     ji.weights[o] = new fp_t [ji.nlambda[o]];
     if (cfg.obs[o]->weight)

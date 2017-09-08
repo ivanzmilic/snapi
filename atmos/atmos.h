@@ -30,9 +30,10 @@ struct typemap{
   uint08_t equals(const char *type_in){ return (strcmp(type_in,type_name))?0:type_code; };
 };
 
-#define ATMOS_TYPE_SPINOR  1
-#define ATMOS_TYPE_MHD     2
-#define ATMOS_TYPE_MURAM   3
+#define ATMOS_TYPE_SPINOR    1
+#define ATMOS_TYPE_SPINOR3D  4
+#define ATMOS_TYPE_MHD       2
+#define ATMOS_TYPE_MURAM     3
 
 #define ATMOS_GEOM_PP      1
 #define ATMOS_GEOM_2D      2
@@ -41,7 +42,7 @@ struct typemap{
 #define ATMOS_RTS_QSC      1
 #define ATMOS_RTS_BEZ      2
 
-#define FILETYPES {{"SPINOR",ATMOS_TYPE_SPINOR},{"MHD",ATMOS_TYPE_MHD},{"MuRAM",ATMOS_TYPE_MURAM},{0,0}}
+#define FILETYPES {{"SPINOR",ATMOS_TYPE_SPINOR},{"SPINOR3D",ATMOS_TYPE_SPINOR3D},{"MHD",ATMOS_TYPE_MHD},{"MuRAM",ATMOS_TYPE_MURAM},{0,0}}
 
 
 class atmosphere:public grid{
@@ -194,11 +195,15 @@ protected:
 // atmos_fio.cc: file I/O
   int08_t read_atmos(const char*,const char*,uint08_t,io_class*);
   int08_t read_spinor(const char*,const char*,io_class*);
+  int08_t read_spinor3d(const char*,const char*,io_class*);
   int08_t read_mhd(const char*,const char*,io_class*);
   int08_t read_muram(const char*,const char*,io_class*);
 public:
   atmosphere(acfg*,io_class&);
   atmosphere(uint08_t*,int32_t&,uint08_t,io_class&);
+
+  //virtual *atmosphere extract(int i, int j, io_class&);
+
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
   virtual ~atmosphere(void);

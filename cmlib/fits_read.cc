@@ -10,7 +10,7 @@
 
 int fits_data_type(const char *file_name,io_class &io)
 {
-  int FT2MFBDT[129];
+  /*int FT2MFBDT[129];
   FT2MFBDT[BYTE_IMG+64]=MFBD_I08T;
   FT2MFBDT[SHORT_IMG+64]=MFBD_I16T;
   FT2MFBDT[LONG_IMG+64]=MFBD_I32T;
@@ -20,19 +20,19 @@ int fits_data_type(const char *file_name,io_class &io)
   int tsz[]=MFBD_TYPE_SIZES;
 //
   int status=0;  /* MUST initialize status */
-  fitsfile *fptr;
+  /*fitsfile *fptr;
   fits_open_file(&fptr,file_name,READONLY,&status);
   int bitpix,nd;
   long naxes[10];
   fits_get_img_param(fptr,10,&bitpix,&nd,naxes,&status);
   int type=FT2MFBDT[bitpix+64];
   fits_close_file(fptr,&status);
-  return type;
+  return type;**/
 }
 
 byte *fits_read(char *file_name,int *&ds,int &nd,char *&header,int &type,io_class &io) // fzread subroutine	
 {
-  int FT2MFBDT[129];
+  /*int FT2MFBDT[129];
   FT2MFBDT[BYTE_IMG+64]=MFBD_I08T;
   FT2MFBDT[SHORT_IMG+64]=MFBD_I16T;
   FT2MFBDT[LONG_IMG+64]=MFBD_I32T;
@@ -43,7 +43,7 @@ byte *fits_read(char *file_name,int *&ds,int &nd,char *&header,int &type,io_clas
 //
   io.msg(IOL_INFO,"reading FITS file \"%s\"\n",file_name);
   int status=0;  /* MUST initialize status */
-  fitsfile *fptr;
+  /*fitsfile *fptr;
   fits_open_file(&fptr,file_name,READONLY,&status);
   int bitpix;
   long naxes[10];
@@ -66,5 +66,5 @@ byte *fits_read(char *file_name,int *&ds,int &nd,char *&header,int &type,io_clas
   fits_close_file(fptr,&status);
   fits_report_error(stderr,status);     // print out any error messages
   header=0;
-  return data; 
+  return data; */
 }

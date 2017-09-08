@@ -129,20 +129,13 @@ int08_t atmosphere::resize(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t 
 {
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int i=0;p[i];++i) if(*(p[i])) del_ft3dim(*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h); // ANOTHER PROBLEM HERE, INVESTIGATE THIS 
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i) if(*(pp[i])) del_ft4dim(*(pp[i]),1,7,x1l,x1h,x2l,x2h,x3l,x3h); // ANOTHER PROBLEM HERE, INVESTIGATE THIS 
-//
+  //
   grid::resize(x1l_in,x1h_in,x2l_in,x2h_in,x3l_in,x3h_in);
 //
   for(int i=0;p[i];++i){
     (*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
     memset((*(p[i]))[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   }
-  //for(int i=0;pp[i];++i){
-    //(*(pp[i]))=ft4dim(1,7,x1l,x1h,x2l,x2h,x3l,x3h);
-    //memset((*(pp[i]))[1][x1l][x2l]+x3l,0,7*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  //}
-//
   return 0;
 }
 
@@ -196,6 +189,83 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
  //
   return offs;
 }
+
+/*atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
+  
+  atmosphere * column;
+  uint08_t do_swap = 0;
+  grid * column_grid = grid::extract(i,j,io_in);
+
+  int32_t sz = column_grid::size();
+  sz += 
+  uint08_t *buf=new uint08_t [sz];
+
+  // We start by packing everything that we want to be in the small atmosphere:
+  int32_t offs=::pack(buf,gtype); // gtype is the same
+  offs+=::pack(buf+offs,rtstype); // rtype is the same 
+// grid...
+  offs+=grid::pack(buf+offs,do_swap,io_in); // <------ THIS IS NOT THE SAME, WE NEED A NEW GRID
+// local stuff
+  offs+=flags.pack(buf+offs,io_in); // flags are the same 
+//
+  offs+=::pack(buf+offs,id); // id is the same
+  offs+=::pack(buf+offs,fname); // fname can be the same, we will not init it any more
+  offs+=::pack(buf+offs,ftype); // ftype can also be the same
+//
+  offs+=::pack(buf+offs,natm,do_swap); // same
+  offs+=::pack(buf+offs,boundary_condition_for_rt,do_swap); // same
+  for(int a=0;a<natm;++a) offs+=atml[a]->pack(buf+offs,do_swap,io_in); //same
+
+  // make 1x1xNZ arrays for all the parameters and pack them up:
+  fp_t *** T_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(T_small[1][1]+x3l,T[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** rho_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(rho_small[1][1]+x3l,rho[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Nt_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Nt_small[1][1]+x3l,Nt[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Ne_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Ne_small[1][1]+x3l,Ne[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Bx_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Bx_small[1][1]+x3l,Bx[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** By_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(By_small[1][1]+x3l,By[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Bz_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Bz_small[1][1]+x3l,Bz[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Vx_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Vx_small[1][1]+x3l,Vx[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Vy_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Vy_small[1][1]+x3l,Vy[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Vz_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Vz_small[1][1]+x3l,Vz[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** Vt_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(Vt_small[1][1]+x3l,Vt[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** tau_referent_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(tau_referent_small[1][1]+x3l,tau_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+  fp_t *** op_referent_small = ft3dim(1,1,1,1,x3l,x3h);
+  memcpy(op_referent_small[1][1]+x3l,op_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+//
+  fp_t ****p[]={&T_small,&rho_small,&Nt_small,&Ne_small,&Bx_small,&By_small,&Bz_small,&Vx_small,
+    &Vy_small,&Vz_small,&Vt_small,&tau_referent_small,&op_referent_small,0};
+  if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
+    for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
+  del_ft3dim(T_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Nt_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Ne_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Bx_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(By_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Bz_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Vx_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Vy_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Vz_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(Vt_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(tau_referent_small,1,1,1,1,x3l,x3h);
+  del_ft3dim(op_referent_small,1,1,1,1,x3l,x3h);
+
+  colum = new atmosphere(buf,offs,0,io_in);
+
+  return 0;
+}*/
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {

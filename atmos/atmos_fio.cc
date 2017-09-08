@@ -5,6 +5,9 @@
 #include "io.h"
 #include "mem.h"
 #include "const.h"
+#include "ana_io.h"
+#include "fileio.h"
+#include "mathtools.h"
 
 #include "atmos.h"
 
@@ -12,6 +15,7 @@ int08_t atmosphere::read_atmos(const char *wd_in,const char *fname_in,uint08_t f
 {
   switch(ftype_in){
     case(ATMOS_TYPE_SPINOR): return read_spinor(wd_in,fname_in,io_in);
+    case(ATMOS_TYPE_SPINOR3D): return read_spinor3d(wd_in,fname_in,io_in);
     case(ATMOS_TYPE_MHD): return read_mhd(wd_in,fname_in,io_in);
     case(ATMOS_TYPE_MURAM): return read_muram(wd_in,fname_in,io_in);
   }
@@ -20,6 +24,7 @@ int08_t atmosphere::read_atmos(const char *wd_in,const char *fname_in,uint08_t f
 
 int08_t atmosphere::read_spinor(const char *wd,const char *filename,io_class *io_in)
 {
+
   char *path=new char [strlen(wd)+strlen(filename)+2];
   sprintf(path,"%s/%s",wd,filename);
   io_in->msg(IOL_INFO,"atmosphere::read_spinor: %s\n",path);
@@ -69,6 +74,56 @@ int08_t atmosphere::read_spinor(const char *wd,const char *filename,io_class *io
   io_in->msg(IOL_ERROR,"atmosphere::read_spinor: error opening file: %s\n",strerror(errno));
   delete[] path;
   return -1;
+}
+
+int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *io_in)
+{
+  char *path=new char [strlen(wd)+strlen(filename)+2];
+  sprintf(path,"%s/%s",wd,filename);
+  io_in->msg(IOL_INFO,"atmosphere::read_spinor3d: %s\n",path);
+  int32_t n1,n2,n3,n4;
+  fp_t **** atmoscube = read_file(path,n1,n2,n3,n4,*io_in);
+  atmoscube = transpose(atmoscube,n1,n2,n3,n4);
+  printf("%d %d %d %d \n",n1,n2,n3,n4);
+  int np = n4;
+  int nx = n3;
+  int ny = n2;
+  int nz = n1;
+  io_in->msg(IOL_INFO,"atmosphere::read_spinor3d: n_parameters=%d, nx=%d, ny=%d, nz=%d\n",np,nx,ny,nz);
+  if (np!=12){
+    io_in->msg(IOL_ERROR,"atmosphere::read_spinor3d: data cube does not have exactly 12 parameters.\n");
+    return -1;  
+  }
+  
+  this->resize(1,nx,1,ny,1,nz); // spinor input is strictly 1-D
+
+  for (int x3i=1;x3i<=nz;++x3i)
+    x3[x3i] = atmoscube[2][1][1][x3i];
+
+  for (int x1i=1;x1i<=nx;++x1i)
+    for (int x2i=1;x2i<=ny;++x2i)
+      for (int x3i=1;x3i<=nz;++x3i){
+        tau_referent[x1i][x2i][x3i] = atmoscube[1][x1i][x2i][x3i];
+        T[x1i][x2i][x3i] = atmoscube[3][x1i][x2i][x3i];
+        Nt[x1i][x2i][x3i] = atmoscube[4][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
+        Ne[x1i][x2i][x3i] = atmoscube[5][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
+        rho[x1i][x2i][x3i] = atmoscube[6][x1i][x2i][x3i];
+        op_referent[x1i][x2i][x3i] = atmoscube[7][x1i][x2i][x3i];
+        fp_t B = atmoscube[8][x1i][x2i][x3i];
+        fp_t el = atmoscube[11][x1i][x2i][x3i];
+        fp_t az = atmoscube[12][x1i][x2i][x3i];
+        Bx[x1i][x2i][x3i]=B*sin(el)*cos(az);
+        By[x1i][x2i][x3i]=B*sin(el)*sin(az);
+        Bz[x1i][x2i][x3i]=B*cos(el);
+        Vt[x1i][x2i][x3i] = atmoscube[9][x1i][x2i][x3i];;
+        Vx[x1i][x2i][x3i] = 0.0;
+        Vy[x1i][x2i][x3i] = 0.0;
+        Vz[x1i][x2i][x3i] = atmoscube[10][x1i][x2i][x3i];
+  }
+  // Test:
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+  //  printf("%e %e %e %e %e \n",x3[x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Bz[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
+  del_ft4dim(atmoscube,1,np,1,nx,1,ny,1,nz);
 }
 
 int08_t atmosphere::read_mhd(const char *wd,const char *filename,io_class *io_in)

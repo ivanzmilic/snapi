@@ -180,6 +180,7 @@ l_c       = 655-l_offset
 Tmap = 'hot'
 Vmap = 'coolwarm'
 Bmap = 'coolwarm'
+Bmap = 'viridis'
 Imap = 'gray'
 Pmap = 'Spectral'
 Dmap = 'coolwarm'
@@ -228,7 +229,7 @@ for i in range(B_nodes[0],B_nodes[-1]+1):
 
 for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.subplot(panelsy,panelsx,i+2)
-	plt.imshow(parameters[i],origin='lower',cmap=Bmap,vmin=-1500,vmax=1500)
+	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=2000)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 
