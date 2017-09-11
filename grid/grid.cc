@@ -112,7 +112,7 @@ int32_t grid::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   return offs;
 }
 
-grid* grid::extract(int i, int j, io_class &io_in)
+grid* grid::extract_grid(int i, int j, io_class &io_in)
 {
   int32_t sz=node::size();
   sz += 6*sizeof(int32_t);

@@ -190,21 +190,41 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   return offs;
 }
 
-/*atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
+atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   
+  
+
   atmosphere * column;
   uint08_t do_swap = 0;
-  grid * column_grid = grid::extract(i,j,io_in);
+  printf("Starting..\n");
+  grid * column_grid = grid::extract_grid(i,j,io_in);
+  printf("Column from the grid extracted\n");
 
-  int32_t sz = column_grid::size();
-  sz += 
+  int32_t sz=sizeof(gtype);
+  sz+=sizeof(rtstype);
+//
+  sz+=column_grid->size();
+// add local stuff
+  sz+=flags.size();
+//
+  sz+=strlen(id)+1;
+  sz+=strlen(fname)+1;
+  sz+=sizeof(ftype);
+//
+  sz+=sizeof(natm);
+  sz+=sizeof(boundary_condition_for_rt);
+  for(int a=0;a<natm;++a) sz+=atml[a]->size(io_in);
+//
+  fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
+  for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
+  
   uint08_t *buf=new uint08_t [sz];
 
   // We start by packing everything that we want to be in the small atmosphere:
   int32_t offs=::pack(buf,gtype); // gtype is the same
   offs+=::pack(buf+offs,rtstype); // rtype is the same 
 // grid...
-  offs+=grid::pack(buf+offs,do_swap,io_in); // <------ THIS IS NOT THE SAME, WE NEED A NEW GRID
+  offs+=column_grid->pack(buf+offs,do_swap,io_in); 
 // local stuff
   offs+=flags.pack(buf+offs,io_in); // flags are the same 
 //
@@ -244,10 +264,10 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   fp_t *** op_referent_small = ft3dim(1,1,1,1,x3l,x3h);
   memcpy(op_referent_small[1][1]+x3l,op_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
 //
-  fp_t ****p[]={&T_small,&rho_small,&Nt_small,&Ne_small,&Bx_small,&By_small,&Bz_small,&Vx_small,
+  fp_t **** pp[]={&T_small,&rho_small,&Nt_small,&Ne_small,&Bx_small,&By_small,&Bz_small,&Vx_small,
     &Vy_small,&Vz_small,&Vt_small,&tau_referent_small,&op_referent_small,0};
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
-    for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
+    for(int ii=0;p[ii];++ii) offs+=::pack(buf+offs,*(pp[ii]),1,1,1,1,x3l,x3h,do_swap);
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
   del_ft3dim(Nt_small,1,1,1,1,x3l,x3h);
@@ -262,10 +282,12 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   del_ft3dim(tau_referent_small,1,1,1,1,x3l,x3h);
   del_ft3dim(op_referent_small,1,1,1,1,x3l,x3h);
 
-  colum = new atmosphere(buf,offs,0,io_in);
+  delete column_grid;
 
-  return 0;
-}*/
+  column = new atmosphere(buf,offs,0,io_in);
+
+  return column;
+}
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {

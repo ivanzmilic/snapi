@@ -275,7 +275,9 @@ int job_class::start(void)
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
-    printf("Atmosphere initialized\n");
+    printf("Initialized!\n");
+    atmosphere * test_atmos = ji.atmos[a]->extract(1,1,*io);
+    printf("Extracted!\n");
     exit(1);
 //
     // ---------------------------------------------------------------------------------------------------------------------------------

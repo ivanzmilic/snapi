@@ -202,7 +202,7 @@ public:
   atmosphere(acfg*,io_class&);
   atmosphere(uint08_t*,int32_t&,uint08_t,io_class&);
 
-  //virtual *atmosphere extract(int i, int j, io_class&);
+  virtual atmosphere* extract(int i, int j, io_class&);
 
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE

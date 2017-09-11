@@ -84,7 +84,6 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
   int32_t n1,n2,n3,n4;
   fp_t **** atmoscube = read_file(path,n1,n2,n3,n4,*io_in);
   atmoscube = transpose(atmoscube,n1,n2,n3,n4);
-  printf("%d %d %d %d \n",n1,n2,n3,n4);
   int np = n4;
   int nx = n3;
   int ny = n2;
