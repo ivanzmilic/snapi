@@ -17,7 +17,6 @@
 #include "conf.h"
 #include "compress.h"
 #include "version.h"
-
 #include "cmdcfg.h"
 #include "atmos.h"
 
