@@ -275,8 +275,6 @@ int job_class::start(void)
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
-    printf("Initialized!\n");
-    atmosphere * test_atmos = ji.atmos[a]->extract(1,1,*io);
    
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -351,7 +349,6 @@ int job_class::start(void)
              class model * model_to_fit = clone(ji.models[0]);
              if (ji.read_model_from_file[0]){
                model_to_fit->set_parameters(model_cube[x][y]);
-               //model_to_fit->print();
              }
                
              chk->pack(ji.atmos[a],model_to_fit,obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
@@ -361,16 +358,35 @@ int job_class::start(void)
              pthread_mutex_unlock(&active_lock);
           }
           if (model_cube) del_ft3dim(model_cube,1,n1,1,n2,1,n3);
-       }else{
+       }else{ // we are going to synthesize something:
+        io->msg(IOL_INFO,"master::job : synthesizing from the input atmosphere\n");
+
+        nx=ji.xh[o]-ji.xl[o]+1;
+       	ny=ji.yh[o]-ji.yl[o]+1;
+       	for(int x=1,n=1;x<=nx;++x)
+        	for(int y=1;y<=ny;++y,++n){ // Cut the piece
+
+        		class atmosphere * atmos_column = ji.atmos[a]->extract(x,y,*io);
+        		chk->pack(atmos_column,0,0,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
+            pthread_mutex_lock(&active_lock);
+            ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
+            pthread_mutex_unlock(&active_lock);
+        }
+
+
+
+
          //ji.atmos[a]->build_from_nodes(ji.models[0]);
-         ji.atmos[a]->set_grid(1);
-         obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
-         //obs=ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0);
-         //obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
-         obs->write(ji.name[o],*io,1,1);
-      	 delete obs;
-         delete ji.atmos[a];
-         exit(0);
+        ji.atmos[a]->set_grid(0);
+       	//test_atmos->set_grid(0);
+       	//obs=test_atmos->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
+        //obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
+        //obs=ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0);
+        obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
+        obs->write(ji.name[o],*io,1,1);
+      	delete obs;
+        delete ji.atmos[a];
+        exit(0);
        }
     }
   }

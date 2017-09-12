@@ -25,7 +25,7 @@ else:
 
 print atmosphere_out[8,:]
 #B
-atmosphere_out[7,:] = 0.0
+atmosphere_out[7,:] = 1000.0
 #v_macroscopic
 atmosphere_out[9,:] = 0E5# * (atmosphere[1,:] - atmosphere[1,-1])/(atmosphere[1,0]-atmosphere[1,-1])
 #theta

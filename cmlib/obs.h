@@ -10,6 +10,8 @@ class observable{
   fp_t ****S,*lambda,*mask; // Stokes vector (N_stokes components x N_wvl)
   int ns,nlambda,nx,ny;
   fp_t scattered_light,spectral_broadening,obs_qs,synth_qs;
+  fp_t el,az;
+  int to_invert;
 public:
   observable(int ns_in);
   observable(int ns_in, int nx_in, int ny_in);
