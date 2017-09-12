@@ -277,8 +277,7 @@ int job_class::start(void)
     ji.atmos[a]->init(wd,io); // setup structure
     printf("Initialized!\n");
     atmosphere * test_atmos = ji.atmos[a]->extract(1,1,*io);
-    printf("Extracted!\n");
-    exit(1);
+   
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation

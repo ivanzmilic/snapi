@@ -168,6 +168,7 @@ int32_t atmosphere::size(io_class &io_in)
 int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 // selection variables
+  printf("I am entering this or am I tripping?\n");
   int32_t offs=::pack(buf,gtype);
   offs+=::pack(buf+offs,rtstype);
 // grid...
@@ -193,7 +194,6 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   
   
-
   atmosphere * column;
   uint08_t do_swap = 0;
   printf("Starting..\n");
@@ -287,6 +287,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   column = new atmosphere(buf,offs,0,io_in);
 
   return column;
+  return 0;
 }
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
