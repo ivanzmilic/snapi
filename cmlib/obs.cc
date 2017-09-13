@@ -55,7 +55,8 @@ observable::~observable(void){
 int32_t observable::size(io_class &io_in){
 
   int32_t sz = 4*sizeof(int); // ns, nlambda,nx,ny
-  sz += 4*sizeof(fp_t); // scattered light, 
+  sz += 6*sizeof(fp_t); // scattered light,broadening,continuum,el,az
+  sz += sizeof(int); // whether to invert or no
   sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
   return sz;
@@ -71,6 +72,9 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,spectral_broadening,do_swap);
   offs+=::pack(buf+offs,obs_qs,do_swap);
   offs+=::pack(buf+offs,synth_qs,do_swap);
+  offs+=::pack(buf+offs,el,do_swap);
+  offs+=::pack(buf+offs,az,do_swap);
+  offs+=::pack(buf+offs,to_invert,do_swap);
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
@@ -88,6 +92,9 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::unpack(buf+offs,spectral_broadening,do_swap);
   offs+=::unpack(buf+offs,obs_qs,do_swap);
   offs+=::unpack(buf+offs,synth_qs,do_swap);
+  offs+=::unpack(buf+offs,el,do_swap);
+  offs+=::unpack(buf+offs,az,do_swap);
+  offs+=::unpack(buf+offs,to_invert,do_swap);
 
   lambda = new fp_t [nlambda]-1;
   mask = new fp_t [nlambda]-1;
@@ -142,6 +149,15 @@ void observable::set_inv_parameters(fp_t sl_in, fp_t sb_in, fp_t obs_qs_in, fp_t
   spectral_broadening = sb_in;
   obs_qs = obs_qs_in;
   synth_qs = synth_qs_in;
+}
+
+void observable::set_viewing_angle(fp_t el_in, fp_t az_in){
+  el=el_in;
+  az=az_in;
+}
+
+void observable::set_to_invert(int to_invert_in){
+  to_invert=to_invert_in;
 }
 
 fp_t **** observable::get_S(){
@@ -227,6 +243,17 @@ fp_t observable::get_spectral_broadening(){
 
 fp_t observable::get_synth_qs(){
   return synth_qs;
+}
+
+fp_t observable::get_el(){
+  return el;
+}
+
+fp_t observable::get_az(){
+  return az;
+}
+int observable::get_to_invert(){
+  return to_invert;
 }
 
 void observable::write(const char *name,io_class &io,int i, int j)

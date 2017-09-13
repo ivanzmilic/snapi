@@ -32,6 +32,9 @@ public:
   void setlambda(fp_t *);
   void setmask(fp_t*);
   void set_inv_parameters(fp_t,fp_t,fp_t,fp_t);
+  void set_viewing_angle(fp_t, fp_t);
+  void set_to_invert(int);
+  int get_to_invert();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);
@@ -49,6 +52,8 @@ public:
   fp_t get_scattered_light();
   fp_t get_spectral_broadening();
   fp_t get_synth_qs();
+  fp_t get_el();
+  fp_t get_az();
 
 
   void normalize();

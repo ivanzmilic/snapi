@@ -196,8 +196,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   atmosphere * column;
   uint08_t do_swap = 0;
   grid * column_grid = grid::extract_grid(i,j,io_in);
-  fprintf(stderr,"atmosphere::extract : column from the grid extracted\n");
-
+  
   int32_t sz=sizeof(gtype);
   sz+=sizeof(rtstype);
 //
@@ -216,7 +215,6 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
   
-  fprintf(stderr,"atmosphere::extract : size of packed things is %d \n",sz);
   uint08_t *buf=new uint08_t [sz];
 
   // We start by packing everything that we want to be in the small atmosphere:
@@ -268,7 +266,6 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int ii=0;p[ii];++ii) offs+=::pack(buf+offs,*(pp[ii]),1,1,1,1,x3l,x3h,do_swap);
 
-  fprintf(stderr,"atmosphere::extract : size of the offset is %d \n",offs);
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
   del_ft3dim(Nt_small,1,1,1,1,x3l,x3h);
@@ -286,10 +283,8 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   delete column_grid;
 
   offs = 0;
-  fprintf(stderr,"atmosphere::extract : trying to make new atmosphere...\n");
   column = atmos_new(buf,offs,0,io_in);
-  fprintf(stderr,"atmosphere::extract : success!\n");
-
+  
   return column;
 }
 

@@ -379,6 +379,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   // The similar one as the the atmosphere::obs:
 
+  //for (int x3i=x3l;x3i<=x3h;++x3i){
+  //  fprintf(stderr,"%d %e %e %e %e %e %e \n",x3i,x3[x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Vt[x1l][x2l][x3i],
+  //    Vz[x1l][x2l][x3i],Bz[x1l][x2l][x3i]);
+  //}
 
   boundary_condition_for_rt = -1;
   popsetup(); // 

@@ -140,7 +140,6 @@ grid* grid::extract_grid(int i, int j, io_class &io_in)
   offs+=::pack(buf+offs,x1_s,x1l_s,x1h_s,do_swap);
   offs+=::pack(buf+offs,x2_s,x2l_s,x2h_s,do_swap);
   offs+=::pack(buf+offs,x3,x3l,x3h,do_swap);
-  fprintf(stderr,"grid::extract_grid : grid shrinked and manually packed \n");
   
   delete[](x1_s+1);
   delete[](x2_s+1);
