@@ -387,6 +387,7 @@ int job_class::start(void)
             array_add(chk,raw);     // add new chunk to the raw data list
         		chk->pack(atmos_column,0,mini_obs,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
         		delete atmos_column;
+        		delete mini_obs;
             pthread_mutex_lock(&active_lock);
             ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
             pthread_mutex_unlock(&active_lock);
