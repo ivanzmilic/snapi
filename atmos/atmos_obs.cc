@@ -387,8 +387,9 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   boundary_condition_for_rt = -1;
   popsetup(); // 
   
-  if (tau_grid)
-    compute_op_referent();
+  compute_op_referent();
+  if (!tau_grid)
+    compute_tau_referent();
 
   nltepops();
 

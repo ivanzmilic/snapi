@@ -428,17 +428,24 @@ fp_t atmosphere::get_partf(int who, int z, fp_t T_in, fp_t Ne_in){
 fp_t ** atmosphere::return_as_array(){
   fp_t ** atmos;
   int ND = x3h-x3l+1;
-  int NP = 7;
+  int NP = 12;
   atmos = ft2dim(1,NP,1,ND);
   for (int x3i=x3l;x3i<=x3h;++x3i){
     int i=x3i-x3l+1;
     atmos[1][i] = log10(-tau_referent[x1l][x2l][x3i]);
-    atmos[2][i] = T[x1l][x2l][x3i];
-    atmos[3][i] = Vt[x1l][x2l][x3i];
-    atmos[4][i] = Vz[x1l][x2l][x3i];
-    atmos[5][i] = Bx[x1l][x2l][x3i];
-    atmos[6][i] = By[x1l][x2l][x3i];
-    atmos[7][i] = Bz[x1l][x2l][x3i];
+    //fprintf(stderr,"%d %e \n",x3i,tau_referent[x1l][x2l][x3i]);
+    atmos[2][i] = x3[x3i];
+    atmos[3][i] = T[x1l][x2l][x3i];
+    atmos[4][i] = Nt[x1l][x2l][x3i];
+    atmos[5][i] = Ne[x1l][x2l][x3i];
+    atmos[6][i] = 0.0;
+    atmos[7][i] = op_referent[x1l][x2l][x3i];
+    fp_t B = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i] + By[x1l][x2l][x3i]*By[x1l][x2l][x3i] + Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+    atmos[8][i] = B;
+    atmos[9][i] = Vt[x1l][x2l][x3i];
+    atmos[10][i] = Vz[x1l][x2l][x3i];
+    atmos[11][i] = acos(Bz[x1l][x2l][x3i]/B);
+    atmos[12][i] = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3l]);
   }
   return atmos;
 }

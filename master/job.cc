@@ -452,10 +452,11 @@ int job_class::stop(void)
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
 
     int ND = ji.atmos[0]->get_N_depths();
-    int NP=7;
+    int NP=12;
     fp_t ****fitted_atmos;
-    if (ji.to_invert[o])
-     fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
+    // These are either really fitted atmospheres, or atmospheres which were used for synthesis 
+    // but now with added tau
+    fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -510,14 +511,17 @@ int job_class::stop(void)
             for (int s=1;s<=4;++s)
               memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
+
+            if (nx==1 && ny==1)
+            	obs->write(ji.name[o],*io,1,1);
             delete obs;
             if (ji.to_invert[o]){
             	test_cube->add_model(mod,x,y);
             	delete mod;
-            	fp_t ** atm_array = atmos->return_as_array();
-            	memcpy(fitted_atmos[x][y][1]+1,atm_array[1]+1,ND*NP*sizeof(fp_t));
-            	del_ft2dim(atm_array,1,NP,1,ND);
             }
+            fp_t ** atm_array = atmos->return_as_array();
+            memcpy(fitted_atmos[x][y][1]+1,atm_array[1]+1,ND*NP*sizeof(fp_t));
+            del_ft2dim(atm_array,1,NP,1,ND);
             delete atmos;
          }
        }else{
@@ -530,13 +534,13 @@ int job_class::stop(void)
     int np;
     if (ji.to_invert[o]){
     	fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
-    
     	write_file((char*)"mag_test_nodes.f0",nodes_cube,nx,ny,np,*io);
     	del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
-    	write_file((char*)"mag_test_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
-    	del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
-    }   
-    write_file(ji.name[o],fitted_spectra,ny,nx,4,nl,*io);
+    }
+    write_file((char*)"mag_test_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
+    del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
+    if (nx > 1 || ny > 1)   
+    	write_file(ji.name[o],fitted_spectra,ny,nx,4,nl,*io);
     del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
   }
   del_v2dim((void***)chunks,1,nx,1,ny);

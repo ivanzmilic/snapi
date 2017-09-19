@@ -38,9 +38,9 @@ lambda_max = max([spectra1[0,-1],spectra2[0,-1]])
 lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
-plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = file1)
+plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = 'Calculation')
 if (file1 != file2):
-	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
+	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = 'FTS atlas')
 	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])
