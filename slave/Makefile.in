@@ -15,8 +15,8 @@ export COMPILER
 export INCLUDE
 export COMPFLAGS
 # ...
-LIBPATH       = -L../cmlib -L../lib -L../atmos -L../grid
-LIBS	      = -latmos -lcg -lm -lcm -lz -lpthread -lfftw3
+LIBPATH       = -L../cmlib -L../lib -L../atmos -L../grid @FFTW3LDFLAGS@
+LIBS	      = -latmos -lcg -lm -lcm -lz -lpthread -lfftw3 @FFTW3LIBS@
 DEST	      = .
 PROGRAM       = islave
 SHELL         = /bin/sh

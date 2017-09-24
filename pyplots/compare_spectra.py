@@ -9,6 +9,7 @@ file2 = sys.argv[2]
 output = sys.argv[3]
 v_macro = float(sys.argv[4])
 scaling = float(sys.argv[5])
+shiftcomp = float(sys.argv[6]) #in angstrom
 
 spectra1 = np.loadtxt(file1, unpack = True)
 spectra2 = np.loadtxt(file2, unpack = True)
@@ -38,7 +39,7 @@ lambda_max = max([spectra1[0,-1],spectra2[0,-1]])
 lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
-plt.plot(spectra1[0,:], spectra1[1,:], color = 'red', label = 'Calculation')
+plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = 'Calculation')
 if (file1 != file2):
 	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = 'FTS atlas')
 	plt.legend()
