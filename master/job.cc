@@ -361,8 +361,11 @@ int job_class::start(void)
              pthread_mutex_lock(&active_lock);
              ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
              pthread_mutex_unlock(&active_lock);
+             delete model_to_fit;
+             delete obs_subset;
           }
           if (model_cube) del_ft3dim(model_cube,1,n1,1,n2,1,n3);
+          delete obs_to_fit;
       
       }else{ // ---------- SYNTHESIS ---------------------------------------------------------//
       	
