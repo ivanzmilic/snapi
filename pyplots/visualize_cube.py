@@ -30,7 +30,7 @@ a = pyana.fzread(input_fitted)
 fitted_cube = a["data"]
 dims = fitted_cube.shape
 
-l_offset = 650
+l_offset = 1
 
 #Here we read the parameter map.
 pin = pyana.fzread(input_nodes)
@@ -78,6 +78,7 @@ for i in range(0,NX):
 	for j in range (0,NY):
 		line_center = np.where(fitted_cube[i,j,0] == min(fitted_cube[i,j,0]))
 		lc = line_center[0]
+		lc = 100
 		V_flipped = np.copy(fitted_cube[i,j,3])
 		V_flipped[lc:] *= -1.0
 		V_total_fit[i,j] = np.sum(V_flipped)
@@ -101,8 +102,8 @@ xl=0
 xh=0
 yl=0
 yh=0
-ll = 1100
-lh=1900
+ll = 1
+lh=957
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
@@ -160,14 +161,14 @@ plt.cla()
 # NOW NODES THEMSELVES -------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2,3]
-T_nodes_tau = [-2.6,-1.6,-0.7,0.0]
+T_nodes = [0,1,2]
+T_nodes_tau = [-2.2,-0.9,0.0]
 #vt_nodes = [5]
-vs_nodes = [4,5,6]
+vs_nodes = [3,4,5]
 vs_nodes_tau = [-3.5,-1.7,-0.5]
-B_nodes = [7,8,9]
-B_nodes_tau = [-3.5,-1.7,-0.5]
-theta_nodes = [10]
+B_nodes = [6,7,8]
+B_nodes_tau = [-3.0,-1.7,-0.5]
+theta_nodes = [9]
 
 panelsx=4
 panelsy=7
@@ -181,7 +182,7 @@ l_c       = 655-l_offset
 Tmap = 'hot'
 Vmap = 'coolwarm'
 Bmap = 'coolwarm'
-Bmap = 'viridis'
+Bmap = 'plasma'
 Imap = 'gray'
 Pmap = 'Spectral'
 Dmap = 'coolwarm'
