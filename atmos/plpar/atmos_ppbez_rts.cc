@@ -274,8 +274,6 @@ int atmos_ppbez::optical_depth_scale(fp_t ***tau,fp_t ***op,fp_t t,fp_t p){
 
 int atmos_ppbez::compute_op_referent(){
 
-  // First we have to compute the opacity.
-
   fp_t lr = airtovac(lambda_referent);
   
   for (int x1i=x1l;x1i<=x1h;++x1i)

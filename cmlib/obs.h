@@ -10,6 +10,8 @@ class observable{
   fp_t ****S,*lambda,*mask; // Stokes vector (N_stokes components x N_wvl)
   int ns,nlambda,nx,ny;
   fp_t scattered_light,spectral_broadening,obs_qs,synth_qs;
+  fp_t el,az;
+  int to_invert;
 public:
   observable(int ns_in);
   observable(int ns_in, int nx_in, int ny_in);
@@ -30,6 +32,9 @@ public:
   void setlambda(fp_t *);
   void setmask(fp_t*);
   void set_inv_parameters(fp_t,fp_t,fp_t,fp_t);
+  void set_viewing_angle(fp_t, fp_t);
+  void set_to_invert(int);
+  int get_to_invert();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
   void read(char*,io_class&);
@@ -47,6 +52,8 @@ public:
   fp_t get_scattered_light();
   fp_t get_spectral_broadening();
   fp_t get_synth_qs();
+  fp_t get_el();
+  fp_t get_az();
 
 
   void normalize();

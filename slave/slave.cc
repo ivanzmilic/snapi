@@ -107,30 +107,57 @@ int main(int argc,char *argv[])
           delete[] buf;
           int32_t offs=0;
           atmos=atmos_new(ubuf,offs,swap_endian,io);  // create atmospheric structure
-          mod=model_new(ubuf,offs,swap_endian,io);  // create model
           obs=obs_new(ubuf,offs,swap_endian,io);  // create observbable
+          int to_invert = obs->get_to_invert();
+          if (to_invert)
+            mod=model_new(ubuf,offs,swap_endian,io);  // create model
           delete[] ubuf;
           if(offs!=size) io.msg(IOL_ERROR,"inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,size);
-          
+
           fp_t * lambda = obs->get_lambda();
           int nlambda = obs->get_n_lambda();
+          fp_t el = obs->get_el();
+          fp_t az = obs->get_az();
 
-          class observable *fit=atmos->stokes_lm_fit(obs,3.14,0.0,mod);
+          uint08_t *data;
+          int32_t rsz;
+
+          if (to_invert){
+
+            class observable *fit=atmos->stokes_lm_fit(obs,el,az,mod);
+            rsz=atmos->size(io);
+            rsz+=mod->size(io);
+            rsz+=fit->size(io);
+            rsz+=3*sizeof(int32_t);
+            data=new uint08_t [rsz];
+            offs=atmos->pack(data,0,io);
+            offs+=fit->pack(data+offs,0,io);
+            offs+=mod->pack(data+offs,0,io);
           
-          int32_t rsz=atmos->size(io);
-          rsz+=mod->size(io);
-          rsz+=fit->size(io);
-          rsz+=3*sizeof(int32_t);
-          uint08_t *data=new uint08_t [rsz];
-          offs=atmos->pack(data,0,io);
-          offs+=mod->pack(data+offs,0,io);
-          offs+=fit->pack(data+offs,0,io);
-          // I prefer deleting immediately after. 
-          delete fit;
-          delete mod;
-          delete atmos;
-          delete obs;
-          delete[](lambda+1);
+            // I prefer deleting immediately after. 
+            delete fit;
+            delete mod;
+            delete atmos;
+            delete obs;
+            delete[](lambda+1);
+          }
+          else {
+
+            atmos->set_grid(0);
+            class observable *synth=atmos->obs_stokes(el,az,lambda,nlambda);
+            rsz=atmos->size(io);
+            rsz+=synth->size(io);
+            rsz+=3*sizeof(int32_t);
+            data=new uint08_t [rsz];
+            offs=atmos->pack(data,0,io);
+            offs+=synth->pack(data+offs,0,io);
+          
+            // I prefer deleting immediately after. 
+            delete synth;
+            delete atmos;
+            delete obs;
+            delete[](lambda+1);
+          }
           
 //
           struct tms t_end;

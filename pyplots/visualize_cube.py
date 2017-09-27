@@ -96,14 +96,13 @@ for i in range(0,NX):
 		chisq[i,j] += 4.0*np.sum(((fitted_cube[i,j,3,:]-obs_cube[j,i,3,:])/noise)**2.0)
 		chisq[i,j] /= (NL-9.0)
 		
-
-
-
 #Here we pring out some profiles
 xl=0
 xh=0
 yl=0
 yh=0
+ll = 1100
+lh=1900
 for i in range(xl,xh+1):
 	for j in range (yl,yh+1):
 		plt.clf()
@@ -114,11 +113,13 @@ for i in range(xl,xh+1):
 		plt.plot(obs_cube[j,i,0,:])
 		plt.xlabel("Wavelength")
 		plt.ylabel("Stokes I")
+		plt.xlim([ll,lh])
 		
 		plt.subplot(322)
 
 		plt.plot(fitted_cube[i,j,3,:],label='Fitted')
 		plt.plot(obs_cube[j,i,3,:],label='Observed')
+		plt.xlim([ll,lh])
 
 		#plt.plot(V_weak_field[i][j],label='WF from obs')
 		

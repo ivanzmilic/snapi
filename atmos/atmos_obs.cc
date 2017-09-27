@@ -42,6 +42,8 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
   lambda_vacuum -=1;
 
+  FILE * opem = fopen("op_em.dat","w");
+
   for(int l=1;l<=nlambda;++l){
 
     for (int a = 0; a<natm; ++a)
@@ -49,7 +51,16 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
     fp_t ***op=opacity(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
     fp_t ***em=emissivity(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
-    
+
+    fp_t *** tau = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+    optical_depth_scale(tau,op,pi-theta,phi);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      fprintf(opem,"%e %e %e %e %e \n",x3[x3i],tau[x1l][x2l][x3i],lambda[l],
+        op[x1l][x2l][x3i],em[x1l][x2l][x3i]);
+
+    del_ft3dim(tau,x1l,x1h,x2l,x2h,x3l,x3h);
+
     //formal(tau_referent[x1l][x2l], S,Lambda_approx,op_rel,em_rel,theta,phi, boundary_condition_for_rt);      // [Stokes] solution and approximate operator
     formal(x3, S,Lambda_approx,op,em,theta,phi, boundary_condition_for_rt);
 
@@ -59,7 +70,8 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
     del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
   }
-  
+  fclose(opem);
+    
   // Clear un-needed quantities
   for (int a = 0; a<natm; ++a){
     atml[a]->prof_clear();
@@ -367,12 +379,17 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   // The similar one as the the atmosphere::obs:
 
+  //for (int x3i=x3l;x3i<=x3h;++x3i){
+  //  fprintf(stderr,"%d %e %e %e %e %e %e \n",x3i,x3[x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Vt[x1l][x2l][x3i],
+  //    Vz[x1l][x2l][x3i],Bz[x1l][x2l][x3i]);
+  //}
 
   boundary_condition_for_rt = -1;
   popsetup(); // 
   
-  if (tau_grid)
-    compute_op_referent();
+  compute_op_referent();
+  if (!tau_grid)
+    compute_tau_referent();
 
   nltepops();
 

@@ -2,7 +2,7 @@ MAKEFILE      = Makefile
 
 #COMPFLAGS     = $(OPTFLAGS) $(WARNFLAGS) $(DBGFLAGS) $(EXTCOMPFLAGS)
 
-INCLUDE	      += -I.. -I../../cmlib -I../../include
+INCLUDE	      += -I.. -I../../cmlib -I../../include @FFTW3INCFLAGS@
 DEST	      = .
 
 AR	      = @AR@

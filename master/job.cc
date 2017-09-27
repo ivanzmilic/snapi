@@ -63,13 +63,16 @@ chunk::~chunk(void)
 int chunk::pack(atmosphere *atmos,model *mod,observable *obs,int swapfile,off_t &swapfile_offset,pthread_mutex_t *swapfile_lock,int clvl,io_class &io)
 {
   int sz=atmos->size(io);
-  sz+=mod->size(io);
   sz+=obs->size(io);
+  if (obs->get_to_invert())
+  	sz+=mod->size(io);
+  
 //
   uint08_t *data=new uint08_t [sz];
   uint32_t offs=atmos->pack(data,0,io);
-  offs+=mod->pack(data+offs,0,io);
   offs+=obs->pack(data+offs,0,io);
+  if (obs->get_to_invert())
+  	offs+=mod->pack(data+offs,0,io);
 //
   if(offs!=sz) io.msg(IOL_ERROR,"chunk::pack: inaccurate buffer size estimate! (actual: %d > estimate: %d)\n",offs,sz);
   byte *cbuf=z_compress(data,sz,clvl,0,io);
@@ -275,8 +278,6 @@ int job_class::start(void)
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
-    printf("Initialized!\n");
-    atmosphere * test_atmos = ji.atmos[a]->extract(1,1,*io);
    
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -293,9 +294,9 @@ int job_class::start(void)
       	io->msg(IOL_INFO,"master::job : return_atmos mode is : %d \n",ji.return_atmos[o]);
       }
       else 
-      	io->msg(IOL_INFO,"master::job : we are synthesizing the data : %s \n",ji.return_model[o]);
+      	io->msg(IOL_INFO,"master::job : we are synthesizing the data from : %s \n",ji.name[o]);
       
-      if (ji.to_invert[o]){ // We are going to invert something.
+      if (ji.to_invert[o]){ // ------------ INVERSION ----------------------------------------//
         io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
         int n1,n2,n3,n4;
 
@@ -345,13 +346,14 @@ int job_class::start(void)
            for(int y=1;y<=ny;++y,++n){ // Cut the piece
 
              class observable *obs_subset=obs_to_fit->extract(x,x,y,y,1,nl);
+             obs_subset->set_viewing_angle(ji.el[o],ji.az[o]);
+             obs_subset->set_to_invert(1);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
              class model * model_to_fit = clone(ji.models[0]);
              if (ji.read_model_from_file[0]){
                model_to_fit->set_parameters(model_cube[x][y]);
-               //model_to_fit->print();
              }
                
              chk->pack(ji.atmos[a],model_to_fit,obs_subset,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
@@ -361,17 +363,36 @@ int job_class::start(void)
              pthread_mutex_unlock(&active_lock);
           }
           if (model_cube) del_ft3dim(model_cube,1,n1,1,n2,1,n3);
-       }else{
-         //ji.atmos[a]->build_from_nodes(ji.models[0]);
-         ji.atmos[a]->set_grid(1);
-         obs=ji.atmos[a]->obs_stokes_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0,0);
-         //obs=ji.atmos[a]->obs_stokes_num_responses(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o],0);
-         //obs=ji.atmos[a]->obs_stokes(ji.el[o],ji.az[o],ji.lambda[o]-1,ji.nlambda[o]);
-         obs->write(ji.name[o],*io,1,1);
-      	 delete obs;
-         delete ji.atmos[a];
-         exit(0);
-       }
+      
+      }else{ // ---------- SYNTHESIS ---------------------------------------------------------//
+      	
+      	io->msg(IOL_INFO,"master::job : synthesizing from the input atmosphere\n");
+
+        nx=ji.xh[o]-ji.xl[o]+1;
+       	ny=ji.yh[o]-ji.yl[o]+1;
+       	for(int x=1,n=1;x<=nx;++x)
+        	for(int y=1;y<=ny;++y,++n){ // Cut the piece
+        		
+        		class observable * mini_obs;
+        		mini_obs = new observable(1,1,1,ji.nlambda[o]);
+        		mini_obs->setlambda(ji.lambda[o]-1);
+        		mini_obs->set_viewing_angle(ji.el[o],ji.az[o]);
+        		mini_obs->set_to_invert(0);
+        		
+        		class atmosphere * atmos_column = ji.atmos[a]->extract(x,y,*io);
+        		atmos_column->set_grid(0);
+
+        		struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
+
+            array_add(chk,raw);     // add new chunk to the raw data list
+        		chk->pack(atmos_column,0,mini_obs,swapfile,swapfile_offset,&swapfile_lock,ji.cdcl,*io);
+        		delete atmos_column;
+        		delete mini_obs;
+            pthread_mutex_lock(&active_lock);
+            ppfrac=2.0+(fp_t)n/(fp_t)(nx*ny);
+            pthread_mutex_unlock(&active_lock);
+        }
+      }
     }
   }
 //
@@ -418,14 +439,24 @@ int job_class::stop(void)
   int ns=0;
 //
   for(int o=0;o<ji.no;++o){
-    modelcube *test_cube=new modelcube(ji.models[0],nx,ny);
-    int nl = ji.lh[o]-ji.ll[o]+1;
+
+    modelcube *test_cube;
+    if (ji.to_invert[o])
+    	test_cube=new modelcube(ji.models[0],nx,ny);
+    int nl=0;
+    if (ji.to_invert[o])
+    	nl = ji.lh[o]-ji.ll[o]+1;
+    else 
+    	nl = ji.nlambda[o];
     fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,nl);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
 
     int ND = ji.atmos[0]->get_N_depths();
-    int NP=7;
-    fp_t ****fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
+    int NP=12;
+    fp_t ****fitted_atmos;
+    // These are either really fitted atmospheres, or atmospheres which were used for synthesis 
+    // but now with added tau
+    fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -439,8 +470,10 @@ int job_class::stop(void)
 
             int32_t offs=0;
             class atmosphere *atmos = atmos_new(data,offs,0,*io);
-            class model* mod=model_new(data,offs,0,*io);
             class observable *obs=obs_new(data,offs,0,*io);
+            class model * mod;
+            if (ji.to_invert[o])
+            	mod=model_new(data,offs,0,*io);
             delete[] data;
 //
             int32_t user,sys,clock;
@@ -448,7 +481,7 @@ int job_class::stop(void)
             offs+=unpack(data+offs,sys,0);
             offs+=unpack(data+offs,clock,0);
             if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
-//
+//          
             u_time+=chunks[x][y]->u_time;
             s_time+=chunks[x][y]->s_time;
             byte found=0;
@@ -478,9 +511,14 @@ int job_class::stop(void)
             for (int s=1;s<=4;++s)
               memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
+
+            if (nx==1 && ny==1 && !ji.to_invert[o])
+            	obs->write(ji.name[o],*io,1,1);
             delete obs;
-            test_cube->add_model(mod,x,y);
-            delete mod;
+            if (ji.to_invert[o]){
+            	test_cube->add_model(mod,x,y);
+            	delete mod;
+            }
             fp_t ** atm_array = atmos->return_as_array();
             memcpy(fitted_atmos[x][y][1]+1,atm_array[1]+1,ND*NP*sizeof(fp_t));
             del_ft2dim(atm_array,1,NP,1,ND);
@@ -494,18 +532,19 @@ int job_class::stop(void)
     io->msg(IOL_WARN,"job_class::stop: done. writing the data...\n");
     
     int np;
-    fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
-    
-    write_file((char*)"mag_test_nodes.f0",nodes_cube,nx,ny,np,*io);
-    del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
-        
-    write_file((char*)"mag_test_fitted.f0",fitted_spectra,ny,nx,4,nl,*io);
-    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
-    
-    write_file((char*)"mag_test_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
+    if (ji.to_invert[o]){
+    	fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
+    	write_file((char*)"inverted_nodes.f0",nodes_cube,nx,ny,np,*io);
+    	del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
+    }
+    write_file((char*)"inverted_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
     del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
-
-
+    if ((nx > 1 || ny > 1) && !ji.to_invert[o])
+    	write_file(ji.name[o],fitted_spectra,ny,nx,4,nl,*io);
+    else if (ji.to_invert[o]) 
+    	write_file((char*)"inverted_spectra.f0",fitted_spectra,ny,nx,4,nl,*io);
+    
+    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
   }
   del_v2dim((void***)chunks,1,nx,1,ny);
 /******************************

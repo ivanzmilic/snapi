@@ -168,7 +168,6 @@ int32_t atmosphere::size(io_class &io_in)
 int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 // selection variables
-  printf("I am entering this or am I tripping?\n");
   int32_t offs=::pack(buf,gtype);
   offs+=::pack(buf+offs,rtstype);
 // grid...
@@ -196,10 +195,8 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   
   atmosphere * column;
   uint08_t do_swap = 0;
-  printf("Starting..\n");
   grid * column_grid = grid::extract_grid(i,j,io_in);
-  printf("Column from the grid extracted\n");
-
+  
   int32_t sz=sizeof(gtype);
   sz+=sizeof(rtstype);
 //
@@ -268,6 +265,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
     &Vy_small,&Vz_small,&Vt_small,&tau_referent_small,&op_referent_small,0};
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int ii=0;p[ii];++ii) offs+=::pack(buf+offs,*(pp[ii]),1,1,1,1,x3l,x3h,do_swap);
+
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
   del_ft3dim(Nt_small,1,1,1,1,x3l,x3h);
@@ -284,10 +282,10 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
 
   delete column_grid;
 
-  column = new atmosphere(buf,offs,0,io_in);
-
+  offs = 0;
+  column = atmos_new(buf,offs,0,io_in);
+  
   return column;
-  return 0;
 }
 
 int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
@@ -430,17 +428,24 @@ fp_t atmosphere::get_partf(int who, int z, fp_t T_in, fp_t Ne_in){
 fp_t ** atmosphere::return_as_array(){
   fp_t ** atmos;
   int ND = x3h-x3l+1;
-  int NP = 7;
+  int NP = 12;
   atmos = ft2dim(1,NP,1,ND);
   for (int x3i=x3l;x3i<=x3h;++x3i){
     int i=x3i-x3l+1;
     atmos[1][i] = log10(-tau_referent[x1l][x2l][x3i]);
-    atmos[2][i] = T[x1l][x2l][x3i];
-    atmos[3][i] = Vt[x1l][x2l][x3i];
-    atmos[4][i] = Vz[x1l][x2l][x3i];
-    atmos[5][i] = Bx[x1l][x2l][x3i];
-    atmos[6][i] = By[x1l][x2l][x3i];
-    atmos[7][i] = Bz[x1l][x2l][x3i];
+    //fprintf(stderr,"%d %e \n",x3i,tau_referent[x1l][x2l][x3i]);
+    atmos[2][i] = x3[x3i];
+    atmos[3][i] = T[x1l][x2l][x3i];
+    atmos[4][i] = Nt[x1l][x2l][x3i];
+    atmos[5][i] = Ne[x1l][x2l][x3i];
+    atmos[6][i] = 0.0;
+    atmos[7][i] = op_referent[x1l][x2l][x3i];
+    fp_t B = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i] + By[x1l][x2l][x3i]*By[x1l][x2l][x3i] + Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
+    atmos[8][i] = B;
+    atmos[9][i] = Vt[x1l][x2l][x3i];
+    atmos[10][i] = Vz[x1l][x2l][x3i];
+    atmos[11][i] = acos(Bz[x1l][x2l][x3i]/B);
+    atmos[12][i] = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3l]);
   }
   return atmos;
 }
