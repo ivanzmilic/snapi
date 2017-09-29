@@ -30,7 +30,6 @@ sigma = v_macro #km/s
 sigma *= (spectra1[0,-1] + spectra1[0,0]) * 0.5 / 2.997E5 # Angstrom
 sigma /= (spectra1[0,1]-spectra1[0,0])
 
-
 spectra1[1] = flt.gaussian_filter(spectra1[1],sigma)
 
 lambda_min = min([spectra1[0,0],spectra2[0,0]])
