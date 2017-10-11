@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-2
+#define DELTA 1E-3
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -33,13 +33,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 10;
+  int MAX_ITER = 20;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -56,7 +56,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-5;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
@@ -65,7 +65,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int N_parameters = model_to_fit->get_N_nodes_total();
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
-  //model_to_fit->print();
   
   for (iter=1;iter<=MAX_ITER;++iter){
 
@@ -79,8 +78,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters); 
       current_obs->add_scattered_light(scattered_light,qs_level);
-      current_obs->spectral_convolve(spectral_broadening,1,1);
-      convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
+      if (spectral_broadening){
+        current_obs->spectral_convolve(spectral_broadening,1,1);
+        convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
+      }
       S_current = current_obs->get_S(1,1);
     }
     
@@ -108,22 +109,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
-
-    //for (int i=1;i<=N_parameters;++i){
-    //  for (int j=1;j<=N_parameters;++j)
-    //    printf("%e   ", JTJ[i][j]);
-    //  printf("\n");
-   ///}
-
     
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-    //for (int i=1;i<=N_parameters;++i)
-    //  fprintf(stderr,"%d %e\n",i,correction[i]);
-    //exit(1);
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);
@@ -132,7 +123,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     reference_obs->add_scattered_light(scattered_light,qs_level);
-    reference_obs->spectral_convolve(spectral_broadening,1,1);  
+    if (spectral_broadening)
+      reference_obs->spectral_convolve(spectral_broadening,1,1);  
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
     fp_t metric_reference = 0.0;
@@ -181,7 +173,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   }
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
-  //model_to_fit->print();
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
@@ -189,13 +180,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   if (chi_to_track)
     delete[]chi_to_track;
 
+  //model_to_fit->print();
+
   // Full version:
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
   observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
   obs_to_return->add_scattered_light(scattered_light,qs_level);
-  obs_to_return->spectral_convolve(spectral_broadening,1,1);
+  if (spectral_broadening)
+    obs_to_return->spectral_convolve(spectral_broadening,1,1);
       
   delete[](lambda+1);
   return obs_to_return;
@@ -810,6 +804,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
       fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
       fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      if (B_mag < 1E-3)
+        B_mag = theta_B = phi_B = 0.0;
       resp_atm_to_parameters[i][param][x3i-x3l+1] = Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B;
     }
     
@@ -820,6 +816,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
       fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
       fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
+      if (B_mag < 1E-3)
+        B_mag = theta_B = phi_B = 0.0;
       resp_atm_to_parameters[i][param][x3i-x3l+1] -= (Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B);
       resp_atm_to_parameters[i][param][x3i-x3l+1] /= step;
     }
@@ -831,12 +829,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   }
 
   // Now we start the responses part.
-
   atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
-
   observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model);
-  
-  del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
+    del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
   
   return o;
   
