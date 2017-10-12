@@ -373,122 +373,13 @@ int atmos_pp::enforce_hequilibrium(){
   // We enforce hydrostatic equilibrium by using the first order numerical scheme for differential eq. 
   // dp/dh = - \rho * g
   // In the longer run, should be used to simplyfy build_from_nodes function
+  // The code assumes that your taugrid is provided
 
-  io.msg(IOL_INFO, "atmos_pp::build_from_nodes : building from nodes (%d..%d)\n",x3h,x3l);
+  io.msg(IOL_INFO, "atmos_pp::enforcing hydrostatic equlibrium (%d..%d)\n",x3h,x3l);
   
-  // Grid in tau, equidistantly spaced in log scale:
-  int N_depths = x3h-x3l+1;
-  fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
-  fp_t tau_min = TAU_MIN;
-  fp_t tau_max = TAU_MAX;
-  
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    logtau[x3i] = tau_min + (tau_max-tau_min) / (x3h-x3l) * (x3i-x3l);
-  for (int x1i=x1l;x1i<=x1h;++x1i)
-    for (int x2i=x2l;x2i<=x2h;++x2i)
-      for (int x3i=x3l;x3i<=x3h;++x3i)
-        tau_referent[x1i][x2i][x3i] = -pow(10.0,logtau[x3i]);
-
-
-  // Interpolate from nodes all the quantities to this tau grid.
-
-  // Temperature:
-  int N_nodes_temp = atmos_model->get_N_nodes_temp();
-  if (N_nodes_temp < 1){
-    io.msg(IOL_ERROR, "atmos_pp::build_from_nodes : can't make atmosphere with less than one T node. Quitting...\n");
-    return 1;  
-  }
-  fp_t * temp_nodes_tau = atmos_model->get_temp_nodes_tau();
-  fp_t * temp_nodes_temp = atmos_model->get_temp_nodes_temp();
-  atmospheric_interpolation(temp_nodes_tau, temp_nodes_temp, N_nodes_temp, logtau, T[x1l][x2l], x3l, x3h, 1);
-  delete[](temp_nodes_tau+1);
-  delete[](temp_nodes_temp+1);
-
-  // Microturbulent velocity:
-  int N_nodes_vt = atmos_model->get_N_nodes_vt();
-  if (N_nodes_vt){
-    fp_t * vt_nodes_tau = atmos_model->get_vt_nodes_tau();
-    fp_t * vt_nodes_vt = atmos_model->get_vt_nodes_vt();
-    atmospheric_interpolation(vt_nodes_tau, vt_nodes_vt, N_nodes_vt, logtau, Vt[x1l][x2l], x3l, x3h, 0);
-    delete[](vt_nodes_tau+1);
-    delete[](vt_nodes_vt+1);
-  }
-  else 
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      Vt[x1l][x2l][x3i] = 0.0;
-  
-  // Systematic velocity: 
-  int N_nodes_vs = atmos_model->get_N_nodes_vs();
-  if (N_nodes_vs){
-    fp_t * vs_nodes_tau = atmos_model->get_vs_nodes_tau();
-    fp_t * vs_nodes_vs = atmos_model->get_vs_nodes_vs();
-    atmospheric_interpolation(vs_nodes_tau, vs_nodes_vs, N_nodes_vs, logtau, Vz[x1l][x2l], x3l, x3h, 0);
-    delete[](vs_nodes_tau+1);
-    delete[](vs_nodes_vs+1);
-  }
-  else 
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      Vz[x1l][x2l][x3i] = 0.0;
-
-  // Magnetic field:
-
-  int N_nodes_B = atmos_model->get_N_nodes_B();
-  fp_t * B = new fp_t[x3h-x3l+1] - x3l;
-    
-  if (N_nodes_B){
-    fp_t * B_nodes_tau = atmos_model->get_B_nodes_tau();
-    fp_t * B_nodes_B = atmos_model->get_B_nodes_B();
-    atmospheric_interpolation(B_nodes_tau,B_nodes_B, N_nodes_B, logtau, B, x3l, x3h, 0);
-    delete[](B_nodes_tau+1);
-    delete[](B_nodes_B+1);
-  }
-  else 
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      B[x3i] = 0.0; 
-
-  
-  int N_nodes_theta = atmos_model->get_N_nodes_theta();
-  fp_t * theta = new fp_t[x3h-x3l+1] - x3l;
-    
-  if (N_nodes_theta){
-    fp_t * theta_nodes_tau = atmos_model->get_theta_nodes_tau();
-    fp_t * theta_nodes_theta = atmos_model->get_theta_nodes_theta();
-    atmospheric_interpolation(theta_nodes_tau,theta_nodes_theta, N_nodes_theta, logtau, theta, x3l, x3h, 0);
-    delete[](theta_nodes_tau+1);
-    delete[](theta_nodes_theta+1);
-  }
-  else
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      theta[x3i] = TINY; 
-
-
-  int N_nodes_phi = atmos_model->get_N_nodes_phi();
-  fp_t * phi = new fp_t[x3h-x3l+1] - x3l;
-
-  if (N_nodes_phi){
-    fp_t * phi_nodes_tau = atmos_model->get_phi_nodes_tau();
-    fp_t * phi_nodes_phi = atmos_model->get_phi_nodes_phi();    
-    atmospheric_interpolation(phi_nodes_tau,phi_nodes_phi, N_nodes_phi, logtau, phi, x3l, x3h, 0);
-    delete[](phi_nodes_tau+1);
-    delete[](phi_nodes_phi+1);
-  }
-  else
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      phi[x3i] = TINY; 
- 
-  for (int x3i=x3l;x3i<=x3h;++x3i){
-    Bx[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * cos(phi[x3i]);
-    By[x1l][x2l][x3i] = B[x3i] * sin(theta[x3i]) * sin(phi[x3i]);
-    Bz[x1l][x2l][x3i] = B[x3i] * cos(theta[x3i]);
-  }
-  delete[](B+x3l);
-  delete[](theta+x3l);
-  delete[](phi+x3l);
-
-
 // ------------------------------------------------------------------------------------------------
   
-  // Density is not given, it is deduced from the temperature using hydrostatic equilibrium. 
+  // In essence what we do is compute density from given temperature run 
   // Need populations to compute opacity correctly:
   popsetup();
   
@@ -498,6 +389,11 @@ int atmos_pp::enforce_hequilibrium(){
   // Initial guess for particple density at the top. Assume pressure of 0.3 in CGS
   Nt[x1l][x2l][x3l] = 0.3/k/T[x1l][x2l][x3l];
 
+  // We need a logtau array to make things consistent with the above
+  fp_t * logtau = new fp_t [x3h-x3l+1]-x3l;
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    logtau[x3i] = log10(-tau_referent[x1l][x2l][x3i]);
+  
   // Solve chemeq and ltepops to get the numbers and to compute density and opacity
   for (int iter=0;iter<MAX_ITER;++iter){
     chemeq(atml, natm, T[x1l][x2l][x3l], Nt[x1l][x2l][x3l], Ne[x1l][x2l][x3l], x1l, x2l, x3l);

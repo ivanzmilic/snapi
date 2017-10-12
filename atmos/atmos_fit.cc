@@ -253,7 +253,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     if (corrected){
       
       // These quantities are only re-computed if the model has been modified:    
-      fp_t **** full_stokes_responses = ft3dim(1,7,x3l,x3h,1,nlambda,1,4);
+      fp_t **** full_stokes_responses = ft4dim(1,7,x3l,x3h,1,nlambda,1,4);
       
       memset(full_stokes_responses[1][x3l][1]+1,0,7*(x3h-x3l+1)*nlambda*4*sizeof(fp_t));
       

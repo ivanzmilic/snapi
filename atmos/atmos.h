@@ -207,6 +207,7 @@ public:
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
   virtual int enforce_hequilibrium(); // enforces hydrostatic equilibrium
+  virtual fp_t ** calculate_dp_dT(); 
 
   virtual ~atmosphere(void);
 //
@@ -262,7 +263,7 @@ public:
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
-  virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t){}; // LM fits trying out nodeless inversion
+  virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t); // LM fits trying out nodeless inversion
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
