@@ -158,7 +158,8 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
 
 // ================================================================================================
 
-observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** intensity_responses, model* input_model)
+observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** intensity_responses, model* input_model,
+  fp_t **** full_stokes_responses)
 {
   // This function synthesises the spectrum, and computes the response functions of the 
   // unpolarized intensity. It can compute the derivatives of populations and number densities
@@ -323,21 +324,26 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   // Write down the intensity perturbations:
   if (!intensity_responses && !input_model){
-    FILE * out;
-    out = fopen("stokes_intensity_responses_analytical.txt", "w");
-      for (int param=1;param<=7;++param){
-      for (int x3i=x3l;x3i<=x3h;++x3i){
-        for (int l=1;l<=nlambda;++l){
-          fp_t loc = 0;
-          if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
-          fprintf(out,"%10.10e %10.10e", loc, lambda[l]);
-          for (int s=1;s<=4;++s)
-            fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
-          fprintf(out," \n");
-        }
-      }
-    }
-    fclose(out);
+
+    if (full_stokes_responses)
+      memcpy(full_stokes_responses[1][x3l][1]+1,d_obs_a[1][x3l][1]+1,7*(x3h-x3l+1)*nlambda*4*sizeof(fp_t));
+    else{
+      FILE * out;
+      out = fopen("stokes_intensity_responses_analytical.txt", "w");
+        for (int param=1;param<=7;++param){
+          for (int x3i=x3l;x3i<=x3h;++x3i){
+            for (int l=1;l<=nlambda;++l){
+              fp_t loc = 0;
+              if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
+              fprintf(out,"%10.10e %10.10e", loc, lambda[l]);
+              for (int s=1;s<=4;++s)
+                fprintf(out," %10.10e", d_obs_a[param][x3i][l][s]);
+              fprintf(out," \n");
+          } //lambda
+        } //x3i
+      }//parameter
+      fclose(out);
+    } //endelse
   }
   
   del_ft4dim(S,x1l,x1h,x2l,x2h,x3l,x3h,1,4);

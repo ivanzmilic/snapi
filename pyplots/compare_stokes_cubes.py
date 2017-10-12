@@ -5,6 +5,7 @@ import sys
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
+filename = sys.argv[3]
 
 temp = pyana.fzread(cube1_in)
 cube1 = temp["data"]
@@ -63,16 +64,6 @@ for j in range (1,N_y_panels+1):
 	plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
 	plt.colorbar(shrink=shrinkage)
 
-plt.savefig('testing_1',fmt='png')
-plt.savefig('testing_1.eps',fmt='eps')
-
-
-
-
-
-
-
-
-plt.clf()
-plt.cla()
+plt.savefig(filename,fmt='png')
+plt.savefig(filename+'.eps',fmt='eps')
 

@@ -206,6 +206,8 @@ public:
 
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
+  virtual int enforce_hequilibrium(); // enforces hydrostatic equilibrium
+
   virtual ~atmosphere(void);
 //
   virtual int32_t size(io_class&);
@@ -248,7 +250,7 @@ public:
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   
-  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*); // Same as obs_scalar_responses, except it works for full Stokes vector
+  virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
   
   // Debug:
@@ -260,6 +262,7 @@ public:
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
+  virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t){}; // LM fits trying out nodeless inversion
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
