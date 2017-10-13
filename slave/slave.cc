@@ -124,7 +124,8 @@ int main(int argc,char *argv[])
 
           if (to_invert){
 
-            class observable *fit=atmos->stokes_lm_fit(obs,el,az,mod);
+            //class observable *fit=atmos->stokes_lm_fit(obs,el,az,mod);
+            class observable *fit=atmos->stokes_lm_nodeless_fit(obs,el,az);
             rsz=atmos->size(io);
             rsz+=mod->size(io);
             rsz+=fit->size(io);

@@ -19,12 +19,11 @@ plt.plot(spectrum[:,0] * 1E8, spectrum[:,1])
 spectrum[:,0] *= 1E8
 spectrum[:,0] -= (spectrum[-1,0] + spectrum[0,0]) * 0.5 
 
-lambda_l = min(spectrum[:,0]+0.2)
-lambda_m = max(spectrum[:,0]-0.2)
+lambda_l = min(spectrum[:,0])
+lambda_m = max(spectrum[:,0])
 #spectrum[:,1] /= max(spectrum[:,1])
 
 mpl.rcParams['font.size'] = 10
-
 
 
 #plt.ion()
@@ -98,7 +97,7 @@ suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 h = h[0,:,0]
 #h/= 1E5
 
-hmax = -4.0
+hmax = -6.0
 hmin = h[-1]
 
 #yname = '$\log\,\\tau_{500}$'

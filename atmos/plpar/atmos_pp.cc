@@ -7,6 +7,7 @@
 #include "atmos.h"
 #include "pack.h"
 #include "const.h"
+#include "mem.h"
 
 #include "atmos_pp.h"
 #include "atmos_ppbez.h"
@@ -454,5 +455,29 @@ int atmos_pp::enforce_hequilibrium(){
 
 // ================================================================================================
 
+fp_t ** atmos_pp::calculate_dN_dT(){
 
+  fp_t ** dN_dT = ft2dim(x3l,x3h,x3l,x3h);
+
+  for (int x3k=x3l;x3k<=x3h;++x3k){ // perturbation
+
+    T[x1l][x2l][x3k] += delta_T * 0.5;
+    enforce_hequilibrium();
+
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      dN_dT[x3i][x3k] = Nt[x1l][x2l][x3i];
+
+    T[x1l][x2l][x3k] -= delta_T;
+    enforce_hequilibrium();
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      dN_dT[x3i][x3k] -= Nt[x1l][x2l][x3i];
+      dN_dT[x3i][x3k] /= delta_T;
+    }
+
+    T[x1l][x2l][x3k] += delta_T * 0.5;
+  }
+
+  return dN_dT;
+} 
 

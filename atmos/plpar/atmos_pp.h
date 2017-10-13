@@ -35,6 +35,7 @@ public:
   virtual int build_from_nodes(model*);
   virtual int interpolate_from_nodes(model*);
   virtual int enforce_hequilibrium();
+  virtual fp_t ** calculate_dN_dT(); 
 //
 //  virtual int08_t init(const char*,io_class*);
 //  virtual fp_t *obs(fp_t,fp_t,fp_t*,int32_t);

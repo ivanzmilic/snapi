@@ -206,8 +206,8 @@ public:
 
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
-  virtual int enforce_hequilibrium(); // enforces hydrostatic equilibrium
-  virtual fp_t ** calculate_dp_dT(); 
+  virtual int enforce_hequilibrium(){}; // enforces hydrostatic equilibrium
+  virtual fp_t ** calculate_dN_dT(){}; 
 
   virtual ~atmosphere(void);
 //
