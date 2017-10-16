@@ -33,7 +33,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 20;
+  int MAX_ITER = 10;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -339,6 +339,8 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
 
     // Apply the correction:
 
+    fp_t * corrections_svd = calculate_svd_corrections(full_stokes_responses,residual,lm_parameter,nlambda);
+
     // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
     reference_obs->add_scattered_light(scattered_light,qs_level);
@@ -410,6 +412,52 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   delete[](lambda+1);
   return obs_to_return;
 }
+
+// ========================================================================================================================================
+
+fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp_t * residual, fp_t lm_parameter, int nlambda){
+  
+  // What we do here: 
+  // We make a separate Hessian Matrix for each parameter we are fitting for.
+  // Each Hessian Matrix we will decompose via SVD, we will keep some amount parameters and then 
+  // we will use them to compute corrections. Hopefully this will work.
+  // Smashing them all together seems wierd.
+
+  int indices[2]={1,4}; // These are the parameters we fit: T and v
+  
+  for (int p=0;p<2;++p){
+    int param = indices[p];
+    fprintf(stderr,"Calculating correction for parameter : %d \n",param);
+    int ND = x3h-x3l+1;
+
+    fp_t ** J = ft2dim(1,nlambda,1,ND);
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      for (int l=1;l<=nlambda;++l)
+        J[l][x3i] = full_stokes_responses[param][x3i][l][1];
+
+    fp_t ** JT = transpose(J,nlambda,ND);
+    fp_t ** JTJ = multiply_with_transpose(J,nlambda,ND);
+    for (int i=1;i<=ND;++i) JTJ[i][i] *= (lm_parameter + 1.0);
+    fp_t * rhs = multiply_vector(JT, residual, ND, nlambda);
+    // Now we have set everything up. Time to do SVD:
+    fp_t ** U = JTJ;
+    fp_t ** V = ft2dim(1,ND,1,ND);
+    fp_t * w = new fp_t [ND]-1;
+
+    if(svdcmp(U,ND,ND,w,V)<0) io.msg(IOL_WARN,"SVD: singular matrix?\n");
+    for (int d=1;d<=ND;++d)
+      fprintf(stderr,"%d %d %e \n",param,d,w[d]);
+    del_ft2dim(J,1,nlambda,1,ND);
+    del_ft2dim(JT,1,ND,1,nlambda);
+    del_ft2dim(JTJ,1,ND,1,ND);
+    del_ft2dim(V,1,ND,1,ND);
+    delete[](w+1);
+  }
+
+
+  return 0;
+}
+
 
 // ========================================================================================================================================
 

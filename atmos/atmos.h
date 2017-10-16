@@ -264,6 +264,7 @@ public:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t); // LM fits trying out nodeless inversion
+  virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int);
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);

@@ -45,7 +45,7 @@ an_conv = np.zeros(dims)
 #pyana.fzwrite('compress_test.f0',an,0,'placeholder')
 
 for i in range(0,NP):
-	an_conv[i] = flt.medfilt(an[i],5)
+	an_conv[i] = flt.medfilt(an[i],3)
 	an_conv[i] = filters.gaussian_filter(an[i],sigma)
 
 pyana.fzwrite(file_out,an_conv,0,'bla')
