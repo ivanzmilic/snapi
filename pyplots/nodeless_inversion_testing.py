@@ -45,7 +45,7 @@ UV,wV,VV = np.linalg.svd(H_V)
 plt.clf()
 plt.cla()
 
-#for i in range(20,25):
+for i in range(0,5):
 	#w_inv = 1.0/w
 	#w_inv[i:] = 0.0
 	#w_inv[small] = 0.0;
@@ -65,8 +65,10 @@ plt.cla()
 	plt.plot(correction,label=str(i))
 	plt.ylim([-2000.0,2000.0])
 	
+	print 'TEMP'
+	for j in range(0,ND):
+		print j,correction[j]
 	
-
 	plt.subplot(122)
 	w_inv = 1.0/wV
 	w_inv[i:] = 0.0
@@ -77,6 +79,10 @@ plt.cla()
 	plt.plot(correction/1E5,label=str(i))
 	plt.legend()
 
+	print 'VEL'
+	for j in range(0,ND):
+		print j,correction[j]/1E5
+	
 
 plt.savefig('corrections.png')
 

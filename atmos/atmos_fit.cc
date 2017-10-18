@@ -239,7 +239,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-    noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-5;
+    noise[l] = sqrt(S_to_fit[1][1] * S_to_fit[1][1]) * 1E-5;
   
   fp_t **** full_stokes_responses;
   observable * current_obs;
@@ -304,7 +304,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
         int stf = stokes_to_fit[s-1];
         residual[(l-1)*n_stokes_to_fit+s] = S_to_fit[stf][l] - S_current[stf][l]; 
         metric += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
-          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
+          *ws[stf-1] / noise[l] / noise[l];
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
     }
     FILE * out;
@@ -313,33 +313,13 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
       for (int s=1;s<=n_stokes_to_fit;++s)
         fprintf(out,"%d %d %e \n",l,s,residual[(l-1)*n_stokes_to_fit+s]);
     fclose(out);
-  
-    fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,2*(x3h-x3l+1));
-    for (int l=1;l<=nlambda;++l) 
-      for (int s=1;s<=n_stokes_to_fit;++s){
-        int stf = stokes_to_fit[s-1];
-        for (int x3i=x3l;x3i<=x3h;++x3i){
-          J[(l-1)*n_stokes_to_fit+s][x3i-x3l+1] = full_stokes_responses[1][x3i][stf][l];
-          J[(l-1)*n_stokes_to_fit+s][(x3h-x3l+1)+x3i-x3l+1] = full_stokes_responses[4][x3i][stf][l];
-        }
-    }
-
-    fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
-    fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     
-    for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
-    // Now correct
-    fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
-    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
-
-    for (int i=1;i<=N_parameters;++i)
-      fprintf(stderr,"%d %e \n",i,correction[i]);
-
-    exit(1);
-
-    // Apply the correction:
-
     fp_t * corrections_svd = calculate_svd_corrections(full_stokes_responses,residual,lm_parameter,nlambda);
+
+    //exit(1);
+
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      T[x1l][x2l][x3i] += corrections_svd[x3i-x3l+1];
 
     // Compare again:
     observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
@@ -357,6 +337,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
+      fprintf(stderr,"GOOD!\n");
       lm_parameter /= 10.0;
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric_reference);
@@ -366,25 +347,23 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
           to_break = 1;
     }
     else{
+      fprintf(stderr,"GOOD!\n");
+      
       lm_parameter *= 10.0;
       corrected = 0;
     }
 
     if(corrected || to_break || iter==MAX_ITER){
       
-      //del_ft4dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
+      del_ft4dim(full_stokes_responses,1,7,x3l,x3h,1,nlambda,1,4);
       delete current_obs;
       del_ft2dim(S_current,1,4,1,nlambda);
     }
 
     delete[](residual+1);
-    del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
-    del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
-    del_ft2dim(J,1,nlambda*n_stokes_to_fit,1,N_parameters);
     del_ft2dim(S_reference,1,4,1,nlambda);
     delete reference_obs;
-    delete [](rhs+1);
-    delete [](correction+1);
+    delete [](corrections_svd+1);
     metric = 0.0;
 
     if (to_break)
@@ -424,8 +403,11 @@ fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp
   // Smashing them all together seems wierd.
 
   int indices[2]={1,4}; // These are the parameters we fit: T and v
+  int cutoff[2]={3,1};
+
+  fp_t * result;
   
-  for (int p=0;p<2;++p){
+  for (int p=0;p<1;++p){
     int param = indices[p];
     fprintf(stderr,"Calculating correction for parameter : %d \n",param);
     int ND = x3h-x3l+1;
@@ -445,17 +427,42 @@ fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp
     fp_t * w = new fp_t [ND]-1;
 
     if(svdcmp(U,ND,ND,w,V)<0) io.msg(IOL_WARN,"SVD: singular matrix?\n");
+    //for (int d=1;d<=ND;++d)
+    //  fprintf(stderr,"%d %d %e \n", p, d, w[d]);
+    
+    // Now make pseudoinverse:
+    fp_t ** U_T = transpose(U,ND,ND);
+    fp_t ** V_T = transpose(V,ND,ND);
+    fp_t ** W_inv = ft2dim(1,ND,1,ND);
+    memset(W_inv[1]+1,0,ND*ND*sizeof(fp_t));
+    for (int i=1;i<=cutoff[p];++i)
+      W_inv[i][i] = 1.0/w[i];
+    fp_t ** temp = multiply_square(W_inv,U_T,ND);
+    fp_t ** U_pseudoinverse = multiply_square(V,temp,ND);
+
+    fp_t * correction = multiply_vector(U_pseudoinverse,rhs,ND);
+
+    result = new fp_t[ND-1]-1;
+    memcpy(result+1,correction+1,ND*sizeof(fp_t));
+
     for (int d=1;d<=ND;++d)
-      fprintf(stderr,"%d %d %e \n",param,d,w[d]);
+      fprintf(stderr,"%d %d %e \n",param,d,correction[d]);
+
     del_ft2dim(J,1,nlambda,1,ND);
     del_ft2dim(JT,1,ND,1,nlambda);
     del_ft2dim(JTJ,1,ND,1,ND);
     del_ft2dim(V,1,ND,1,ND);
+    del_ft2dim(V_T,1,ND,1,ND);
+    del_ft2dim(U_T,1,ND,1,ND);
+    del_ft2dim(W_inv,1,ND,1,ND);
+    del_ft2dim(temp,1,ND,1,ND);
+    del_ft2dim(U_pseudoinverse,1,ND,1,ND);
     delete[](w+1);
+    delete[](correction+1);
   }
 
 
-  return 0;
+  return result;
 }
 
 
