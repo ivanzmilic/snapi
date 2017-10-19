@@ -16,10 +16,10 @@ import matplotlib
 #input_obs = sys.argv[3] #observations we have fitted, not necessary same dimension as fitted
 #input_lambdao = sys.argv[4] #lambda of original observations, same as above
 
-input_nodes = sys.argv[5] #inferred values of the nodes
-input_atmos = sys.argv[6] #inferred atmospheres
+input_nodes = sys.argv[1] #inferred values of the nodes
+input_atmos = sys.argv[2] #inferred atmospheres
 
-print_maps_here = sys.argv[7]
+print_maps_here = sys.argv[3]
 
 #Here we read the parameter/node map:
 temp = pyana.fzread(input_nodes)
@@ -35,7 +35,7 @@ atmospheres = a_read["data"]
 # NOW PLOT THE NODES ---------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2,3]
+T_nodes = [0,2,3]
 T_nodes_tau = [-2.7,-1.8,-0.9,0.0]
 #vt_nodes = [5]
 vs_nodes = [4,5,6]
@@ -44,7 +44,7 @@ B_nodes = [7,8,9]
 B_nodes_tau = [-3.0,-1.7,-0.5]
 theta_nodes = [10]
 
-panelsx=4
+panelsx=3
 panelsy=3
 
 Tmap = 'hot'
@@ -57,15 +57,17 @@ Dmap = 'coolwarm'
 plt.clf()
 plt.cla()
 
-defsize = 3
+defsize = 2.5
 barshrink=0.8
 plt.figure(figsize=[defsize*3*panelsx, defsize*panelsy])
+k =0
 
 # We will keep this simple:
-for i in range(T_nodes[0],T_nodes[-1]+1):
+for i in T_nodes:
 	m = np.mean(parameters[i])
 	s = np.std(parameters[i])
-	plt.subplot(panelsy,panelsx,i+1)
+	k=k+1
+	plt.subplot(panelsy,panelsx,k)
 	plt.imshow(parameters[i],origin='lower',cmap=Tmap,vmin=m-3*s,vmax=m+3*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Temperature at $\log\,\\tau$ = '+str(T_nodes_tau[i-T_nodes[0]]))

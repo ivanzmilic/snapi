@@ -1100,12 +1100,19 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     fp_t * derivatives = new fp_t [N_nodes] - 1;
 
     // at the top we want linear extrapolation:
-    derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
-    derivatives[1] *= (node_tau[2]-node_tau[1])/(node_tau[1]-tau_grid[1]); // HACK
+    if (is_temp){
+      derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
+      derivatives[1] *= (node_tau[2]-node_tau[1])/(node_tau[1]-tau_grid[1]); // HACK
+    }
+    else {
+      derivatives[1] = 0.0; // For other than T, we want to have flat distribution
+    }
     // at the bottom let's do the same as as FALC:
 
-    if (!is_temp)
+    if (!is_temp){
       derivatives[N_nodes] = (node_value[N_nodes] - node_value[N_nodes-1]) / (node_tau[N_nodes]-node_tau[N_nodes-1]);
+      derivatives[N_nodes] = 0.0; // For other than T we want to have flat distribution
+    }
     else {
 
       fp_t d_T_falc[11] = {1694.91525424, 2164.5021645, 2342.50815695, 2289.18827635, 2155.92183045,
