@@ -33,7 +33,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 10;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -68,12 +68,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   for (iter=1;iter<=MAX_ITER;++iter){
 
-    //fprintf(stderr, "iteration #%d\n",iter);
-    if (corrected){
-      
+    if (corrected){      
       // These quantities are only re-computed if the model has been modified:    
-      derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);
-      
+      derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       
       current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters); 
