@@ -27,8 +27,9 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
   // *** op = 3D opacity, for given freq and direction
   // *** em = 3D emissivity, for given freq and direction
   // t      = theta angle
-  // p      = phi angle, relevant only in 3D case, but ok we can use it here as well in case of Zeeman or whatever
-  // boundary = this specifies what kind of boundary condition are we using. Anything greater then zero means that intensity is specified and equal to boundary. 
+  // p      = phi angle, relevant only in 3D case, but ok we can use it here as well in case of Zeeman or whatever. 
+  // boundary = this specifies what kind of boundary condition are we using. Anything greater or equal to zero means 
+  //            the intensity is specified and equal that value
   //            if it is -1 then boundary is equal to local source function.
 
   fp_t *I = S[x1l][x2l]; // "Current" value of intensity. I.e. the one for this "column" 
@@ -45,7 +46,7 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
   int zh = (ct>0) ? x3h : x3l; // Where do we end.
 //
   // Boundary condition for the intensity.
-  I[zl]= (ct > 0) ? 0.0 : ee[zl] / oo[zl];
+  I[zl]= (ct > 0) ? 0.0 : ee[zl] / oo[zl]; // Can be improved to diffusion approximation. But rarely relevant.
 
   if(ct < 0 && boundary >= 0) // lower boundary condition
       I[zl] = boundary;
@@ -61,11 +62,15 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
       l[zl] = 0.0;
   }
 
+  // All the interpolations. Both for chi(op) as well for the source function are Bezier! 
+  // See de la Cruz Rodriguez & Piskunov (2013) for details! 
+
   // We will now compute the optical depth scale from here.
   // First derivatives of the opacity.
   int ND = x3h-x3l+1;
   fp_t * delta_tau = new fp_t [ND] - x3l;
   fp_t * opp_derivative = new fp_t [ND] - x3l;
+  // First  and last - linear derivative:
   opp_derivative[zl] = (oo[zl+dz] - oo[zl]) / (spatial_grid[zl+dz] - spatial_grid[zl]) * (-ct);
   opp_derivative[zh] = (oo[zh] - oo[zh-dz]) / (spatial_grid[zh] - spatial_grid[zh-dz]) * (-ct);
   for (int z = zl+dz;(z-zh)*dz<0;z+=dz){
@@ -114,7 +119,7 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
     
     fp_t tb = delta_tau[z];
     fp_t tf = delta_tau[z+dz];  
-    // APPROXIMATE TO CHECK WHAT IS THE PROBLEM:
+    // Debug in case you have problems - basically not needed:
     if (tau_switch_debug){
       fp_t dlb = (spatial_grid[z] - spatial_grid[z-dz]) / (-ct);
       fp_t dlf = (spatial_grid[z+dz] - spatial_grid[z]) / (-ct);
@@ -136,11 +141,8 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
       }
       else {
         w0 = (2.0 - etb * (tb * tb + 2.0 * tb + 2.0)) / tb / tb;
-        //if (z == 29)
-        //  printf("Formal  : %5.15e %5.15e %5.15e %5.15e \n",tb,etb, w0,(2.0 - etb * (tb * tb + 2.0 * tb + 2.0)) / tb / tb);
         w1 = 1.0 - 2.0 * (etb + tb - 1.0) / tb / tb; 
         w2 = 2.0 * (tb - 2.0  + etb * (tb + 2.0)) / tb / tb;
-        
       }
     }
     else { // Linear
@@ -155,18 +157,13 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
         w2 = 0.0;
       }
     }
-    //if (z == 29)
-      //printf("Formal : %5.15e %5.15e %5.15e \n",tf, tb, w0);
-
-    // Before actually performing formal solution we have to compute the value of the control point, which is a bit slower when you use
-    // BESSER but what can you do. (We can always revert o de la Cruz Rodriguez & Piskunov 2013)
+    // Before actually performing formal solution we have to compute the value of the control point.
     fp_t s0 = ee[z-dz] / oo[z-dz]; // Upwind source function.
     fp_t s1 = ee[z] / oo[z]; // Local source function.
     fp_t s2 = ee[z+dz] / oo [z+dz]; // Downwind source function.
     fp_t sp, C1, C0, C;
 
-    if (tf > bezier_delimiter){
-      
+    if (tf > bezier_delimiter){    
       C0 = s1 - tb/2.0*s_derivative[z];
       C1 = s0 + tb/2.0*s_derivative[z-dz];
       C = (C0+C1)*0.5;
@@ -177,22 +174,8 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
     // Finally, calculate the contribution to I_mu
     I[z] = I[z-dz] * etb + w0 * s0 + w1 * s1 + w2 * C;
 
-    //if (z == 29){
-    //  printf("Formal. \n");
-      //printf("%5.15e %5.15e %5.15e %5.15e %5.15e %5.15e %5.15e %5.15e \n", I[z-dz],etb,w0,s0,w1,s1,w2,C);
-    //  printf("%5.15e \n", w0);
-    //}
-
-    //printf("%d %e %e %e %e %e %e  \n", z, etb, I[z-dz], w0, s0, w1, s1, w2, C); 
-    
     // And compute the local operator
     if(L) l[z] = (w1+0.5*w2);
-    //if (L){
-    //  if (l[z] < 0){
-    //    printf("Error! l[z] = %e @ %d. w1 = %e w2 = %e tb = %e \n", l[z],z,w1,w2,tb);
-    //    exit(1);
-    //  }
-    //}
   }
 
   // Still the final point in the atmosphere is not covered here. That one we will compute in the linear approximation, both for 
@@ -217,10 +200,7 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
     // And compute the local operator:
     if(L) l[z] = w1;
   }
-
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-    //l[x3i] = 0.0;
-    
+  
   delete [](delta_tau+x3l);
   delete [](opp_derivative+x3l);
   delete [](s_derivative+x3l);

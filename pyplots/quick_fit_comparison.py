@@ -22,8 +22,8 @@ fit = temp["data"]
 
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
-#l = np.linspace(6301,6303,201)
-l = np.linspace(6300.8921,6303.2671,112)
+l = np.linspace(6301,6303,201)
+#l = np.linspace(6300.8921,6303.2671,112)
 
 for i in range (0,1):
 	for j in range(0,1):

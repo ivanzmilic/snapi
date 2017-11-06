@@ -145,6 +145,7 @@ int main(int argc,char *argv[])
           else {
 
             atmos->set_grid(1);
+            atmos->enforce_hequilibrium();
             class observable *synth=atmos->obs_stokes(el,az,lambda,nlambda);
             rsz=atmos->size(io);
             rsz+=synth->size(io);

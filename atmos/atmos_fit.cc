@@ -208,7 +208,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = 1E3;
-  fp_t lm_multiplicator = 2.0;
+  fp_t lm_multiplicator = 5.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
@@ -242,14 +242,6 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   for (int l=1;l<=nlambda;++l)
     noise[l] = sqrt(S_to_fit[1][1] * S_to_fit[1][l]) * 1E-2;
 
-  // DEBUG:
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    Vz[x1l][x2l][x3i] = 1E5;
-
-  //FILE * spectra_out;
-  //FILE * atmos_out;
-  //spectra_out = fopen("spectra_out.txt","w");
-  //atmos_out = fopen("atmos_out.txt","w");
   
   fp_t **** full_stokes_responses;
   observable * current_obs;

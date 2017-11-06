@@ -31,7 +31,7 @@
 #define delta_B 0.01
 #define delta_angle 0.0001 // In radians, this is a bit more than 0.1 degree. Hopefully it works. 
 
-#define n_air = 1.000277 // in the end we took the VALC approach, so n is still lambda dependent. 
+#define n_air 1.000277 // in the end we took the VALC approach, so n is still lambda dependent. 
 #define lambda_referent 5000.0E-8 // in cm <---- Bad idea to have this hardcoded here
 
 #define turn_on_damping 1.0 // Purely for debug purpopses

@@ -12,7 +12,7 @@ print Stokes_cube.shape
 #plot a mean stokes profile:
 I_mean = np.mean(Stokes_cube,axis=(0,1))
 #NL = 501
-NL = 501
+NL = 1001
 l = np.linspace(5892,5897,NL)
 #l = np.linspace(5887,5893.3,201)
 l/= 1E8
@@ -43,7 +43,7 @@ for s in range(1,4):
 
 mydpi = 80
 
-for l in range(251,350):
+for l in range(251,251):
 	plt.clf()
 	plt.cla()
 	plt.figure(figsize=(366/float(mydpi),1680/float(mydpi)),dpi=mydpi)
