@@ -1923,8 +1923,8 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   fp_t * solution = new fp_t [nmap];  
   Crout(nmap,M_to_solve, M_LU);
   solveCrout(nmap,M_LU,b,solution);
-  Crout(nmap,M_to_solve, M_LU);
-  solveCrout(nmap,M_LU,b,solution);
+  //Crout(nmap,M_to_solve, M_LU);
+  //solveCrout(nmap,M_LU,b,solution);
 
   fp_t delta = 0.0;
   for (int i = 0; i<nmap; ++i){

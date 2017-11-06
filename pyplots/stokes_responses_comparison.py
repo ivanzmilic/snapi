@@ -92,6 +92,26 @@ wvl = wvl[0][0]
 wvl *= 1E8
 wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 
+wvl_new = np.zeros(701)
+wvl_new[:300] = wvl[:300]
+wvl_new[300:] = wvl[600:]
+
+ra_new = np.zeros([4,N_Parameters,n_depths,701])
+ra_new[:,:,:,:300] = ra[:,:,:,:300]
+ra_new[:,:,:,300:] = ra[:,:,:,600:]
+
+
+wvl = wvl_new
+wvl[300:] -= wvl[300]-wvl[299]
+wvl_tick = wvl_new
+ra = ra_new
+
+lambda_l = wvl[0]
+lambda_m = wvl[-1]
+
+
+wlv = wvl_new
+
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 h = h[0,:,0]
@@ -102,7 +122,7 @@ hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(0,7):
+for p in range(0,4):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)
@@ -122,7 +142,7 @@ for p in range(0,7):
 		plt.xlim([lambda_l, lambda_m])
 		plt.ylim([hmin, hmax])
 		plt.title('$\mathrm{Stokes}\,I$')
-		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
+		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='hot')
 		plt.colorbar()
@@ -131,7 +151,7 @@ for p in range(0,7):
 		plt.xlim([lambda_l, lambda_m])
 		plt.ylim([hmin, hmax])
 		plt.title('$\mathrm{Stokes}\,Q$')
-		#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
+		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		#plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[1,p,:,:], vmin = v_min[1], vmax = v_max[1], rasterized=True,cmap='coolwarm')
 		plt.colorbar()
@@ -161,44 +181,44 @@ for p in range(0,7):
 
 	#then plot the stuff
 	plt.figure(1);
-	plt.figure(figsize=[10, 6.0])
+	plt.figure(figsize=[6.0, 6.0])
 	plt.clf()
 	plt.cla()
 	plt.subplot(221)
 	plt.xlim([lambda_l, lambda_m])
 	plt.ylim([hmin, hmax])
 	plt.title('$\mathrm{Stokes}\,I$')
-	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel(yname)
-	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='hot')
-	plt.colorbar()
-	plt.tight_layout()
-	plt.subplot(222)
-	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([hmin, hmax])
-	plt.title('$\mathrm{Stokes}\,Q$')
-	#plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	#plt.ylabel(yname)
-	plt.pcolormesh(wvl, h, ra[1,p,:,:], vmin = v_min[1], vmax = v_max[1], rasterized=True,cmap='coolwarm')
-	plt.colorbar()
-	plt.tight_layout()
-	plt.subplot(223)
-	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([hmin, hmax])
-	plt.title('$\mathrm{Stokes}\,U$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel(yname)
-	plt.pcolormesh(wvl, h, ra[2,p,:,:], vmin = v_min[2], vmax = v_max[2], rasterized=True,cmap='coolwarm')
-	plt.colorbar()
+	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='hot')
+	#plt.colorbar()
 	plt.tight_layout()
-	plt.subplot(224)
+	plt.subplot(222)
 	plt.xlim([lambda_l, lambda_m])
 	plt.ylim([hmin, hmax])
 	plt.title('$\mathrm{Stokes}\,V$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	#plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[3,p,:,:], vmin = v_min[3], vmax = v_max[3], rasterized=True,cmap='coolwarm')
-	plt.colorbar()
+	#plt.colorbar()
+	plt.tight_layout()
+	plt.subplot(223)
+	plt.xlim([lambda_l, lambda_m])
+	plt.ylim([hmin, hmax])
+	plt.title('$\mathrm{Stokes}\,Q$')
+	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
+	plt.ylabel(yname)
+	plt.pcolormesh(wvl, h, ra[1,p,:,:], vmin = v_min[1], vmax = v_max[1], rasterized=True,cmap='coolwarm')
+	#plt.colorbar()
+	plt.tight_layout()
+	plt.subplot(224)
+	plt.xlim([lambda_l, lambda_m])
+	plt.ylim([hmin, hmax])
+	plt.title('$\mathrm{Stokes}\,U$')
+	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
+	#plt.ylabel(yname)
+	plt.pcolormesh(wvl, h, ra[2,p,:,:], vmin = v_min[2], vmax = v_max[2], rasterized=True,cmap='coolwarm')
+	#plt.colorbar()
 	plt.tight_layout()
 	plt.savefig(output_file+'_analytical_responses_intensity_'+suffix[p]+'.eps', format='eps',bbox_inches='tight')
 

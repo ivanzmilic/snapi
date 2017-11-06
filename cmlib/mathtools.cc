@@ -9,6 +9,7 @@
 #include "types.h"
 #include "io.h"
 #include "uts.h"
+#include <math.h>
 
 #include "mathtools.h"
 #include "mem.h"
@@ -600,8 +601,16 @@ fp_t ** multiply_with_transpose(fp_t ** A, int N_rows, int N_columns){
     for (int j=1;j<=N_columns;++j)
       for (int k=1;k<=N_rows;++k)
         B[i][j] += A[k][i] * A[k][j];
-
   return B;
+}
+
+fp_t ** make_from_diagonal(fp_t * diag, int from, int to){
+  fp_t ** A = ft2dim(from,to,from,to);
+  int N=to-from+1;
+  memset(A[from]+from,0,N*N*sizeof(fp_t));
+  for (int i=from;i<=to;++i)
+    A[i][i] = diag[i];
+  return A;
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -621,6 +630,97 @@ fp_t * solve(fp_t ** A, fp_t * rhs, int from, int to){
   //delete[]solution;
 
   return solution-from;
+}
+
+fp_t * svd_treshold_square_matrix(fp_t ** A, int N, fp_t treshold, int return_w){
+
+  // This function tresholds matrix by doing SVD and setting all 
+  // singular values small than treshold to zero:
+
+  fp_t ** M = ft2dim(1,N,1,N);
+  memcpy(M[1]+1,A[1]+1,N*N*sizeof(fp_t));
+
+  fp_t ** V = ft2dim(1,N,1,N); // Actually transpose(V)!!!!
+  fp_t ** U = ft2dim(1,N,1,N); // U, matrix to decompose is first put here
+  fp_t ** temp; // temporary matrix, just because our matrix multiplication is awkward
+  fp_t  * w; // singular values
+  fp_t ** W; // diagonal matrix of singular values
+
+  memset(V[1]+1,0,N*N*sizeof(fp_t));
+  memcpy(U[1]+1,M[1]+1,N*N*sizeof(fp_t));
+  w = new fp_t[N]-1;
+  memset(w+1,0,N*sizeof(fp_t));
+  //if(svdcmp(U,N,N,w,V)<0) fprintf(stderr,"SVD: singular matrix?\n");
+  shifted_svd(U,N,N,w,V);
+  W = make_from_diagonal(w,1,N);
+  // Treshold
+  for (int i=1;i<=N;++i){
+    if (w[i] < treshold*w[1]) W[i][i] = 0.0;
+    else  W[i][i] = w[i];
+  }
+  temp = multiply_square(W,V,N);
+  del_ft2dim(M,1,N,1,N);
+  M = multiply_square(U,temp,N);
+  del_ft2dim(temp,1,N,1,N);
+  del_ft2dim(W,1,N,1,N);
+  del_ft2dim(U,1,N,1,N);
+  del_ft2dim(V,1,N,1,N);
+  if (!return_w)
+    delete[](w+1);
+
+  memcpy(A[1]+1,M[1]+1,N*N*sizeof(fp_t));
+  del_ft2dim(M,1,N,1,N);
+  if (return_w)
+    return w;
+  return 0;
+}
+
+fp_t * svd_invert_square_matrix(fp_t ** A, int N, fp_t treshold, int return_w){
+
+  // This function tresholds matrix by doing SVD and setting all 
+  // singular values small than treshold to zero. And it inverts it.
+
+  fp_t ** M = ft2dim(1,N,1,N);
+  memcpy(M[1]+1,A[1]+1,N*N*sizeof(fp_t));
+
+  fp_t ** V = ft2dim(1,N,1,N); // Actually transpose(V)!!!!
+  fp_t ** U = ft2dim(1,N,1,N); // U, matrix to decompose is first put here
+  fp_t ** temp; // temporary matrix, just because our matrix multiplication is awkward
+  fp_t  * w; // singular values
+  fp_t ** W; // diagonal matrix of singular values
+
+  memset(V[1]+1,0,N*N*sizeof(fp_t));
+  memcpy(U[1]+1,M[1]+1,N*N*sizeof(fp_t));
+  w = new fp_t[N]-1;
+  memset(w+1,0,N*sizeof(fp_t));
+  //if(svdcmp(U,N,N,w,V)<0) fprintf(stderr,"SVD: singular matrix?\n");
+  shifted_svd(U,N,N,w,V);
+  W = make_from_diagonal(w,1,N);
+  // Treshold
+  for (int i=1;i<=N;++i){
+    if (w[i] < treshold*w[1]) W[i][i] = 0.0;
+    else  W[i][i] = 1.0/w[i];
+  }
+  fp_t ** V_T = transpose(V,N,N);
+  fp_t ** U_T = transpose(U,N,N);
+  temp = multiply_square(W,U_T,N);
+  del_ft2dim(M,1,N,1,N);
+  M = multiply_square(V_T,temp,N);
+  del_ft2dim(temp,1,N,1,N);
+  del_ft2dim(W,1,N,1,N);
+  del_ft2dim(U,1,N,1,N);
+  del_ft2dim(V,1,N,1,N);
+  del_ft2dim(U_T,1,N,1,N);
+  del_ft2dim(V_T,1,N,1,N);
+  if (!return_w)
+    delete[](w+1);
+
+  memcpy(A[1]+1,M[1]+1,N*N*sizeof(fp_t));
+  del_ft2dim(M,1,N,1,N);
+  if (return_w)
+    return w;
+  return 0;
+
 }
 
 
@@ -1331,4 +1431,556 @@ int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_paramet
   } // each parameter
   
   del_ft2dim(S_temp,1,4,1,N_lambda);
+}
+
+int convolve_response_with_gauss_tau(fp_t *** response, int x3l, int x3h, fp_t * taugrid, int nlambda, fp_t sigma){
+  
+  fp_t * temp = new fp_t [x3h-x3l+1]-1;
+  for (int s=1;s<=4;++s)
+    for (int l=1;l<=nlambda;++l){
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        temp[x3i-x3l+1] = response[x3i][s][l];
+      convolve_with_gauss(temp,taugrid,x3h-x3l+1,sigma);
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        response[x3i][s][l] = temp[x3i-x3l+1];
+    }
+}
+
+int convolve_with_gauss(fp_t * y, fp_t * x, int N, fp_t sigma){
+
+  fp_t * x_fine; 
+  int N_fine;
+
+  // Guesstimate N_lambda_fine;
+  fp_t x_min = x[1] - 10.0*sigma;
+  fp_t x_max = x[N] + 10.0*sigma;
+  N_fine = int((x_max-x_min)/(0.2*sigma))+1;
+  fp_t step = (x_max-x_min) / (N_fine-1);
+  x_fine = new fp_t [N_fine]-1;
+  for (int i=1;i<=N_fine;++i){ 
+    x_fine[i] = x_min + (i-1)*step;
+  }
+
+  // Set-up a array for  keeping the kernel:
+  fp_t * kernel = new fp_t [N_fine]-1;
+
+  // Interpolate S to the existing grid:
+  fp_t * y_interpolated;
+  y_interpolated = new fp_t[N_fine]-1;
+  for (int i=1;i<=N_fine;++i)
+    y_interpolated[i] = interpol_1d(y+1,x+1,N,x_fine[i]);
+
+  fp_t * w_x = new fp_t [N_fine]-1;
+  w_x[1] = w_x[N_fine] = step*0.5; 
+  for (int i=2;i<N_fine;++i)
+    w_x[i] = step;
+
+  for (int i=1;i<=N;++i){
+
+    fp_t temp_to_integrate[N_fine]; 
+    // Compute kernel:
+    for (int ii=1;ii<=N_fine;++ii)
+      kernel[ii] = 0.56418958354/sigma * exp(-(x_fine[ii]-x[i])*(x_fine[ii]-x[i])/sigma/sigma);
+    y[i] = 0.0;
+    for (int ii=1;ii<=N_fine;++ii){
+      temp_to_integrate[ii] = y_interpolated[ii] * kernel[ii];
+      y[i] += temp_to_integrate[ii] * w_x[ii];
+    }
+  }
+      
+  //cleanup:
+  delete[](w_x+1);
+  delete[](x_fine+1);
+  delete[](kernel+1);
+  delete[](y_interpolated+1);
+
+  return 0;
+}
+
+int set_to_zero_except(fp_t * x, int N, int to_keep){
+  int * indices = new int [N];
+  for (int i=0;i<N;++i)
+    indices[i] = i;
+  stupid_sort_indices_by_abs(x, indices, N);
+
+  if (to_keep <= N){
+    for (int i=to_keep;i<N;++i)
+      x[i] = 0.0;
+  }
+  delete[]indices;
+}
+
+int stupid_sort_indices_by_abs(fp_t * A, int * indices, int N){
+  fp_t * A_temp = new fp_t [N];
+  memcpy(A_temp,A,N*sizeof(fp_t));
+  for (int i=0;i<N;++i){
+    indices[i] = index_of_max_abs(A_temp,N);
+    A_temp[indices[i]] = 0.0;
+  }
+  delete[]A_temp;
+}
+
+int index_of_max_abs(fp_t * x, int N){
+  int max = 0;
+  for (int i=1;i<N;++i)
+    if (fabs(x[i])>fabs(x[max]))
+      max = i;
+  return max;
+}
+
+// ================================================================================================
+// Legendre polynomials:
+
+// n = 0
+double P0(double x){
+  return 1.0 ;
+}
+
+// n = 1
+double P1(double x){
+  return x ;
+}
+
+// n = 2
+double P2(double x){
+  return ((3.0 * x*x) - 1.0) * 0.5 ;
+}
+
+/*
+ *  Pn(x)
+ */
+double Pn(unsigned int n, double x){
+  if (n == 0){
+    return P0(x);
+  }
+  else if (n == 1){
+    return P1(x) ;
+  }
+  else if (n == 2){
+    return P2(x) ;
+  }  
+  if (x == 1.0){
+    return 1.0 ;
+  }
+  if (x == -1.0){
+    return ((n % 2 == 0) ? 1.0 : -1.0) ;
+  }
+  if ((x == 0.0) && (n % 2)){
+    return 0.0 ;
+  }
+
+  double pnm1(P2(x)) ;
+  double pnm2(P1(x)) ;
+  double pn(pnm1) ;
+
+  for (unsigned int l = 3 ; l <= n ; l++){ 
+    pn = (((2.0 * (double)l) - 1.0) * x * pnm1 - 
+      (((double)l - 1.0) * pnm2)) / (double)l ;
+    pnm2 = pnm1;
+    pnm1 = pn;
+  }
+    return pn ;
+}
+
+fp_t * project_on_legendre_basis(fp_t * y, fp_t * x, int N, int up_to){
+
+  // First reduce x to interval -1,1
+
+  fp_t * x_shrinked = new fp_t [N];
+  for (int i=0;i<N;++i)
+    x_shrinked[i] = -1.0 + 2.0*i/(N-1); // we do not need x if we assume y is on 
+                                        // equidistant grid
+  fp_t * alpha = new fp_t[up_to];
+
+  fp_t ** M = ft2dim(1,N,1,up_to);
+
+  for (int i=1;i<=N;++i)
+    for (int j=1;j<=up_to;++j)
+      M[i][j] = Pn(j-1,x_shrinked[i-1]);
+
+  fp_t ** MT = transpose(M,N,up_to);
+  fp_t ** MTM = multiply_with_transpose(M,N,up_to);
+  fp_t * rhs = multiply_vector(MT,y-1,up_to,N);
+
+  // Now we solve the linear system MT M x = MT b, using LU decomposition because
+  // SVD is for weaklings.
+
+  // Let us invert the matrix: 
+  fp_t * M_to_solve = MTM[1] +1;
+  fp_t * M_LU = new fp_t [up_to * up_to];  
+  
+  Crout(up_to,M_to_solve, M_LU);
+  solveCrout(up_to,M_LU,rhs+1,alpha);
+               
+  del_ft2dim(M,1,N,1,up_to);
+  del_ft2dim(MT,1,up_to,1,N);
+  del_ft2dim(MTM,1,up_to,1,up_to);
+  delete [](M_LU);                                       
+  delete [](rhs+1);
+  delete []x_shrinked;
+  return alpha;
+}
+
+fp_t * reconstruct_from_legendre_basis(fp_t * coeffs, fp_t * x, int N, int up_to){
+
+  // First reduce x to interval -1,1
+
+  fp_t * x_shrinked = new fp_t [N];
+  fp_t shrink = (x[N-1] - x[0])/2.0;
+  for (int i=0;i<N;++i)
+    x_shrinked[i] = x[i]/shrink;
+  fp_t shift = -1.0 - x_shrinked[0];
+  for (int i=0;i<N;++i){
+    x_shrinked[i] += shift;
+  }
+
+  fp_t * y = new fp_t [N];
+  memset(y,0,N*sizeof(fp_t));
+
+  for (int i=0;i<N;++i)
+    for (int j=0;j<up_to;++j)
+      y[i] += coeffs[j]*Pn(j,x_shrinked[i]);
+  
+  delete []x_shrinked;
+  return y;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// SVD libraries:
+/* 
+ * svdcomp - SVD decomposition routine. 
+ * Takes an mxn matrix a and decomposes it into udv, where u,v are
+ * left and right orthogonal transformation matrices, and d is a 
+ * diagonal matrix of singular values.
+ *
+ * This routine is adapted from svdecomp.c in XLISP-STAT 2.1 which is 
+ * code from Numerical Recipes adapted by Luke Tierney and David Betz.
+ *
+ * Input to dsvd is as follows:
+ *   a = mxn matrix to be decomposed, gets overwritten with u
+ *   m = row dimension of a
+ *   n = column dimension of a
+ *   w = returns the vector of singular values of a
+ *   v = returns the right orthogonal transformation matrix
+*/
+
+
+static double PYTHAG(double a, double b)
+{
+    double at = fabs(a), bt = fabs(b), ct, result;
+
+    if (at > bt)       { ct = bt / at; result = at * sqrt(1.0 + ct * ct); }
+    else if (bt > 0.0) { ct = at / bt; result = bt * sqrt(1.0 + ct * ct); }
+    else result = 0.0;
+    return(result);
+}
+
+int shifted_svd(fp_t ** U, int M, int N, fp_t * w, fp_t ** V){
+
+  // Basically just copy the arrays to ones indexed from zero.
+  // svd than copy back
+  fp_t ** U_s = ft2dim(0,M-1,0,N-1);
+  fp_t * w_s = new fp_t [N];
+  fp_t ** V_s = ft2dim(0,N-1,0,N-1);
+  memcpy(U_s[0],U[1]+1,M*N*sizeof(fp_t));
+  memset(w_s,0,N*sizeof(fp_t));
+  memset(V_s[0],0,N*N*sizeof(fp_t));
+
+  dsvd(U_s, M, N, w_s,V_s);
+  
+  memcpy(U[1]+1,U_s[0],M*N*sizeof(fp_t));
+  memcpy(w+1,w_s,N*sizeof(fp_t));
+  memcpy(V[1]+1,V_s[0],N*N*sizeof(fp_t));
+
+  del_ft2dim(U_s,0,M-1,0,N-1);
+  delete[]w_s;
+  del_ft2dim(V_s,0,N-1,0,N-1);
+  
+  return 0;
+}
+
+
+int dsvd(double **a, int m, int n, double *w, double **v)
+{
+    int flag, i, its, j, jj, k, l, nm;
+    double c, f, h, s, x, y, z;
+    double anorm = 0.0, g = 0.0, scale = 0.0;
+    double *rv1;
+
+    if (m < n) 
+    {
+        fprintf(stderr, "#rows must be > #cols \n");
+        return(0);
+    }
+  
+    rv1 = (double *)malloc((unsigned int) n*sizeof(double));
+
+/* Householder reduction to bidiagonal form */
+    for (i = 0; i < n; i++) 
+    {
+        /* left-hand reduction */
+        l = i + 1;
+        rv1[i] = scale * g;
+        g = s = scale = 0.0;
+        if (i < m) 
+        {
+            for (k = i; k < m; k++) 
+                scale += fabs((double)a[k][i]);
+            if (scale) 
+            {
+                for (k = i; k < m; k++) 
+                {
+                    a[k][i] = (a[k][i]/scale);
+                    s += (a[k][i] * a[k][i]);
+                }
+                f = a[i][i];
+                g = -sign(sqrt(s), f);
+                h = f * g - s;
+                a[i][i] = (f - g);
+                if (i != n - 1) 
+                {
+                    for (j = l; j < n; j++) 
+                    {
+                        for (s = 0.0, k = i; k < m; k++) 
+                            s += (a[k][i] * a[k][j]);
+                        f = s / h;
+                        for (k = i; k < m; k++) 
+                            a[k][j] += (f * a[k][i]);
+                    }
+                }
+                for (k = i; k < m; k++) 
+                    a[k][i] = (a[k][i]*scale);
+            }
+        }
+        w[i] = (scale * g);
+    
+        /* right-hand reduction */
+        g = s = scale = 0.0;
+        if (i < m && i != n - 1) 
+        {
+            for (k = l; k < n; k++) 
+                scale += fabs(a[i][k]);
+            if (scale) 
+            {
+                for (k = l; k < n; k++) 
+                {
+                    a[i][k] = (a[i][k]/scale);
+                    s += (a[i][k] * a[i][k]);
+                }
+                f = a[i][l];
+                g = -sign(sqrt(s), f);
+                h = f * g - s;
+                a[i][l] = (f - g);
+                for (k = l; k < n; k++) 
+                    rv1[k] = a[i][k] / h;
+                if (i != m - 1) 
+                {
+                    for (j = l; j < m; j++) 
+                    {
+                        for (s = 0.0, k = l; k < n; k++) 
+                            s += (a[j][k] * a[i][k]);
+                        for (k = l; k < n; k++) 
+                            a[j][k] += (s * rv1[k]);
+                    }
+                }
+                for (k = l; k < n; k++) 
+                    a[i][k] = (a[i][k]*scale);
+            }
+        }
+        anorm = max(anorm, (fabs(w[i]) + fabs(rv1[i])));
+    }
+  
+    /* accumulate the right-hand transformation */
+    for (i = n - 1; i >= 0; i--) 
+    {
+        if (i < n - 1) 
+        {
+            if (g) 
+            {
+                for (j = l; j < n; j++)
+                    v[j][i] = ((a[i][j] / a[i][l]) / g);
+                    /* double division to avoid underflow */
+                for (j = l; j < n; j++) 
+                {
+                    for (s = 0.0, k = l; k < n; k++) 
+                        s += (a[i][k] * v[k][j]);
+                    for (k = l; k < n; k++) 
+                        v[k][j] += (s * v[k][i]);
+                }
+            }
+            for (j = l; j < n; j++) 
+                v[i][j] = v[j][i] = 0.0;
+        }
+        v[i][i] = 1.0;
+        g = rv1[i];
+        l = i;
+    }
+  
+    /* accumulate the left-hand transformation */
+    for (i = n - 1; i >= 0; i--) 
+    {
+        l = i + 1;
+        g = w[i];
+        if (i < n - 1) 
+            for (j = l; j < n; j++) 
+                a[i][j] = 0.0;
+        if (g) 
+        {
+            g = 1.0 / g;
+            if (i != n - 1) 
+            {
+                for (j = l; j < n; j++) 
+                {
+                    for (s = 0.0, k = l; k < m; k++) 
+                        s += (a[k][i] * a[k][j]);
+                    f = (s / a[i][i]) * g;
+                    for (k = i; k < m; k++) 
+                        a[k][j] += (f * a[k][i]);
+                }
+            }
+            for (j = i; j < m; j++) 
+                a[j][i] = (a[j][i]*g);
+        }
+        else 
+        {
+            for (j = i; j < m; j++) 
+                a[j][i] = 0.0;
+        }
+        ++a[i][i];
+    }
+
+    /* diagonalize the bidiagonal form */
+    for (k = n - 1; k >= 0; k--) 
+    {                             /* loop over singular values */
+        for (its = 0; its < 30; its++) 
+        {                         /* loop over allowed iterations */
+            flag = 1;
+            for (l = k; l >= 0; l--) 
+            {                     /* test for splitting */
+                nm = l - 1;
+                if (fabs(rv1[l]) + anorm == anorm) 
+                {
+                    flag = 0;
+                    break;
+                }
+                if (fabs(w[nm]) + anorm == anorm) 
+                    break;
+            }
+            if (flag) 
+            {
+                c = 0.0;
+                s = 1.0;
+                for (i = l; i <= k; i++) 
+                {
+                    f = s * rv1[i];
+                    if (fabs(f) + anorm != anorm) 
+                    {
+                        g = w[i];
+                        h = PYTHAG(f, g);
+                        w[i] = h; 
+                        h = 1.0 / h;
+                        c = g * h;
+                        s = (- f * h);
+                        for (j = 0; j < m; j++) 
+                        {
+                            y = a[j][nm];
+                            z = a[j][i];
+                            a[j][nm] = (y * c + z * s);
+                            a[j][i] = (z * c - y * s);
+                        }
+                    }
+                }
+            }
+            z = w[k];
+            if (l == k) 
+            {                  /* convergence */
+                if (z < 0.0) 
+                {              /* make singular value nonnegative */
+                    w[k] = (-z);
+                    for (j = 0; j < n; j++) 
+                        v[j][k] = (-v[j][k]);
+                }
+                break;
+            }
+            if (its >= 30) {
+                free((void*) rv1);
+                fprintf(stderr, "No convergence after 30,000! iterations \n");
+                return(0);
+            }
+    
+            /* shift from bottom 2 x 2 minor */
+            x = w[l];
+            nm = k - 1;
+            y = w[nm];
+            g = rv1[nm];
+            h = rv1[k];
+            f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
+            g = PYTHAG(f, 1.0);
+            f = ((x - z) * (x + z) + h * ((y / (f + sign(g, f))) - h)) / x;
+          
+            /* next QR transformation */
+            c = s = 1.0;
+            for (j = l; j <= nm; j++) 
+            {
+                i = j + 1;
+                g = rv1[i];
+                y = w[i];
+                h = s * g;
+                g = c * g;
+                z = PYTHAG(f, h);
+                rv1[j] = z;
+                c = f / z;
+                s = h / z;
+                f = x * c + g * s;
+                g = g * c - x * s;
+                h = y * s;
+                y = y * c;
+                for (jj = 0; jj < n; jj++) 
+                {
+                    x = v[jj][j];
+                    z = v[jj][i];
+                    v[jj][j] = (x * c + z * s);
+                    v[jj][i] = (z * c - x * s);
+                }
+                z = PYTHAG(f, h);
+                w[j] = z;
+                if (z) 
+                {
+                    z = 1.0 / z;
+                    c = f * z;
+                    s = h * z;
+                }
+                f = (c * g) + (s * y);
+                x = (c * y) - (s * g);
+                for (jj = 0; jj < m; jj++) 
+                {
+                    y = a[jj][j];
+                    z = a[jj][i];
+                    a[jj][j] = (y * c + z * s);
+                    a[jj][i] = (z * c - y * s);
+                }
+            }
+            rv1[l] = 0.0;
+            rv1[k] = f;
+            w[k] = x;
+        }
+    }
+    free((void*) rv1);
+    return(1);
+}
+
+// ==============================================================================================================================
+
+fp_t chi_sqr(fp_t ** obs, fp_t ** fit, fp_t * noise, int nlambda, int * stokes_to_fit, int n_stokes_to_fit, fp_t * ws){
+
+  fp_t chisqr = 0.0;
+
+  for (int l=1;l<=nlambda;++l)
+      for (int s=1;s<=n_stokes_to_fit;++s){
+        int stf = stokes_to_fit[s-1];
+        fp_t res = obs[stf][l] - fit[stf][l]; 
+        chisqr += res * res *ws[stf-1] / noise[l] / noise[l];
+  }
+
+  return chisqr;
 }

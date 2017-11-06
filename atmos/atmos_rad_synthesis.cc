@@ -253,7 +253,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
                 em_pert[l][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
                 em_pert[l][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
       }
-      for (int param=1;param<=7;++param){
+      for (int param=1;param<=4;++param){
         formal_pert_numerical(dS, op[l], em[l], op_pert[l][param], em_pert[l][param], theta, phi, boundary_condition_for_rt);
   
         if (param == 2)

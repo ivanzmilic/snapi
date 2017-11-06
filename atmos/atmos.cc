@@ -450,6 +450,29 @@ fp_t ** atmosphere::return_as_array(){
   return atmos;
 }
 
+int atmosphere::copy_from_array(fp_t ** array){
+  
+  int ND = x3h-x3l+1;
+  int NP = 12;
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    int i=x3i-x3l+1;
+    tau_referent[x1l][x2l][x3i] = -pow(10.0,array[1][i]);
+    x3[x3i] = array[2][i];
+    T[x1l][x2l][x3i] = array[3][i];
+    Nt[x1l][x2l][x3i] = array[4][i];
+    Ne[x1l][x2l][x3i] = array[5][i];
+    op_referent[x1l][x2l][x3i] = array[7][i];
+    //array[8][i] = B;
+    Vt[x1l][x2l][x3i] = array[9][i];
+    Vz[x1l][x2l][x3i] = array[10][i];
+    //array[11][i] = acos(Bz[x1l][x2l][x3i]/B);
+    //array[12][i] = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3l]);
+  }
+  return 0;
+}
+
+
+
 int atmosphere::build_from_nodes(model *){
   return 0;
 }

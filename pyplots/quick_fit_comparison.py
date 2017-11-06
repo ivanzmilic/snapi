@@ -12,19 +12,24 @@ temp = pyana.fzread(obs_in)
 obs = temp["data"]
 temp = pyana.fzread(fit_in)
 fit = temp["data"]
-temp = pyana.fzread(atmos_in)
-atmos = temp["data"]
-temp = pyana.fzread(nodes_in)
-nodes = temp["data"]
 
-l = np.linspace(5887.7914658,5897.18400651,967)
-l = l[0:957]
+#print fit[0,0,0]
+#print obs[0,0,0]
+#temp = pyana.fzread(atmos_in)
+#atmos = temp["data"]
+#temp = pyana.fzread(nodes_in)
+#nodes = temp["data"]
 
-for i in range (136,137):
-	for j in range(66,67):
+#l = np.linspace(5887.7914658,5897.18400651,967)
+#l = l[0:957]
+#l = np.linspace(6301,6303,201)
+l = np.linspace(6300.8921,6303.2671,112)
+
+for i in range (0,1):
+	for j in range(0,1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[8.0, 4.5])
+		plt.figure(figsize=[8.0, 5.5])
 
 		plt.subplot(211)
 		plt.plot(l,obs[0,0,0]/max(obs[0,0,0]),color='red',label='Observation')

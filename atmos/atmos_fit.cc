@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-3
+#define DELTA 1E-17
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -112,7 +112,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
 
-
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
@@ -205,15 +204,17 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   int nlambda = spectrum_to_fit->get_n_lambda_to_fit();
   fp_t * lambda = spectrum_to_fit->get_lambda_to_fit();
 
-  set_grid(1); // contrary to the previous function, we can work in h scale
+  set_grid(1); // we are still working in tau scale
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E-3;
+  fp_t lm_parameter = 1E3;
+  fp_t lm_multiplicator = 2.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 1;
+  int MAX_ITER = 50;
+  int INITIAL_ITER = 15;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -233,10 +234,22 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     stokes_to_fit[counter] = s+1;
     ++counter;
   }
+  fp_t * logtau_grid = new fp_t [x3h+x3l+1]-x3l;
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    logtau_grid[x3i] = log10(-rt_grid[x3i]);
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-    noise[l] = sqrt(S_to_fit[1][1] * S_to_fit[1][1]) * 1E-5;
+    noise[l] = sqrt(S_to_fit[1][1] * S_to_fit[1][l]) * 1E-2;
+
+  // DEBUG:
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    Vz[x1l][x2l][x3i] = 1E5;
+
+  //FILE * spectra_out;
+  //FILE * atmos_out;
+  //spectra_out = fopen("spectra_out.txt","w");
+  //atmos_out = fopen("atmos_out.txt","w");
   
   fp_t **** full_stokes_responses;
   observable * current_obs;
@@ -245,10 +258,27 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_nodeless_fit : entering iterative procedure\n");
   
+  int NT=5; // Number of T nodes
+  int NV=1; // Number of V nodes
+
+  // Project the starting atmosphere on legendre basis:
+  int ND=x3h-x3l+1;
+  fp_t * alpha_T = project_on_legendre_basis(T[x1l][x2l]+x3l,logtau_grid+x3l,ND,NT);
+  fp_t * T_r = reconstruct_from_legendre_basis(alpha_T,logtau_grid+x3l,ND,NT);
+  fp_t * alpha_V = project_on_legendre_basis(Vz[x1l][x2l]+x3l,logtau_grid+x3l,ND,NV);
+  fp_t * V_r = reconstruct_from_legendre_basis(alpha_V,logtau_grid+x3l,ND,NV);
+  memcpy(T[x1l][x2l]+x3l,T_r,ND*sizeof(fp_t));
+  memcpy(Vz[x1l][x3l]+x3l,V_r,ND*sizeof(fp_t));
+  
+  delete[]T_r;delete[]V_r;
+  delete[]alpha_T;
+  delete[]alpha_V;
+  enforce_hequilibrium();
+
+
   for (iter=1;iter<=MAX_ITER;++iter){
 
-    
-    //fprintf(stderr, "iteration #%d\n",iter);
+    fprintf(stderr, "iteration #%d\n",iter);
     if (corrected){
       
       // These quantities are only re-computed if the model has been modified:    
@@ -256,6 +286,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
       memset(full_stokes_responses[1][x3l][1]+1,0,7*(x3h-x3l+1)*nlambda*4*sizeof(fp_t));
       
       current_obs = obs_stokes_responses(theta, phi, lambda, nlambda,0,0,full_stokes_responses); 
+
       fp_t ** dN_dT = calculate_dN_dT();
         for (int x3k=x3l;x3k<=x3h;++x3k)
           for (int x3i=x3l;x3i<=x3h;++x3i)
@@ -271,26 +302,8 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
           convolve_response_with_gauss(full_stokes_responses[p]+x3l-1,lambda,(x3h-x3l+1),nlambda,spectral_broadening);   
       }
       S_current = current_obs->get_S(1,1);
-
-      // Maybe print out full responses just in case:
-      FILE * out;
-      out = fopen("stokes_intensity_responses_analytical.txt", "w");
-        for (int param=1;param<=7;++param){
-          for (int x3i=x3l;x3i<=x3h;++x3i){
-            for (int l=1;l<=nlambda;++l){
-              fp_t loc = 0;
-              if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
-              fprintf(out,"%10.10e %10.10e", loc, lambda[l]);
-              for (int s=1;s<=4;++s)
-                fprintf(out," %10.10e", full_stokes_responses[param][x3i][l][s]);
-              fprintf(out," \n");
-          } //lambda
-        } //x3i
-      }//parameter
-      fclose(out);
-      current_obs->write("spectrum.dat",io,1,1);
     }
-    
+   
     fp_t * residual;
     residual = new fp_t [nlambda*n_stokes_to_fit]-1; 
     
@@ -304,51 +317,227 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
           *ws[stf-1] / noise[l] / noise[l];
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
     }
-    FILE * out;
-    out = fopen("residual.dat","w");
-    for (int l=1;l<=nlambda;++l)
-      for (int s=1;s<=n_stokes_to_fit;++s)
-        fprintf(out,"%d %d %e \n",l,s,residual[(l-1)*n_stokes_to_fit+s]);
-    fclose(out);
+
+    printf("Starting metric = %f \n",metric);
+
+    fp_t ** old_atmos = return_as_array();
+
+    // What if I project corrections on legendre basis immediately
+     
+    observable * reference_obs;
+    fp_t ** S_reference;
+
+    fp_t BIC, BIC_TP, BIC_VP, BIC_TM, BIC_VM;
+    fp_t amplify = 1.0;
+
+    int NT_old = NT; int NV_old = NV;
     
-    fp_t * corrections_svd = calculate_svd_corrections(full_stokes_responses,residual,lm_parameter,nlambda);
-
-    //exit(1);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      T[x1l][x2l][x3i] += corrections_svd[x3i-x3l+1];
-
-    // Compare again:
-    observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    reference_obs->add_scattered_light(scattered_light,qs_level);
-    if (spectral_broadening)
-      reference_obs->spectral_convolve(spectral_broadening,1,1);  
-    fp_t ** S_reference = reference_obs->get_S(1,1);
-
-    fp_t metric_reference = 0.0;
-    for (int l=1;l<=nlambda;++l)
-      for (int s=1;s<=n_stokes_to_fit;++s){
-        int stf=stokes_to_fit[s-1];
-        metric_reference += (S_to_fit[stf][l] - S_reference[stf][l]) * (S_to_fit[stf][l] - S_reference[stf][l])
-         *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
+    // For the proper one:
+    fp_t ** corrections = calculate_legendre_corrections(full_stokes_responses,residual, lm_parameter, nlambda,NT,NV); 
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += corrections[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += corrections[2][x3i-x3l+1];
     }
-    if (metric_reference < metric){
+    polish_extreme_values();    
+    enforce_hequilibrium();
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    S_reference = reference_obs->get_S(1,1);
+    fp_t metric_reference = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
+    BIC = metric_reference + (NT+NV)*log(nlambda)*amplify;
+    del_ft2dim(S_reference,1,4,1,nlambda);
+    delete reference_obs;
+    
+    // One more T mode:
+    NT=NT_old+1;
+    fp_t ** corrections_TP = calculate_legendre_corrections(full_stokes_responses,residual, lm_parameter, nlambda,NT,NV);
+    copy_from_array(old_atmos);
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += corrections_TP[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += corrections_TP[2][x3i-x3l+1];
+    }
+    polish_extreme_values();    
+    enforce_hequilibrium();
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    S_reference = reference_obs->get_S(1,1);
+    fp_t metric_reference_TP = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
+    BIC_TP = metric_reference_TP + (NT+NV)*log(nlambda)*amplify;
+    del_ft2dim(S_reference,1,4,1,nlambda);
+    delete reference_obs;
+    NT=NT_old;
+
+    // One V mode more:
+    NV=NV_old+1;
+    fp_t ** corrections_VP = calculate_legendre_corrections(full_stokes_responses,residual, lm_parameter, nlambda,NT,NV);
+    copy_from_array(old_atmos);
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += corrections_VP[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += corrections_VP[2][x3i-x3l+1];
+    }
+    polish_extreme_values();    
+    enforce_hequilibrium();
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    S_reference = reference_obs->get_S(1,1);
+    fp_t metric_reference_VP = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
+    BIC_VP = metric_reference_VP + (NT+NV)*log(nlambda)*amplify;
+    del_ft2dim(S_reference,1,4,1,nlambda);
+    delete reference_obs;
+    NV=NV_old;
+
+    // One less T mode:
+    NT = (NT_old-1 > 0 ) ? NT_old-1 : NT_old;
+
+    // Projecting part:
+    copy_from_array(old_atmos);
+    alpha_T = project_on_legendre_basis(T[x1l][x2l]+x3l,logtau_grid+x3l,ND,NT);
+    T_r = reconstruct_from_legendre_basis(alpha_T,logtau_grid+x3l,ND,NT);
+    memcpy(T[x1l][x2l]+x3l,T_r,ND*sizeof(fp_t));
+    delete[]T_r;
+    delete[]alpha_T;
+    // -----------------------------------------------------------------------------
+
+    fp_t ** corrections_TM = calculate_legendre_corrections(full_stokes_responses,residual, lm_parameter, nlambda,NT,NV); 
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += corrections_TM[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += corrections_TM[2][x3i-x3l+1];
+    }
+    polish_extreme_values();    
+    enforce_hequilibrium();
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    S_reference = reference_obs->get_S(1,1);
+    fp_t metric_reference_TM = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
+    BIC_TM = metric_reference_TM + (NT+NV)*log(nlambda)*amplify;
+    del_ft2dim(S_reference,1,4,1,nlambda);
+    delete reference_obs;
+    NT = NT_old;
+
+    // One less V mode:
+    NV = (NV_old-1 > 0 ) ? NV_old-1 : NV_old;
+
+    // Projecting part:
+    copy_from_array(old_atmos);
+    alpha_V = project_on_legendre_basis(Vz[x1l][x2l]+x3l,logtau_grid+x3l,ND,NV);
+    V_r = reconstruct_from_legendre_basis(alpha_V,logtau_grid+x3l,ND,NV);
+    memcpy(Vz[x1l][x2l]+x3l,V_r,ND*sizeof(fp_t));
+    delete[]V_r;
+    delete[]alpha_V;
+    // -----------------------------------------------------------------------------
+    
+    fp_t ** corrections_VM = calculate_legendre_corrections(full_stokes_responses,residual, lm_parameter, nlambda,NT,NV);
+    
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += corrections_VM[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += corrections_VM[2][x3i-x3l+1];
+    }
+    polish_extreme_values();    
+    enforce_hequilibrium();
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    S_reference = reference_obs->get_S(1,1);
+    fp_t metric_reference_VM = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
+    BIC_VM = metric_reference_VM + (NT+NV)*log(nlambda)*amplify;
+    del_ft2dim(S_reference,1,4,1,nlambda);
+    delete reference_obs;
+    NV = NV_old;
+
+    printf("Old metric = %f \n",metric);
+    printf("%d %d %f %f %f %f %f \n", NT, NV, BIC,BIC_TP,BIC_VP,BIC_TM,BIC_VM);
+    printf("%d %d %f %f %f %f %f \n", NT, NV, metric_reference,metric_reference_TP,
+      metric_reference_VP,metric_reference_TM,metric_reference_VM);
+
+    fp_t BICS[5] = {BIC,BIC_TP,BIC_VP,BIC_TM,BIC_VM};
+    int indices[5] = {0,1,2,3,4};
+
+    stupid_sort_indices_by_abs(BICS,indices,5);
+    
+    fp_t ** correctiones[] = {corrections,corrections_TP,corrections_VP,corrections_TM,corrections_VM};
+    fp_t  metrics[] = {metric_reference,metric_reference_TP,metric_reference_VP,metric_reference_TM,metric_reference_VM};
+  
+    fp_t ** final_corrections;
+    fp_t final_metric;
+
+    int NT_test=NT, NV_test=NV;
+    
+    if (iter > INITIAL_ITER){
+
+      int best = indices[4];
+      if (best == 1)
+        NT_test = NT_old+1;
+      else if (best == 2)
+        NV_test = NV_old+1;
+      else if (best == 3)
+        NT_test = (NT_old-1 > 0) ? NT_old-1 : NT_old;
+      else if (best == 4)
+        NV_test = (NV_old-1 > 0) ? NV_old-1 : NV_old;
+      
+      final_corrections = correctiones[indices[4]];
+      final_metric = metrics[indices[4]];
+    }
+    else {
+      final_corrections = corrections;
+      final_metric = metric_reference;
+    }
+    // Apply corrections again
+    copy_from_array(old_atmos);
+    // Project again:
+    printf("NT_test = %d NV_test = %d \n",NT_test,NV_test);
+    if (NT_test < NT_old || NV_test < NV_old){ 
+      alpha_T = project_on_legendre_basis(T[x1l][x2l]+x3l,logtau_grid+x3l,ND,NT_test);
+      T_r = reconstruct_from_legendre_basis(alpha_T,logtau_grid+x3l,ND,NT_test);
+      alpha_V = project_on_legendre_basis(Vz[x1l][x2l]+x3l,logtau_grid+x3l,ND,NV_test);
+      V_r = reconstruct_from_legendre_basis(alpha_V,logtau_grid+x3l,ND,NV_test);
+      memcpy(T[x1l][x2l]+x3l,T_r,ND*sizeof(fp_t));
+      memcpy(Vz[x1l][x3l]+x3l,V_r,ND*sizeof(fp_t));
+      delete[]T_r;delete[]V_r;
+      delete[]alpha_T;
+      delete[]alpha_V;
+    }
+
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      T[x1l][x2l][x3i] += final_corrections[1][x3i-x3l+1];
+      Vz[x1l][x2l][x3i] += final_corrections[2][x3i-x3l+1];
+    }
+    enforce_hequilibrium();
+
+    del_ft2dim(corrections,1,2,x3l,x3h);
+    del_ft2dim(corrections_TP,1,2,x3l,x3h);
+    del_ft2dim(corrections_VP,1,2,x3l,x3h);
+    del_ft2dim(corrections_TM,1,2,x3l,x3h);
+    del_ft2dim(corrections_VM,1,2,x3l,x3h);
+    
+    // Compare again:
+    
+    if (final_metric < metric){
       // Everything is ok, and we can decrease lm_parameter:
       fprintf(stderr,"GOOD!\n");
-      lm_parameter /= 10.0;
+      lm_parameter /= lm_multiplicator;
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric_reference);
+      del_ft2dim(old_atmos,1,12,x3l,x3h);
       if (n_chi_to_track >=3)
         if ((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1] < DELTA &&
           (chi_to_track[n_chi_to_track-3] - chi_to_track[n_chi_to_track-2]) / chi_to_track[n_chi_to_track-2] < DELTA)
           to_break = 1;
     }
     else{
-      fprintf(stderr,"GOOD!\n");
-      
-      lm_parameter *= 10.0;
+      fprintf(stderr,"BAD!\n");
+      copy_from_array(old_atmos);
+      del_ft2dim(old_atmos,1,12,x3l,x3h);
+      lm_parameter *= lm_multiplicator;
       corrected = 0;
     }
+
+    if (iter > INITIAL_ITER && corrected){
+      NT = NT_test;
+      NV = NV_test;
+    }
+
+     // ===========================================================================
+    //for (int x3i=x3l;x3i<=x3h;++x3i)
+    //  fprintf(atmos_out,"%e %e %e \n",log10(-tau_referent[x1l][x2l][x3i]),T[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
+
+    //for (int l=1;l<=nlambda;++l)
+    //  fprintf(spectra_out, "%e %e\n",lambda[l],S_current[1][l]);
+    // ===========================================================================
+
 
     if(corrected || to_break || iter==MAX_ITER){
       
@@ -356,11 +545,8 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
       delete current_obs;
       del_ft2dim(S_current,1,4,1,nlambda);
     }
-
+    
     delete[](residual+1);
-    del_ft2dim(S_reference,1,4,1,nlambda);
-    delete reference_obs;
-    delete [](corrections_svd+1);
     metric = 0.0;
 
     if (to_break)
@@ -375,8 +561,6 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   if (chi_to_track)
     delete[]chi_to_track;
 
-  //model_to_fit->print();
-
   // Full version:
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
@@ -384,14 +568,37 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
   obs_to_return->add_scattered_light(scattered_light,qs_level);
   if (spectral_broadening)
     obs_to_return->spectral_convolve(spectral_broadening,1,1);
+
+  //fclose(atmos_out);
+  //fclose(spectra_out);
       
   delete[](lambda+1);
+  delete[](logtau_grid+x3l);
   return obs_to_return;
 }
 
 // ========================================================================================================================================
 
-fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp_t * residual, fp_t lm_parameter, int nlambda){
+observable* atmosphere::forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,
+    fp_t scattered_light, fp_t qs, fp_t spectral_broadening){
+
+  // proceduralized version which performs, in turn
+  // 1) Stokes synthesis from current atmosphere
+  // 2) Adds scattered light from the quiet Sun
+  // 3) Convolves with instrumental profile
+  // 4) Calculates chisq
+
+  observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
+  reference_obs->add_scattered_light(scattered_light,qs);
+  if (spectral_broadening)
+    reference_obs->spectral_convolve(spectral_broadening,1,1);  
+  
+  return reference_obs;
+}
+
+// ========================================================================================================================================
+
+fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp_t * residual, fp_t lm_parameter, int nlambda, int param){
   
   // What we do here: 
   // We make a separate Hessian Matrix for each parameter we are fitting for.
@@ -399,67 +606,219 @@ fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp
   // we will use them to compute corrections. Hopefully this will work.
   // Smashing them all together seems wierd.
 
-  int indices[2]={1,4}; // These are the parameters we fit: T and v
-  int cutoff[2]={3,1};
-
   fp_t * result;
+  fp_t cutoff = 0.0;
+  if (param == 1) cutoff = 1E-5;
+  if (param == 4) cutoff = 1E-2;
   
-  for (int p=0;p<1;++p){
-    int param = indices[p];
-    fprintf(stderr,"Calculating correction for parameter : %d \n",param);
-    int ND = x3h-x3l+1;
+  fprintf(stderr,"Calculating correction for parameter : %d \n",param);
+  int ND = x3h-x3l+1;
 
-    fp_t ** J = ft2dim(1,nlambda,1,ND);
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      for (int l=1;l<=nlambda;++l)
-        J[l][x3i] = full_stokes_responses[param][x3i][l][1];
+  fp_t ** J = ft2dim(1,nlambda,1,ND);
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l)
+      J[l][x3i] = full_stokes_responses[param][x3i][l][1];
 
-    fp_t ** JT = transpose(J,nlambda,ND);
-    fp_t ** JTJ = multiply_with_transpose(J,nlambda,ND);
-    for (int i=1;i<=ND;++i) JTJ[i][i] *= (lm_parameter + 1.0);
-    fp_t * rhs = multiply_vector(JT, residual, ND, nlambda);
-    // Now we have set everything up. Time to do SVD:
-    fp_t ** U = JTJ;
-    fp_t ** V = ft2dim(1,ND,1,ND);
-    fp_t * w = new fp_t [ND]-1;
+  fp_t ** JT = transpose(J,nlambda,ND);
+  fp_t ** JTJ = multiply_with_transpose(J,nlambda,ND);
+  for (int i=1;i<=ND;++i) JTJ[i][i] *= (lm_parameter + 1.0);
+  fp_t * rhs = multiply_vector(JT, residual, ND, nlambda);
+  // Now we have set everything up. Time to do SVD:
+  fp_t ** U = JTJ;
+  fp_t ** V = ft2dim(1,ND,1,ND);
+  fp_t * w = new fp_t [ND]-1;
 
-    if(svdcmp(U,ND,ND,w,V)<0) io.msg(IOL_WARN,"SVD: singular matrix?\n");
-    //for (int d=1;d<=ND;++d)
-    //  fprintf(stderr,"%d %d %e \n", p, d, w[d]);
-    
-    // Now make pseudoinverse:
-    fp_t ** U_T = transpose(U,ND,ND);
-    fp_t ** V_T = transpose(V,ND,ND);
-    fp_t ** W_inv = ft2dim(1,ND,1,ND);
-    memset(W_inv[1]+1,0,ND*ND*sizeof(fp_t));
-    for (int i=1;i<=cutoff[p];++i)
+  if(svdcmp(U,ND,ND,w,V)<0) io.msg(IOL_WARN,"SVD: singular matrix?\n");
+  
+  // Now make pseudoinverse:
+  fp_t ** U_T = transpose(U,ND,ND);
+  fp_t ** V_T = transpose(V,ND,ND);
+  fp_t ** W_inv = ft2dim(1,ND,1,ND);
+  memset(W_inv[1]+1,0,ND*ND*sizeof(fp_t));
+  for (int i=1;i<=ND;++i)
+    if (w[i]/w[1] > cutoff)
       W_inv[i][i] = 1.0/w[i];
-    fp_t ** temp = multiply_square(W_inv,U_T,ND);
-    fp_t ** U_pseudoinverse = multiply_square(V,temp,ND);
 
-    fp_t * correction = multiply_vector(U_pseudoinverse,rhs,ND);
+  fp_t ** temp = multiply_square(W_inv,U_T,ND);
+  fp_t ** U_pseudoinverse = multiply_square(V,temp,ND);
 
-    result = new fp_t[ND-1]-1;
-    memcpy(result+1,correction+1,ND*sizeof(fp_t));
+  fp_t * correction = multiply_vector(U_pseudoinverse,rhs,ND);
 
-    for (int d=1;d<=ND;++d)
-      fprintf(stderr,"%d %d %e \n",param,d,correction[d]);
+  result = new fp_t[ND]-1;
+  memcpy(result+1,correction+1,ND*sizeof(fp_t));
 
-    del_ft2dim(J,1,nlambda,1,ND);
-    del_ft2dim(JT,1,ND,1,nlambda);
-    del_ft2dim(JTJ,1,ND,1,ND);
-    del_ft2dim(V,1,ND,1,ND);
-    del_ft2dim(V_T,1,ND,1,ND);
-    del_ft2dim(U_T,1,ND,1,ND);
-    del_ft2dim(W_inv,1,ND,1,ND);
-    del_ft2dim(temp,1,ND,1,ND);
-    del_ft2dim(U_pseudoinverse,1,ND,1,ND);
-    delete[](w+1);
-    delete[](correction+1);
+  del_ft2dim(J,1,nlambda,1,ND);
+  del_ft2dim(JT,1,ND,1,nlambda);
+  del_ft2dim(JTJ,1,ND,1,ND);
+  del_ft2dim(V,1,ND,1,ND);
+  del_ft2dim(V_T,1,ND,1,ND);
+  del_ft2dim(U_T,1,ND,1,ND);
+  del_ft2dim(W_inv,1,ND,1,ND);
+  del_ft2dim(temp,1,ND,1,ND);
+  del_ft2dim(U_pseudoinverse,1,ND,1,ND);
+  delete[](w+1);
+  delete[](correction+1);
+  return result;
+}
+
+// ========================================================================================================================================
+
+fp_t ** atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp_t * residual, fp_t lm_parameter, int nlambda){
+  
+  // Overloaded version of the function from above. 
+  // This one uses the approach that SIR and Andres are using. 
+  // We decompose the matrix somehow.
+
+  // Scale responses:
+  fp_t T_scale = 5E3;
+  fp_t V_scale = 1E5;
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      full_stokes_responses[1][x3i][l][1] *= T_scale;
+      full_stokes_responses[4][x3i][l][1] *= V_scale;
   }
 
+  int ND = x3h-x3l+1;
+  fp_t ** J = ft2dim(1,nlambda,1,2*ND);
+  for (int l=1;l<=nlambda;++l)
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      J[l][x3i-x3l+1] = full_stokes_responses[1][x3i][l][1];
+      J[l][x3i-x3l+1+ND] = full_stokes_responses[4][x3i][l][1];
+  }
 
-  return result;
+  fp_t ** JT = transpose(J,nlambda,2*ND);
+  fp_t ** JTJ = multiply_with_transpose(J,nlambda,2*ND);
+
+  for (int i=1;i<=2*ND;++i) JTJ[i][i] *= (lm_parameter + 1.0);
+  fp_t * rhs = multiply_vector(JT, residual, 2*ND, nlambda);
+
+  // Separate the Hessian (JTJ) in two parts (in general case it 
+  // will be in one part for each fitted parameter).
+  fp_t ** Hessian_tmp = ft2dim(1,2*ND,1,2*ND);
+  fp_t ** Hessian_vel = ft2dim(1,2*ND,1,2*ND);
+  memset(Hessian_tmp[1]+1,0,4*ND*ND*sizeof(fp_t));
+  memset(Hessian_vel[1]+1,0,4*ND*ND*sizeof(fp_t));
+  for (int i=1;i<=ND;++i)
+    for (int j=1;j<=2*ND;++j){
+      Hessian_tmp[i][j] = JTJ[i][j];
+      Hessian_vel[i+ND][j] = JTJ[i+ND][j];
+  }
+
+  fp_t * w;
+  w = svd_treshold_square_matrix(Hessian_tmp,2*ND,1E-3,1);
+  //for (int i=1;i<=2*ND;++i)
+  //  fprintf(stderr,"%d %e \n",i,w[i]);
+  delete[](w+1);
+  w = svd_treshold_square_matrix(Hessian_vel,2*ND,1E-2,1);
+  //for (int i=1;i<=2*ND;++i)
+  //  fprintf(stderr,"%d %e \n",i,w[i]);
+  delete[](w+1);
+  
+  for (int i=1;i<=2*ND;++i)
+    for (int j=1;j<=2*ND;++j)
+      JTJ[i][j] = Hessian_tmp[i][j] + Hessian_vel[i][j];
+
+  w = svd_invert_square_matrix(JTJ,2*ND,1E-12,1);
+  //for (int i=1;i<=2*ND;++i)
+  //  fprintf(stderr,"%d %e \n",i,w[i]);
+  delete[](w+1);
+
+  fp_t * x = multiply_vector(JTJ,rhs,2*ND);
+  fp_t ** corrections = ft2dim(1,2,1,ND);
+  for (int i=1;i<=ND;++i){
+    x[i] *= T_scale;
+    x[i+ND] *= V_scale;
+    corrections[1][i] = x[i];
+    corrections[2][i] = x[i+ND];
+  }
+  delete[](x+1);
+
+  // De-scale the responses:
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      full_stokes_responses[1][x3i][l][1] /= T_scale;
+      full_stokes_responses[4][x3i][l][1] /= V_scale;
+  }
+  return corrections;
+}
+
+fp_t ** atmosphere::calculate_legendre_corrections(fp_t **** full_stokes_responses, fp_t * residual, fp_t lm_parameter, int nlambda,
+  int NT, int NV){
+
+  // Automatically asume that the logtau grid is equdistantly spaced and that the 
+  // legendre polynomials are defined on the whole range
+  fp_t * x = new fp_t[x3h-x3l+1]-x3l;
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    x[x3i] = -1.0 + (x3i-x3l)*2.0/(x3h-x3l);
+  }
+
+  fp_t scale_T = 5E3;
+  fp_t scale_v = 1E5;
+
+  // Scale response function:
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      full_stokes_responses[1][x3i][l][1] *= scale_T; // T
+      full_stokes_responses[4][x3i][l][1] *= scale_v; // v
+    }
+
+  int N_components[2] = {NT,NV}; // # of components for T and V
+
+  int N_parameters = N_components[0] + N_components[1]; // total number of parameters
+
+  fp_t ** J = ft2dim(1,nlambda,1,N_parameters); // Jacobian
+  memset(J[1]+1,0,nlambda*N_parameters*sizeof(fp_t));
+
+  for (int i=1;i<=N_components[0];++i) // Calculate derivatives w.r.t. each Legendre polynomial
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t P = Pn(i-1,x[x3i]); // legendre pol
+      for (int l=1;l<=nlambda;++l)
+        J[l][i] += full_stokes_responses[1][x3i][l][1] * P;
+  }
+  for (int i=1;i<=N_components[1];i++) // Calculate derivatives w.r.t. each Legendre polynomial
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fp_t P = Pn(i,x[x3i]); // legendre pol
+      for (int l=1;l<=nlambda;++l)
+        J[l][i+N_components[0]] += full_stokes_responses[4][x3i][l][1] * P;
+  }
+  
+  fp_t ** JT = transpose(J,nlambda,N_parameters);
+  fp_t ** JTJ = multiply_with_transpose(J,nlambda,N_parameters);
+
+  for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
+  fp_t * rhs = multiply_vector(JT, residual, N_parameters, nlambda);
+
+  del_ft2dim(JT,1,N_parameters,1,nlambda);
+  del_ft2dim(J,1,nlambda,1,N_parameters);
+
+  svd_invert_square_matrix(JTJ,N_parameters,0,0);
+
+  fp_t * corrections_legendre_basis = multiply_vector(JTJ,rhs,N_parameters);
+
+  del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
+  delete[](rhs+1);
+
+  fp_t ** corrections = ft2dim(1,2,x3l,x3h);
+  memset(corrections[1]+x3l,0,2*(x3h-x3l+1)*sizeof(fp_t));
+
+  for (int i=1;i<=N_components[0];++i)
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      corrections[1][x3i] += Pn(i-1,x[x3i]) * corrections_legendre_basis[i]*scale_T;
+  for (int i=1;i<=N_components[1];++i)
+    for (int x3i=x3l;x3i<=x3h;++x3i)
+      corrections[2][x3i] += Pn(i-1,x[x3i]) * corrections_legendre_basis[i+N_components[0]]*scale_v;
+
+  delete[](corrections_legendre_basis+1);
+  delete[](x+x3l);
+
+  // Unscale response function:
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      full_stokes_responses[1][x3i][l][1] /= scale_T; // T
+      full_stokes_responses[4][x3i][l][1] /= scale_v; // v
+    }
+
+  return corrections;
 }
 
 
@@ -1105,165 +1464,24 @@ fp_t * atmosphere::calculate_svd_corrections(fp_t **** full_stokes_responses, fp
 
  // ===============================================================================================
 
+int atmosphere::polish_extreme_values(){
+  // This function just checks for bad values of physical parameters and puts them
+  // back in the boundaries
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for (int x2i=x2l;x2i<=x2h;++x2i)
+      for (int x3i=x3l;x3i<=x3h;++x3i){
+        if (T[x1i][x2i][x3i] < 3400.0) T[x1i][x2i][x3i] = 3400.0;
+        if (T[x1i][x2i][x3i] > 12000.0) T[x1i][x2i][x3i] = 12000.0;
+        if (Vz[x1i][x2i][x3i] < -2E6) Vz[x1i][x2i][x3i] = -2E6;
+        if (Vz[x1i][x2i][x3i] > 2E6) Vz[x1i][x2i][x3i] = 2E6;
+
+  }
+  return 0;
+}
+
+ // ===============================================================================================
+
  /////////////////////
  // OLD:::::
 
- observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){
-
-  // Perform LM fitting and return the best fitting spectrum
-  // First extract the spectrum from the observation:
-  fp_t ** stokes_vector_to_fit = spectrum_to_fit->get_S(1,1);
-  
-  // This is a starting model
-  int N_temp_nodes = 4;
-  int N_vt_nodes = 1;
-  int N_parameters = N_temp_nodes + N_vt_nodes;
-  model * current_model = model_new(N_temp_nodes,N_vt_nodes,0,0);
-    
-  // Temperature nodes:
-  fp_t * temp_nodes_tau = new fp_t [N_temp_nodes] -1;
-  fp_t * temp_nodes_temp = new fp_t [N_temp_nodes] -1;
-  temp_nodes_tau[1] = -4.0;
-  temp_nodes_tau[2] = -2.5;
-  temp_nodes_tau[3] = -1.0;
-  temp_nodes_tau[4] = 0.5;
-    
-  temp_nodes_temp[1] = 6000.0;
-  temp_nodes_temp[2] = 7000.0;
-  temp_nodes_temp[3] = 8000.0;
-  temp_nodes_temp[4] = 8500.0;
-    
-  current_model->set_temp_nodes(temp_nodes_tau, temp_nodes_temp);
-
-  // Vt nodes:
-  fp_t * vt_nodes_tau = new fp_t [N_vt_nodes] -1;
-  fp_t * vt_nodes_vt = new fp_t [N_vt_nodes] -1;
-  vt_nodes_tau[1] = 0;
-  vt_nodes_vt[1] = 1.5E5;
-  current_model->set_vt_nodes(vt_nodes_tau,vt_nodes_vt);
-
-  fp_t metric = 0.0;
-  fp_t lm_parameter = 1E-3;
-  FILE * output;
-  output = fopen("fitting_log.txt", "w");
-
-  int iter = 0;
-  int MAX_ITER = 1;
-
-  io.msg(IOL_INFO, "atmosphere::scalar_lm_fit : entering iterative procedure\n");
-
-  FILE * detailed_log;
-  detailed_log = fopen("detailed_log.txt", "w");
-  
-  for (iter = 1; iter <=MAX_ITER; ++iter){
-  
-    fp_t ** derivatives_to_parameters_num = ft2dim(1,N_parameters,1,nlambda);
-    memset(derivatives_to_parameters_num[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
-    fp_t ** derivatives_to_parameters = ft2dim(1,N_parameters,1,nlambda);
-    memset(derivatives_to_parameters[1]+1,0,N_parameters*nlambda*sizeof(fp_t));
-    fp_t * residual = new fp_t [nlambda] - 1;
-      
-    // Start by computing Chisq, and immediately the response of the current spectrum to the nodes
-
-    observable *current_obs = obs_scalar_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters);
-    /*obs_scalar_num_responses_to_nodes_tau(current_model, theta, phi, lambda, nlambda, derivatives_to_parameters_num);
-          
-    for (int i=1;i<=N_parameters;++i){
-      fprintf(detailed_log,"NODE# %d \n", i);
-      for (int l=1;l<=nlambda;++l)
-        fprintf(detailed_log,"%d %e %e %e %e \n", l, lambda[l-1]*1E8, derivatives_to_parameters_num[i][l], derivatives_to_parameters[i][l],
-          (derivatives_to_parameters[i][l] - derivatives_to_parameters_num[i][l]) / derivatives_to_parameters_num[i][l]);
-    }*/
-
-    fp_t ** S = current_obs->get_S(1,1);
-
-    for (int l=1;l<=nlambda;++l){
-      residual[l] = stokes_vector_to_fit[1][l] - S[1][l]; 
-      //printf("l = %d residual = %e \n", l, residual[l]);
-      metric += residual[l] * residual[l] / 1E22;
-    }
-    fprintf(detailed_log, "Iteration # : %d Chisq : %e \n", iter, metric);
-    // Now we need to correct:
-    fp_t ** J = ft2dim(1,nlambda,1,N_parameters);
-    for (int i=1;i<=N_parameters;++i) for (int l=1;l<=nlambda;++l) J[l][i] = derivatives_to_parameters[i][l];
-    fp_t ** J_transpose = transpose(J,nlambda,N_parameters);
-    fp_t ** JTJ = multiply_with_transpose(J, nlambda, N_parameters);
-    for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
-    // Now correct
-    fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, nlambda);
-    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
-
-    fprintf(detailed_log, "Jacobian, residual and finally, correction: \n");
-    for (int i=1;i<=N_parameters;++i){
-      for (int j=1;j<=N_parameters;++j)
-        fprintf(detailed_log, " %e ", JTJ[i][j]);
-      fprintf(detailed_log, " %e %e \n", residual[i], correction[i]);
-    }
-
-    for (int i=1;i<=N_parameters;++i)
-      current_model->perturb_node_value(i, correction[i]);
-    current_model->print();
-
-    build_from_nodes(current_model);
-    observable *reference_obs = obs_scalar_tau(theta, phi, lambda, nlambda);
-    fp_t ** S_reference = reference_obs->get_S(1,1);
-
-    // Compute new chi sq
-    fp_t metric_reference = 0.0;
-    for (int l=1;l<=nlambda;++l){
-        metric_reference += (stokes_vector_to_fit[1][l] - S_reference[1][l]) * (stokes_vector_to_fit[1][l] - S_reference[1][l]) / 1E22;
-      }
-      fprintf(output, "%d %e \n", iter, metric);
-      if (metric_reference < metric){
-        // Everything is ok, and we can decrease lm_parameter:
-        lm_parameter /= 10.0;
-        //fprintf(output, "Good step! Decreasing lm parameter.\n");
-      }
-      else{
-        // We are in the more non-linear regime, so we want linearization and hence, gradient descent
-        lm_parameter *= 10.0;
-        // And un-modify:
-        for (int i=1;i<=N_parameters;++i)
-        current_model->perturb_node_value(i, -1.0 * correction[i]);
-      //fprintf(output, "Bad step! Undoing modification and increasing lm parameter.\n");
-      }
-
-    if (iter == MAX_ITER){
-      FILE * result;
-      result = fopen("spectrum_fitted.dat", "w");
-      for (int l=1;l<=nlambda;++l)
-        fprintf(result, "%e %e %e \n", lambda[l-1], stokes_vector_to_fit[1][l], S_reference[1][l]);
-      fclose(result);
-    }
-
-    del_ft2dim(J_transpose,1,N_parameters,1,nlambda);
-    del_ft2dim(JTJ,1,N_parameters,1,N_parameters);
-    del_ft2dim(J,1,nlambda,1,N_parameters);
-    del_ft2dim(derivatives_to_parameters,1,N_parameters,1,nlambda);
-    del_ft2dim(derivatives_to_parameters_num,1,N_parameters,1,nlambda);
-    del_ft2dim(S,1,1,1,nlambda);
-    del_ft2dim(S_reference,1,1,1,nlambda);
-    delete current_obs;
-    delete reference_obs;
-
-    delete [](residual+1);
-    delete [](rhs+1);
-    delete [](correction+1);
-    metric = 0.0;
-    // if (to_break < converged)
-     //break;
-  }
-
-  fclose(output);
-  fclose(detailed_log);
-
-  io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
-
-  // Clean-up:
-  del_ft2dim(stokes_vector_to_fit,1,1,1,nlambda);
-  delete [](temp_nodes_tau+1);
-  delete [](temp_nodes_temp+1);
-  delete current_model;
-
-  return 0;
-}
+ observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){};

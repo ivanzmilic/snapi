@@ -250,6 +250,8 @@ public:
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
+  virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening);
+  
   
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 
@@ -264,7 +266,12 @@ public:
   virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t); // LM fits trying out nodeless inversion
-  virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int);
+  virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int, int);
+  virtual fp_t ** calculate_svd_corrections(fp_t ****, fp_t *, fp_t, int);
+  virtual fp_t ** calculate_legendre_corrections(fp_t ****, fp_t *, fp_t, int, int, int);
+
+  virtual int polish_extreme_values();
+  //virtual int interpolate_with_legendre(fp_t ***,int, int);
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
@@ -296,6 +303,7 @@ public:
   };
   int get_N_depths();
   fp_t ** return_as_array();
+  int copy_from_array(fp_t **);
 //
 // ----------------------------------------------------------------------------------------------------------------
 // -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------

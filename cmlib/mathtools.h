@@ -21,6 +21,7 @@ fp_t * multiply_with_vector(fp_t * A, fp_t ** B, int dim);
 fp_t ** transpose (fp_t ** A, int N_rows, int N_columns);
 fp_t **** transpose(fp_t ****A, int N1, int N2, int N3, int N4);
 fp_t ** multiply_with_transpose(fp_t ** A, int N_rows, int N_columns);
+fp_t ** make_from_diagonal(fp_t * diag, int from, int to);
 
 fp_t * solve(fp_t ** A, fp_t * rhs, int from, int to); // Solve linear system using LU decomposition
 
@@ -75,6 +76,28 @@ fp_t * vactoair(fp_t *, int);
 
 int convolve_spectra_with_gauss(fp_t **, fp_t *,int, fp_t);
 int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, fp_t);
+int convolve_response_with_gauss_tau(fp_t ***, int, int, fp_t *, int, fp_t);
+int convolve_with_gauss(fp_t *,fp_t *, int,fp_t with);
 
+int set_to_zero_except(fp_t * x, int N, int to_keep);
+int stupid_sort_indices_by_abs(fp_t * A, int * indices, int N);
+int index_of_max_abs(fp_t * x, int N);
+
+fp_t * svd_treshold_square_matrix(fp_t ** A, int N, fp_t treshold, int return_w);
+fp_t * svd_invert_square_matrix(fp_t ** A, int N, fp_t treshold, int return_w);
+int shifted_svd(fp_t ** U, int M, int N, fp_t * w, fp_t **V);
+
+double P0(double);
+double P1(double);
+double P2(double);
+double Pn(unsigned int, double);
+fp_t * project_on_legendre_basis(fp_t * y, fp_t * x, int N, int up_to);
+fp_t * reconstruct_from_legendre_basis(fp_t * coeff, fp_t * x, int N, int up_to);
+
+static double PYTHAG(double a, double b);
+int dsvd(double **a, int m, int n, double *w, double **v);
+
+// Various merit functions and such:
+fp_t chi_sqr(fp_t ** obs, fp_t ** fit, fp_t * noise, int nlambda, int * stokes_to_fit, int n_stokes_to_fit, fp_t * ws);
 
 #endif                        // __MATHTOOLS_H__
