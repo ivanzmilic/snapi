@@ -26,10 +26,10 @@ plt.clf()
 plt.cla()
 plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
-plt.xlim([50,300])
 plt.savefig('mean_profiles',fmt='png')
 
-wls = np.array([100,250,270,290])
+
+wls = np.array([20,107,215,330,443,523])
 
 N_x_panels = 3
 N_y_panels = len(wls)
@@ -40,7 +40,7 @@ x_size = y_size * float(NX)/float(NY)
 
 shrinkage = 0.7
 
-plt.figure(figsize=[x_size*N_x_panels, y_size*N_y_panels])
+plt.figure(figsize=[14.0,9.0])
 
 for j in range (1,N_y_panels+1):
 	
@@ -66,4 +66,19 @@ for j in range (1,N_y_panels+1):
 
 plt.savefig(filename,fmt='png')
 plt.savefig(filename+'.eps',fmt='eps')
+
+xl = 1
+xh = 1
+yl = 1
+yh = 1
+
+for i in range(xl-1,xh):
+	for j in range(yl-1,yh):
+		plt.clf()
+		plt.cla()
+		plt.plot(cube1[i,j,0,:])
+		plt.plot(cube2[i,j,0,:])
+		plt.savefig('test_'+str(i)+'_'+str(j),fmt='png')
+		plt.close('all')
+
 

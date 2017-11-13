@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-17
+#define DELTA 1E-3
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -28,18 +28,19 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E-3;
+  fp_t lm_parameter = 1E2;
+  fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 30;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -56,7 +57,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 2E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
@@ -94,6 +95,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         metric += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
           *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
+
     }
   
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
@@ -111,6 +113,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
+    //svd_invert_square_matrix(JTJ,N_parameters,1E-6,0);
+    //fp_t * correction = multiply_vector(JTJ,rhs,N_parameters,N_parameters);
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);
@@ -132,7 +136,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
-      lm_parameter /= 10.0;
+      lm_parameter /= lm_multiplicator;
       model_to_fit->cpy_values_from(test_model);
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric_reference);
@@ -142,7 +146,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           to_break = 1;
     }
     else{
-      lm_parameter *= 10.0;
+      lm_parameter *= lm_multiplicator;
       corrected = 0;
     }
 

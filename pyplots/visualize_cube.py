@@ -43,12 +43,12 @@ stokes[:,:,:,:] /= I_c
 #-----------------------------------------------------------------------------------------------------
 
 T_nodes = [0,2,3]
-T_nodes_tau = [-2.9,-1.7,-0.7,0.0]
-#vt_nodes = [5]
+T_nodes_tau = [-3.0,-1.7,-0.7,0.0]
+#vt_nodes = [3]
 vs_nodes = [4,5,6]
 vs_nodes_tau = [-3.5,-1.7,-0.5]
 B_nodes = [7,8,9]
-B_nodes_tau = [-3.0,-1.7,-0.5]
+B_nodes_tau = [-3.0,-1.6,-0.5]
 theta_nodes = [10]
 
 panelsx=3
@@ -119,7 +119,7 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 	s = np.std(parameters[i])
 
 	plt.subplot(panelsy,panelsx,2*panelsx+(i-vs_nodes[0])+1)
-	plt.imshow(parameters[i],origin='lower',cmap=Vmap,vmin=-3*s,vmax=3*s)
+	plt.imshow(parameters[i],origin='lower',cmap=Vmap,vmin=-4*s,vmax=4*s)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('LOS velocity [km/s] at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 	plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
@@ -127,13 +127,13 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 
-s = np.copy(B_nodes)
-for i in range(B_nodes[0],B_nodes[-1]+1):
-	parameters[i] *= np.cos(parameters[theta_nodes[0]])
-	s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
+#s = np.copy(B_nodes)
+#for i in range(B_nodes[0],B_nodes[-1]+1):
+#	parameters[i] *= np.cos(parameters[theta_nodes[0]])
+#	s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
 
-
-for i in range(B_nodes[0],B_nodes[-1]+1):
+for i in range(0,-1):
+#for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.subplot(panelsy,panelsx,3*panelsx+(i-B_nodes[0])+1)
 	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=1500)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)

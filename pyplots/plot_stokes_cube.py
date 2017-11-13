@@ -13,7 +13,7 @@ print Stokes_cube.shape
 I_mean = np.mean(Stokes_cube,axis=(0,1))
 #NL = 501
 NL = 1001
-l = np.linspace(5892,5897,NL)
+l = np.linspace(5887,5897,NL)
 #l = np.linspace(5887,5893.3,201)
 l/= 1E8
 S = np.zeros([5,NL])
@@ -101,9 +101,8 @@ for s in range(0,4):
 		plt.subplot(panelsy,panelsx,s*panelsx+l+1)
 		plt.imshow(to_plot,vmin=v_min,vmax=v_max,cmap='gray',origin='lower')
 		#
-		#if (l==4):
-		#	plt.colorbar(shrink=0.5)
-		#plt.tight_layout()
+		plt.colorbar(shrink=0.5)
+		plt.tight_layout()
 		if (s==0):
 			plt.title('$'+str((wvl_c-wvl[l])*10)+'\,\mathrm{m \AA}$')
 		if (l==0):
