@@ -68,9 +68,11 @@ plt.savefig(filename,fmt='png')
 plt.savefig(filename+'.eps',fmt='eps')
 
 xl = 1
-xh = 1
+xh = 10
 yl = 1
-yh = 1
+yh = 10
+
+print cube2[0,0,0,:]
 
 for i in range(xl-1,xh):
 	for j in range(yl-1,yh):
