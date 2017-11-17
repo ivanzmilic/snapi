@@ -127,13 +127,13 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 
-s = np.copy(B_nodes)
-for i in range(B_nodes[0],B_nodes[-1]+1):
-	parameters[i] *= np.cos(parameters[theta_nodes[0]])
-	s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
+#s = np.copy(B_nodes)
+#for i in range(B_nodes[0],B_nodes[-1]+1):
+	#parameters[i] *= np.cos(parameters[theta_nodes[0]])
+	#s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
 
-#for i in range(0,-1):
-for i in range(B_nodes[0],B_nodes[-1]+1):
+for i in range(0,-1):
+#for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.subplot(panelsy,panelsx,3*panelsx+(i-B_nodes[0])+1)
 	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=1500)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
