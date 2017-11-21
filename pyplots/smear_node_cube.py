@@ -32,10 +32,10 @@ NP = dims[0]
 
 an_conv = np.zeros(dims)
 
-#	an[-1] = np.cos(an[-1])
-#an[7:10] *= an[-1]
-#an[-1] = np.arccos(an[-1])
-#an[7:10] /= np.cos(an[-1])
+an[-1] = np.cos(an[-1])
+an[7:10] *= an[-1]
+an[-1] = np.arccos(an[-1])
+an[7:10] /= np.cos(an[-1])
 
 an_conv = np.copy(an)
 
