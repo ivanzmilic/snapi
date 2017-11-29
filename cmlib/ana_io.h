@@ -42,7 +42,7 @@ struct ana_file{
   FILE *f;
   int type,tsize,t_endian;
   int fsize,felem;
-  int size,elem;
+  size_t size,elem;
 //
   ana_file(const char *file_name,int *ds,int nd,const char *header,int type_in,io_class &io);
   ~ana_file(void);

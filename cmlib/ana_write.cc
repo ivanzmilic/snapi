@@ -142,7 +142,7 @@ void ana_fzwrite(byte *data,char *file_name,int *ds,int nd,char *header,int type
   int nx=fh->dim[0];
   int ny=n_elem/nx;
   int type_sizes[]=ANA_VAR_SZ;
-  int size=n_elem*type_sizes[type];
+  size_t size=(size_t)n_elem*(size_t)type_sizes[type];
   if(t_endian){ // big endian platform
     switch(type){
       case(INT16): swap((int16_t*)data,n_elem); break;
@@ -193,7 +193,7 @@ ana_file::ana_file(const char *file_name,int *ds,int nd,const char *header,int t
 //
     type=type_in;
     tsize=type_sizes[type];
-    size=elem*tsize;
+    size=(size_t)elem*(size_t)tsize;
     felem=0;
     fsize=0;
 //
@@ -220,7 +220,7 @@ int ana_file::append(void *data,int n,int type_in)
 {
   if(f)
     if(type_in==type){
-      int sz=n*tsize;
+      size_t sz=n*tsize;
       if(t_endian){ // big endian platform
         switch(type){
           case(INT16): swap((int16_t*)data,n); break;
