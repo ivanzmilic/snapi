@@ -146,12 +146,11 @@ byte *ana_fzread(char *file_name,int *&ds,int &nd,char *&header,int &type,io_cla
     type=AT2MFBDT[type];
     return out;
   }else{                            // uncompressed
-    int size=n_elem*type_sizes[type];
+    size_t size=(size_t)n_elem*(size_t)type_sizes[type];
     byte *out=new byte [size];
-    if(read(fin,out,size)<size){
-//      if(posix_fadvise(fin,0,stat_buf.st_size,POSIX_FADV_DONTNEED)<0) io.msg(IOL_ERROR,"ana_fzread: releasing page cache: %s\n",strerror(errno));
-      close(fin);
-      io.msg(IOL_ERROR,"error: unexpected end of file\n");
+    if(fread(out,1,size,fin)<size){
+      fclose(fin);
+      exit(fprintf(stderr,"error: unexpected end of file\n"));
     }
 //    if(posix_fadvise(fin,0,stat_buf.st_size,POSIX_FADV_DONTNEED)<0) io.msg(IOL_ERROR,"ana_fzread: releasing page cache: %s\n",strerror(errno));
     close(fin);
