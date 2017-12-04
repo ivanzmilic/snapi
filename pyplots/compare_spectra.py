@@ -47,7 +47,7 @@ if (file1 != file2):
 
 plt.xlim([lambda_min,lambda_max])
 #plt.xlim([5892,5894])
-plt.ylim([0.4,1.2])
+plt.ylim([0.2,1.2])
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 #plt.ylim([0,1E14])
 plt.xlabel("$\lambda [\AA]$")

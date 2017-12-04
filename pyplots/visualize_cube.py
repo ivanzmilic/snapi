@@ -89,7 +89,7 @@ plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off')
 plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 plt.subplot(panelsy,panelsx,3)
-plt.imshow(stokes[:,:,3,ll].transpose(),origin='summer',cmap=Bmap,vmin=0,vmax=0.03)
+plt.imshow(stokes[:,:,3,ll].transpose(),origin='summer',cmap=Bmap,vmin=0,vmax=0.05)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Stokes $V$ (Sodium D2)')
@@ -127,15 +127,15 @@ for i in range(vs_nodes[0],vs_nodes[-1]+1):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 
-#s = np.copy(B_nodes)
-#for i in range(B_nodes[0],B_nodes[-1]+1):
-	#parameters[i] *= np.cos(parameters[theta_nodes[0]])
-	#s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
+s = np.copy(B_nodes)
+for i in range(B_nodes[0],B_nodes[-1]+1):
+	parameters[i] *= np.cos(parameters[theta_nodes[0]])
+	s[i-B_nodes[0]] = 3.0*np.std(parameters[i])
 
-for i in range(0,-1):
-#for i in range(B_nodes[0],B_nodes[-1]+1):
+#for i in range(0,-1):
+for i in range(B_nodes[0],B_nodes[-1]+1):
 	plt.subplot(panelsy,panelsx,3*panelsx+(i-B_nodes[0])+1)
-	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=1500)
+	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=2000)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 	if (i!=7):

@@ -14,9 +14,8 @@ cube1 = np.transpose(cube1,(1,0,2,3))
 temp = pyana.fzread(cube2_in)
 cube2 = temp["data"]
 
-mask = np.loadtxt(maskfile,unpack=True)
-l_l = 88
-l_r = 635
+l_l = 1
+l_r = 957
 
 
 dims = cube1.shape
@@ -33,6 +32,8 @@ plt.cla()
 plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
 plt.savefig('mean_profiles',fmt='png')
+
+exit();
 
 
 wls = np.array([20,107,215,330,443,523])
