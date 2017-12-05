@@ -147,7 +147,6 @@ byte *ana_fzread(char *file_name,int *&ds,int &nd,char *&header,int &type,io_cla
     return out;
   }else{                            // uncompressed
     size_t size=(size_t)n_elem*(size_t)type_sizes[type];
-    printf("Size = %ld \n",size);
     byte *out=new byte [size];
 //
     size_t rdsz=0;
