@@ -5,7 +5,7 @@ import sys
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
-filename = sys.argv[3]
+out_name = sys.argv[3]
 maskfile = sys.argv[4]
 
 temp = pyana.fzread(cube1_in)
@@ -33,8 +33,6 @@ plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
 plt.savefig('mean_profiles',fmt='png')
 
-exit();
-
 
 wls = np.array([20,107,215,330,443,523])
 
@@ -47,7 +45,7 @@ x_size = y_size * float(NX)/float(NY)
 
 shrinkage = 0.7
 
-plt.figure(figsize=[14.0,9.0])
+plt.figure(figsize=[10.0,8.0])
 
 for j in range (1,N_y_panels+1):
 	
@@ -72,24 +70,5 @@ for j in range (1,N_y_panels+1):
 	plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
 	plt.colorbar(shrink=shrinkage)
 
-plt.savefig(filename,fmt='png')
-plt.savefig(filename+'.eps',fmt='eps')
-
-xl = 1
-xh = 10
-yl = 1
-yh = 10
-
-#print cube2[0,0,0,:]
-
-for i in range(xl-1,xh):
-	for j in range(yl-1,yh):
-		plt.clf()
-		plt.cla()
-		plt.plot(cube1[i,j,0,:])
-		plt.plot(cube2[i,j,0,:])
-		plt.plot(mask[l_l-1:l_r]*max(cube1[i,j,0,:]),'o')
-		plt.savefig('test_'+str(i)+'_'+str(j),fmt='png')
-		plt.close('all')
-
-
+plt.savefig(out_name,fmt='png')
+plt.savefig(out_name+'.eps',fmt='eps')

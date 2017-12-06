@@ -28,13 +28,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E-3;
+  fp_t lm_parameter = 1E3;
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 20;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;

@@ -2,6 +2,7 @@ import pyana
 import numpy as np 
 import matplotlib.pyplot as plt 
 import scipy.ndimage.filters as flt
+import scipy.interpolate as interpol
 import sys
 
 file_in = sys.argv[1]
@@ -38,10 +39,24 @@ for i in range(0,NX):
 			random_sample = np.random.normal(0,1.0,NL)
 			stokes_cube[i,j,s] += random_sample*loc_noise
 
-plt.plot(l,stokes_cube[0,0,0],color='blue')
+#Then we need to resample
+NL_new = 401
+l_new = np.linspace(15643,15667,401)
+
+resampled_cube = np.zeros([NX,NY,4,NL_new])
+
+for i in range(0,NX):
+	for j in range(0,NY):
+		for s in range(0,1):
+			f = interpol.interp1d(l,stokes_cube[i,j,s])
+			resampled_cube[i,j,s] = f(l_new)
+
+
+
+plt.plot(l_new,resampled_cube[0,0,0],color='blue')
 plt.savefig('pre_vs_post_degraded',fmt='png')
 
-pyana.fzwrite(file_out,stokes_cube,0,'placeholder')
+pyana.fzwrite(file_out,resampled_cube,0,'placeholder')
 
 
 
