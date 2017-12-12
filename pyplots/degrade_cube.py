@@ -21,7 +21,7 @@ NL = 1501
 # in Angstrom
 l = np.linspace(15640.0,15670.0,NL)
 
-sigma = 143.0 #in mA
+sigma = -1 #in mA
 sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
 print sigma
 noise_level = 3E-4
@@ -31,17 +31,19 @@ plt.clf()
 plt.cla()
 plt.plot(l,stokes_cube[0,0,0],color='red')
 
-for i in range(0,NX):
-	for j in range(0,NY):
-		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,:]/stokes_cube[i,j,0,20])
-		for s in range(0,1):
-			stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma)
-			random_sample = np.random.normal(0,1.0,NL)
-			stokes_cube[i,j,s] += random_sample*loc_noise
+
+if (sigma > 0):
+	for i in range(0,NX):
+		for j in range(0,NY):
+			loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,:]/stokes_cube[i,j,0,20])
+			for s in range(0,1):
+				stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma)
+				random_sample = np.random.normal(0,1.0,NL)
+				stokes_cube[i,j,s] += random_sample*loc_noise
 
 #Then we need to resample
-NL_new = 401
-l_new = np.linspace(15643,15667,401)
+NL_new = 601
+l_new = np.linspace(15643,15667,NL_new)
 
 resampled_cube = np.zeros([NX,NY,4,NL_new])
 

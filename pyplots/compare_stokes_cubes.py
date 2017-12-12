@@ -1,7 +1,10 @@
+import matplotlib
+matplotlib.use('Agg')
 import pyana
 import numpy as np 
 import matplotlib.pyplot as plt 
 import sys
+from scipy.signal import argrelextrema
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -15,13 +18,14 @@ temp = pyana.fzread(cube2_in)
 cube2 = temp["data"]
 
 l_l = 1
-l_r = 957
+l_r = 601
 
 
 dims = cube1.shape
-NX = dims[0]
-NY = dims[1]
+NX = dims[1]
+NY = dims[0]
 NL = dims[3]
+print NX, NY
 
 #before plotting the spatial distributions, plot averaged spectra:
 
@@ -32,20 +36,22 @@ plt.cla()
 plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
 plt.savefig('mean_profiles',fmt='png')
-
-
-wls = np.array([20,107,215,330,443,523])
-
+wls = argrelextrema(cube_2_mean,np.less)
+wls = np.asarray(wls)
+wls = wls[0]
+print wls
+#wls[0] += 15
+#wls[3] += 15
 N_x_panels = 3
 N_y_panels = len(wls)
 
 #make the size of the figure:
-y_size = 4.0
-x_size = y_size * float(NX)/float(NY)
+x_size = 6.0
+y_size = x_size * float(NY)/float(NX) * 1.0
 
-shrinkage = 0.7
+shrinkage = 1.0
 
-plt.figure(figsize=[10.0,8.0])
+plt.figure(figsize=[N_x_panels*x_size,N_y_panels*y_size])
 
 for j in range (1,N_y_panels+1):
 	
@@ -70,5 +76,6 @@ for j in range (1,N_y_panels+1):
 	plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
 	plt.colorbar(shrink=shrinkage)
 
-plt.savefig(out_name,fmt='png')
-plt.savefig(out_name+'.eps',fmt='eps')
+plt.tight_layout()
+plt.savefig(out_name,fmt='png',bbxox_inches='tight')
+plt.savefig(out_name+'.eps',fmt='eps',bbxox_inches='tight')
