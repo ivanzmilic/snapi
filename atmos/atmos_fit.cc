@@ -28,7 +28,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E0;
+  fp_t lm_parameter = 1E3;
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
@@ -57,7 +57,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 5E-3;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
@@ -93,10 +93,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         int stf = stokes_to_fit[s-1];
         residual[(l-1)*n_stokes_to_fit+s] = S_to_fit[stf][l] - S_current[stf][l]; 
         metric += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
-          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
+          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda);
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
 
     }
+
+    fprintf(stderr,"Iteration # %d metric = %e \n",iter,metric);
   
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
     for (int i=1;i<=N_parameters;++i) 
@@ -113,18 +115,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
-    //svd_invert_square_matrix(JTJ,N_parameters,1E-6,0);
-    //fp_t * correction = multiply_vector(JTJ,rhs,N_parameters,N_parameters);
-
+  
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
     build_from_nodes(test_model);
     // Compare again:
-    observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
-    reference_obs->add_scattered_light(scattered_light,qs_level);
-    if (spectral_broadening)
-      reference_obs->spectral_convolve(spectral_broadening,1,1);  
+    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
 
     fp_t metric_reference = 0.0;
@@ -132,7 +129,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf=stokes_to_fit[s-1];
         metric_reference += (S_to_fit[stf][l] - S_reference[stf][l]) * (S_to_fit[stf][l] - S_reference[stf][l])
-         *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda-N_parameters);
+         *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda);
     }
     if (metric_reference < metric){
       // Everything is ok, and we can decrease lm_parameter:
@@ -186,10 +183,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
-  observable *obs_to_return = obs_stokes(theta, phi, lambda, nlambda);
-  obs_to_return->add_scattered_light(scattered_light,qs_level);
-  if (spectral_broadening)
-    obs_to_return->spectral_convolve(spectral_broadening,1,1);
+  observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
       
   delete[](lambda+1);
   return obs_to_return;
@@ -582,7 +576,6 @@ observable* atmosphere::forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, in
   // 1) Stokes synthesis from current atmosphere
   // 2) Adds scattered light from the quiet Sun
   // 3) Convolves with instrumental profile
-  // 4) Calculates chisq
 
   observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
   reference_obs->add_scattered_light(scattered_light,qs);
