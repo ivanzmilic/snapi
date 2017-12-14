@@ -253,7 +253,7 @@ public:
   virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening);
   virtual fp_t * calc_residual(fp_t **, fp_t **, int, int, int*);
   virtual fp_t calc_chisq(int, int, int*, fp_t *, fp_t *, fp_t *);
-  virtual int look_for_best_lambda();
+  virtual int look_for_best_lambda(fp_t&, fp_t);
   
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 

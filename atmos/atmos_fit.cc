@@ -118,9 +118,11 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fprintf(stderr,"Iteration # %d metric_reference = %e \n",iter,metric_reference);
     
     if (metric_reference < metric){
+      
+      // How much to decrease lambda:
+      lm_parameter = look_for_best_lambda(lm_parameter, lm_multiplicator);
       // Everything is ok, and we can decrease lm_parameter:
-      lm_parameter /= lm_multiplicator;
-      look_for_best_lambda();
+      //lm_parameter /= lm_multiplicator;
       model_to_fit->cpy_values_from(test_model);
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric_reference);
@@ -197,6 +199,37 @@ fp_t atmosphere::calc_chisq(int nlambda, int n_stokes_to_fit, int * stokes_to_fi
         residual[(l-1)*n_stokes_to_fit+stf] /= (noise[l]/noise[1]);
   }
   return chisq;
+}
+
+int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t lm_multiplicator, fp_t ** JTJ, int N_parameters
+  fp_t * rhs, model * model_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda, fp_t scattered_light,
+  fp_t qs_level, fp_t spectral_broadening, fp_t ** S_to_fit, int n_stokes_to_fit, int * stokes_to_fit,
+  fp_t * ws, fp_t * noise, fp_t metric_old){
+  //lm_parameter /= lm_multiplicator;
+
+  int MAX_ITER = 100; // Maximum number of explorations.  
+  for (int iter=1;iter<=MAX_ITER;++iter){
+    lm_parameter /= lm_multiplicator;
+    for (int i=1;i<=N_parameters;++i)
+      JTJ[i][i] *= (1.0+lm_parameter);
+
+    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
+  
+    // Apply the correction:
+    model * test_model = clone(model_to_fit);
+    test_model->correct(correction);
+    build_from_nodes(test_model);
+    // Compare again:
+    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
+    fp_t ** S_reference = reference_obs->get_S(1,1);
+    fp_t * residual_test = calc_residual(S_to_fit,S_reference,nlambda,n_stokes_to_fit,stokes_to_fit);
+    fp_t metric_reference = calc_chisq(nlambda, n_stokes_to_fit, stokes_to_fit, residual_test, noise, ws);
+    delete[](residual_test+1);
+
+    if (metric_reference > metric_old) {
+
+    }
+  }
 }
 
 // ======================================================================================================================================================
