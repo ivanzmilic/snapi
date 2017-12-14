@@ -245,7 +245,8 @@ public:
   virtual observable *obs_stokes_responses_to_nodes_new(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // 'New' version
                                                                                                          // hence the 3D vector in last argument
   virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
-                                                                                                         // hence the 3D vector in last argument
+  virtual int scale_rf(fp_t ***, model*, int, int);
+  virtual int scale_corrections(fp_t *, model*, int);                                                                                                      // hence the 3D vector in last argument
 //
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
@@ -253,7 +254,10 @@ public:
   virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening);
   virtual fp_t * calc_residual(fp_t **, fp_t **, int, int, int*);
   virtual fp_t calc_chisq(int, int, int*, fp_t *, fp_t *, fp_t *);
-  virtual int look_for_best_lambda(fp_t&, fp_t);
+  virtual int look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_parameters,
+  fp_t * rhs, model * model_current, fp_t theta, fp_t phi, fp_t * lambda, int nlambda, fp_t scattered_light,
+  fp_t qs_level, fp_t spectral_broadening, fp_t ** S_to_fit, int n_stokes_to_fit, int * stokes_to_fit,
+  fp_t * ws, fp_t * noise, fp_t metric_old);
   
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ***, model*, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *obs_stokes_num_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // 

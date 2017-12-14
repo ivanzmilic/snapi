@@ -37,7 +37,7 @@ for i in range (0,1):
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,I/I_c}$')
-		#plt.ylim
+		plt.ylim([0.0,1.4])
 		plt.legend()
 
 		plt.subplot(212)

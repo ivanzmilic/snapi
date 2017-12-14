@@ -31,6 +31,12 @@
 #define delta_B 0.01
 #define delta_angle 0.0001 // In radians, this is a bit more than 0.1 degree. Hopefully it works. 
 
+// scales of the parameters, important for fitting
+#define T_scale 5000.0 
+#define vt_scale 1E5
+#define vr_scale 1E5
+#define B_scale  1000.0
+
 #define n_air 1.000277 // in the end we took the VALC approach, so n is still lambda dependent. 
 #define lambda_referent 5000.0E-8 // in cm <---- Bad idea to have this hardcoded here
 
