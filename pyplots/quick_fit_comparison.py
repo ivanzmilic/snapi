@@ -15,8 +15,9 @@ fit = temp["data"]
 
 #print fit[0,0,0]
 #print obs[0,0,0]
-#temp = pyana.fzread(atmos_in)
-#atmos = temp["data"]
+temp = pyana.fzread(atmos_in)
+atmos = temp["data"]
+atmos.shape
 #temp = pyana.fzread(nodes_in)
 #nodes = temp["data"]
 
@@ -29,9 +30,9 @@ for i in range (0,1):
 	for j in range(0,1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[8.0, 5.5])
+		plt.figure(figsize=[5.5,18.0])
 
-		plt.subplot(211)
+		plt.subplot(611)
 		plt.plot(obs[0,0,0]/max(obs[0,0,0]),color='red',label='Observation')
 		plt.plot(fit[0,0,0]/max(obs[0,0,0]),color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -40,24 +41,38 @@ for i in range (0,1):
 		plt.ylim([0.0,1.4])
 		plt.legend()
 
-		plt.subplot(212)
+		plt.subplot(612)
 		plt.plot(obs[0,0,3]/max(obs[0,0,0]),color='red',label='Observation')
 		plt.plot(fit[0,0,3]/max(obs[0,0,0]),color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
 
-		#plt.subplot(223)
-		#plt.plot(atmos[i,j,0],atmos[i,j,2])
-		#plt.xlim([-5,1])
-		#plt.xlabel('$\mathrm{log\,}\\tau$')
-		#plt.ylabel('$\mathrm{T\,[K]}$')
+		plt.subplot(613)
+		plt.plot(atmos[i,j,0],atmos[i,j,2])
+		plt.xlim([-5,1])
+		plt.xlabel('$\mathrm{log\,}\\tau$')
+		plt.ylabel('$\mathrm{T\,[K]}$')
 
-		#plt.subplot(224)
-		#plt.plot(atmos[i,j,0],atmos[i,j,9])
-		#plt.xlim([-5,1])
-		#plt.xlabel('$\mathrm{log\,}\\tau$')
-		#plt.ylabel('$\mathrm{B_{los}\,[Gauss]}$')
+		plt.subplot(614)
+		plt.plot(atmos[i,j,0],atmos[i,j,7])
+		plt.xlim([-5,1])
+		plt.xlabel('$\mathrm{log\,}\\tau$')
+		plt.ylabel('$\mathrm{B_{los}\,[Gauss]}$')
+		
+		plt.subplot(615)
+		plt.plot(atmos[i,j,0],atmos[i,j,9]/1E5)
+		plt.xlim([-5,1])
+		plt.xlabel('$\mathrm{log\,}\\tau$')
+		plt.ylabel('$v_{los}$')
+
+		plt.subplot(616)
+		plt.plot(atmos[i,j,0],atmos[i,j,8]/1E5)
+		plt.xlim([-5,1])
+		plt.xlabel('$\mathrm{log\,}\\tau$')
+		plt.ylabel('$v_{turb}$')
+
+
 
 		#print nodes[:,j,i]
 

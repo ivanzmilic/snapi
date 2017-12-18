@@ -40,7 +40,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 0.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -54,6 +54,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     stokes_to_fit[counter] = s+1;
     ++counter;
   }
+
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
@@ -86,7 +87,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda,n_stokes_to_fit,stokes_to_fit);
     metric = calc_chisq(nlambda, n_stokes_to_fit, stokes_to_fit, residual, noise, ws);
-    //fprintf(stderr,"Iteration # %d metric = %e \n",iter,metric);
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
     for (int i=1;i<=N_parameters;++i) 
       for (int l=1;l<=nlambda;++l) 
@@ -94,7 +94,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           int stf = stokes_to_fit[s-1];
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
     }
-
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     
@@ -108,6 +107,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
+    //test_model->print();
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -115,8 +115,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * residual_test = calc_residual(S_to_fit,S_reference,nlambda,n_stokes_to_fit,stokes_to_fit);
     fp_t metric_reference = calc_chisq(nlambda, n_stokes_to_fit, stokes_to_fit, residual_test, noise, ws);
     delete[](residual_test+1);
-    
-    //fprintf(stderr,"Iteration # %d metric_reference = %e lambda = %e \n",iter,metric_reference,lm_parameter);
     
     if (metric_reference < metric){
       
@@ -184,10 +182,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 fp_t * atmosphere::calc_residual(fp_t ** S_to_fit, fp_t ** S_current, int nlambda, int n_stokes_to_fit, int * stokes_to_fit){
 
   fp_t * residual = new fp_t[n_stokes_to_fit*nlambda]-1;
-    for (int l=1;l<=nlambda;++l)
-      for (int s=1;s<=n_stokes_to_fit;++s){
-        int stf=stokes_to_fit[s-1];
-        residual[(l-1)*n_stokes_to_fit+stf] = S_to_fit[stf][l] - S_current[stf][l];
+  for (int l=1;l<=nlambda;++l)
+    for (int s=1;s<=n_stokes_to_fit;++s){
+      int stf=stokes_to_fit[s-1];
+      residual[(l-1)*n_stokes_to_fit+s] = S_to_fit[stf][l] - S_current[stf][l];
   }
   return residual;
 }
@@ -197,9 +195,9 @@ fp_t atmosphere::calc_chisq(int nlambda, int n_stokes_to_fit, int * stokes_to_fi
   for (int l=1;l<=nlambda;++l)
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf = stokes_to_fit[s-1];
-        chisq += residual[(l-1)*n_stokes_to_fit+stf] * residual[(l-1)*n_stokes_to_fit+stf] 
+        chisq += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
           *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda);
-        residual[(l-1)*n_stokes_to_fit+stf] /= (noise[l]/noise[1]);
+        residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
   }
   return chisq;
 }
