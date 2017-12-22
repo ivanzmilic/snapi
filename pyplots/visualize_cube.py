@@ -46,11 +46,11 @@ stokes[:,:,:,:] /= I_c
 
 T_nodes = [0,2,3]
 T_nodes_tau = [-3.0,-1.7,-0.7,0.0]
-#vt_nodes = [3]
-vs_nodes = [4,5,6]
+vt_nodes = [4]
+vs_nodes = [5,6,7]
 vs_nodes_tau = [-3.5,-1.7,-0.5]
-B_nodes = [7,8,9]
-B_nodes_tau = [-3.0,-1.6,-0.5]
+B_nodes = [8,9]
+B_nodes_tau = [-3.0,-0.5]
 theta_nodes = [10]
 
 panelsx=3
@@ -80,7 +80,7 @@ plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off')
 #if (i!=0):
 #	plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
-ll =240
+ll =0
 
 plt.subplot(panelsy,panelsx,2)
 plt.imshow(stokes[:,:,0,ll].transpose(),origin='lower',cmap=Imap,vmin=0.2,vmax=0.6)

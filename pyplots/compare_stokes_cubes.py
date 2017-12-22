@@ -13,12 +13,12 @@ maskfile = sys.argv[4]
 
 temp = pyana.fzread(cube1_in)
 cube1 = temp["data"]
-cube1 = np.transpose(cube1,(1,0,2,3))
+#cube1 = np.transpose(cube1,(1,0,2,3))
 temp = pyana.fzread(cube2_in)
 cube2 = temp["data"]
 
 l_l = 1
-l_r = 601
+l_r = 501
 
 
 dims = cube1.shape
