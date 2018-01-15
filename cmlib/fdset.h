@@ -4,13 +4,13 @@
 class fdset;
 
 #include <sys/types.h>
+#include <poll.h>
 #include "types.h"
 
 class fdset{
-  fd_set fds,rd_fds;
-  int mfds,idx;
-  int *fd;
+  struct pollfd *fds;
   void **token;
+  int idx;
   int n;
 public:
   fdset(void);

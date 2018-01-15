@@ -2,57 +2,55 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <poll.h>
+
 #include "types.h"
 #include "fdset.h"
 
 fdset::fdset(void)
 {
-  mfds=-1;
   idx=-1;
-  FD_ZERO(&fds);
-  fd=new int[1]-1;
+  fds=new struct pollfd [1]-1;
   token=new void*[1]-1;
   n=0;
 }
 
 fdset::~fdset(void)
 {
-  delete[] (fd+1);
+  delete[] (fds+1);
   delete[] (token+1);
 }
 
 void fdset::add(int fd_in,void *token_in)
 {
-  FD_SET(fd_in,&fds);
-  if(fd_in>mfds) mfds=fd_in;
-  for(int i=1;i<=n;++i) if(fd[i]==fd_in) return; // already registered
-  int *tfd=new int [n+1]-1;
+  for(int i=1;i<=n;++i) if(fds[i].fd==fd_in) return; // already registered
+//
+  struct pollfd *tfds=new struct pollfd [n+1]-1;
   void **tto=new void* [n+1]-1;
-  memcpy(tfd+1,fd+1,n*sizeof(int));
+  memcpy(tfds+1,fds+1,n*sizeof(struct pollfd));
   memcpy(tto+1,token+1,n*sizeof(void*));
-  delete[] (fd+1);
+  delete[] (fds+1);
   delete[] (token+1);
-  fd=tfd;
+  fds=tfds;
   token=tto;
   ++n;
-  fd[n]=fd_in;
+  fds[n].fd=fd_in;
+  fds[n].events=POLLIN;
+  fds[n].revents=0; // very important for on the fly adding
   token[n]=token_in;
 }
 
 void fdset::act(void)
 {
-  rd_fds=fds;
-  select(mfds+1,&rd_fds,NULL,NULL,NULL);
+  for(int i=1;i<=n;++i) fds[i].revents=0;
+  poll(fds+1,n,-1); // indefinite poll
   idx=0;
 }
 
 void fdset::act(fp_t t)
 {
-  struct timeval tv;
-  tv.tv_sec=(time_t)t;
-  tv.tv_usec=(int)((t-(fp_t)tv.tv_sec)*1.0E+06); 
-  rd_fds=fds;
-  select(mfds+1,&rd_fds,NULL,NULL,&tv);
+  for(int i=1;i<=n;++i) fds[i].revents=0;
+  poll(fds+1,n,1000.0*t);
   idx=0;
 }
 
@@ -61,7 +59,7 @@ void *fdset::next(void)
   if(idx<0) return 0;
   while(idx<n){
     ++idx;
-    if(FD_ISSET(fd[idx],&rd_fds)) return token[idx];
+    if(fds[idx].revents&POLLIN) return token[idx];
   }
   idx=-1;
   return 0;
@@ -69,28 +67,26 @@ void *fdset::next(void)
 
 void fdset::rem(int fd_in)
 {
-  FD_CLR(fd_in,&fds);
   for(int i=1;i<=n;++i)
-    if(fd[i]==fd_in)
+    if(fds[i].fd==fd_in){
       if(n>1){
-        int *tfd=new int [n-1]-1;
+        struct pollfd *tfds=new struct pollfd [n-1]-1;
         void **tto=new void* [n-1]-1;
         if(i>1){
-          memcpy(tfd+1,fd+1,(i-1)*sizeof(int));
+          memcpy(tfds+1,fds+1,(i-1)*sizeof(struct pollfd));
           memcpy(tto+1,token+1,(i-1)*sizeof(void*));
         }
         if(n>i){
-          memcpy(tfd+i,fd+i+1,(n-i)*sizeof(int));
+          memcpy(tfds+i,fds+i+1,(n-i)*sizeof(struct pollfd));
           memcpy(tto+i,token+i+1,(n-i)*sizeof(void*));
         }
-        delete[] (fd+1);
+        delete[] (fds+1);
         delete[] (token+1);
-        fd=tfd;
+        fds=tfds;
         token=tto;
         --n;
         return;
       }else --n;
-  if(fd_in>=mfds)
-    while((!FD_ISSET(mfds,&fds))&&(mfds>0)) --mfds;
+    }
 }
 
