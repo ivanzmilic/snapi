@@ -135,7 +135,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           to_break = 1;
     }
     else{
-      lm_parameter *= lm_multiplicator;
+      lm_parameter *= lm_multiplicator*lm_multiplicator;
       corrected = 0;
     }
 
