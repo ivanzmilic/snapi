@@ -8,6 +8,8 @@ import sys
 file_in = sys.argv[1]
 file_out = sys.argv[2]
 
+to_degrade = int(sys.argv[3])
+
 temp = pyana.fzread(file_in)
 stokes_cube = temp["data"]
 
@@ -24,19 +26,37 @@ l = np.linspace(5887.0,5897.0,NL)
 #l = np.linspace(15640.0,15670.0,NL)
 
 sigma = 50 #in mA
+sigma /= 2.35
 sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
 print sigma
-noise_level = 5E-3
-noise_level *= np.mean(stokes_cube[:,:,0,0])
+noise_level = 1E-3
+I_c_mean = np.mean(stokes_cube[:,:,0,0])
+noise_level *= I_c_mean
 
 plt.clf()
 plt.cla()
 plt.plot(l,stokes_cube[0,0,0],color='red')
 
+#if we want to smear spatially:
+if (to_degrade):
+	A=[0.7,0.3] #two part-psf, weights
+	width = [0.25,5.0] # two part - psf, widths in "
+	A = np.asarray(A)
+	width = np.asarray(width)
+	width *= 725.0
+	width /= 20.8
+	width /= 2.35 #from FWHM to sigma
+	print width
+
+	for s in range (0,4):
+		for w in range(0,NL):
+			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0]) + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1])
+
+print stokes_cube.shape
 
 for i in range(0,NX):
 	for j in range(0,NY):
-		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,:]/stokes_cube[i,j,0,0])
+		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,:]/I_c_mean)
 		for s in range(0,4):
 			if (sigma>0):
 				stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma)
@@ -44,8 +64,12 @@ for i in range(0,NX):
 			stokes_cube[i,j,s] += random_sample*loc_noise
 
 #Then we need to resample
+#NL_new = 601
 NL_new = 501
+#l_new = np.linspace(15640.0,15670.0,NL_new)
 l_new = np.linspace(5887.0,5897.0,NL_new)
+
+print 'New sampling = ', l_new[1]-l_new[0]
 
 resampled_cube = np.zeros([NX,NY,4,NL_new])
 
@@ -54,6 +78,7 @@ for i in range(0,NX):
 		for s in range(0,4):
 			f = interpol.interp1d(l,stokes_cube[i,j,s])
 			resampled_cube[i,j,s] = f(l_new)
+
 
 #After everything the Q,U,V need to be normalized:
 for s in range(1,4):

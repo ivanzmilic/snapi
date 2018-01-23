@@ -49,9 +49,9 @@ T_nodes_tau = [-3.0,-1.7,-0.7,0.0]
 vt_nodes = [4]
 vs_nodes = [5,6,7]
 vs_nodes_tau = [-3.5,-1.7,-0.5]
-B_nodes = [8,9]
-B_nodes_tau = [-3.0,-0.5]
-theta_nodes = [10]
+B_nodes = [8,9,10]
+B_nodes_tau = [-3.0,-1.6,-0.5]
+theta_nodes = [11]
 
 panelsx=3
 panelsy=4

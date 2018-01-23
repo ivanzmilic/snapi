@@ -110,7 +110,8 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       get_number(tmp_str,spectral_broadening);
       delete[] tmp_str;
       spectral_broadening *= 1E-11;//convert to cm from mA
-    }else spectral_broadening = 30.0*1E-11;//default
+      spectral_broadening /= 2.35; // convert from FWHM to sigma
+    }else spectral_broadening = 0;
     if(char *tmp_str=get_arg(odata,"OBSERVED_CONTINUUM",0)){
       get_number(tmp_str,obs_qs);
       delete[] tmp_str;

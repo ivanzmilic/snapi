@@ -18,8 +18,8 @@ fit = temp["data"]
 temp = pyana.fzread(atmos_in)
 atmos = temp["data"]
 atmos.shape
-#temp = pyana.fzread(nodes_in)
-#nodes = temp["data"]
+temp = pyana.fzread(nodes_in)
+nodes = temp["data"]
 
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
@@ -72,10 +72,7 @@ for i in range (0,1):
 		plt.xlabel('$\mathrm{log\,}\\tau$')
 		plt.ylabel('$v_{turb}$')
 
-
-
-		#print nodes[:,j,i]
-
+		print nodes[:,j,i]
 
 		plt.tight_layout()
 		plt.savefig('quick_test'+str(i)+'_'+str(j),fmt='png',bbox_inches='tight')
