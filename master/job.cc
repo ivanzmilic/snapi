@@ -451,7 +451,7 @@ int job_class::stop(void)
     	nl = ji.lh[o]-ji.ll[o]+1;
     else 
     	nl = ji.nlambda[o];
-    fp_t ****fitted_spectra=ft4dim(1,ny,1,nx,1,4,1,nl);
+    fp_t ****fitted_spectra=ft4dim(1,nx,1,ny,1,4,1,nl);
     memset(fitted_spectra[1][1][1]+1,0,nx*ny*4*nl*sizeof(fp_t));
 
     int ND = ji.atmos[0]->get_N_depths();
@@ -512,7 +512,7 @@ int job_class::stop(void)
             fp_t **S_temp=obs->get_S(1,1);
             int n_lambda_fitted = obs->get_n_lambda();
             for (int s=1;s<=4;++s)
-              memcpy(fitted_spectra[y][x][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
+              memcpy(fitted_spectra[x][y][s]+1,S_temp[s]+1,n_lambda_fitted*sizeof(fp_t));
             del_ft2dim(S_temp,1,4,1,n_lambda_fitted);
 
             if (nx==1 && ny==1 && !ji.to_invert[o])
@@ -538,16 +538,16 @@ int job_class::stop(void)
     if (ji.to_invert[o]){
     	fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
     	write_file((char*)"inverted_nodes.f0",nodes_cube,nx,ny,np,*io);
-    	del_ft3dim(nodes_cube,1,ny,1,nx,1,np);
+    	del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
     }
     write_file((char*)"inverted_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
     del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
     if ((nx > 1 || ny > 1) && !ji.to_invert[o])
-    	write_file(ji.name[o],fitted_spectra,ny,nx,4,nl,*io);
+    	write_file(ji.name[o],fitted_spectra,nx,ny,4,nl,*io);
     else if (ji.to_invert[o]) 
-    	write_file((char*)"inverted_spectra.f0",fitted_spectra,ny,nx,4,nl,*io);
+    	write_file((char*)"inverted_spectra.f0",fitted_spectra,nx,ny,4,nl,*io);
     
-    del_ft4dim(fitted_spectra,1,ny,1,nx,1,4,1,nl);
+    del_ft4dim(fitted_spectra,1,nx,1,ny,1,4,1,nl);
   }
   del_v2dim((void***)chunks,1,nx,1,ny);
 /******************************

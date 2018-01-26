@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import sys
 from scipy.signal import argrelextrema
+import scipy.ndimage.filters as flt
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -37,6 +38,7 @@ plt.cla()
 plt.plot(cube_1_mean,color='red')
 plt.plot(cube_2_mean,color='blue')
 plt.savefig('mean_profiles',fmt='png')
+cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
 wls = argrelextrema(cube_1_mean,np.less)
 wls = np.asarray(wls)
 wls = wls[0]

@@ -1260,8 +1260,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
         int ii = 1;
         for (ii=1;ii<N_nodes;++ii){
           if (tau_grid[i] <= node_tau[ii+1])
-            break;
-          
+            break;        
         }
     
         fp_t E = node_value[ii] + (node_tau[ii+1] - node_tau[ii]) / 3.0 * derivatives[ii];

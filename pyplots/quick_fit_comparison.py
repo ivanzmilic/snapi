@@ -21,20 +21,25 @@ atmos.shape
 temp = pyana.fzread(nodes_in)
 nodes = temp["data"]
 
+fit = np.transpose(fit,(1,0,2,3))
+
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
 #l = np.linspace(6300.8921,6303.2671,112)
 
-for i in range (0,1):
-	for j in range(0,1):
+x = int(sys.argv[5])
+y = int(sys.argv[6])
+
+for i in range (x,x+1):
+	for j in range(y,y+1):
 		plt.clf()
 		plt.cla()
 		plt.figure(figsize=[5.5,18.0])
 
 		plt.subplot(611)
-		plt.plot(obs[0,0,0]/max(obs[0,0,0]),color='red',label='Observation')
-		plt.plot(fit[0,0,0]/max(obs[0,0,0]),color='blue',label='Fit')
+		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,0]/max(obs[i,j,0]),color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,I/I_c}$')
@@ -42,8 +47,8 @@ for i in range (0,1):
 		plt.legend()
 
 		plt.subplot(612)
-		plt.plot(obs[0,0,3]/max(obs[0,0,0]),color='red',label='Observation')
-		plt.plot(fit[0,0,3]/max(obs[0,0,0]),color='blue',label='Fit')
+		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,3]/max(obs[i,j,0]),color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
@@ -55,7 +60,7 @@ for i in range (0,1):
 		plt.ylabel('$\mathrm{T\,[K]}$')
 
 		plt.subplot(614)
-		plt.plot(atmos[i,j,0],atmos[i,j,7])
+		plt.plot(atmos[i,j,0],atmos[i,j,7]*np.cos(atmos[i,j,10]))
 		plt.xlim([-5,1])
 		plt.xlabel('$\mathrm{log\,}\\tau$')
 		plt.ylabel('$\mathrm{B_{los}\,[Gauss]}$')
