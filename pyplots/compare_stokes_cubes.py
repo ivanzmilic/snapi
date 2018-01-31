@@ -32,7 +32,6 @@ print NX, NY
 
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
-cube1 = np.transpose(cube1,(1,0,2,3))
 plt.clf()
 plt.cla()
 plt.plot(cube_1_mean,color='red')

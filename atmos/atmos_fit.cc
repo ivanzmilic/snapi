@@ -28,19 +28,19 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E2;
+  fp_t lm_parameter = 1E3;
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 10;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
   int to_break = 0;
   
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 4.0; // weights for Stokes parameters
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0; // weights for Stokes parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -58,7 +58,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 5E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;

@@ -32,15 +32,17 @@ NP = dims[0]
 
 an_conv = np.zeros(dims)
 
-an[-1] = np.cos(an[-1])
-an[8:11] *= an[-1]
-an[-1] = np.arccos(an[-1])
-an[8:11] /= np.cos(an[-1])
+#an[-1] = np.cos(an[-1])
+#an[8:11] *= an[-1]
+#an[-1] = np.arccos(an[-1])
+#an[8:11] /= np.cos(an[-1])
+
+#an[8:10] *= np.sum(an[8:10])/np.sum(an[10])
 
 an_conv = np.copy(an)
 
-for i in range(0,NP-4):
-	an_conv[i] = flt.medfilt(an[i],5)
+for i in range(0,NP-5):
+	an_conv[i] = flt.medfilt(an[i],7)
 	an_conv[i] = filters.gaussian_filter(an[i],sigma)
 
 pyana.fzwrite(file_out,an_conv,0,'bla')

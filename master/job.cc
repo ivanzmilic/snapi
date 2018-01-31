@@ -340,6 +340,7 @@ int job_class::start(void)
         	int nn1,nn2,nn3;
           model_cube = read_file(ji.input_models[0],nn1,nn2,nn3,*io);
           io->msg(IOL_INFO,"master::job:: modelcube sucessfully read from file and will be used.\n");
+          io->msg(IOL_INFO,"%d %d %d \n",nn1,nn2,nn3);
         }
                   
          for(int x=1,n=1;x<=nx;++x)
@@ -587,7 +588,7 @@ int job_class::stop(void)
     swapfilename=0;
   }
   pthread_mutex_unlock(&swapfile_lock);
-  exit(1);
+  //exit(1);
   return 0;
 }
 

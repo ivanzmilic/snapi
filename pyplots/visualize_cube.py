@@ -28,6 +28,7 @@ print_maps_here = sys.argv[4]
 #Here we read the parameter/node map:
 temp = pyana.fzread(input_nodes)
 parameters = temp["data"]
+parameters = np.transpose(parameters,(0,2,1))
 temp = parameters.shape
 NN = temp[0] #total number of nodes
 
@@ -44,16 +45,16 @@ stokes[:,:,:,:] /= I_c
 # NOW PLOT THE NODES ---------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,2,3]
-T_nodes_tau = [-3.0,-1.7,-0.7,0.0]
+T_nodes = [0,1,2,3]
+T_nodes_tau = [-3.0,-1.7,-0.7,0.2]
 vt_nodes = [4]
-vs_nodes = [5,6,7]
-vs_nodes_tau = [-3.5,-1.7,-0.5]
-B_nodes = [8,9,10]
-B_nodes_tau = [-3.0,-1.6,-0.5]
-theta_nodes = [11]
+vs_nodes = [5,6,7,8]
+vs_nodes_tau = [-4.5,-2.9,-1.5,-0.3]
+B_nodes = [9,10,11,12]
+B_nodes_tau = [-4.5,-2.5,-1.0,0.0]
+theta_nodes = [13]
 
-panelsx=3
+panelsx=4
 panelsy=4
 
 Tmap = 'hot'
@@ -72,7 +73,7 @@ plt.figure(figsize=[defsize*2.5*panelsx, 0.95*defsize*panelsy])
 k =0
 
 plt.subplot(panelsy,panelsx,1)
-plt.imshow(stokes[:,:,0,0].transpose(),origin='lower',cmap=Imap,vmin=0.7,vmax=1.3)
+plt.imshow(stokes[:,:,0,0],origin='lower',cmap=Imap,vmin=0.7,vmax=1.3)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Stokes $I$ (continuum)')
@@ -83,7 +84,7 @@ plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off')
 ll =0
 
 plt.subplot(panelsy,panelsx,2)
-plt.imshow(stokes[:,:,0,ll].transpose(),origin='lower',cmap=Imap,vmin=0.2,vmax=0.6)
+plt.imshow(stokes[:,:,0,ll],origin='lower',cmap=Imap,vmin=0.2,vmax=0.6)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Stokes $I$ (Sodium D2)')
@@ -91,7 +92,7 @@ plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off')
 plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 plt.subplot(panelsy,panelsx,3)
-plt.imshow(stokes[:,:,3,ll].transpose(),origin='summer',cmap=Bmap,vmin=0,vmax=0.05)
+plt.imshow(stokes[:,:,3,ll],origin='summer',cmap=Bmap,vmin=0,vmax=0.05)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 plt.title('Stokes $V$ (Sodium D2)')

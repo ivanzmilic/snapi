@@ -21,7 +21,7 @@ atmos.shape
 temp = pyana.fzread(nodes_in)
 nodes = temp["data"]
 
-fit = np.transpose(fit,(1,0,2,3))
+#fit = np.transpose(fit,(1,0,2,3))
 
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
