@@ -45,16 +45,16 @@ stokes[:,:,:,:] /= I_c
 # NOW PLOT THE NODES ---------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------
 
-T_nodes = [0,1,2,3]
-T_nodes_tau = [-3.0,-1.7,-0.7,0.2]
-vt_nodes = [4]
-vs_nodes = [5,6,7,8]
-vs_nodes_tau = [-4.5,-2.9,-1.5,-0.3]
-B_nodes = [9,10,11,12]
-B_nodes_tau = [-4.5,-2.5,-1.0,0.0]
-theta_nodes = [13]
 
-panelsx=4
+T_nodes_tau = [-2.5,-1.4,-0.6,-0.1,0.3]
+T_nodes = np.arange(len(T_nodes_tau))
+vs_nodes_tau = [-3.3,-1.6,-0.7]
+vs_nodes = np.arange(len(vs_nodes_tau)) + len(T_nodes_tau)
+B_nodes_tau = [-2.8,-1.4,-0.5]
+B_nodes = np.arange(len(B_nodes_tau)) + len(vs_nodes_tau) + len(T_nodes_tau)
+theta_nodes = [len(B_nodes_tau) + len(vs_nodes_tau) + len(T_nodes_tau)]
+
+panelsx=len(T_nodes_tau)
 panelsy=4
 
 Tmap = 'hot'
@@ -67,9 +67,9 @@ Dmap = 'coolwarm'
 plt.clf()
 plt.cla()
 
-defsize = 2.5
+defsize = 4.0
 barshrink=0.8
-plt.figure(figsize=[defsize*2.5*panelsx, 0.95*defsize*panelsy])
+plt.figure(figsize=[defsize*1.0*panelsx, 1.0*defsize*panelsy])
 k =0
 
 plt.subplot(panelsy,panelsx,1)

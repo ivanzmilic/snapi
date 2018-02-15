@@ -28,13 +28,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E3;
+  fp_t lm_parameter = 1E2;
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 10;
+  int MAX_ITER = 15;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -58,7 +58,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   
   fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 1E-3;
+   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 5E-3;
   
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
@@ -69,6 +69,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
   
   for (iter=1;iter<=MAX_ITER;++iter){
+
+    //model_to_fit->print();
 
     if (corrected){      
       // These quantities are only re-computed if the model has been modified:    
@@ -119,14 +121,14 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (metric_reference < metric){
       
       // Everything is ok, and we can decrease lm_parameter:
-      model_to_fit->cpy_values_from(test_model);
-      lm_parameter /= lm_multiplicator;
+      //model_to_fit->cpy_values_from(test_model);
+      //lm_parameter /= lm_multiplicator;
       // How much to decrease lambda:
       
-      /*look_for_best_lambda(lm_parameter, JTJ, N_parameters,
+      look_for_best_lambda(lm_parameter, JTJ, N_parameters,
         rhs, model_to_fit, theta, phi, lambda, nlambda, scattered_light,
         qs_level, spectral_broadening, S_to_fit, n_stokes_to_fit, stokes_to_fit,
-        ws, noise, metric_reference);*/
+        ws, noise, metric_reference);
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3)

@@ -1211,7 +1211,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
 
     if (!is_temp){
       derivatives[N_nodes] = (node_value[N_nodes] - node_value[N_nodes-1]) / (node_tau[N_nodes]-node_tau[N_nodes-1]);
-      derivatives[N_nodes] = 0.0; // For other than T we want to have flat distribution
+      //derivatives[N_nodes] = 0.0; // For other than T we want to have flat distribution
     }
     else {
 
@@ -1244,6 +1244,12 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
       }
     }
 
+    /*if(is_temp){
+      for (int i=1;i<=N_nodes;++i)
+        fprintf(stderr,"%d %e %e \n",i,node_value[i],derivatives[i]);
+    }*/
+
+
     // And then use the derivative to interpolate:
     for (int i=from;i<=to;++i){
 
@@ -1267,6 +1273,8 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
         fp_t F = node_value[ii+1] - (node_tau[ii+1] - node_tau[ii]) / 3.0 * derivatives[ii+1];
         fp_t u = (tau_grid[i] -  node_tau[ii]) / (node_tau[ii+1] - node_tau[ii]);
         quantity[i] = (1.0-u)*(1.0-u)*(1.0-u) * node_value[ii] + u*u*u*node_value[ii+1] + 3.0*u*(1.0-u)*(1.0-u)*E + 3.0*u*u*(1.0-u)*F; 
+        //if (is_temp)
+          //printf("%d %e %e %e \n",i,tau_grid[i],u,quantity[i]);
       }
     }
     delete[](derivatives+1);

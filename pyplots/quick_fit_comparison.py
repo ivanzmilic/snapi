@@ -27,6 +27,7 @@ nodes = temp["data"]
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
 #l = np.linspace(6300.8921,6303.2671,112)
+l = np.linspace(15643.0,15667.0,601)
 
 x = int(sys.argv[5])
 y = int(sys.argv[6])
@@ -35,47 +36,16 @@ for i in range (x,x+1):
 	for j in range(y,y+1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[5.5,18.0])
+		plt.figure(figsize=[8.0,3.0])
 
-		plt.subplot(611)
-		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(fit[i,j,0]/max(obs[i,j,0]),color='blue',label='Fit')
+		plt.subplot(111)
+		plt.plot(l,obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,I/I_c}$')
 		plt.ylim([0.0,1.4])
 		plt.legend()
-
-		plt.subplot(612)
-		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(fit[i,j,3]/max(obs[i,j,0]),color='blue',label='Fit')
-		#plt.xlim([l[0],l[-1]])
-		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
-		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
-
-		plt.subplot(613)
-		plt.plot(atmos[i,j,0],atmos[i,j,2])
-		plt.xlim([-5,1])
-		plt.xlabel('$\mathrm{log\,}\\tau$')
-		plt.ylabel('$\mathrm{T\,[K]}$')
-
-		plt.subplot(614)
-		plt.plot(atmos[i,j,0],atmos[i,j,7]*np.cos(atmos[i,j,10]))
-		plt.xlim([-5,1])
-		plt.xlabel('$\mathrm{log\,}\\tau$')
-		plt.ylabel('$\mathrm{B_{los}\,[Gauss]}$')
-		
-		plt.subplot(615)
-		plt.plot(atmos[i,j,0],atmos[i,j,9]/1E5)
-		plt.xlim([-5,1])
-		plt.xlabel('$\mathrm{log\,}\\tau$')
-		plt.ylabel('$v_{los}$')
-
-		plt.subplot(616)
-		plt.plot(atmos[i,j,0],atmos[i,j,8]/1E5)
-		plt.xlim([-5,1])
-		plt.xlabel('$\mathrm{log\,}\\tau$')
-		plt.ylabel('$v_{turb}$')
 
 		print nodes[:,j,i]
 
