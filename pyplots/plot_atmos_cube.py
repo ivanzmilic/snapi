@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys 
 import pyana
+import scipy.interpolate.interp1d as interp1d
 
 input_file = sys.argv[1]
 

@@ -34,7 +34,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 15;
+  int MAX_ITER = 20;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -121,14 +121,14 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (metric_reference < metric){
       
       // Everything is ok, and we can decrease lm_parameter:
-      //model_to_fit->cpy_values_from(test_model);
-      //lm_parameter /= lm_multiplicator;
+      model_to_fit->cpy_values_from(test_model);
+      lm_parameter /= lm_multiplicator;
       // How much to decrease lambda:
       
-      look_for_best_lambda(lm_parameter, JTJ, N_parameters,
+      /*look_for_best_lambda(lm_parameter, JTJ, N_parameters,
         rhs, model_to_fit, theta, phi, lambda, nlambda, scattered_light,
         qs_level, spectral_broadening, S_to_fit, n_stokes_to_fit, stokes_to_fit,
-        ws, noise, metric_reference);
+        ws, noise, metric_reference);*/
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3)

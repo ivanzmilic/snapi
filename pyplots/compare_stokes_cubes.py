@@ -57,11 +57,15 @@ shrinkage = 0.6
 noise = 1E-3 * np.sqrt(cube_1_mean[0]*cube_1_mean[:])
 residual = (cube1-cube2)
 residual[:] /= noise;
-residual = residual * residual; 
-residual = np.mean(residual,axis=(0,1))
-chisq = np.sum(residual[0]) + np.sum(residual[3])
-chisq /= 1002
-print 'chisq = ', chisq
+residual = residual * residual
+print residual.shape
+residual = np.sum(residual,axis=3)
+residual /= 1002
+residual = residual[:,:,0] + residual[:,:,3]
+print 'chisq_max = ', np.amax(residual)
+print 'chisq_mean = ', np.mean(residual)
+
+
 
 plt.figure(figsize=[N_x_panels*x_size,N_y_panels*y_size])
 

@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import pyana 
 import numpy as np 
 import matplotlib.pyplot as plt 
@@ -27,7 +29,8 @@ nodes = temp["data"]
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
 #l = np.linspace(6300.8921,6303.2671,112)
-l = np.linspace(15643.0,15667.0,601)
+#l = np.linspace(15643.0,15667.0,601)
+l = np.linspace(5887.0,5897.0,501)
 
 x = int(sys.argv[5])
 y = int(sys.argv[6])

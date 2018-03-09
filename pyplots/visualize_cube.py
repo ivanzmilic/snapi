@@ -87,7 +87,7 @@ plt.subplot(panelsy,panelsx,2)
 plt.imshow(stokes[:,:,0,ll],origin='lower',cmap=Imap,vmin=0.2,vmax=0.6)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Stokes $I$ (Sodium D2)')
+plt.title('Stokes $I$ (line)')
 plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
 plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
@@ -95,7 +95,7 @@ plt.subplot(panelsy,panelsx,3)
 plt.imshow(stokes[:,:,3,ll],origin='summer',cmap=Bmap,vmin=0,vmax=0.05)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Stokes $V$ (Sodium D2)')
+plt.title('Stokes $V$ (line)')
 plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
 plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
