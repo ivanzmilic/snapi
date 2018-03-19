@@ -17,19 +17,19 @@ dims = stokes_cube.shape
 NX = dims[0]
 NY = dims[1]
 #NL = 1501
-NL = 1001
+NL = 701
 
 
 #hardcode wavelength, in principle we could also read it (just a thought)
 # in Angstrom
-l = np.linspace(5887.0,5897.0,NL)
+l = np.linspace(6560.0,6567.0,NL)
 #l = np.linspace(15640.0,15670.0,NL)
 
-sigma = 50 #in mA
+sigma = -5 #in mA
 sigma /= 2.35
 sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
 print sigma
-noise_level = 1E-3
+noise_level = 1E-10
 I_c_mean = np.mean(stokes_cube[:,:,0,0])
 noise_level *= I_c_mean
 
@@ -56,7 +56,7 @@ print stokes_cube.shape
 
 for i in range(0,NX):
 	for j in range(0,NY):
-		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,:]/I_c_mean)
+		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,0]/I_c_mean)
 		for s in range(0,4):
 			if (sigma>0):
 				stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma)
@@ -65,9 +65,9 @@ for i in range(0,NX):
 
 #Then we need to resample
 #NL_new = 601
-NL_new = 501
+NL_new = 701
 #l_new = np.linspace(15640.0,15670.0,NL_new)
-l_new = np.linspace(5887.0,5897.0,NL_new)
+l_new = np.linspace(6560.0,6567.0,NL_new)
 
 print 'New sampling = ', l_new[1]-l_new[0]
 
