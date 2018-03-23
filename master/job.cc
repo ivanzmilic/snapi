@@ -278,7 +278,6 @@ int job_class::start(void)
   off_t swapfile_offset=0;
   for(int a=0;a<ji.na;++a){
     ji.atmos[a]->init(wd,io); // setup structure
-   
 //
     // ---------------------------------------------------------------------------------------------------------------------------------
     /// Time computation
@@ -294,7 +293,12 @@ int job_class::start(void)
       	io->msg(IOL_INFO,"master::job : return_atmos mode is : %d \n",ji.return_atmos[o]);
       }
       else 
-      	io->msg(IOL_INFO,"master::job : we are synthesizing the data from : %s \n",ji.name[o]);
+        if (ji.models ){
+          io->msg(IOL_INFO,"master::job : model is provided in synth mode. synthesizing from : \n");
+          ji.atmos[a]->build_from_nodes(ji.models[0]);
+        }
+        else 
+      	 io->msg(IOL_INFO,"master::job : we are synthesizing the data from : %s \n",ji.name[o]);
       
       if (ji.to_invert[o]){ // ------------ INVERSION ----------------------------------------//
         io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
@@ -383,7 +387,7 @@ int job_class::start(void)
         		mini_obs->set_viewing_angle(ji.el[o],ji.az[o]);
         		mini_obs->set_to_invert(0);
         		
-        		class atmosphere * atmos_column = ji.atmos[a]->extract(x,y,*io);
+        		class atmosphere * atmos_column = ji.atmos[a]->extract(x+ji.xl[o]-1,y+ji.yl[o]-1,*io);
         		atmos_column->set_grid(0);
 
         		struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);

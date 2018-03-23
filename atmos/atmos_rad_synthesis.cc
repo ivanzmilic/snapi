@@ -188,7 +188,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
-
+  
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);   
   fp_t ***Lambda_approx = ft3dim(x1l, x1h, x2l, x2h, x3l, x3h);
   
@@ -215,7 +215,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
 
   //for (int x3i=x3l;x3i<=x3h;++x3i)
-    //fprintf(stderr,"%d %e %e \n",x3i,op_pert[1][3][x3i][x1l][x2l][x3i][1][1], em_pert[1][3][x3i][x1l][x2l][x3i][1]);
+  //  fprintf(stderr,"%d %e %e \n",x3i,op_pert[1][7][x3i][x1l][x2l][x3i][1][3], em_pert[1][7][x3i][x1l][x2l][x3i][2]);
 
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
@@ -253,7 +253,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
                 em_pert[l][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
                 em_pert[l][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
       }
-      for (int param=1;param<=4;++param){
+      for (int param=1;param<=7;++param){
         formal_pert_numerical(dS, op[l], em[l], op_pert[l][param], em_pert[l][param], theta, phi, boundary_condition_for_rt);
   
         if (param == 2)
@@ -297,6 +297,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
                       * atm_resp_to_parameters[p][q][x3k] * normalizer;
         }
       }
+
       // But now when we have these "compressed responses" we need to propagate them further.
       formal_pert_numerical(dS, op[l], em[l], op_pert_params, em_pert_params, theta, phi, 
         boundary_condition_for_rt, N_parameters);
@@ -313,9 +314,10 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
         for (int s=1;s<=4;++s)
           intensity_responses[p][l][s] = dS[p][x1l][x2l][x3l][s]/normalizer;
       }
+      //fprintf(stderr,"%e %e \n",intensity_responses[11][l][2],intensity_responses[11][l][3]);
     }
 
-    // Add it to the observable
+    // Add the synthesized spectrum to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
     
@@ -373,6 +375,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
+  //fprintf(stderr,"%e %e \n",intensity_responses[11][1][2],intensity_responses[11][1][3]);
   return o;
 
 }

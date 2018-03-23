@@ -242,10 +242,10 @@ public:
 // Vector case. Here we have already generalized. So no need to split between "tau" and "geometrical" functions. This should be cleaned up in 
 // the 'final' version of the code
   virtual observable *obs_stokes_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
-  virtual observable *obs_stokes_responses_to_nodes_new(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // 'New' version
+  virtual observable *obs_stokes_responses_to_nodes_new(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***, fp_t filter_width); // 'New' version
                                                                                                          // hence the 3D vector in last argument
-  virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***); // The same as above, except it is for vector case.
-  virtual int scale_rf(fp_t ***, model*, int, int);
+  virtual observable *obs_stokes_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t ***, fp_t filter_width); // The same as above, except it is for vector case.
+  virtual int scale_rf(fp_t ***, model*, int, int, fp_t *, fp_t *);
   virtual int scale_corrections(fp_t *, model*, int);                                                                                                      // hence the 3D vector in last argument
 //
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.

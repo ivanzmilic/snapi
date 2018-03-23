@@ -1891,7 +1891,10 @@ int atmos_ppbez::formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** e
   fp_t **** Intensity_perturbed = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   fp_t ***** opacity_perturbed = ft5dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t **** emissivity_perturbed = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  
+
+  //fprintf(stderr,"N_parameters = %d \n",N_parameters);
+  //fprintf(stderr,"%e %e \n",op_pert[10][x1l][x2l][x3l][1][2],em_pert[10][x1l][x2l][x3l][2]);
+  //fprintf(stderr,"%e %e \n",op_pert[11][x1l][x2l][x3l][1][2],em_pert[11][x1l][x2l][x3l][2]);
   
   for (int p=1;p<=N_parameters;++p){
 
@@ -1906,7 +1909,10 @@ int atmos_ppbez::formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** e
 
     formal(rt_grid, Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
 
-    //printf("Up : %d %e \n", x3k, Intensity_perturbed[x1l][x2l][x3l][1]);
+    /*printf("p = %d \n",p);
+    for (int s=1;s<=4;++s)
+      printf(" %1.10e ", Intensity_perturbed[x1l][x2l][x3l][s]);
+    printf("\n");*/
 
     for (int x1i=x1l;x1i<=x1h;++x1i)
       for (int x2i=x2l;x2i<=x2h;++x2i)
@@ -1925,7 +1931,9 @@ int atmos_ppbez::formal_pert_numerical(fp_t ***** dS, fp_t ***** op, fp_t **** e
           
     formal(rt_grid, Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
 
-    //printf("Low: %d %e \n", x3k, Intensity_perturbed[x1l][x2l][x3l][1]);
+    //for (int s=1;s<=4;++s)
+    //  printf(" %1.10e ", Intensity_perturbed[x1l][x2l][x3l][s]);
+    //printf("\n");
 
 
     for (int x1i=x1l;x1i<=x1h;++x1i)

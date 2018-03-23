@@ -142,19 +142,35 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       if(get_numbers(tmp_str,lambda,nlambda)<0)
         io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting wavelength points (did you specify a range but not a step size?)!\n",id);
     }
-    lambda+=1; // get_numbers returns range from 0...N-1 <---- what?
-    //printf("%1.10e %1.10e %d %1.10e\n ", lambda[0],lambda[nlambda-1],nlambda, lambda[1]-lambda[0]);
+    lambda+=1; // get_numbers returns
     for(int l=0;l<nlambda;++l){
       lambda[l]*=1E-8; // A->cm
-      //lambda[l] = airtovac(lambda[l]);
     }
+    
     io.msg(IOL_XNFO,"obs: %d %E...%E\n",nlambda,lambda[0],lambda[nlambda-1]);
-    if(!(name=get_arg(odata,"NAME",0)))
-      io.msg(IOL_ERROR|IOL_FATAL,"obs: no output file name specified!\n");
-  
     delete[] tmp_str;
+  }
+  else if(char *tmp_str2=get_arg(odata,"LGRID",0)){
+    FILE * tmpinpt = fopen(tmp_str2,"r");
+    nlambda = 0;
+    if (fscanf(tmpinpt,"%d", &nlambda)!=EOF)
+      lambda = new fp_t [nlambda];
+    else lambda = 0; // SHOULD BE ERROR
+    fp_t tmp;
+    for (int i=0;i<nlambda;++i)
+      if (fscanf(tmpinpt,"%lf",&tmp)!=EOF){
+        lambda[i] = tmp*1E-8; // A -> cm
+    }
+    // should be else - error  
+  fclose(tmpinpt);
+  delete[] tmp_str2;
+  for (int i=0;i<nlambda;++i)
+      fprintf(stderr,"%d %f \n",i,lambda[i]*1E8);
   }else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: observation must have wavelength specified to be observable!\n",id);
 
+  if(!(name=get_arg(odata,"NAME",0)))
+      io.msg(IOL_ERROR|IOL_FATAL,"obs: no output file name specified!\n");
+  
   if(char *tmp_str=get_arg(odata,"XRANGE",0)){
     fp_t * xrange;
     int temp=0;

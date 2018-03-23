@@ -409,8 +409,6 @@ int multiply_4x4(fp_t ** A, fp_t * B, fp_t * result){
 
   // This is a trivial, for-the-debug function which multiplies matrices, no debug lines, no check no nothing. 
 
-  //printf("You ran me biatch!\n");
-
   for (int i = 1; i<=4; ++i)
     {
       result[i] = 0.0;

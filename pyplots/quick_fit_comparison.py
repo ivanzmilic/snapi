@@ -29,8 +29,9 @@ nodes = temp["data"]
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
 #l = np.linspace(6300.8921,6303.2671,112)
-#l = np.linspace(15643.0,15667.0,601)
-l = np.linspace(5887.0,5897.0,501)
+l = np.linspace(15642.5,15667.5,501)
+#l = np.linspace(8540.0,8543.0,151)
+#l = l[:151]
 
 x = int(sys.argv[5])
 y = int(sys.argv[6])
@@ -39,16 +40,45 @@ for i in range (x,x+1):
 	for j in range(y,y+1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[8.0,3.0])
+		plt.figure(figsize=[9.0,6.5])
 
-		plt.subplot(111)
+		plt.subplot(221)
 		plt.plot(l,obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(l,fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,I/I_c}$')
+		#plt.xlim([8541.0,8543.0])
 		plt.ylim([0.0,1.4])
 		plt.legend()
+
+		plt.subplot(222)
+		plt.plot(l,obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		#plt.xlim([l[0],l[-1]])
+		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
+		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
+		#plt.ylim([0.0,1.4])
+		#plt.legend()
+
+		plt.subplot(223)
+		plt.plot(l,obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		#plt.xlim([l[0],l[-1]])
+		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
+		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
+		#plt.ylim([0.0,1.4])
+		#plt.legend()
+
+		plt.subplot(224)
+		plt.plot(l,obs[i,j,2]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,2]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		#plt.xlim([l[0],l[-1]])
+		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
+		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
+		#plt.ylim([0.0,1.4])
+		#plt.legend()
+
 
 		print nodes[:,j,i]
 

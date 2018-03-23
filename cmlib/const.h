@@ -29,7 +29,7 @@
 #define delta_Nt_frac 1E-3 
 #define delta_vr 20.0 // same as for delta_vt
 #define delta_B 0.01
-#define delta_angle 0.0001 // In radians, this is a bit more than 0.1 degree. Hopefully it works. 
+#define delta_angle 0.001 // In radians, this is a bit more than 0.1 degree. Hopefully it works. 
 
 // scales of the parameters, important for fitting
 #define T_scale 5000.0 

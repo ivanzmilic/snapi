@@ -889,6 +889,7 @@ int atom::boundbound_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp
                   op_vector_pert[l][7][x3i][x1i][x2i][x3i][1][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*cp * op_loc;
                   op_vector_pert[l][7][x3i][x1i][x2i][x3i][3][4] += -0.5*(F_p-0.5*(F_r+F_b))*st*st*2.0*sp * op_loc;
                   op_vector_pert[l][7][x3i][x1i][x2i][x3i][4][2] += 0.5*(F_p-0.5*(F_r+F_b))*st*st*2.0*cp * op_loc;
+                
                   // And to emissivity:
                   em_vector_pert[l][7][x3i][x1i][x2i][x3i][2] += -0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*sp * em_loc;
                   em_vector_pert[l][7][x3i][x1i][x2i][x3i][3] += 0.5 * (H_p-0.5*(H_r+H_b)) * st*st*2.0*cp * em_loc;        

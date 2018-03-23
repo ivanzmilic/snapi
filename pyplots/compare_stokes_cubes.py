@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
+from matplotlib import ticker
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -45,14 +46,15 @@ wls = np.append(0,wls)
 print wls
 #wls[0] += 15
 #wls[3] += 15
-N_x_panels = 6
+N_x_panels = 4
 N_y_panels = len(wls)
 
 #make the size of the figure:
-x_size = 4.0
-y_size = x_size * float(NY)/float(NX) * 1.0
+x_size = 2.8
+ratio = 0.8
+y_size = x_size * float(NY)/float(NX) * ratio
 
-shrinkage = 0.6
+shrinkage = 0.7
 
 noise = 1E-3 * np.sqrt(cube_1_mean[0]*cube_1_mean[:])
 residual = (cube1-cube2)
@@ -79,36 +81,58 @@ for j in range (1,N_y_panels+1):
 	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+1)
 	plt.imshow(to_plot,origin='lower',vmin = 1-3*s,vmax=1+3*s,cmap='hot')
 	plt.colorbar(shrink=shrinkage)
+	if (j==N_y_panels):
+		plt.xlabel('x [pixel]')
+	plt.ylabel('y [pixel]')
+	if (j==1):
+		plt.title('Observed $I/I_c$')
+
 
 	to_plot = np.copy(cube2[:,:,0,wls[j-1]])
 	to_plot/=m
 	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+2)
 	plt.imshow(to_plot,origin='lower',vmin = 1-3*s,vmax=1+3*s,cmap='hot')
 	plt.colorbar(shrink=shrinkage)
+	if (j==N_y_panels):
+		plt.xlabel('x [pixel]')
+	if (j==1):
+		plt.title('Fitted $I/I_c$')
 
 
-	to_plot = (cube2[:,:,0,wls[j-1]]-cube1[:,:,0,wls[j-1]])/cube1[:,:,0,wls[j-1]]*100.0
-	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
-	plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
-	plt.colorbar(shrink=shrinkage)
+
+
+	#to_plot = (cube2[:,:,0,wls[j-1]]-cube1[:,:,0,wls[j-1]])/cube1[:,:,0,wls[j-1]]*100.0
+	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
+	#plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
+	#plt.colorbar(shrink=shrinkage)
 
 	to_plot1 = np.mean(cube1[:,:,3,wls[j-1]:wls[j-1]+6],axis=2)/cube1[:,:,0,0]
 	s = np.std(to_plot1)
 
-	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
+	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
 	plt.imshow(to_plot1,origin='lower',vmin = -3*s,vmax=3*s,cmap='coolwarm')
 	plt.colorbar(shrink=shrinkage)
+	if (j==N_y_panels):
+		plt.xlabel('x [pixel]')
+	if (j==1):
+		plt.title('Observed $V/I_c$')
+
+
 
 	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+6],axis=2)/cube1[:,:,0,0]
 	
-	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+5)
+	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
 	plt.imshow(to_plot2,origin='lower',vmin = -3*s,vmax=3*s,cmap='coolwarm')
 	plt.colorbar(shrink=shrinkage)
+	if (j==N_y_panels):
+		plt.xlabel('x [pixel]')
+	if (j==1):
+		plt.title('Fitted $V/I_c$')
 
-	to_plot = (to_plot2-to_plot1)/(to_plot1+1E-3*np.amax(to_plot1))*100.0
-	plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+6)
-	plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
-	plt.colorbar(shrink=shrinkage)
+	#to_plot = (to_plot2-to_plot1)/(to_plot1+1E-3*np.amax(to_plot1))*100.0
+	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+6)
+	#plt.imshow(to_plot,origin='lower',vmin = -20.0,vmax=20.0,cmap='coolwarm')
+	#plt.colorbar(shrink=shrinkage)
 
 
 plt.tight_layout()

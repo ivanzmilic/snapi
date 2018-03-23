@@ -28,19 +28,21 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E2;
+  fp_t lm_parameter = 1E3;
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER = 20;
+  int MAX_ITER=30;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
   int to_break = 0;
-  
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0; // weights for Stokes parameters
+
+  // weights for Stokes parameters. They enter like this in response scaling, and 
+  // quadratically in chi_sq. basically they reduce the noise  
+  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0; 
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -54,36 +56,43 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     stokes_to_fit[counter] = s+1;
     ++counter;
   }
-
   
-  fp_t *noise = new fp_t [nlambda]-1; // wavelength dependent noise
+  fp_t noise_level = 1E-3*S_to_fit[1][1];
+  fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise[l] = sqrt(S_to_fit[1][l] * S_to_fit[1][1]) * 5E-3;
-  
+   noise_scaling[l] = sqrt(S_to_fit[1][1]/S_to_fit[1][1]);
+  fp_t *noise = new fp_t[nlambda]-1;
+  for (int l=1;l<=nlambda;++l)
+   noise[l] = noise_level * noise_scaling[l];
+
   observable * current_obs;
   fp_t *** derivatives_to_parameters;
   fp_t ** S_current;
+
+  int filtergraph_mode=1;
   
   int N_parameters = model_to_fit->get_N_nodes_total();
   
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
+
+  //FILE * chi_out;
+  //chi_out = fopen("chi_sq.dat","w");
   
   for (iter=1;iter<=MAX_ITER;++iter){
-
-    //model_to_fit->print();
 
     if (corrected){      
       // These quantities are only re-computed if the model has been modified:    
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
-      
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters); 
+      // Calculate the spectrum and the responses and apply degradation to it:      
+      current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
       current_obs->add_scattered_light(scattered_light,qs_level);
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       }
-      scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters);
+
+      scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,noise_scaling);
       S_current = current_obs->get_S(1,1);
     }
     
@@ -95,20 +104,24 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         for (int s=1;s<=n_stokes_to_fit;++s){
           int stf = stokes_to_fit[s-1];
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
+
     }
+    
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
-    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
+
+    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);    
     scale_corrections(correction,model_to_fit,N_parameters);
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
   
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
+    
     //test_model->print();
     build_from_nodes(test_model);
     // Compare again:
@@ -168,10 +181,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
   delete[](noise+1);
+  delete[](noise_scaling+1);
   if (chi_to_track)
     delete[]chi_to_track;
 
   // Full version:
+  //model_to_fit->print();
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
@@ -198,20 +213,20 @@ fp_t atmosphere::calc_chisq(int nlambda, int n_stokes_to_fit, int * stokes_to_fi
       for (int s=1;s<=n_stokes_to_fit;++s){
         int stf = stokes_to_fit[s-1];
         chisq += residual[(l-1)*n_stokes_to_fit+s] * residual[(l-1)*n_stokes_to_fit+s] 
-          *ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda);
+          *ws[stf-1] * ws[stf-1] / noise[l] / noise[l] / (n_stokes_to_fit*nlambda);
         residual[(l-1)*n_stokes_to_fit+s] /= (noise[l]/noise[1]);
   }
   return chisq;
 }
 
-int atmosphere::scale_rf(fp_t *** derivatives_to_parameters, model* model_to_fit, int nlambda, int N_parameters){
+int atmosphere::scale_rf(fp_t *** derivatives_to_parameters, model* model_to_fit, int nlambda, int N_parameters, fp_t * w_stokes, fp_t * noise_scaling){
 
   fp_t scales[6] ={T_scale,vt_scale,vr_scale,B_scale,1.0,1.0};
   for (int i=1;i<=N_parameters;++i){
     int index=model_to_fit->which_parameter(i);
-      for (int l=1;l<=nlambda;++l)
-        for (int s=1;s<=4;++s)
-          derivatives_to_parameters[i][l][s] *= scales[index];
+    for (int l=1;l<=nlambda;++l)
+      for (int s=1;s<=4;++s)
+        derivatives_to_parameters[i][l][s] *= scales[index-1] * w_stokes[s-1] * noise_scaling[l];
   }
   return 0;
 }
@@ -220,7 +235,7 @@ int atmosphere::scale_corrections(fp_t * corrections, model* model_to_fit, int N
   fp_t scales[6] ={T_scale,vt_scale,vr_scale,B_scale,1.0,1.0};
   for (int i=1;i<=N_parameters;++i){
     int index=model_to_fit->which_parameter(i);
-    corrections[i] *= scales[index];
+    corrections[i] *= scales[index-1];
   }
   return 0; 
 }
@@ -967,7 +982,7 @@ fp_t ** atmosphere::calculate_legendre_corrections(fp_t **** full_stokes_respons
   return o;
  }
 
-  observable *atmosphere::obs_stokes_num_responses_to_nodes(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
+  observable *atmosphere::obs_stokes_num_responses_to_nodes(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters, fp_t filter_width){
 
   // We first need to create the atmosphere from the model and compute the observable:
 
@@ -1436,8 +1451,8 @@ fp_t ** atmosphere::calculate_legendre_corrections(fp_t **** full_stokes_respons
 
  }
 
- // Same as the above except for polarized radiation (Zeeman mode so far):
- observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
+// Same as the above except for polarized radiation (Zeeman mode so far):
+observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters, fp_t filter_width){
 
   // We first need to create the atmosphere from the model and compute the observable:
   
@@ -1540,15 +1555,50 @@ fp_t ** atmosphere::calculate_legendre_corrections(fp_t **** full_stokes_respons
     delete[](local_perturbations+x3l);
   
   }
-
-  // Now we start the responses part.
   atmos_model->set_response_to_parameters(resp_atm_to_parameters,x3h-x3l+1);
-  observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model,0);
-    del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
+  del_ft3dim(resp_atm_to_parameters,1,N_parameters,1,7,1,N_depths);
   
-  return o;
-  
- }
+  // If there is a filter there is some gymnastics:
+  // 1) Create a fine wavelenght grid and calculate spectrum and the responses on it
+  // 2) Interpolate back to the original grid where exact filter positions are given. 
+  // 3) Return the observable and responses on the original grid to the fitting method
+  if (filter_width){
+    int nlambda_fine = int((lambda[nlambda]+5.0*filter_width - lambda[1] - 5.0*filter_width)*2.0/filter_width);
+    fp_t * lambda_fine = new fp_t [nlambda_fine]-1;
+    for (int l=1;l<=nlambda_fine;++l){
+      lambda_fine[l] = lambda[1]-5.0*filter_width + filter_width/2.0 * (l-1);
+    }
+    fp_t *** response_to_parameters_fine = ft3dim(1,N_parameters,1,nlambda_fine,1,4);
+    observable * o_fine = obs_stokes_responses(theta, phi, lambda_fine, nlambda_fine, response_to_parameters_fine,atmos_model,0);
+    o_fine->spectral_convolve(filter_width,1,1);
+    convolve_response_with_gauss(response_to_parameters_fine,lambda_fine,N_parameters,nlambda_fine,filter_width);   
+    fp_t ** S_fine = o_fine->get_S(1,1);
+    fp_t **** S = ft4dim(1,1,1,1,1,4,1,nlambda);
+    for (int s=1;s<=4;++s)
+      for (int l=1;l<=nlambda;++l)
+        S[1][1][s][l] = interpol_1d(S_fine[s],lambda_fine,nlambda_fine,lambda[l]);
+    for (int i=1;i<=N_parameters;++i){
+      fp_t ** response_temp = transpose(response_to_parameters_fine[i],nlambda,4);
+      for (int s=1;s<=4;++s)
+        for (int l=1;l<=nlambda;++l)
+          response_to_parameters[i][l][s] = interpol_1d(response_temp[s],lambda_fine,nlambda_fine,lambda[l]);
+      del_ft2dim(response_temp,1,4,1,nlambda);
+    }
+    del_ft2dim(S_fine,1,4,1,nlambda_fine);
+    del_ft3dim(response_to_parameters_fine,1,N_parameters,1,nlambda_fine,1,4);
+    delete[](lambda_fine+1);
+    observable * o = new observable(1,1,4,nlambda); 
+    o->set(S);
+    o->setlambda(lambda);
+    del_ft4dim(S,1,1,1,1,1,4,1,nlambda);
+    delete o_fine;
+  }
+  // If there is no filter, everything is the same as before:
+  else{
+    observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model,0);
+    return o;
+  }
+}
 
  // ===============================================================================================
 

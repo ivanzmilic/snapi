@@ -114,7 +114,7 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
         Bx[x1i][x2i][x3i]=B*sin(el)*cos(az);
         By[x1i][x2i][x3i]=B*sin(el)*sin(az);
         Bz[x1i][x2i][x3i]=B*cos(el);
-        Vt[x1i][x2i][x3i] = atmoscube[9][x1i][x2i][x3i];;
+        Vt[x1i][x2i][x3i] = 3E5;//atmoscube[9][x1i][x2i][x3i];;
         Vx[x1i][x2i][x3i] = 0.0;
         Vy[x1i][x2i][x3i] = 0.0;
         Vz[x1i][x2i][x3i] = atmoscube[10][x1i][x2i][x3i];

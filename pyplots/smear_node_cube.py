@@ -32,19 +32,18 @@ NP = dims[0]
 
 an_conv = np.zeros(dims)
 
-an[-1] = np.cos(an[-1])
-an[-1] = np.arccos(an[-1])
+#an[-1] = np.cos(an[-1])
 
-an[8:10] *= an[-1]
-an[8:10] = np.abs(an[8:10])
+#an[8:10] *= an[-1]
+#an[8:10] = np.abs(an[8:10])
 
 #an[9:11] = an[8]
 
-an[-1,:,:] = np.pi * 0.99
+#an[-1,:,:] = np.pi * 0.99
 
 an_conv = np.copy(an)
 
-for i in range(0,NP-3):
+for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],5)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an[i],sigma)
