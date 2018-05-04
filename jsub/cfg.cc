@@ -120,6 +120,16 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       get_number(tmp_str,synth_qs);
       delete[] tmp_str;
     } else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting calculated continuum level\n",id);
+    if(char *tmp_str=get_arg(odata,"ITERATIONS",0)){
+      fp_t n_iter; // temp
+      get_number(tmp_str,n_iter);
+      no_iterations = int(n_iter);
+      delete[] tmp_str;
+    } else no_iterations = 10;
+    if(char *tmp_str=get_arg(odata,"STARTING_LAMBDA",0)){
+      get_number(tmp_str,starting_lambda);
+      delete[] tmp_str;
+    } else starting_lambda=1E3;
   }
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){

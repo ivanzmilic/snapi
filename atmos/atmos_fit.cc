@@ -34,7 +34,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER=30;
+  int MAX_ITER=20;
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -57,7 +57,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     ++counter;
   }
   
-  fp_t noise_level = 1E-3*S_to_fit[1][1];
+  fp_t noise_level = 3E-4*S_to_fit[1][1];
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
    noise_scaling[l] = sqrt(S_to_fit[1][1]/S_to_fit[1][1]);
@@ -69,7 +69,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t *** derivatives_to_parameters;
   fp_t ** S_current;
 
-  int filtergraph_mode=1;
+  int filtergraph_mode=0;
   
   int N_parameters = model_to_fit->get_N_nodes_total();
   
@@ -85,7 +85,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       // Calculate the spectrum and the responses and apply degradation to it:      
+      //printf("WOOOOOOOOOOW! %d \n",nlambda);
       current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
+
       current_obs->add_scattered_light(scattered_light,qs_level);
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);

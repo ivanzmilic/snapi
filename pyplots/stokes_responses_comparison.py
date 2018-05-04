@@ -100,12 +100,12 @@ suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 h = h[0,:,0]
 #h/= 1E5
 
-hmax = -4.0
+hmax = -5.0
 hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(0,4):
+for p in range(0,1):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)
@@ -164,6 +164,22 @@ for p in range(0,4):
 
 	#then plot the stuff
 	plt.figure(1);
+	plt.figure(figsize=[6.0, 4.0])
+	plt.clf()
+	plt.cla()
+	plt.xlim([lambda_l, lambda_m])
+	plt.ylim([hmin, hmax])
+	plt.title('$\mathrm{Stokes}\,V$')
+	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
+	plt.ylabel(yname)
+	plt.pcolormesh(wvl, h, ra[3,4,:,:]/np.amax(ra[3,p,:,:]), vmin = -1, vmax = 1, rasterized=True,cmap='PuOr')
+	plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*(-2.0)+ 1.0)
+	#plt.colorbar()
+	plt.tight_layout()
+	plt.savefig('response_V_B',fmt='png',bbox_inches='tight')
+	plt.savefig('response_V_B.eps',fmt='eps',bbox_inches='tight')
+	plt.close('all')
+
 	plt.figure(figsize=[9.0, 6.0])
 	plt.clf()
 	plt.cla()

@@ -39,7 +39,7 @@ plt.plot(cube_1_mean,color='red')
 plt.plot(cube_2_mean,color='blue')
 plt.savefig('mean_profiles',fmt='png')
 cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
-wls = argrelextrema(cube_1_mean,np.less)
+wls = argrelextrema(cube_2_mean,np.less)
 wls = np.asarray(wls)
 wls = wls[0]
 wls = np.append(0,wls)
@@ -62,7 +62,7 @@ residual[:] /= noise;
 residual = residual * residual
 print residual.shape
 residual = np.sum(residual,axis=3)
-residual /= 1002
+residual /= (2.0*NL)
 residual = residual[:,:,0] + residual[:,:,3]
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
@@ -85,7 +85,7 @@ for j in range (1,N_y_panels+1):
 		plt.xlabel('x [pixel]')
 	plt.ylabel('y [pixel]')
 	if (j==1):
-		plt.title('Observed $I/I_c$')
+		plt.title('Observed $I/<I>$')
 
 
 	to_plot = np.copy(cube2[:,:,0,wls[j-1]])
@@ -96,7 +96,7 @@ for j in range (1,N_y_panels+1):
 	if (j==N_y_panels):
 		plt.xlabel('x [pixel]')
 	if (j==1):
-		plt.title('Fitted $I/I_c$')
+		plt.title('Fitted $I/<I>$')
 
 
 

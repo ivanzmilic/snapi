@@ -24,26 +24,26 @@ NL = 1501
 #l = np.linspace(8540.0,8543.0,NL)
 l = np.linspace(15640.0,15670.0,NL)
 
-sigma = -5 #in mA
+sigma = -150 #in mA
 sigma /= 2.35
 sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
 print sigma
-noise_level = 1E-5
+noise_level = 3E-4
 I_c_mean = np.mean(stokes_cube[:,:,0,0])
 noise_level *= I_c_mean
 
 plt.clf()
 plt.cla()
-plt.plot(l,stokes_cube[0,0,0],color='red')
+plt.plot(stokes_cube[0,0,0],color='red')
 
 #if we want to smear spatially:
 if (to_degrade):
 	A=[0.7,0.3] #two part-psf, weights
-	width = [0.25,5.0] # two part - psf, widths in "
+	width = [0.15,2.0] # two part - psf, widths in "
 	A = np.asarray(A)
 	width = np.asarray(width)
-	width *= 725.0
-	width /= 20.8
+	width *= 725.0  #to km
+	width /= 20.8 #to pixel
 	width /= 2.35 #from FWHM to sigma
 	print width
 
@@ -63,7 +63,7 @@ for i in range(0,NX):
 			stokes_cube[i,j,s] += random_sample*loc_noise
 
 #Then we need to resample
-NL_new = 601
+NL_new = 501
 #NL_new = 151
 l_new = np.linspace(15640.0,15670.0,NL_new)
 #l_new = np.linspace(8540.0,8543.0,NL_new)
@@ -83,7 +83,7 @@ for i in range(0,NX):
 for s in range(1,4):
 	resampled_cube[:,:,s,:] /= resampled_cube[:,:,0,:]
 
-plt.plot(l_new,resampled_cube[0,0,0],color='blue')
+plt.plot(resampled_cube[0,0,0],color='blue')
 plt.savefig('pre_vs_post_degraded',fmt='png')
 
 pyana.fzwrite(file_out,resampled_cube,0,'placeholder')
