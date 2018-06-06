@@ -177,7 +177,6 @@ public:
   virtual fp_t dissoc(fp_t,fp_t){ return 0.0; } // default: not a molecule
   virtual ion *components(int &nc_o){ return 0; }
   virtual void pupdate(fp_t,fp_t*,int,int32_t,int32_t,int32_t){
-    //printf("You are now running the pupdate from atmol class. \n");
   };
   virtual void randomize_populations(fp_t){
   };

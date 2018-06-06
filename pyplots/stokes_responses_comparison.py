@@ -4,6 +4,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt 
 import scipy.ndimage as ndimage
 
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+mpl.rcParams['axes.formatter.useoffset'] = False
+
 #turn input arguments into something usable
 profile_file = sys.argv[1]
 rn_file = sys.argv[2]
@@ -22,8 +27,6 @@ spectrum[:,0] -= (spectrum[-1,0] + spectrum[0,0]) * 0.5
 lambda_l = min(spectrum[:,0])
 lambda_m = max(spectrum[:,0])
 #spectrum[:,1] /= max(spectrum[:,1])
-
-mpl.rcParams['font.size'] = 10
 
 
 #plt.ion()
@@ -90,7 +93,7 @@ h = h.reshape(N_Parameters,n_depths, n_wvl)
 
 wvl = wvl[0][0]
 wvl *= 1E8
-wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
+#wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 
 lambda_l = wvl[0]
 lambda_m = wvl[-1]
@@ -105,7 +108,7 @@ hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(0,1):
+for p in range(3,4):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)
@@ -163,22 +166,27 @@ for p in range(0,1):
 	#v_max = np.amax(ra[p]*100)
 
 	#then plot the stuff
-	plt.figure(1);
-	plt.figure(figsize=[6.0, 4.0])
+	center = (wvl[n_wvl-1] + wvl[0]) / 2.0
+	
 	plt.clf()
 	plt.cla()
-	plt.xlim([lambda_l, lambda_m])
-	plt.ylim([hmin, hmax])
-	plt.title('$\mathrm{Stokes}\,V$')
-	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
-	plt.ylabel(yname)
-	plt.pcolormesh(wvl, h, ra[3,4,:,:]/np.amax(ra[3,p,:,:]), vmin = -1, vmax = 1, rasterized=True,cmap='PuOr')
-	plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*(-2.0)+ 1.0)
-	#plt.colorbar()
-	plt.tight_layout()
-	plt.savefig('response_V_B',fmt='png',bbox_inches='tight')
-	plt.savefig('response_V_B.eps',fmt='eps',bbox_inches='tight')
+	fig, ax = plt.subplots(1,1,figsize=[6.0, 4.0])
+	
+	#ax.set_xlim([6.0+center,11.5+center])
+	ax.set_xlim([15646.0,15654.0])
+	#ax.set_xlim([6301.0,6303.0])
+	ax.set_ylim([hmin, hmax])
+	ax.set_title('Stokes$\,I$')
+	ax.set_xlabel('$\lambda\,\mathrm{[\AA]}$')
+	ax.set_ylabel(yname)
+	ax.pcolormesh(wvl, h, np.log10(np.abs(ra[0,3,:,:])/np.amax(ra[0,3,:,:])),vmin=-3,vmax=0, rasterized=True,cmap='coolwarm')
+	ax.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*(-2.0)+ 1.0)
+	ax.plot(wvl,wvl/wvl*0.0)
+	fig.tight_layout()
+	fig.savefig('response_I_V',fmt='png',bbox_inches='tight')
+	fig.savefig('response_I_V.eps',fmt='eps',bbox_inches='tight')
 	plt.close('all')
+	quit();
 
 	plt.figure(figsize=[9.0, 6.0])
 	plt.clf()

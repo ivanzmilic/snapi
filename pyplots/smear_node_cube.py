@@ -32,14 +32,10 @@ NP = dims[0]
 
 an_conv = np.zeros(dims)
 
-#an[-1] = np.cos(an[-1])
+#Project B, theta, phi -> B_x, B_y B_z
 
-#an[8:10] *= an[-1]
-#an[8:10] = np.abs(an[8:10])
-
-#an[9:11] = an[8]
-
-#an[-1,:,:] = np.pi * 0.99
+B_z = an[10:14] * np.cos(an[14])
+B_t = an[10:14] * np.sin(an[14])
 
 an_conv = np.copy(an)
 
@@ -47,5 +43,18 @@ for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],5)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an[i],sigma)
+
+for i in range(0,0):
+	B_z[i] = flt.medfilt(B_z[i],5)
+	B_t[i] = flt.medfilt(B_t[i],5)
+	if (sigma):
+		B_z[i] = filters.gaussian_filter(B_z[i],sigma)
+		B_t[i] = filters.gaussian_filter(B_t[i],sigma)
+
+for i in range(0,0):
+	an_conv[10+i] = (B_z[i] * B_z[i] + B_t[i] * B_t[i]) ** 0.5
+
+#an_conv[-1] = 0.1
+
 
 pyana.fzwrite(file_out,an_conv,0,'bla')

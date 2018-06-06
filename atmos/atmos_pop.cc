@@ -175,8 +175,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
       break; 
   }
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
-  //fclose(test_intensity);
-  //fclose(test_opem);
   
   for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
 

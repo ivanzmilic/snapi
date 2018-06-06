@@ -38,8 +38,8 @@ plt.plot(stokes_cube[0,0,0],color='red')
 
 #if we want to smear spatially:
 if (to_degrade):
-	A=[0.7,0.3] #two part-psf, weights
-	width = [0.15,2.0] # two part - psf, widths in "
+	A=[1.0,0.0] #two part-psf, weights
+	width = [0.3,3.0] # two part - psf, widths in "
 	A = np.asarray(A)
 	width = np.asarray(width)
 	width *= 725.0  #to km
@@ -48,9 +48,10 @@ if (to_degrade):
 	print width
 
 	for s in range (0,4):
-		for w in range(0,NL):
-			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0]) + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1])
-
+		for w in range(0,1):
+			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0],mode='wrap') + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1],mode='wrap')
+print np.std(stokes_cube[:,:,0,0])/np.mean(stokes_cube[:,:,0,0])
+quit();
 print stokes_cube.shape
 
 for i in range(0,NX):
@@ -58,7 +59,7 @@ for i in range(0,NX):
 		loc_noise = noise_level * np.sqrt(stokes_cube[i,j,0,0]/I_c_mean)
 		for s in range(0,4):
 			if (sigma>0):
-				stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma)
+				stokes_cube[i,j,s] = flt.gaussian_filter(stokes_cube[i,j,s],sigma,mode='nearest')
 			random_sample = np.random.normal(0,1.0,NL)
 			stokes_cube[i,j,s] += random_sample*loc_noise
 

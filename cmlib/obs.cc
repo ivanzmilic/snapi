@@ -55,8 +55,8 @@ observable::~observable(void){
 int32_t observable::size(io_class &io_in){
 
   int32_t sz = 4*sizeof(int); // ns, nlambda,nx,ny
-  sz += 6*sizeof(fp_t); // scattered light,broadening,continuum,el,az
-  sz += sizeof(int); // whether to invert or no
+  sz += 7*sizeof(fp_t); // scattered light,broadening,continuum,el,az, starting lambda for lm
+  sz += 2*sizeof(int); // whether to invert or no, max number of iterations
   sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
   return sz;
@@ -75,6 +75,8 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,el,do_swap);
   offs+=::pack(buf+offs,az,do_swap);
   offs+=::pack(buf+offs,to_invert,do_swap);
+  offs+=::pack(buf+offs,no_iterations,do_swap);
+  offs+=::pack(buf+offs,start_lambda,do_swap);
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
@@ -95,6 +97,8 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::unpack(buf+offs,el,do_swap);
   offs+=::unpack(buf+offs,az,do_swap);
   offs+=::unpack(buf+offs,to_invert,do_swap);
+  offs+=::unpack(buf+offs,no_iterations,do_swap);
+  offs+=::unpack(buf+offs,start_lambda,do_swap);
 
   lambda = new fp_t [nlambda]-1;
   mask = new fp_t [nlambda]-1;
@@ -160,6 +164,14 @@ void observable::set_to_invert(int to_invert_in){
   to_invert=to_invert_in;
 }
 
+void observable::set_no_iterations(int input){
+  no_iterations = input;
+}
+
+void observable::set_start_lambda(fp_t input){
+  start_lambda = input;
+}
+
 fp_t **** observable::get_S(){
 
   fp_t **** S_copy;
@@ -193,7 +205,6 @@ fp_t ** observable::get_S_to_fit(int i, int j){
 
   return S_copy;
 }
-
 
 
 fp_t * observable::get_lambda(){
@@ -254,6 +265,12 @@ fp_t observable::get_az(){
 }
 int observable::get_to_invert(){
   return to_invert;
+}
+int observable::get_no_iterations(){
+  return no_iterations;
+}
+fp_t observable::get_start_lambda(){
+  return start_lambda;
 }
 
 void observable::write(const char *name,io_class &io,int i, int j)

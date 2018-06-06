@@ -1,3 +1,7 @@
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
@@ -7,6 +11,7 @@ import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib_scalebar.scalebar import ScaleBar
+import colorcet as cc
 
 
 stokes_cube_file = sys.argv[1]
@@ -32,20 +37,28 @@ size = 1.5
 
 #1105
 
+x = np.linspace(0.0,NX-1*1.0,NX)
+x *= 20.8 / 1E3
+y = x
+
 plt.figure(figsize=[4.5*1, 3.7*2])
 plt.clf()
 plt.cla()
 plt.subplot(211)
-plt.imshow(stokes_cube[:,:,0,0]/mean[0],origin='lower',cmap='hot')
+plt.imshow(stokes_cube[:,:,0,0]/mean[0],origin='lower',cmap=cc.cm['fire'],extent=[x[0],x[-1],y[0],y[-1]])
 plt.colorbar(shrink=0.9)
-plt.title('$\mathrm{Stokes}\,I\,\mathrm{Fe\,1.56\mu m}$')
+plt.title('$\mathrm{Stokes}\,I/I_{\mathrm{qs}}$')
+plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.ylabel('$\mathrm{Stokes}\,I$')
 plt.subplot(212)
-plt.imshow(stokes_cube[:,:,3,370],origin='lower',cmap='coolwarm',vmin=-0.04,vmax=0.04)
-plt.title('$V/I$')
+plt.imshow(stokes_cube[:,:,3,370]*stokes_cube[:,:,0,370]/mean[0],origin='lower',cmap=cc.cm['coolwarm'],vmin=-0.04,vmax=0.04,extent=[x[0],x[-1],y[0],y[-1]])
+plt.title('$V/I_{\mathrm{qs}}$')
 plt.colorbar(shrink=0.9)
+plt.xlabel('$x\,[\mathrm{Mm}]$')
+plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.tight_layout()
-plt.savefig('I_V',bbox_inches='tight')
+plt.savefig(sys.argv[2],bbox_inches='tight')
+plt.savefig(sys.argv[2]+'.eps',fmt='eps',bbox_inches='tight')
 quit();
 
 

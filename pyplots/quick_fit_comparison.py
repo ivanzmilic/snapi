@@ -28,8 +28,8 @@ nodes = temp["data"]
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
-#l = np.linspace(6300.8921,6303.2671,112)
-l = np.linspace(15642.5,15667.5,501)
+l = np.linspace(6300.8921,6303.2671,112)
+#l = np.linspace(15642.5,15667.5,501)
 #l = np.linspace(8540.0,8543.0,151)
 #l = l[:151]
 
@@ -78,9 +78,6 @@ for i in range (x,x+1):
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
-
-
-		print nodes[:,j,i]
 
 		plt.tight_layout()
 		plt.savefig('quick_test'+str(i)+'_'+str(j),fmt='png',bbox_inches='tight')

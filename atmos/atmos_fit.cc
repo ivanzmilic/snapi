@@ -28,13 +28,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
-  fp_t lm_parameter = 1E3;
+  fp_t lm_parameter = spectrum_to_fit->get_start_lambda();
   fp_t lm_multiplicator = 10.0;
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
-  int MAX_ITER=20;
+  int MAX_ITER = spectrum_to_fit->get_no_iterations();
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -60,7 +60,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t noise_level = 3E-4*S_to_fit[1][1];
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
-   noise_scaling[l] = sqrt(S_to_fit[1][1]/S_to_fit[1][1]);
+   noise_scaling[l] = sqrt(S_to_fit[1][l]/S_to_fit[1][1]);
   fp_t *noise = new fp_t[nlambda]-1;
   for (int l=1;l<=nlambda;++l)
    noise[l] = noise_level * noise_scaling[l];
@@ -85,8 +85,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       // Calculate the spectrum and the responses and apply degradation to it:      
-      //printf("WOOOOOOOOOOW! %d \n",nlambda);
-      current_obs = obs_stokes_num_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
+      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
 
       current_obs->add_scattered_light(scattered_light,qs_level);
       if (spectral_broadening){
@@ -108,6 +107,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
 
     }
+
+    //fprintf(chi_out,"%d %e \n",iter,metric);
     
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
@@ -163,6 +164,21 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       del_ft2dim(S_current,1,4,1,nlambda);
     }
 
+    // Then calculate the errors and show them:
+    /*if (to_break || iter==MAX_ITER){
+      fp_t * errors = new fp_t [N_parameters]-1;
+      memset(errors+1,0,N_parameters*sizeof(fp_t));
+      for (int i=1;i<=N_parameters;++i)
+        errors[i] = sqrt(2.0*metric*n_stokes_to_fit*nlambda/(N_parameters)/fabs(JTJ[i][i]))*noise_level;
+      scale_corrections(errors,model_to_fit,N_parameters);
+      FILE * error;
+      error = fopen("errors.dat","w");
+      for (int i=1;i<=N_parameters;++i)
+        fprintf(error,"%d %e \n",i,errors[i]);
+      fclose(error);
+      delete[](errors+1);
+    }*/
+
     delete[](residual+1);
     delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
@@ -174,9 +190,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](correction+1);
     metric = 0.0;
 
+    //printf("Iteration # %d done.\n",iter);
+
     if (to_break)
       break;
   }
+  //fclose(chi_out);
 
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
   // Clean-up:

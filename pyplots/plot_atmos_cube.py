@@ -15,15 +15,17 @@ atmos_cube[:,:,9,:] *= -1.0 # reverse sign
 #atmos_cube[:,:,10:12,:] *= 180.0/np.pi #to deg
 
 
-depths = [60]
+depths = [16,26,34]
 depth_values = atmos_cube[0,0,0,depths]
-parameters=[2,7]
-param_names = ['T [K] (Upper Phot.)','B los [Gauss]','v los [km/s]','theta [deg]', 'phi[deg]']
+parameters=[2,9]
+param_names = ['T [K]','B los [Gauss]','v los [km/s]','theta [deg]', 'phi[deg]']
 cmaps=['hot','coolwarm','coolwarm']
 
 #plot mean stokes profile:
 panelsx = len(depths)
 panelsy = len(parameters)
+
+print depth_values
 
 #plt.clf()
 #plt.cla()
@@ -73,9 +75,9 @@ for p in range(0,panelsy):
 		#if (p==0):
 			#plt.title('$\mathrm{Photosphere}$')
 
-		if (p>0):
-			scalebar = ScaleBar(20.8*1E3) # 1 pixel = 0.2 meter
-			plt.gca().add_artist(scalebar)
+		#if (p>0):
+			#scalebar = ScaleBar(20.8*1E3) # 1 pixel = 0.2 meter
+			#plt.gca().add_artist(scalebar)
 		#plt.tight_layout()
 
 plt.savefig(input_file+'_atmos.eps',fmt='eps',bbox_inches='tight')

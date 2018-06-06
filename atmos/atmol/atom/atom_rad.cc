@@ -1786,10 +1786,7 @@ fp_t atom::C_ij(int z, int from, int to, fp_t T, fp_t Ne){
 
 	fp_t q_ij = 5.465E-11 * sqrt(T) * 14.5 * oscillator_str * 4.7468212E-22 / en_difference / en_difference * u_0 * exp(-u_0) * Gamma_collisional;
 
-  //q_ij = 2E-15 * fp_t(g[z][to]) / fp_t(g[z][from]) * sqrt(T) * 1E6;
-
 	q_ij = (from < to) ? q_ij : q_ij * exp(u_0) * fp_t(g[z][to]) / fp_t(g[z][from]);
-  //q_ij = (from > to) ? q_ij : q_ij / exp(u_0) / fp_t(g[z][to]) * fp_t(g[z][from]);
 
 	return (from != to) ? q_ij * Ne  : 0.0;
 }
@@ -1825,9 +1822,6 @@ fp_t atom::R_cont_i(int z, int i, fp_t JJ, fp_t T, fp_t n_e){
 
 	fp_t dE=ip[z]-ee[z][i];
   
-  //if (i == 1)
-    //printf("%e %e %e %e %e \n", fp_t(g[z][i]) / fp_t(g[z+1][0]), exp(dE / k / T), pow(T, -1.5), n_e, saha_const);
-	
   return JJ * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp(dE / k / T) * pow(T, -1.5) * n_e * saha_const;
 
 }

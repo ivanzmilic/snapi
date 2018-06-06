@@ -10,7 +10,6 @@
 #include "cmdcfg.h"
 #include "cmdln.h"
 #include "cfg.h"
-//#include "config.h"
 #include "net.h"
 #include "uts.h"
 #include "pack.h"
@@ -81,6 +80,8 @@ int main(int argc,char *argv[])
   ji.lambda=new fp_t* [ji.no];
   ji.weights=new fp_t* [ji.no];
   ji.name=new char* [ji.no];
+  ji.no_iterations=new int [ji.no];
+  ji.starting_lambda = new fp_t [ji.no];
   for(int o=0;o<ji.no;++o){
     ji.az[o]=cfg.obs[o]->az;
     ji.el[o]=cfg.obs[o]->el;
@@ -96,6 +97,8 @@ int main(int argc,char *argv[])
       ji.spectral_broadening[o] = cfg.obs[o]->spectral_broadening;
       ji.obs_qs[o] = cfg.obs[o]->obs_qs;
       ji.synth_qs[o] = cfg.obs[o]->synth_qs;
+      ji.no_iterations[o] = cfg.obs[o]->no_iterations;
+      ji.starting_lambda[o] = cfg.obs[o]->starting_lambda;
     }
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));

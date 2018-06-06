@@ -51,6 +51,8 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,spectral_broadening=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,obs_qs=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,synth_qs=new fp_t [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,no_iterations=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,starting_lambda=new fp_t [no],0,no-1,swap_endian); 
     lambda=new fp_t* [no];
     weights = new fp_t*[no];
     name=new char* [no];
@@ -123,6 +125,12 @@ jnfo::~jnfo(void)
     if(weights) delete[] weights;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
     if(name) delete[] name;
+    if (scattered_light) delete[]scattered_light;
+    if (spectral_broadening) delete []spectral_broadening; 
+    if (synth_qs) delete []synth_qs;
+    if (obs_qs) delete []obs_qs;
+    if (no_iterations) delete []no_iterations;
+    if (starting_lambda) delete []starting_lambda;
   }
   if(uname) delete[] uname;
   
@@ -139,8 +147,8 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   usize+=sizeof(int);                            // no
   if(no){
-    usize+=6*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth
-    usize+=no*sizeof(int);                       // nlambda
+    usize+=7*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth,starting_lambda
+    usize+=2*no*sizeof(int);                       // nlambda,no_iterations
     usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
       usize+=2*nlambda[o]*sizeof(fp_t);  // lambda,weights
@@ -184,6 +192,8 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,spectral_broadening,0,no-1,swap_endian);
     offs+=pack(data+offs,obs_qs,0,no-1,swap_endian);
     offs+=pack(data+offs,synth_qs,0,no-1,swap_endian);
+    offs+=pack(data+offs,no_iterations,0,no-1,swap_endian);
+    offs+=pack(data+offs,starting_lambda,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);
