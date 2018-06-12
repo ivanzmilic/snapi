@@ -13,7 +13,7 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TAU_MIN -3.0
+#define TAU_MIN -5.0
 #define TAU_MAX  1.0
 #define TINY 1E-5
 

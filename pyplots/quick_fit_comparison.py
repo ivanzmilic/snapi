@@ -28,7 +28,7 @@ nodes = temp["data"]
 #l = np.linspace(5887.7914658,5897.18400651,967)
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
-l = np.linspace(6300.8921,6303.2671,112)
+#l = np.linspace(6300.8921,6303.2671,112)
 #l = np.linspace(15642.5,15667.5,501)
 #l = np.linspace(8540.0,8543.0,151)
 #l = l[:151]
@@ -43,9 +43,9 @@ for i in range (x,x+1):
 		plt.figure(figsize=[9.0,6.5])
 
 		plt.subplot(221)
-		plt.plot(l,obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(l,fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
-		#plt.xlim([l[0],l[-1]])
+		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		#plt.xlim([0,22])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,I/I_c}$')
 		#plt.xlim([8541.0,8543.0])
@@ -53,8 +53,8 @@ for i in range (x,x+1):
 		plt.legend()
 
 		plt.subplot(222)
-		plt.plot(l,obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(l,fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
@@ -62,8 +62,8 @@ for i in range (x,x+1):
 		#plt.legend()
 
 		plt.subplot(223)
-		plt.plot(l,obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(l,fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot(obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
@@ -71,8 +71,8 @@ for i in range (x,x+1):
 		#plt.legend()
 
 		plt.subplot(224)
-		plt.plot(l,obs[i,j,2]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(l,fit[i,j,2]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot(obs[i,j,2]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(fit[i,j,2]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')

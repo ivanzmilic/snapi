@@ -353,7 +353,7 @@ fp_t ** solve_svd(fp_t ** Matrix, fp_t ** rhs, int start, int N, int N_equations
 
   // Now we have the decomposition now it is time to use it to solve:
 
-  fp_t crit = 1E13;
+  fp_t crit = 1E6;
 
   fp_t wmax=w[1];
   for(int i=1;i<=N;++i){ 
@@ -1200,16 +1200,15 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     // at the top we want linear extrapolation:
     if (is_temp){
       derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
-      derivatives[1] *= (node_tau[2]-node_tau[1])/(node_tau[1]-tau_grid[1]); // HACK
+      //derivatives[1] *= (node_tau[2]-node_tau[1])/(node_tau[1]-tau_grid[1]); // HACK
     }
     else {
       derivatives[1] = 0.0; // For other than T, we want to have flat distribution
     }
+    
     // at the bottom let's do the same as as FALC:
-
     if (!is_temp){
       derivatives[N_nodes] = (node_value[N_nodes] - node_value[N_nodes-1]) / (node_tau[N_nodes]-node_tau[N_nodes-1]);
-      //derivatives[N_nodes] = 0.0; // For other than T we want to have flat distribution
     }
     else {
 
@@ -1242,12 +1241,6 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
       }
     }
 
-    /*if(is_temp){
-      for (int i=1;i<=N_nodes;++i)
-        fprintf(stderr,"%d %e %e \n",i,node_value[i],derivatives[i]);
-    }*/
-
-
     // And then use the derivative to interpolate:
     for (int i=from;i<=to;++i){
 
@@ -1271,14 +1264,12 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
         fp_t F = node_value[ii+1] - (node_tau[ii+1] - node_tau[ii]) / 3.0 * derivatives[ii+1];
         fp_t u = (tau_grid[i] -  node_tau[ii]) / (node_tau[ii+1] - node_tau[ii]);
         quantity[i] = (1.0-u)*(1.0-u)*(1.0-u) * node_value[ii] + u*u*u*node_value[ii+1] + 3.0*u*(1.0-u)*(1.0-u)*E + 3.0*u*u*(1.0-u)*F; 
-        //if (is_temp)
-          //printf("%d %e %e %e \n",i,tau_grid[i],u,quantity[i]);
       }
     }
     delete[](derivatives+1);
 
-    if (is_temp){
-      // Polish temperature stratification:
+    // Polish temperature stratification:
+    if (is_temp){  
       for (int i=from;i<=to;++i){
         if (quantity[i] < 3400.0) quantity[i] = 3400.0;
         if (quantity[i] > 12000.0) quantity[i] = 12000.0; // put these in constants

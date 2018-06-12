@@ -137,14 +137,20 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (metric_reference < metric){
       
       // Everything is ok, and we can decrease lm_parameter:
-      model_to_fit->cpy_values_from(test_model);
-      lm_parameter /= lm_multiplicator;
-      // How much to decrease lambda:
+      if (iter == 0)
+        look_for_best_lambda(lm_parameter, JTJ, N_parameters,
+          rhs, model_to_fit, theta, phi, lambda, nlambda, scattered_light,
+          qs_level, spectral_broadening, S_to_fit, n_stokes_to_fit, stokes_to_fit,
+          ws, noise, metric_reference);
       
-      /*look_for_best_lambda(lm_parameter, JTJ, N_parameters,
-        rhs, model_to_fit, theta, phi, lambda, nlambda, scattered_light,
-        qs_level, spectral_broadening, S_to_fit, n_stokes_to_fit, stokes_to_fit,
-        ws, noise, metric_reference);*/
+      else {
+        model_to_fit->cpy_values_from(test_model);
+        lm_parameter /= lm_multiplicator;
+      }
+
+      // Except in the first iteration and then we look for the optimal lambda:
+      
+      // From then on, it proceeds normally:
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3)
@@ -179,6 +185,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       delete[](errors+1);
     }*/
 
+    //fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
+
     delete[](residual+1);
     delete test_model;
     del_ft2dim(J_transpose,1,N_parameters,1,n_stokes_to_fit*nlambda);
@@ -189,8 +197,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
-
-    //printf("Iteration # %d done.\n",iter);
 
     if (to_break)
       break;
@@ -266,16 +272,16 @@ int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_para
   fp_t qs_level, fp_t spectral_broadening, fp_t ** S_to_fit, int n_stokes_to_fit, int * stokes_to_fit,
   fp_t * ws, fp_t * noise, fp_t metric_old){
   
-  fp_t lm_multiplicator=sqrt(10.0);
+  fp_t lm_multiplicator=10.0;
   model * model_test;
   fp_t metric_prev = metric_old;
 
-  int MAX_ITER = 20; // Maximum number of explorations.  
+  int MAX_ITER = 10; // Maximum number of explorations.  
   int iter = 0;
   for (iter=1;iter<=MAX_ITER;++iter){
+    
     lm_parameter /= lm_multiplicator;
-    for (int i=1;i<=N_parameters;++i)
-      JTJ[i][i] *= (1.0+lm_parameter);
+    for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (1.0+lm_parameter);
 
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);
     scale_corrections(correction,model_to_fit,N_parameters);
@@ -297,7 +303,7 @@ int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_para
     del_ft2dim(S_reference,1,4,1,nlambda);
     delete reference_obs;
     //fprintf(stderr,"Correction attempt %d, m_ref = %e m_prev = %e, lambda = %e \n",iter, metric_reference,metric_prev, lm_parameter);
-    if (metric_reference > metric_prev) { // If correction is bad, increase lm to previous value and break
+    if (metric_reference > metric_prev  || lm_parameter <= 1E-3/lm_multiplicator) { // If correction is bad, increase lm to previous value and break
       
       lm_parameter *= lm_multiplicator;
       // Delete the test model and update original model (again - awkward) according to the last value of lambda

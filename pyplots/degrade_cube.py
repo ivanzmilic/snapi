@@ -24,7 +24,7 @@ NL = 1501
 #l = np.linspace(8540.0,8543.0,NL)
 l = np.linspace(15640.0,15670.0,NL)
 
-sigma = -150 #in mA
+sigma = 150 #in mA
 sigma /= 2.35
 sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
 print sigma
@@ -51,7 +51,6 @@ if (to_degrade):
 		for w in range(0,1):
 			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0],mode='wrap') + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1],mode='wrap')
 print np.std(stokes_cube[:,:,0,0])/np.mean(stokes_cube[:,:,0,0])
-quit();
 print stokes_cube.shape
 
 for i in range(0,NX):
@@ -81,13 +80,22 @@ for i in range(0,NX):
 
 
 #After everything the Q,U,V need to be normalized:
+
+binning = int(sys.argv[4])
+resampled_binned_cube = np.zeros([NX/binning,NY/binning,4,NL_new])
+for i in range(0,NX/binning):
+	for j in range(0,NY/binning):
+		for s in range(0,4):
+			for l in range(0,NL_new):
+				resampled_binned_cube[i,j,s,l] = np.mean(resampled_cube[i*binning:(i+1)*binning,j*binning:(j+1)*binning,s,l])
+
 for s in range(1,4):
-	resampled_cube[:,:,s,:] /= resampled_cube[:,:,0,:]
+	resampled_binned_cube[:,:,s,:] /= resampled_binned_cube[:,:,0,:]
 
 plt.plot(resampled_cube[0,0,0],color='blue')
 plt.savefig('pre_vs_post_degraded',fmt='png')
 
-pyana.fzwrite(file_out,resampled_cube,0,'placeholder')
+pyana.fzwrite(file_out,resampled_binned_cube,0,'placeholder')
 
 
 
