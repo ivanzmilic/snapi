@@ -304,6 +304,14 @@ parcfg::parcfg(char* pardata, io_class &io){
     value+=1;
     delete[] val_str;  
   }else io.msg(IOL_ERROR|IOL_FATAL,"parcfg::parcfg: no value specified for parameter nodes!\n");
+  if(char *tmp_str=get_arg(pardata,"REG_TYPE",0)){
+    get_number(tmp_str,reg_type);
+    delete[] tmp_str;
+  }else reg_type=0; // default
+  if(char *tmp_str=get_arg(pardata,"REG_ALPHA",0)){
+    get_number(tmp_str,reg_alpha);
+    delete[] tmp_str;
+  }else reg_alpha=0.0; // default
 
   if (strcmp(id,"THETA") == 0 || strcmp(id,"PHI") == 0)
     for (int nn=0;nn<n;++nn)

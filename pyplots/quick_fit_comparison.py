@@ -42,7 +42,7 @@ for i in range (x,x+1):
 		plt.cla()
 		plt.figure(figsize=[9.0,6.5])
 
-		plt.subplot(221)
+		plt.subplot(321)
 		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([0,22])
@@ -52,7 +52,7 @@ for i in range (x,x+1):
 		plt.ylim([0.0,1.4])
 		plt.legend()
 
-		plt.subplot(222)
+		plt.subplot(322)
 		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -61,7 +61,7 @@ for i in range (x,x+1):
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
 
-		plt.subplot(223)
+		plt.subplot(323)
 		plt.plot(obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -70,14 +70,19 @@ for i in range (x,x+1):
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
 
-		plt.subplot(224)
+		plt.subplot(324)
 		plt.plot(obs[i,j,2]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,2]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')
+
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
+
+		plt.subplot(325)
+		plt.plot(atmos[i,j,0],atmos[i,j,2])
+		plt.xlim([-3,1])
 
 		plt.tight_layout()
 		plt.savefig('quick_test'+str(i)+'_'+str(j),fmt='png',bbox_inches='tight')

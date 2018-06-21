@@ -357,30 +357,42 @@ private:
   // Temperature nodes
   fp_t * temp_nodes_tau;
   fp_t * temp_nodes_temp;
+  int temp_reg_type;
+  fp_t temp_reg_alpha;
 
   // Microturbulent velocity nodes
   fp_t * vt_nodes_tau;
   fp_t * vt_nodes_vt;
+  int vt_reg_type;
+  fp_t vt_reg_alpha;
 
   // Systematic velocity nodes
 
   fp_t * vs_nodes_tau;
   fp_t * vs_nodes_vs;
+  int vs_reg_type;
+  fp_t vs_reg_alpha;
 
   // Magnetic field nodes
 
   fp_t * B_nodes_tau;
   fp_t * B_nodes_B;
+  int B_reg_type;
+  fp_t B_reg_alpha;
 
   // Theta nodes 
 
   fp_t * theta_nodes_tau;
   fp_t * theta_nodes_theta;
+  int theta_reg_type;
+  fp_t theta_reg_alpha;
 
   // Phi nodes: 
 
   fp_t * phi_nodes_tau;
   fp_t * phi_nodes_phi;
+  int phi_reg_type;
+  fp_t phi_reg_alpha;
 
   // Mapping matrix which describes how is every parameter mapped onto perturbations of other ones:
   fp_t *** response_to_parameters;
@@ -411,27 +423,44 @@ public:
   int get_N_nodes_temp();
   fp_t * get_temp_nodes_tau();
   fp_t * get_temp_nodes_temp();
+  int get_temp_reg_type(){return temp_reg_type;};
+  int get_temp_reg_alpha(){return temp_reg_alpha;};
+  void set_temp_reg(int,fp_t);
 
   int get_N_nodes_vt();
   fp_t * get_vt_nodes_tau();
   fp_t * get_vt_nodes_vt();
+  int get_vt_reg_type(){return vt_reg_type;};
+  int get_vt_reg_alpha(){return vt_reg_alpha;};
+  void set_vt_reg(int,fp_t);
 
   int get_N_nodes_vs();
   fp_t * get_vs_nodes_tau();
   fp_t * get_vs_nodes_vs();
+  int get_vs_reg_type(){return vs_reg_type;};
+  int get_vs_reg_alpha(){return vs_reg_alpha;};
+  void set_vs_reg(int,fp_t);
 
   int get_N_nodes_B();
   fp_t * get_B_nodes_tau();
   fp_t * get_B_nodes_B();
+  int get_B_reg_type(){return B_reg_type;};
+  int get_B_reg_alpha(){return B_reg_alpha;};
+  void set_B_reg(int,fp_t);
 
   int get_N_nodes_theta();
   fp_t * get_theta_nodes_tau();
   fp_t * get_theta_nodes_theta();
+  int get_theta_reg_type(){return theta_reg_type;};
+  int get_theta_reg_alpha(){return theta_reg_alpha;};
+  void set_theta_reg(int,fp_t);
 
   int get_N_nodes_phi();
   fp_t * get_phi_nodes_tau();
   fp_t * get_phi_nodes_phi();
-
+  int get_phi_reg_type(){return phi_reg_type;};
+  int get_phi_reg_alpha(){return phi_reg_alpha;};
+  void set_phi_reg(int,fp_t);
 
   int get_N_nodes_total();
   int perturb_node_value(int, fp_t);

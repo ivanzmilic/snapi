@@ -37,6 +37,8 @@ struct parcfg{ // configuration for each of the parameter, nodes and values
   int n; // number of nodes
   fp_t *tau;
   fp_t *value;
+  int reg_type; // type of regularization
+  fp_t reg_alpha; // coefficient of regularization
 
   parcfg(char *pardata,io_class&);
   ~parcfg(void);

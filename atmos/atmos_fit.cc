@@ -108,14 +108,60 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     }
 
+
     //fprintf(chi_out,"%d %e \n",iter,metric);
     
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
+
+    // DEVELOP:
+
+    printf("")
+
+    fp_t ** Reg = ft2dim(1,N_parameters,1,N_parameters);
+    memset(Reg[1]+1,0,N_parameters*N_parameters*sizeof(fp_t));
+
+    // Here we want to add a regularization matrix.
+    for (int i=2;i<=model_to_fit->get_N_nodes_temp();++i){
+      Reg[i][i] = 1.0;
+      Reg[i][i-1] = -1.0;
+    }
+    Reg[1][1] = -1.0;
+    Reg[1][2] = 1.0;
+    fp_t alpha = 1E2;
+
+    fp_t ** RegTReg = multiply_with_transpose(Reg,N_parameters,N_parameters);
+    for (int i=1;i<=N_parameters;++i)
+      for (int j=1;j<=N_parameters;++j){
+        RegTReg[i][j] *= alpha*alpha;
+        JTJ[i][j] += RegTReg[i][j];
+      }
+    del_ft2dim(RegTReg,1,N_parameters,1,N_parameters);
+
+    fp_t ** Reg_transpose = transpose(Reg,N_parameters,N_parameters);
+
+    fp_t * reg_residual = new fp_t [N_parameters]-1;
+    memset(reg_residual+1,0,N_parameters*sizeof(fp_t));
+    fp_t * Temperature = model_to_fit->get_temp_nodes_temp();
+    for (int i=2;i<=model_to_fit->get_N_nodes_temp();++i)
+      reg_residual[i] = (Temperature[i]-Temperature[i-1])*alpha;
+    reg_residual[1] = (Temperature[2] - Temperature[1])*alpha;
+    fp_t * reg_rhs = multiply_vector(Reg_transpose,reg_residual,N_parameters,N_parameters);
+
+    delete [](Temperature+1);
+    delete [](reg_residual+1);
+    del_ft2dim(Reg_transpose,1,N_parameters,1,N_parameters);
+    del_ft2dim(Reg,1,N_parameters,1,N_parameters);
+
+    // END OF DEVELOP:
     
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
+    for (int i=1;i<=N_parameters;++i)
+      rhs[i] += reg_rhs[i];
+
+    delete[](reg_rhs+1);
 
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);    
     scale_corrections(correction,model_to_fit,N_parameters);
