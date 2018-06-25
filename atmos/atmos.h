@@ -275,6 +275,14 @@ public:
   virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int, int);
   virtual fp_t ** calculate_svd_corrections(fp_t ****, fp_t *, fp_t, int);
   virtual fp_t ** calculate_legendre_corrections(fp_t ****, fp_t *, fp_t, int, int, int);
+  virtual void regularize_hessian(fp_t **, fp_t *, model*);
+  virtual void regularize_parameter(fp_t **, fp_t *, model *, int);
+  //virtual void regularize_temp(fp_t **,fp_t *,model*);
+  //virtual void regularize_vt(fp_t **,fp_t *,model*);
+  //virtual void regularize_vs(fp_t **,fp_t *,model*);
+  //virtual void regularize_B(fp_t **,fp_t *,model*);
+  //virtual void regularize_theta(fp_t **,fp_t *,model*);
+  //virtual void regularize_phi(fp_t **,fp_t *,model*);
 
   virtual int polish_extreme_values();
   //virtual int interpolate_with_legendre(fp_t ***,int, int);
@@ -424,42 +432,42 @@ public:
   fp_t * get_temp_nodes_tau();
   fp_t * get_temp_nodes_temp();
   int get_temp_reg_type(){return temp_reg_type;};
-  int get_temp_reg_alpha(){return temp_reg_alpha;};
+  fp_t get_temp_reg_alpha(){return temp_reg_alpha;};
   void set_temp_reg(int,fp_t);
 
   int get_N_nodes_vt();
   fp_t * get_vt_nodes_tau();
   fp_t * get_vt_nodes_vt();
   int get_vt_reg_type(){return vt_reg_type;};
-  int get_vt_reg_alpha(){return vt_reg_alpha;};
+  fp_t get_vt_reg_alpha(){return vt_reg_alpha;};
   void set_vt_reg(int,fp_t);
 
   int get_N_nodes_vs();
   fp_t * get_vs_nodes_tau();
   fp_t * get_vs_nodes_vs();
   int get_vs_reg_type(){return vs_reg_type;};
-  int get_vs_reg_alpha(){return vs_reg_alpha;};
+  fp_t get_vs_reg_alpha(){return vs_reg_alpha;};
   void set_vs_reg(int,fp_t);
 
   int get_N_nodes_B();
   fp_t * get_B_nodes_tau();
   fp_t * get_B_nodes_B();
   int get_B_reg_type(){return B_reg_type;};
-  int get_B_reg_alpha(){return B_reg_alpha;};
+  fp_t get_B_reg_alpha(){return B_reg_alpha;};
   void set_B_reg(int,fp_t);
 
   int get_N_nodes_theta();
   fp_t * get_theta_nodes_tau();
   fp_t * get_theta_nodes_theta();
   int get_theta_reg_type(){return theta_reg_type;};
-  int get_theta_reg_alpha(){return theta_reg_alpha;};
+  fp_t get_theta_reg_alpha(){return theta_reg_alpha;};
   void set_theta_reg(int,fp_t);
 
   int get_N_nodes_phi();
   fp_t * get_phi_nodes_tau();
   fp_t * get_phi_nodes_phi();
   int get_phi_reg_type(){return phi_reg_type;};
-  int get_phi_reg_alpha(){return phi_reg_alpha;};
+  fp_t get_phi_reg_alpha(){return phi_reg_alpha;};
   void set_phi_reg(int,fp_t);
 
   int get_N_nodes_total();

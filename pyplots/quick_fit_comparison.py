@@ -40,9 +40,9 @@ for i in range (x,x+1):
 	for j in range(y,y+1):
 		plt.clf()
 		plt.cla()
-		plt.figure(figsize=[9.0,6.5])
+		plt.figure(figsize=[9.0,11.0])
 
-		plt.subplot(321)
+		plt.subplot(421)
 		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([0,22])
@@ -52,7 +52,7 @@ for i in range (x,x+1):
 		plt.ylim([0.0,1.4])
 		plt.legend()
 
-		plt.subplot(322)
+		plt.subplot(422)
 		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -61,7 +61,7 @@ for i in range (x,x+1):
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
 
-		plt.subplot(323)
+		plt.subplot(423)
 		plt.plot(obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -70,7 +70,7 @@ for i in range (x,x+1):
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
 
-		plt.subplot(324)
+		plt.subplot(424)
 		plt.plot(obs[i,j,2]/max(obs[i,j,0]),color='red',label='Observation')
 		plt.plot(fit[i,j,2]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
@@ -80,9 +80,33 @@ for i in range (x,x+1):
 		#plt.ylim([0.0,1.4])
 		#plt.legend()
 
-		plt.subplot(325)
+		plt.subplot(425)
 		plt.plot(atmos[i,j,0],atmos[i,j,2])
 		plt.xlim([-3,1])
+		plt.xlabel('$\log\\tau$')
+		plt.ylabel('$\mathrm{T\,[K]}$')
+
+		plt.subplot(426)
+		plt.plot(atmos[i,j,0],atmos[i,j,7])
+		plt.xlim([-3,1])
+		plt.xlabel('$\log\\tau$')
+		plt.ylabel('$\mathrm{B\,[Gauss]}$')
+
+
+		plt.subplot(427)
+		plt.plot(atmos[i,j,0],atmos[i,j,8]/1E5)
+		plt.xlim([-3,1])
+		plt.xlabel('$\log\\tau$')
+		plt.ylabel('$\mathrm{v_{turbulent}\,[km/s]}$')
+
+
+		plt.subplot(428)
+		plt.plot(atmos[i,j,0],-atmos[i,j,9]/1E5)
+		plt.xlim([-3,1])
+		plt.xlabel('$\log\\tau$')
+		plt.ylabel('$\mathrm{v_{los}\,[km/s]}$')
+
+
 
 		plt.tight_layout()
 		plt.savefig('quick_test'+str(i)+'_'+str(j),fmt='png',bbox_inches='tight')

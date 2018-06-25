@@ -72,7 +72,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int filtergraph_mode=0;
   
   int N_parameters = model_to_fit->get_N_nodes_total();
-  
+
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
   //FILE * chi_out;
@@ -113,56 +113,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
+    fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
 
-    // DEVELOP:
+    regularize_hessian(JTJ,rhs,model_to_fit);
 
-    printf("")
-
-    fp_t ** Reg = ft2dim(1,N_parameters,1,N_parameters);
-    memset(Reg[1]+1,0,N_parameters*N_parameters*sizeof(fp_t));
-
-    // Here we want to add a regularization matrix.
-    for (int i=2;i<=model_to_fit->get_N_nodes_temp();++i){
-      Reg[i][i] = 1.0;
-      Reg[i][i-1] = -1.0;
-    }
-    Reg[1][1] = -1.0;
-    Reg[1][2] = 1.0;
-    fp_t alpha = 1E2;
-
-    fp_t ** RegTReg = multiply_with_transpose(Reg,N_parameters,N_parameters);
-    for (int i=1;i<=N_parameters;++i)
-      for (int j=1;j<=N_parameters;++j){
-        RegTReg[i][j] *= alpha*alpha;
-        JTJ[i][j] += RegTReg[i][j];
-      }
-    del_ft2dim(RegTReg,1,N_parameters,1,N_parameters);
-
-    fp_t ** Reg_transpose = transpose(Reg,N_parameters,N_parameters);
-
-    fp_t * reg_residual = new fp_t [N_parameters]-1;
-    memset(reg_residual+1,0,N_parameters*sizeof(fp_t));
-    fp_t * Temperature = model_to_fit->get_temp_nodes_temp();
-    for (int i=2;i<=model_to_fit->get_N_nodes_temp();++i)
-      reg_residual[i] = (Temperature[i]-Temperature[i-1])*alpha;
-    reg_residual[1] = (Temperature[2] - Temperature[1])*alpha;
-    fp_t * reg_rhs = multiply_vector(Reg_transpose,reg_residual,N_parameters,N_parameters);
-
-    delete [](Temperature+1);
-    delete [](reg_residual+1);
-    del_ft2dim(Reg_transpose,1,N_parameters,1,N_parameters);
-    del_ft2dim(Reg,1,N_parameters,1,N_parameters);
-
-    // END OF DEVELOP:
-    
+  
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
-    fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
-    for (int i=1;i<=N_parameters;++i)
-      rhs[i] += reg_rhs[i];
-
-    delete[](reg_rhs+1);
-
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters);    
     scale_corrections(correction,model_to_fit,N_parameters);
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
@@ -1688,6 +1645,117 @@ int atmosphere::polish_extreme_values(){
 
   }
   return 0;
+}
+
+void atmosphere::regularize_hessian(fp_t ** JTJ, fp_t * rhs, model * model_to_fit){
+  for (int i=1;i<=6;++i)
+    regularize_parameter(JTJ, rhs, model_to_fit,i);
+}
+
+void atmosphere::regularize_parameter(fp_t ** JTJ, fp_t * rhs, model * model_to_fit, int param){
+
+    int reg_type = 0;
+    switch(param){
+      case 1 : reg_type = model_to_fit->get_temp_reg_type(); break;
+      case 2 : reg_type = model_to_fit->get_vt_reg_type(); break;
+      case 3 : reg_type = model_to_fit->get_vs_reg_type(); break;
+      case 4 : reg_type = model_to_fit->get_B_reg_type(); break;
+      case 5 : reg_type = model_to_fit->get_theta_reg_type(); break;
+      case 6 : reg_type = model_to_fit->get_phi_reg_type(); break;
+    }
+
+    //printf("Param = %d Regtype = %d \n",param,reg_type);
+
+    if (reg_type){
+
+      // Load the strength of the regularization
+      fp_t alpha = 0.0;
+      int from=1; int to=0;
+      switch(param){
+        case 1 : alpha = model_to_fit->get_temp_reg_alpha(); break; 
+        case 2 : alpha = model_to_fit->get_vt_reg_alpha(); break;
+        case 3 : alpha = model_to_fit->get_vs_reg_alpha(); break;
+        case 4 : alpha = model_to_fit->get_B_reg_alpha(); break;
+        case 5 : alpha = model_to_fit->get_theta_reg_alpha(); break;
+        case 6 : alpha = model_to_fit->get_phi_reg_alpha(); break;
+      }
+      int N_parameters = model_to_fit->get_N_nodes_total();
+      for (int i=1;i<=N_parameters;++i)
+        if (model_to_fit->which_parameter(i) == param){
+          from = i;
+          break;
+      }
+      for (int i=from;i<=N_parameters;++i)
+        if (model_to_fit->which_parameter(i)!= param){
+          to = i-1;
+          break;
+      }
+      //fprintf(stderr,"Param = %d From = %d to = %d alpha = %e \n",param,from,to,alpha);
+  
+      // Regularization matrix. It's hessian is added to the hessian of the chisq
+      fp_t ** Reg = ft2dim(1,N_parameters,1,N_parameters);
+      memset(Reg[1]+1,0,N_parameters*N_parameters*sizeof(fp_t));
+      
+      // Here we want to add a regularization matrix:
+      
+      if (reg_type==2){ // Tikhonov
+        for (int i=from+1;i<=to;++i){
+          Reg[i][i] = 1.0;
+          Reg[i][i-1] = -1.0;
+        }
+        Reg[from][from] = -1.0;
+        Reg[from][from+1] = 1.0;
+      }
+      else if (reg_type==1){ // Departure from zero
+        for (int i=from;i<=to;++i)
+          Reg[i][i] = 1.0;
+      }
+      
+      // Calculate Hessian of the regularization
+      fp_t ** RegTReg = multiply_with_transpose(Reg,N_parameters,N_parameters);
+      for (int i=1;i<=N_parameters;++i)
+        for (int j=1;j<=N_parameters;++j){
+          RegTReg[i][j] *= alpha*alpha;
+          JTJ[i][j] += RegTReg[i][j];
+      }
+      del_ft2dim(RegTReg,1,N_parameters,1,N_parameters);
+      
+      // 'Residual' of the regularization:
+      fp_t ** Reg_transpose = transpose(Reg,N_parameters,N_parameters);
+      fp_t * reg_residual = new fp_t [N_parameters]-1;
+      memset(reg_residual+1,0,N_parameters*sizeof(fp_t));
+
+      fp_t * quantity;
+      switch(param){
+        case 1 : quantity = model_to_fit->get_temp_nodes_temp(); break;
+        case 2 : quantity = model_to_fit->get_vt_nodes_vt(); break;
+        case 3 : quantity = model_to_fit->get_vs_nodes_vs(); break;
+        case 4 : quantity = model_to_fit->get_B_nodes_B(); break;
+        case 5 : quantity = model_to_fit->get_theta_nodes_theta(); break; 
+        case 6 : quantity = model_to_fit->get_phi_nodes_phi(); break;
+      }
+      //for (int i=from;i<=to;++i)
+      //  printf("%d %e \n",i,quantity[i-from+1]);
+
+      if (reg_type==2){ // Tikhonov
+        for (int i=from+1;i<=to;++i)
+          reg_residual[i] = (quantity[i+1-from]-quantity[i-from])*alpha;
+        reg_residual[from] = (quantity[2] - quantity[1])*alpha;     
+      }
+      else if (reg_type==1){ // Departures from zero
+        for (int i=from;i<=to;++i)
+          reg_residual[i] = quantity[i+1-from]*alpha;
+      }
+      fp_t * reg_rhs = multiply_vector(Reg_transpose,reg_residual,N_parameters,N_parameters);
+      for (int i=1;i<=N_parameters;++i)
+        rhs[i]-=reg_rhs[i];
+
+      delete [](quantity+1);
+      delete [](reg_residual+1);
+      delete [](reg_rhs+1);
+      del_ft2dim(Reg_transpose,1,N_parameters,1,N_parameters);
+      del_ft2dim(Reg,1,N_parameters,1,N_parameters);
+    }
 }
 
  // ===============================================================================================

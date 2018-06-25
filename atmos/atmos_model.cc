@@ -338,39 +338,39 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   if (N_nodes_temp){
     offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
     offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
-    offs+=::pack(buf+offs,temp_reg_type,do_swap);
-    offs+=::pack(buf+offs,temp_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,temp_reg_type,do_swap);
+  offs+=::pack(buf+offs,temp_reg_alpha,do_swap);
   if (N_nodes_vt){
     offs+=::pack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
     offs+=::pack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
-    offs+=::pack(buf+offs,vt_reg_type,do_swap);
-    offs+=::pack(buf+offs,vt_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,vt_reg_type,do_swap);
+  offs+=::pack(buf+offs,vt_reg_alpha,do_swap);
   if (N_nodes_vs){
     offs+=::pack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
     offs+=::pack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
-    offs+=::pack(buf+offs,vs_reg_type,do_swap);
-    offs+=::pack(buf+offs,vs_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,vs_reg_type,do_swap);
+  offs+=::pack(buf+offs,vs_reg_alpha,do_swap);
   if (N_nodes_B){
     offs+=::pack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
     offs+=::pack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
-    offs+=::pack(buf+offs,B_reg_type,do_swap);
-    offs+=::pack(buf+offs,B_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,B_reg_type,do_swap);
+  offs+=::pack(buf+offs,B_reg_alpha,do_swap);
   if (N_nodes_theta){
     offs+=::pack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
     offs+=::pack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
-    offs+=::pack(buf+offs,theta_reg_type,do_swap);
-    offs+=::pack(buf+offs,theta_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,theta_reg_type,do_swap);
+  offs+=::pack(buf+offs,theta_reg_alpha,do_swap);
   if (N_nodes_phi){
     offs+=::pack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
     offs+=::pack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
-    offs+=::pack(buf+offs,phi_reg_type,do_swap);
-    offs+=::pack(buf+offs,phi_reg_alpha,do_swap);
   }
+  offs+=::pack(buf+offs,phi_reg_type,do_swap);
+  offs+=::pack(buf+offs,phi_reg_alpha,do_swap);
 
   return offs;
 }
@@ -403,49 +403,49 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
     temp_nodes_temp = new fp_t [N_nodes_temp] -1;
     offs+=::unpack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
     offs+=::unpack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
-    offs+=::unpack(buf+offs,temp_reg_type,do_swap);
-    offs+=::unpack(buf+offs,temp_reg_alpha,do_swap);
   }
+  offs+=::unpack(buf+offs,temp_reg_type,do_swap);
+  offs+=::unpack(buf+offs,temp_reg_alpha,do_swap);
   if (N_nodes_vt){
     vt_nodes_tau = new fp_t [N_nodes_vt] -1;
     vt_nodes_vt = new fp_t [N_nodes_vt] -1;
     offs+=::unpack(buf+offs,vt_nodes_tau,1,N_nodes_vt,do_swap);
     offs+=::unpack(buf+offs,vt_nodes_vt,1,N_nodes_vt,do_swap);
-    offs+=::unpack(buf+offs,vt_reg_type,do_swap);
-    offs+=::unpack(buf+offs,vt_reg_alpha,do_swap);
   }
+  offs+=::unpack(buf+offs,vt_reg_type,do_swap);
+  offs+=::unpack(buf+offs,vt_reg_alpha,do_swap);
   if (N_nodes_vs){
     vs_nodes_tau = new fp_t [N_nodes_vs] -1;
     vs_nodes_vs = new fp_t [N_nodes_vs] -1;
     offs+=::unpack(buf+offs,vs_nodes_tau,1,N_nodes_vs,do_swap);
     offs+=::unpack(buf+offs,vs_nodes_vs,1,N_nodes_vs,do_swap);
-    offs+=::unpack(buf+offs,vs_reg_type,do_swap);
-    offs+=::unpack(buf+offs,vs_reg_alpha,do_swap);
   }
+  offs+=::unpack(buf+offs,vs_reg_type,do_swap);
+  offs+=::unpack(buf+offs,vs_reg_alpha,do_swap);
   if (N_nodes_B){
     B_nodes_tau = new fp_t [N_nodes_B] -1;
     B_nodes_B = new fp_t [N_nodes_B] -1;
     offs+=::unpack(buf+offs,B_nodes_tau,1,N_nodes_B,do_swap);
     offs+=::unpack(buf+offs,B_nodes_B,1,N_nodes_B,do_swap);
-    offs+=::unpack(buf+offs,B_reg_type,do_swap);
-    offs+=::unpack(buf+offs,B_reg_alpha,do_swap);
   }
+  offs+=::unpack(buf+offs,B_reg_type,do_swap);
+  offs+=::unpack(buf+offs,B_reg_alpha,do_swap);
   if (N_nodes_theta){
     theta_nodes_tau = new fp_t [N_nodes_theta] -1;
     theta_nodes_theta = new fp_t [N_nodes_theta] -1;
     offs+=::unpack(buf+offs,theta_nodes_tau,1,N_nodes_theta,do_swap);
     offs+=::unpack(buf+offs,theta_nodes_theta,1,N_nodes_theta,do_swap);
-    offs+=::unpack(buf+offs,theta_reg_type,do_swap);
-    offs+=::unpack(buf+offs,theta_reg_alpha,do_swap);
   }
+  offs+=::unpack(buf+offs,theta_reg_type,do_swap);
+  offs+=::unpack(buf+offs,theta_reg_alpha,do_swap);
   if (N_nodes_phi){
     phi_nodes_tau = new fp_t [N_nodes_phi] -1;
     phi_nodes_phi = new fp_t [N_nodes_phi] -1;
     offs+=::unpack(buf+offs,phi_nodes_tau,1,N_nodes_phi,do_swap);
     offs+=::unpack(buf+offs,phi_nodes_phi,1,N_nodes_phi,do_swap);
-    offs+=::unpack(buf+offs,phi_reg_type,do_swap);
-    offs+=::unpack(buf+offs,phi_reg_alpha,do_swap);
   }  
+  offs+=::unpack(buf+offs,phi_reg_type,do_swap);
+  offs+=::unpack(buf+offs,phi_reg_alpha,do_swap);
 //
   response_to_parameters = 0;
   return offs;
@@ -848,6 +848,31 @@ fp_t *** model::get_response_to_parameters(){
   return response_to_parameters_cpy;
 }
 
+void model::set_temp_reg(int type, fp_t str){
+  temp_reg_type = type;
+  temp_reg_alpha = str;
+}
+void model::set_vt_reg(int type, fp_t str){
+  vt_reg_type = type;
+  vt_reg_alpha = str;
+}
+void model::set_vs_reg(int type, fp_t str){
+  vs_reg_type = type;
+  vs_reg_alpha = str;
+}
+void model::set_B_reg(int type, fp_t str){
+  B_reg_type = type;
+  B_reg_alpha = str;
+}
+void model::set_theta_reg(int type, fp_t str){
+  theta_reg_type = type;
+  theta_reg_alpha = str;
+}
+void model::set_phi_reg(int type, fp_t str){
+  phi_reg_type = type;
+  phi_reg_alpha = str;
+}
+
 int model::correct(fp_t * correction){
 
   // This function applies an array of corrections to the model.
@@ -934,42 +959,37 @@ model * clone(model * input){
   tau = input->get_temp_nodes_tau();
   value = input->get_temp_nodes_temp();
   output->set_temp_nodes(tau,value);
-  temp_reg_type = input->get_temp_reg_type();
-  temp_reg_alpha = input->get_temp_reg_alpha();
+  output->set_temp_reg(input->get_temp_reg_type(),input->get_temp_reg_alpha());
   delete[](tau+1);delete[](value+1);
   tau = input->get_vt_nodes_tau();
   value = input->get_vt_nodes_vt();
   output->set_vt_nodes(tau,value);
-  vt_reg_type = input->get_vt_reg_type();
-  vt_reg_alpha = input->get_vt_reg_alpha();
+  output->set_vt_reg(input->get_vt_reg_type(),input->get_vt_reg_alpha());
   delete[](tau+1);delete[](value+1);
   tau = input->get_vs_nodes_tau();
   value = input->get_vs_nodes_vs();
   output->set_vs_nodes(tau,value);
-  vs_reg_type = input->get_vs_reg_type();
-  vs_reg_alpha = input->get_vs_reg_alpha();
+  output->set_vs_reg(input->get_vs_reg_type(),input->get_vs_reg_alpha());
   delete[](tau+1);delete[](value+1);
   tau = input->get_B_nodes_tau();
   value = input->get_B_nodes_B();
   output->set_B_nodes(tau,value);
-  B_reg_type = input->get_B_reg_type();
-  B_reg_alpha = input->get_B_reg_alpha();
+  output->set_B_reg(input->get_B_reg_type(),input->get_B_reg_alpha());
   delete[](tau+1);delete[](value+1);
   tau = input->get_theta_nodes_tau();
   value = input->get_theta_nodes_theta();
   output->set_theta_nodes(tau,value);
-  theta_reg_type = input->get_theta_reg_type();
-  theta_reg_alpha = input->get_theta_reg_alpha();
+  output->set_theta_reg(input->get_theta_reg_type(),input->get_theta_reg_alpha());
   delete[](tau+1);delete[](value+1);
   tau = input->get_phi_nodes_tau();
   value = input->get_phi_nodes_phi();
   output->set_phi_nodes(tau,value);
-  phi_reg_type = input->get_phi_type();
-  phi_reg_alpha = input->get_phi_alpha();
+  output->set_phi_reg(input->get_phi_reg_type(),input->get_phi_reg_alpha());
   delete[](tau+1);delete[](value+1);
 
   return output;
 }
+
 
 
 // --------------------------------------------------------------------------------------------------------------
