@@ -37,7 +37,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int search_for_optimum_lambda = 0;
   int MAX_ITER = spectrum_to_fit->get_no_iterations();
   if (MAX_ITER < 0){
-    MAX_ITER = fabs(MAX_ITER);
+    MAX_ITER = -MAX_ITER;
     search_for_optimum_lambda = 1;
   }
   fp_t * chi_to_track = 0;
