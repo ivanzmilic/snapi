@@ -34,7 +34,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Some fitting related parameters:
   fp_t metric = 0.0;
   int iter = 0;
+  int search_for_optimum_lambda = 0;
   int MAX_ITER = spectrum_to_fit->get_no_iterations();
+  if (MAX_ITER < 0){
+    MAX_ITER = fabs(MAX_ITER);
+    search_for_optimum_lambda = 1;
+  }
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -108,7 +113,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
     }
 
-
     //fprintf(chi_out,"%d %e \n",iter,metric);
     
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
@@ -116,7 +120,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
 
     regularize_hessian(JTJ,rhs,model_to_fit);
-
   
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
@@ -140,7 +143,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (metric_reference < metric){
       
       // Everything is ok, and we can decrease lm_parameter:
-      if (iter == 0)
+      if (iter == 1 && search_for_optimum_lambda)
         look_for_best_lambda(lm_parameter, JTJ, N_parameters,
           rhs, model_to_fit, theta, phi, lambda, nlambda, scattered_light,
           qs_level, spectral_broadening, S_to_fit, n_stokes_to_fit, stokes_to_fit,
