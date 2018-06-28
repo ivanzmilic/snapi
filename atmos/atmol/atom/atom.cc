@@ -182,8 +182,7 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
 
           j_qn[i][l]=cfg->ion[i]->level[l]->j_qn;
           l_qn[i][l]=cfg->ion[i]->level[l]->l_qn;
-          //printf("Z = %d j = %d l = %d \n",Z, j_qn[i][l], l_qn[i][l]);
-
+    
           flags[i][l]=0;
           
           bf[i][l]=bf_new(ee[i][l],ip[i],j[i][l],i+1,cfg->ion[i]->level[l]->bf,io_in);
@@ -250,25 +249,38 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
         fp_t gf=((fp_t)(g[z][lu]) / g[z][ll])*fct*lam*lam*A[z][lu][ll];
         osc_str[z][ll][lu] = osc_str[z][lu][ll] = gf;
 
-        //col_dam_cross_section = compute_col_dam(z, lu, ll); // Function compute_col_dam not yet written
         col_dam_cross_section[z][lu][ll] = col_dam_cross_section[z][ll][lu] = 0.0;
         alpha_col_dam[z][lu][ll] = alpha_col_dam[z][ll][lu] = 0.0;
-
-        //printf("Z = %d lu = %d ll = %d \n",Z, l_qn[z][lu], l_qn[z][ll]);
-
         compute_damp_col(z, lu, ll);
-
-        //printf("Z = %d lu = %d ll = %d \n",Z, l_qn[z][lu], l_qn[z][ll]);
-      }
+  }
 //
-// setup ionization populations
-//  N=new fp_t [Z+1];
-//  memset(N,0,(Z+1)*sizeof(fp_t));
-//  n=new fp_t* [Z+1];
-//  for(int i=0;i<=Z;++i){
-//    n[i]=new fp_t [nl[i]];
-//    for(int l=0;l<nl[i];++l) n[i][l]=0.0;
-//  }
+  // now we deal with the collisional cross-sections for the levels.
+  if (NLTE){
+    cr = new colr*** [Z+1];
+    for (int z=0;z<=Z;++z){
+      if (nl[z]){ // if there are any levels
+        cr[z] = new colr** [nl[z]];
+        for (int l=0;l<nl[z];++l){
+          int ncr=0;
+          if (cfg->ion[z]->nl)
+            ncr = cfg->ion[z]->level[l]->ncr;
+          cr[z][l] = new colr* [nl[z]];
+          for (int ll=0;ll<nl[z];++ll) cr[z][l][ll] = 0;
+          for (int ll=0;ll<ncr;++ll){
+            int to_level = cfg->ion[z]->level[l]->cr[ll]->to_lvl;
+            cr[z][l][to_level-1] = cr_new(0,0,0,0,cfg->ion[z]->level[l]->cr[ll],io_in);
+            printf("I made a specified collisional rate for transition %d,%d !\n",l,to_level-1);
+          }
+          for (int ll=0;ll<nl[z];++ll){
+            if (!cr[z][l][ll]){
+              cr[z][l][ll] = cr_new(0,0,0,0,0,io_in);
+              printf("I made an unspecified collisional rate for transition %d,%d !\n",l,ll);
+            }
+          }
+        }
+      }
+    }
+  } 
 //
   numid=Z;
   io_in.msg(IOL_INFO,"atom::atom: %s = 0x%016lX\n",name,numid);
@@ -283,11 +295,6 @@ atom::atom(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in):atmol(b
 
 atom::~atom(void)
 {
-//  if(n){
-//    for(int z=0;z<=Z;++z) delete[] n[z];
-//    delete[] n;
-//  }
-//  if(N) delete[] N;
 //
   if(pop) popclean(x1l,x1h,x2l,x2h,x3l,x3h);
   if(ip) delete[] ip;
@@ -337,6 +344,19 @@ atom::~atom(void)
     }
     delete[] bf;
   }
+  if (cr && NLTE){
+    for (int z=0;z<=Z;++z){
+      if (nl[z]){
+        for (int l=0;l<nl[z];++l){
+          for (int ll=0;ll<nl[z];++ll)
+            delete cr[z][l][ll];
+          delete[]cr[z][l];
+        }
+      }
+      delete[]cr[z];
+    }
+    delete[]cr;
+  }
   if(zmap) delete[] zmap;
   if(lmap) delete[] lmap;
   if(nl) delete[] nl;
@@ -356,6 +376,11 @@ int32_t atom::size(io_class &io_in)
     sz+=partf[i]->size(io_in); // partition function data
     for(uint16_t l=0;l<nl[i];++l) sz+=bf[i][l]->size(io_in);  // bound-free crossection data
     for(uint16_t l=0;l<nl[i];++l) sz+=5*nl[i]*sizeof(fp_t); // A,B, osc_str, dam_col_cross_section, alpha
+    if (NLTE){
+      for(uint16_t l=0;l<nl[i];++l)
+        for(uint16_t ll=0;ll<nl[i];++ll)
+          sz+=cr[i][l][ll]->size(io);
+    }
   }
   return sz;
 }
@@ -387,7 +412,10 @@ int32_t atom::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
       offs+=::pack(buf+offs,osc_str[i][l],0,nl[i]-1,do_swap);
       offs+=::pack(buf+offs,col_dam_cross_section[i][l],0,nl[i]-1,do_swap);
       offs+=::pack(buf+offs,alpha_col_dam[i][l],0,nl[i]-1,do_swap);
-
+      if (NLTE){
+        for(uint16_t ll=0;ll<nl[i];++ll)
+          offs+=cr[i][l][ll]->pack(buf+offs,do_swap,io);
+      }
     }
   }
 //
@@ -423,6 +451,18 @@ int32_t atom::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   osc_str = newtrans(Z, nl);
   col_dam_cross_section = newtrans(Z, nl);
   alpha_col_dam = newtrans(Z, nl);
+
+  if (NLTE){
+    cr = new colr*** [Z+1];
+    for (int z=0;z<=Z;++z){
+      if (nl[z]){
+        cr[z] = new colr**[nl[z]];
+        for (int l=0;l<nl[z];++l)
+          cr[z][l] = new colr*[nl[z]];
+      }
+    }
+  }
+
   for(uint08_t i=0;i<=Z;++i){
     offs+=::unpack(buf+offs,ee[i]=new fp_t [nl[i]],0,nl[i]-1,do_swap);
     offs+=::unpack(buf+offs,g_lande[i]=new fp_t [nl[i]],0,nl[i]-1,do_swap);
@@ -440,14 +480,16 @@ int32_t atom::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
       offs+=::unpack(buf+offs,osc_str[i][l],0,nl[i]-1,do_swap);
       offs+=::unpack(buf+offs,col_dam_cross_section[i][l],0,nl[i]-1,do_swap);
       offs+=::unpack(buf+offs,alpha_col_dam[i][l],0,nl[i]-1,do_swap);
-      
+      if (NLTE){
+        for(uint16_t ll=0;ll<nl[i];++ll)
+          cr[i][l][ll] = cr_new(buf,offs,do_swap,io);
+      }
     }
   }
-//
-//  n=new fp_t* [Z+1];
-//  offs+=::unpack(buf+offs,N=new fp_t [Z+1],0,Z,do_swap);
-//  for(uint08_t i=0;i<=Z;++i) offs+=::unpack(buf+offs,n[i]=new fp_t [nl[i]],0,nl[i]-1,do_swap);
-//
+  
+  //for (int l=0;l<nl[0];++l)
+  //  for (int ll=0;ll<nl[0];++ll)
+  //    printf("l = %d ll= %d type = %d rate = %e \n",l,ll,cr[0][l][ll]->get_type(),C_ij(0,l,ll,5000.0,1E15));
   return offs;
 }
 

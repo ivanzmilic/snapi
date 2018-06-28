@@ -21,7 +21,7 @@ class colr *cr_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io)
   return new colr(buf,offs,do_swap,io);
 }
 
-class colr *cr_new(struct crcfg *cfg,io_class &io_in)
+class colr *cr_new(fp_t e_from, fp_t e_to, fp_t, fp_t, struct crcfg *cfg,io_class &io_in)
 {
   if(!cfg) return new colr(COLR_TYPE_NONE);
   if(!strcmp(cfg->crtype,"TAB")) return new tbcr(cfg->t,cfg->v,cfg->n,io_in);
@@ -62,6 +62,8 @@ int32_t colr::unpack(uint08_t *buf,uint08_t do_swap,io_class &io)
 tbcr::tbcr(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io):colr(buf,offs,do_swap,io)
 {
   offs+=unpack(buf+offs,do_swap,io);
+  //printf("My type is %d: \n",type);
+  //printf("%e \n",C(8000.0,1E5));
 }
 
 tbcr::tbcr(fp_t *t_in,fp_t *v_in,int n_in,io_class &io):colr(COLR_TYPE_TAB)
@@ -71,6 +73,9 @@ tbcr::tbcr(fp_t *t_in,fp_t *v_in,int n_in,io_class &io):colr(COLR_TYPE_TAB)
   v=new fp_t [n];
   memcpy(t,t_in,n*sizeof(fp_t));
   memcpy(v,v_in,n*sizeof(fp_t));
+  //printf("a tab type has been created, these are the values:\n");
+  //for (int i=0;i<n;++i)
+    //printf("%d %e %e \n",i,t[i],v[i]);
 //
 }
 
@@ -116,5 +121,5 @@ fp_t tbcr::interpol(fp_t tmp)
 
 fp_t tbcr::C(fp_t Temp,fp_t ne)
 {
-  return 0.0;
+  return interpol(Temp) * ne;
 }

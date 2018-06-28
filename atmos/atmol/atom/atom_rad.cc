@@ -1769,7 +1769,18 @@ fp_t atom::C_ij(int z, int from, int to, fp_t T, fp_t Ne){
 
 	// This is the default expression for computing collisional rates for given transition. By default we mean van Regemorter formula: 
 	//Stel. Atm. 3rd edition and references therein, page 276
+  if (to==from) return 0.0;
+  
+  int l_up = (from > to) ? from : to;
+  int l_down = (from > to) ? to : from;
 
+  if (cr[z][l_up][l_down]->get_type()){
+  
+    fp_t en_difference = (ee[z][l_up] - ee[z][l_down]);
+    fp_t u_0 = en_difference / k / T;
+    fp_t rates = (from > to) ? cr[z][l_up][l_down]->C(T,Ne) : cr[z][l_up][l_down]->C(T,Ne) * exp(-u_0) * fp_t(g[z][l_up]) / fp_t(g[z][l_down]);
+    return rates;
+  }
 	fp_t oscillator_str = osc_str[z][from][to];
 	fp_t en_difference = aps(ee[z][from] - ee[z][to]);
 	fp_t u_0 = en_difference / k / T;

@@ -30,31 +30,16 @@ an = a["data"]
 dims = an.shape
 NP = dims[0]
 
+an[5] *= np.cos(an[6])
+an[6] = 0.1
 an_conv = np.zeros(dims)
 
-#Project B, theta, phi -> B_x, B_y B_z
 
-B_z = an[10:14] * np.cos(an[14])
-B_t = an[10:14] * np.sin(an[14])
-
-an_conv = np.copy(an)
 
 for i in range(0,NP):
 	an_conv[i] = flt.medfilt(an[i],5)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an[i],sigma)
-
-for i in range(0,0):
-	B_z[i] = flt.medfilt(B_z[i],5)
-	B_t[i] = flt.medfilt(B_t[i],5)
-	if (sigma):
-		B_z[i] = filters.gaussian_filter(B_z[i],sigma)
-		B_t[i] = filters.gaussian_filter(B_t[i],sigma)
-
-for i in range(0,0):
-	an_conv[10+i] = (B_z[i] * B_z[i] + B_t[i] * B_t[i]) ** 0.5
-
-#an_conv[-1] = 0.1
 
 
 pyana.fzwrite(file_out,an_conv,0,'bla')

@@ -1750,8 +1750,8 @@ void atmosphere::regularize_parameter(fp_t ** JTJ, fp_t * rhs, model * model_to_
           reg_residual[i] = quantity[i+1-from]*alpha;
       }
       fp_t * reg_rhs = multiply_vector(Reg_transpose,reg_residual,N_parameters,N_parameters);
-      for (int i=1;i<=N_parameters;++i)
-        rhs[i]-=reg_rhs[i];
+      //for (int i=1;i<=N_parameters;++i)
+      //  rhs[i]-=reg_rhs[i];
 
       delete [](quantity+1);
       delete [](reg_residual+1);

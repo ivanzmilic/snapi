@@ -19,7 +19,8 @@ temp = pyana.fzread(nodes_in)
 nodes = temp["data"]
 NP = nodes.shape[0]
 print 'Total number of parameters = ',NP
-
+NX = nodes.shape[1]
+NY = nodes.shape[2]
 
 #however here we try some other form of wavelet denoising:
 #norm = np.amax(np.abs(nodes[index]))
@@ -29,7 +30,8 @@ print 'Total number of parameters = ',NP
 #reconstructed = denoise_wavelet(nodes[index],wavelet='db8', multichannel=True,method='VisuShrink', mode='hard',sigma=5.0*sigma_est)
 #reconstructed *= norm
 #nodes[index] *=norm
-
+nodes[NP-2] *= np.cos(nodes[NP-1])
+nodes[NP-1,:,:] = 0.1
 for p in range(0,NP-1):
 
 	#do 2D wavelet transformation
@@ -37,11 +39,12 @@ for p in range(0,NP-1):
 
 	#assign it to these mighty arrays
 	cA,(cH,cV,cD) = coeffs
-
+	#print cA.shape
 	#regularize
 	cH[:,:] = 0.0
 	cV[:,:] = 0.0
 	cD[:,:] = 0.0
+	#cA[47:57,:] = 0.0
 
 	#reconstruct
 	reconstructed = pywt.idwt2(coeffs,'db8')

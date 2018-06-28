@@ -24,6 +24,7 @@ public:
   virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
 //
   virtual fp_t C(fp_t,fp_t){ return 0.0; }
+  int08_t get_type(){return type;};
 };
 
 

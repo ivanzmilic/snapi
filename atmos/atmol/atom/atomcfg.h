@@ -38,6 +38,7 @@ public:
 struct crcfg{   // transition collisional rates
   char *crtype; // type of rate to use
   fp_t *t,*v;
+  int to_lvl;
   int n;
 public:
   crcfg(char*,io_class&);

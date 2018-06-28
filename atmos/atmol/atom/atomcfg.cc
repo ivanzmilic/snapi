@@ -147,6 +147,12 @@ crcfg::crcfg(char *crdata,io_class &io)
   if(!(crtype=get_arg(crdata,"TYPE",0))) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: no collisional rate type specified!\n");
 //
   if((!strcmp(crtype,"HYDROGENIC"))||(!strcmp(crtype,"HYD"))||(!strcmp(crtype,"TABLE"))||(!strcmp(crtype,"TAB"))){
+    if(char *tmp_str=get_arg(crdata,"TO_LVL",0)){
+      int temp;
+      if(sscanf(tmp_str,"%d",&temp)!=1) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: failed to convert target level argument \"%s\" to a valid integer value\n",tmp_str);
+      delete[] tmp_str;
+      to_lvl=temp;
+    }else io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: no level specified for crossection!\n");
     if(char *tmp_str=get_arg(crdata,"TEMP",0)){
       if(get_numbers(tmp_str,t,n)<0) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: failed to convert TEMP argument \"%s\" to floating point values\n",tmp_str);
       t+=1;
@@ -156,13 +162,13 @@ crcfg::crcfg(char *crdata,io_class &io)
     if(char *val_str=get_arg(crdata,"VALUE",0)){
       int m;
       if(get_numbers(val_str,v,m)<0) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: failed to convert VALUE argument \"%s\" to floating point values\n",val_str);
-      if(m!=n) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: number of wavelengths (%d) not equal to number of values (%d)!\n",n,m);
+      if(m!=n) io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: number of temperatures (%d) not equal to number of values (%d)!\n",n,m);
       v+=1;
       delete[] val_str;
     }else io.msg(IOL_ERROR|IOL_FATAL,"crcfg::crcfg: no value specified for crossection!\n");
 
   }else{
-    io.msg(IOL_WARN,"crcfg::crcfg: unknown crossection type \"%s\" specified!\n",crtype);
+    io.msg(IOL_WARN,"crcfg::crcfg: unknown/no crossection type (\"%s\") specified. setting to default and proceeding \n",crtype);
     t=v=0;
     n=0;
   }
@@ -256,7 +262,9 @@ lcfg::lcfg(char *ldata,io_class &io)
     cr=new crcfg* [ncr];
     for(int l=0;l<ncr;++l) cr[l]=new crcfg(crcss[l],io);
     del_str(crcss);
+    //printf("ncr = %d \n",ncr);
   }
+  //printf("total number of specified crs for this level is : %d \n",ncr);
 //
   if(char *s=arg_test(ldata)) io.msg(IOL_WARN,"lcfg::lcfg: the following lines were not processed:%s\n",s);
 }
