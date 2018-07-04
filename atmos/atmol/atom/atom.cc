@@ -485,11 +485,7 @@ int32_t atom::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
           cr[i][l][ll] = cr_new(buf,offs,do_swap,io);
       }
     }
-  }
-  
-  //for (int l=0;l<nl[0];++l)
-  //  for (int ll=0;ll<nl[0];++ll)
-  //    printf("l = %d ll= %d type = %d rate = %e \n",l,ll,cr[0][l][ll]->get_type(),C_ij(0,l,ll,5000.0,1E15));
+  } 
   return offs;
 }
 

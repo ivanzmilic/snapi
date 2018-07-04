@@ -17,7 +17,7 @@ dims = stokes_cube.shape
 NX = dims[0]
 NY = dims[1]
 #NL = 1501
-NL = 301
+NL = 601
 
 #hardcode wavelength, in principle we could also read it (just a thought)
 # in Angstrom
