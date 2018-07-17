@@ -114,7 +114,19 @@ acfg::acfg(char *adata,io_class &io)
     del_str(mols);
   }
 //
+  // opacity fudge related stuff:
+  if(char *tmp_str=get_arg(adata,"OF",0)){
+    get_number(tmp_str,of);
+    delete[] tmp_str;
+  }else of=0;
+  if (of)
+    of_filename=get_arg(adata,"OF_FILE",0);
+  else 
+    of_filename=0;
+//
   if(char *s=arg_test(adata)) io.msg(IOL_WARN,"atmos config: ID=%s: the following lines were not processed:%s\n",id,s);
+
+
 }
 
 acfg::~acfg(void)
@@ -124,6 +136,7 @@ acfg::~acfg(void)
   if(geom) delete[] geom;
   if(filetype) delete[] filetype;
   if(filename) delete[] filename;
+  if(of_filename) delete[] of_filename;
   if(atm){
     for(int a=0;a<natm;++a) delete atm[a];
     delete[] atm;

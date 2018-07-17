@@ -35,7 +35,7 @@ fp_t ***atom::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_
 {
   fp_t ***op=freefree_op(T,Ne,Vlos,lambda); // free-free opacity
   op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
-  memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  //memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
   
   op=add(boundfree_op(Vlos,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);          // bound-free ionization
   op=add(boundbound_op(T,Ne,Vlos,Vt, B_vec, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h); // bound-bound transitions
@@ -53,7 +53,7 @@ fp_t ***atom::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t ****
     for(int x2i=x2l;x2i<=x2h;++x2i)
         for(int x3i=x3l;x3i<=x3h;++x3i)
             em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
-  memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
+  //memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
   
   em=add(boundfree_em(Vlos,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
   em=add(boundbound_em(T,Ne,Vlos,Vt, B_vec, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -211,6 +211,8 @@ fp_t ***atom::freefree_op(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t lambda)
   fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 //
+  fp_t fudge = parent_atm->get_opacity_fudge(lambda);
+
   fp_t fct=(e*e*c*h*h*Ryd)/(6.0*pi*pi*pi*e0*me*c)*sqrt((2.0*pi)/(3.0*k*me*me*me));
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
@@ -222,6 +224,7 @@ fp_t ***atom::freefree_op(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t lambda)
         fp_t b=-(h*c)/(k*T[x1i][x2i][x3i]); // stimulated emission correction
         fp_t ll=lambda*(1.0+Vlos[x1i][x2i][x3i]/c);
         op[x1i][x2i][x3i]*=ll*sqr(ll)*(1.0-exp(b/ll));
+        op[x1i][x2i][x3i]*=fudge;
       }
   return op;
 }
@@ -313,6 +316,8 @@ fp_t ***atom::boundfree_op(fp_t ***Vlos,fp_t lambda) // absorption
 {
   fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+
+  fp_t fudge=parent_atm->get_opacity_fudge(lambda);
 //
   for(int z=0;z<Z;++z) // skip final stage: it cannot be ionized
     for(int l=0;l<nl[z];++l)
@@ -328,7 +333,7 @@ fp_t ***atom::boundfree_op(fp_t ***Vlos,fp_t lambda) // absorption
             // But we also need some corrections now.
               fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T, -1.5) 
               * fp_t(g[z][l]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][l] - h * c / lambda)/k/T);
-              op[x1i][x2i][x3i] += sigma * (pop[x1i][x2i][x3i].n[z][l] - pop_mod);
+              op[x1i][x2i][x3i] += sigma * (pop[x1i][x2i][x3i].n[z][l] - pop_mod)*fudge;
             }
           }
   return op;
@@ -377,6 +382,8 @@ fp_t ***atom::boundfree_em(fp_t ***Vlos,fp_t lambda) // emissivity
 {
   fp_t ***em=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+
+  fp_t fudge=parent_atm->get_opacity_fudge(lambda);
 //  
   for(int z=0;z<Z;++z) // recombination to stage z
     for(int l=0;l<nl[z];++l)
@@ -388,7 +395,7 @@ fp_t ***atom::boundfree_em(fp_t ***Vlos,fp_t lambda) // emissivity
             if (sigma){
               fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(fetch_temperature(x1i, x2i, x3i), -1.5) * fp_t(g[z][l]) / fp_t(g[z+1][0])
               * exp((ip[z] - ee[z][l]) / k /  fetch_temperature(x1i, x2i, x3i));          
-              em[x1i][x2i][x3i] += sigma * pop_mod * (1.0 - exp(- h * c / lambda / k / fetch_temperature(x1i, x2i, x3i))) * Planck_f(lambda, fetch_temperature(x1i,x2i,x3i));
+              em[x1i][x2i][x3i] += sigma * pop_mod * (1.0 - exp(- h * c / lambda / k / fetch_temperature(x1i, x2i, x3i))) * Planck_f(lambda, fetch_temperature(x1i,x2i,x3i))*fudge;
             }
   }
   return em;

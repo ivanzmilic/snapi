@@ -515,6 +515,8 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
   
   fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+
+  fp_t fudge=parent_atm->get_opacity_fudge(lambda);
   
   // Now approach from Grey p. 155-156:
   
@@ -530,7 +532,7 @@ fp_t *** h_minus_mol::freefree_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t lambda)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         fp_t T_P = 5040. / T[x1i][x2i][x3i];
         op[x1i][x2i][x3i] = 1E-26 * Ne[x1i][x2i][x3i]*k*T[x1i][x2i][x3i] * 
-          pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0);
+          pow(10.0,f_0+f_1*log10(T_P)+f_2*log10(T_P)*log10(T_P))*fetch_population(x1i,x2i,x3i,0,0) * fudge;
   } // points in the atmosphere
 
   return op;
@@ -604,6 +606,7 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
   fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
   memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
 
+  fp_t fudge=parent_atm->get_opacity_fudge(lambda);
   //
   // We are computing the opacity following the book of Gray:
   fp_t a[7]={1.99654,-1.18267E-5,2.64243E-6,-4.40524E-10,3.23992E-14,-1.39568E-18,2.78701E-23};
@@ -617,7 +620,7 @@ fp_t *** h_minus_mol::boundfree_op(fp_t*** Vlos, fp_t lambda){
         fp_t T = fetch_temperature(x1i,x2i,x3i);
         fp_t T_P = 5040./T;
         op[x1i][x2i][x3i] = 4.158E-28 * alpha * fetch_Ne(x1i,x2i,x3i)*k*T *
-          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-h*c/lambda/k/T));
+          pow(T_P,2.5) * pow(10.0,0.754*T_P)*fetch_population(x1i,x2i,x3i,0,0)* (1.0 - exp(-h*c/lambda/k/T))*fudge;
   } // points in the atmosphere
   return op;
 }

@@ -20,6 +20,10 @@ struct acfg{                  // atmosphere config
   char *filename,*filetype;
   int nx,ny,nz;               // dimensions
   fp_t dx,dy,dz;              // grid parameters
+
+  int of; //opacity fudge yes/no
+  char *of_filename; // opacity fudge filename
+  int N_of; // number of wavelenghts for opacity fudge
 //
   acfg(void);
   acfg(char *adata,io_class&);

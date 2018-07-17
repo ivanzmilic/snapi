@@ -564,5 +564,24 @@ int atmosphere::op_em_pert_numerical_scalar(fp_t ***T_in,fp_t ***Ne_in,fp_t ***V
   return 0;  
 }
 
+fp_t atmosphere::get_opacity_fudge(fp_t lambda){
+
+  lambda *= 1E8;
+  fp_t fudge=1.0;
+
+  for (int l=1;l<=N_of-1;++l){
+    if (lambda_of[l] < lambda && lambda_of[l+1] > lambda){
+      fudge = (lambda-lambda_of[l+1])/(lambda_of[l]-lambda_of[l+1]) * value_of[l] +
+        (lambda-lambda_of[l])/(lambda_of[l+1]-lambda_of[l]) * value_of[l+1];
+    }
+  }
+  double lb_coeff = 2.1177*exp(-(lambda-2087.7)*(lambda-2087.7)/2.421E6) + 0.68738;
+  if (lambda > 4500.0)
+    lb_coeff=0.0;
+
+  fudge*=(1.0+0.666667*lb_coeff);
+  return fudge;
+}
+
 
 

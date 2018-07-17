@@ -75,6 +75,11 @@ protected:
                  // depth at lambda=500. If we do not, we use h which is given in the input atmosphere. 
   fp_t * rt_grid; // This is grid we use to perform radiative transfer solution. It will either be geometrical grid (x3) or it will be optical depth grid
                   // (tau_referent)
+
+  // Opacity fudge values:
+  fp_t * lambda_of;
+  fp_t * value_of;
+  int N_of;
 //
 //
 //
@@ -318,6 +323,7 @@ public:
   int get_N_depths();
   fp_t ** return_as_array();
   int copy_from_array(fp_t **);
+  virtual fp_t get_opacity_fudge(fp_t lambda);
 //
 // ----------------------------------------------------------------------------------------------------------------
 // -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------

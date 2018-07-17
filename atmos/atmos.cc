@@ -83,6 +83,36 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   for(int m=0;m<cfg->nmol;++m){
     atml[m+cfg->natm]=atmol_new(cfg->mol[m],atml,cfg->natm,io_in); // This makes a new object of type atmol which is either atom or mol (or H-)
   }
+  if (cfg->of){ //if fudge is on
+    if(FILE *f=fopen(cfg->of_filename,"r")){
+      char line[1000];
+      if(!fgets(line,1000,f)) io_in.msg(IOL_WARN,"atmosphere::atmosphere: when reading line 1\n");
+      sscanf(line,"%d",&N_of);
+      io_in.msg(IOL_INFO,"atmosphere::atmosphere: %d opacity fudge points\n",N_of);
+
+      if (N_of){
+        lambda_of = new fp_t [N_of]-1;
+        value_of = new fp_t [N_of]-1;
+      }
+
+      for(int i=1;i<=N_of;++i){
+        if(!fgets(line,1000,f)) io_in.msg(IOL_WARN,"atmosphere::atmosphere: when reading line %d %s \n",i+1,cfg->of_filename);
+        if(feof(f)){
+          io_in.msg(IOL_ERROR,"atmosphere::atmosphere: unexpected end of file reading opacity fudge file line %d\n",i+1);
+          fclose(f);
+        }
+        float32_t lambda_in, value_in;
+        sscanf(line,"%E %E",&lambda_in,&value_in);
+        lambda_of[i] = lambda_in;
+        value_of[i] = value_in;
+      }
+      fclose(f);
+    }
+    else 
+      io_in.msg(IOL_ERROR,"atmosphere::atmosphere: error opening file: %s\n",cfg->of_filename);
+  }
+  else 
+    N_of=0;
 //
   flags.set(ATMOS_FLAG_DEF);
 //
@@ -111,6 +141,11 @@ atmosphere::~atmosphere(void)
 //
   if(id) delete[] id;
   if(fname) delete[] fname;
+
+  if(N_of){
+    delete[](lambda_of+1);
+    delete[](value_of+1);
+  }
 }
 
 void atmosphere::set_grid(int input){
@@ -159,9 +194,9 @@ int32_t atmosphere::size(io_class &io_in)
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int i=0;p[i];++i) sz+=(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t);
 
-  //fp_t *****pp[]={&Ne_lte_der,0};
-  //for(int i=0;pp[i];++i) sz+=7*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t);
-//
+  sz+=sizeof(int);// N_of (opacity_fudge)
+  sz+=2*N_of*sizeof(fp_t);
+
   return sz;
 }
 
@@ -186,7 +221,13 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int i=0;p[i];++i) offs+=::pack(buf+offs,*(p[i]),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
- //
+
+  offs+=::pack(buf+offs,N_of,do_swap);
+  if (N_of){
+    offs+=::pack(buf+offs,lambda_of,1,N_of,do_swap);
+    offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
+  } 
+  //
   return offs;
 }
 
@@ -211,6 +252,9 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   sz+=sizeof(natm);
   sz+=sizeof(boundary_condition_for_rt);
   for(int a=0;a<natm;++a) sz+=atml[a]->size(io_in);
+
+  sz+=sizeof(N_of);
+  sz+=2.0*N_of*sizeof(fp_t);
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
@@ -266,6 +310,12 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int ii=0;p[ii];++ii) offs+=::pack(buf+offs,*(pp[ii]),1,1,1,1,x3l,x3h,do_swap);
 
+  offs+=::pack(buf+offs,N_of,do_swap);
+  if (N_of){
+    offs+=::pack(buf+offs,lambda_of,1,N_of,do_swap);
+    offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
+  } 
+
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
   del_ft3dim(Nt_small,1,1,1,1,x3l,x3h);
@@ -309,6 +359,14 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   else
     for(int i=0;p[i];++i) (*(p[i]))=0;
 
+  offs+=::unpack(buf+offs,N_of,do_swap);
+  if (N_of){
+    lambda_of = new fp_t[N_of]-1;
+    value_of = new fp_t[N_of]-1;
+    offs+=::unpack(buf+offs,lambda_of,1,N_of,do_swap);
+    offs+=::unpack(buf+offs,value_of,1,N_of,do_swap);
+  }
+  
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
 
