@@ -30,13 +30,12 @@ an = a["data"]
 dims = an.shape
 NP = dims[0]
 
-an[7:9] *= np.cos(an[9])
-an[9] = 0.1
-an_conv = np.zeros(dims)
+an_conv = np.copy(an)
 
-for i in range(0,NP):
+for i in range(0,NP-5):
 	an_conv[i] = flt.medfilt(an[i],5)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an_conv[i],sigma)
+
 
 pyana.fzwrite(file_out,an_conv,0,'bla')

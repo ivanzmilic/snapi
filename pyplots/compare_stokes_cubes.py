@@ -59,6 +59,8 @@ N_y_panels = len(wls)
 #y = x
 x = np.linspace(0,NX-1,NX)
 y = np.linspace(0,NY-1,NY)
+x*=20.8*3.0/1E3
+y*=20.8*3.0/1E3
 
 #make the size of the figure:
 x_size = 2.0
