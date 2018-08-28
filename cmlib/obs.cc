@@ -37,6 +37,11 @@ observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
   memset(lambda+1,0,nlambda*sizeof(fp_t));
   mask = new fp_t[nlambda]-1;
   memset(mask+1,0,nlambda*sizeof(fp_t));
+  scattered_light=0.0;
+  spectral_broadening=0.0;
+  synth_qs = 1.0; obs_qs = 1.0;
+  el=0.0;az=0.0;
+  to_invert=0;no_iterations=0;start_lambda=1.0;
 }
 
 observable::observable(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){

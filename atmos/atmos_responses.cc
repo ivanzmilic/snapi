@@ -46,6 +46,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	// Same ordering like in the case of NLTEpop
 	if (nlambda ==0){
 		io.msg(IOL_INFO, "atmosphere::nlt population responses : no nlte spieces. We are done here.\n");
+		for(int a=0;a<natm;++a) atml[a]->rtclean(0,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
 		return 0; 
 	}
 

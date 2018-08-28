@@ -280,7 +280,9 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
         }
       }
     }
-  } 
+  }
+  else 
+    cr = 0; 
 //
   numid=Z;
   io_in.msg(IOL_INFO,"atom::atom: %s = 0x%016lX\n",name,numid);
@@ -462,6 +464,8 @@ int32_t atom::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
       }
     }
   }
+  else 
+    cr = 0;
 
   for(uint08_t i=0;i<=Z;++i){
     offs+=::unpack(buf+offs,ee[i]=new fp_t [nl[i]],0,nl[i]-1,do_swap);
