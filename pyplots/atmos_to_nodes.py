@@ -17,10 +17,10 @@ temp = pyana.fzread(atmos_in)
 atmos = temp["data"]
 
 # now we need the nodes:
-T_nodes = [-3.2,-2.1,-1.2,-0.5,0.0,0.5]
-vt_nodes = [0]
-v_nodes = [-2.0,-0.8,0.0,0.5]
-B_nodes = [-2.0,-0.8,0.0,0.5]
+T_nodes = [-2.2,-0.9,0.0,0.5]
+vt_nodes = []
+v_nodes = [-1.5,-0.5,0.5]
+B_nodes = [-1.5,0.3]
 theta_nodes = [0]
 
 #now time to interpolate

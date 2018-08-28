@@ -12,7 +12,7 @@ from skimage.measure import compare_psnr
 
 
 nodes_in = sys.argv[1] #nodes file
-percentage = float(sys.argv[2]) # compression factor
+skip = int(sys.argv[2]) # compression factor
 
 #read in the nodes
 temp = pyana.fzread(nodes_in)
@@ -32,7 +32,7 @@ NY = nodes.shape[2]
 #nodes[index] *=norm
 #nodes[NP-3:NP-1] *= np.cos(nodes[NP-1])
 #nodes[NP-1] = np.cos(nodes[NP-1])
-for p in range(0,NP-5):
+for p in range(0,NP-skip):
 
 	#do 2D wavelet transformation
 	coeffs = pywt.dwt2(nodes[p],'db8')

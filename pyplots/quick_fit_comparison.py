@@ -62,8 +62,9 @@ for i in range (x,x+1):
 		#plt.legend()
 
 		plt.subplot(423)
-		plt.plot(obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		#plt.plot(obs[i,j,1]/max(obs[i,j,0]),color='red',label='Observation')
+		#plt.plot(fit[i,j,1]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot((obs[i,j,0]-fit[i,j,0]) / obs[i,j,0])
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')

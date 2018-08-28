@@ -26,7 +26,7 @@ mean = flt.gaussian_filter(mean,15)
 lines=argrelextrema(mean, np.less)
 lines=np.asarray(lines[0])
 print lines
-offset = [0,0,0,5]
+offset = [0,0,0,4]
 NL = stokes_cube.shape[3]
 NX = stokes_cube.shape[1]
 NY = stokes_cube.shape[0]
@@ -38,8 +38,12 @@ size = 1.5
 #1105
 
 x = np.linspace(0.0,NX-1*1.0,NX)
-x *= 20.8 / 1E3
+x *= 2.0*20.8 / 1E3
 y = x
+
+l_line = lines[4]
+
+stokes_cube=np.transpose(stokes_cube,(1,0,2,3))
 
 plt.figure(figsize=[4.5*1, 3.7*2])
 plt.clf()
@@ -51,8 +55,8 @@ plt.title('$\mathrm{Stokes}\,I/I_{\mathrm{qs}}$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.ylabel('$\mathrm{Stokes}\,I$')
 plt.subplot(212)
-plt.imshow(stokes_cube[:,:,3,370]*stokes_cube[:,:,0,370]/mean[0],origin='lower',cmap=cc.cm['coolwarm'],vmin=-0.04,vmax=0.04,extent=[x[0],x[-1],y[0],y[-1]])
-plt.title('$V/I_{\mathrm{qs}}$')
+plt.imshow(stokes_cube[:,:,3,l_line+offset[3]]*stokes_cube[:,:,0,l_line+offset[3]]/mean[0]*100.0,origin='lower',cmap=cc.cm['coolwarm'],vmin=-1,vmax=1,extent=[x[0],x[-1],y[0],y[-1]])
+plt.title('$V/I_{\mathrm{qs}}\,[\%]$')
 plt.colorbar(shrink=0.9)
 plt.xlabel('$x\,[\mathrm{Mm}]$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
