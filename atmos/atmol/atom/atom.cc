@@ -1964,7 +1964,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     }
   }*/
 
-  fp_t relaxation_factor = 0.9;
+  fp_t relaxation_factor = 1.0;
 
   // Let us invert the matrix: 
   fp_t * M_to_solve = M[1] +1;
@@ -1983,11 +1983,11 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   bool zeros = false;
   for (int i = 0; i<nmap; ++i){
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
-    if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
-      pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] - solution[i] * relaxation_factor)/(1.0-relaxation_factor);
-      zeros = true;
+    //if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
+      //pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] - solution[i] * relaxation_factor)/(1.0-relaxation_factor);
+      //zeros = true;
       //printf("Negative population n = %e for z = %d i = %d @ x3i = %d \n", pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]], zmap[i],lmap[i],x3i);
-      break;
+      //break;
       /*
       delta = 1.0;
       //exit(1);
@@ -2005,7 +2005,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       }
       fclose(to_invert);
       exit(1);*/
-    } 
+    //} 
   }
   //if (strcmp(id,"Na")==0)
   //print_populations();
@@ -2015,10 +2015,10 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   delete []b;
   delete []solution;
 
-  if (zeros && alo)
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
-  else if (zeros && !alo)
-    delta = 0; // don't do anything!
+  //if (zeros && alo)
+  //  delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
+  //else if (zeros && !alo)
+  //  delta = 0; // don't do anything!
 
   return delta;
 
