@@ -1852,7 +1852,7 @@ void atom::prof_clear(void){
 
 }
 
-fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t x2i,int32_t x3i)
+fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t x2i,int32_t x3i, int alo)
 // *********************************************************
 // * Solve the rate equations for given temperature and    *
 // * electron density. The ionization fractions and        *
@@ -1892,14 +1892,21 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         fp_t LL = (tmap[z][l][ll]) ? L[tmap[z][l][ll]] / nrm[tmap[z][l][ll]] : 0.0;
 
         // Transitions from this level
-        fp_t Radiative_rates = 1.0 * R_ij_local_ALO(z, l, ll, JJ, LL, pop[x1i][x2i][x3i].n[z][l], pop[x1i][x2i][x3i].n[z][ll]);
+        fp_t Radiative_rates;
+        if (alo == 1)
+          Radiative_rates = 1.0 * R_ij_local_ALO(z, l, ll, JJ, LL, pop[x1i][x2i][x3i].n[z][l], pop[x1i][x2i][x3i].n[z][ll]);
+        else
+          Radiative_rates = 1.0 * R_ij(z,l,ll,JJ);
         fp_t Collisional_rates = C_ij(z, l, ll, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
         
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates); 
         
         // Transitions to this level:
-        Radiative_rates = 1.0 * R_ij_local_ALO(z, ll, l, JJ, LL, pop[x1i][x2i][x3i].n[z][ll], pop[x1i][x2i][x3i].n[z][l]);
+        if (alo)
+          Radiative_rates = 1.0 * R_ij_local_ALO(z, ll, l, JJ, LL, pop[x1i][x2i][x3i].n[z][ll], pop[x1i][x2i][x3i].n[z][l]);
+        else 
+          Radiative_rates = 1.0 * R_ij(z,ll,l,JJ);
         Collisional_rates = C_ij(z, ll, l, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         int dl = ll - l;
@@ -1957,7 +1964,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     }
   }*/
 
-  fp_t relaxation_factor = 1.0;
+  fp_t relaxation_factor = 0.9;
 
   // Let us invert the matrix: 
   fp_t * M_to_solve = M[1] +1;
@@ -1965,24 +1972,29 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   fp_t * solution = new fp_t [nmap];  
   Crout(nmap,M_to_solve, M_LU);
   solveCrout(nmap,M_LU,b,solution);
-  //Crout(nmap,M_to_solve, M_LU);
-  //solveCrout(nmap,M_LU,b,solution);
 
   fp_t delta = 0.0;
   for (int i = 0; i<nmap; ++i){
     fp_t rel_delta = fabs(solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]) / pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]];
     delta = (rel_delta > delta) ? rel_delta : delta;
   }
+  
+  // If population is negative, don't correct but re-do using normal lambda iteration
+  bool zeros = false;
   for (int i = 0; i<nmap; ++i){
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
     if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
+      pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] - solution[i] * relaxation_factor)/(1.0-relaxation_factor);
+      zeros = true;
       //printf("Negative population n = %e for z = %d i = %d @ x3i = %d \n", pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]], zmap[i],lmap[i],x3i);
-      //delta = 1.0;
+      break;
+      /*
+      delta = 1.0;
       //exit(1);
-      //printf("Rate matrix:\n");
-      //io.msg(IOL_INFO,"atom::pops: %s\n",name);
-      //FILE * to_invert;
-      /*to_invert = fopen("matrix_to_invert.txt","w");
+      printf("Rate matrix:\n");
+      io.msg(IOL_INFO,"atom::pops: %s\n",name);
+      FILE * to_invert;
+      to_invert = fopen("matrix_to_invert.txt","w");
       for(int ii=1;ii<=nmap;++ii){
         for(int iii=1;iii<=nmap;++iii){
          fprintf(stderr,"%5.10E ",M[ii][iii]);      
@@ -2002,6 +2014,12 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   delete []M_LU;
   delete []b;
   delete []solution;
+
+  if (zeros && alo)
+    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
+  else if (zeros && !alo)
+    delta = 0; // don't do anything!
+
   return delta;
 
   }

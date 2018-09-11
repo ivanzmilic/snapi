@@ -22,16 +22,6 @@ print 'Total number of parameters = ',NP
 NX = nodes.shape[1]
 NY = nodes.shape[2]
 
-#however here we try some other form of wavelet denoising:
-#norm = np.amax(np.abs(nodes[index]))
-#nodes[index]/=norm
-#sigma_est = estimate_sigma(nodes[index], multichannel=True, average_sigmas=True)
-#print sigma_est
-#reconstructed = denoise_wavelet(nodes[index],wavelet='db8', multichannel=True,method='VisuShrink', mode='hard',sigma=5.0*sigma_est)
-#reconstructed *= norm
-#nodes[index] *=norm
-#nodes[NP-3:NP-1] *= np.cos(nodes[NP-1])
-#nodes[NP-1] = np.cos(nodes[NP-1])
 for p in range(0,NP-skip):
 
 	#do 2D wavelet transformation
@@ -65,18 +55,6 @@ for p in range(0,NP-skip):
 	plt.close('all')
 
 	nodes[p] = reconstructed
-
-#bigger = np.where(nodes[-1] > 1.0)
-#nodes[-1,bigger] = 1.0
-#smaller = np.where(nodes[-1] < -1.0)
-#nodes[-1,smaller] = -1.0
-
-#nodes[-3,:,:] = 400.0
-#nodes[-2,:,:] = 600.0
-#nodes[-1,:,:] = 0.1
-#nodes[-1] = np.arccos(nodes[-1])
-#nodes[NP-3:NP-1] /= np.cos(nodes[NP-1])
-
 
 pyana.fzwrite(sys.argv[3],nodes,0,'placeholder')
 

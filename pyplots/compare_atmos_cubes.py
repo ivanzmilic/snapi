@@ -144,7 +144,7 @@ for ii in range (2,3):
 		#ax.scatter(x,y,c=np.log(c),s=10)
 		#ax.hist2d(x,y,(100,100),cmap='Purples',vmax=30)
 			print pearsonr(x,y)
-			print np.std(x-y)/np.mean(np.fabs(x))
+			print np.std((x-y)/np.max(np.abs(y)))
 		#ax.plot(cube2_to_show[i].reshape(NX*NY),cube2_to_show[i].reshape(NX*NY),color='red')
 		#if (i==0):
 		#	ax.set_title(title[ii])

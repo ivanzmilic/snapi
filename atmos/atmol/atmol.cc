@@ -203,16 +203,10 @@ void atmol::rtinit(void)
 void atmol::prof_init(void){
 }
 
-fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t)
+fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int)
 {
   return 0;
 }
-
-fp_t atmol::pops_broyden(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t)
-{
-  return 0;
-}
-
 
 void atmol::add(fp_t ***R,fp_t ***L,fp_t ***op,fp_t***,fp_t***,fp_t***,fp_t bin,fp_t lambda,fp_t theta,fp_t phi)
 {

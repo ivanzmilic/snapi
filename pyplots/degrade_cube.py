@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import scipy.ndimage.filters as flt
 import scipy.interpolate as interpol
+import scipy.special as spec
+import scipy.signal as signal
 import sys
 
 file_in = sys.argv[1]
@@ -41,8 +43,8 @@ plt.plot(stokes_cube[0,0,0],color='red')
 
 #if we want to smear spatially:
 if (to_degrade):
-	A=[1.0,0.0] #two part-psf, weights
-	width = [0.11,2.0] # two part - psf, widths in "
+	A=[0.8,0.2] #two part-psf, weights
+	width = [0.3,5.0] # two part - psf, widths in "
 	A = np.asarray(A)
 	width = np.asarray(width)
 	width *= 725.0  #to km
@@ -50,11 +52,49 @@ if (to_degrade):
 	width /= 2.35 #from FWHM to sigma
 	print width
 
+	#new part, proper airy function implementation:
+
+	#x and y in pixels
+	x = np.linspace(-14.5,14.5,30)
+	y = np.linspace(-14.5,14.5,30)
+	psf = np.zeros([30,30])
+
+	D = 0.75 * 0.8 #telescope radius
+	L = 1.56E-6 # wavelength
+
+	x *= 20.8 / 725. / 206265. #to rad
+	x *= 6.28 * D / L
+	y = np.copy(x)
+	xx,yy = np.meshgrid(x,y)
+
+	r = (xx**2.0 + yy**2.0) ** 0.5
+
+	psf = (spec.jv(1,r)/r)**2.0
+
+	plt.clf()
+	plt.cla()
+	plt.imshow(psf)
+	plt.savefig('psf.png')
+	
+	test = signal.convolve2d(stokes_cube[:200,:200,0,0],psf,boundary='wrap')
+	print test.shape
+	test = test[15:-15,15:-15]
+	print np.std(test)/np.mean(test)
+	plt.clf()
+	plt.cla()
+	plt.imshow(test)
+	plt.savefig('test.png')
+	
+	exit(1);
+
+
+
 	for s in range (0,4):
 		for w in range(0,1):
 			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0],mode='wrap') + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1],mode='wrap')
 print np.std(stokes_cube[:,:,0,0])/np.mean(stokes_cube[:,:,0,0])
 print stokes_cube.shape
+exit(1);
 
 for i in range(0,NX):
 	for j in range(0,NY):

@@ -357,11 +357,8 @@ public:
 
   virtual void compute_profile_norm(fp_t, fp_t, fp_t *, fp_t *, fp_t ***, int);
  
-  virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t);
-  virtual fp_t pops_broyden(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t);
-  virtual int initialize_broyden_ALO(fp_t **, int, int, int, fp_t);
-  virtual fp_t * compute_F_broyden(int, int, int, fp_t, fp_t *, fp_t *);
-
+  virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int);
+  
   virtual void add(fp_t***,fp_t***,fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t,fp_t,fp_t);
   // New one:
   virtual void add(fp_t***, fp_t***, fp_t ***, fp_t, fp_t, fp_t);
