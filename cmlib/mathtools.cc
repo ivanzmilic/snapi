@@ -1345,7 +1345,7 @@ int convolve_spectra_with_gauss(fp_t ** S, fp_t * lambda,int N, fp_t width){
   // Guesstimate N_lambda_fine;
   fp_t l_min = lambda[1] - 10.0*width;
   fp_t l_max = lambda[N] + 10.0*width;
-  N_lambda_fine = int((l_max-l_min)/(0.2*width))+1;
+  N_lambda_fine = int((l_max-l_min)/(0.5*width))+1;
   fp_t step = (l_max-l_min) / (N_lambda_fine-1);
   lambda_fine = new fp_t [N_lambda_fine]-1;
   for (int l=1;l<=N_lambda_fine;++l){ 

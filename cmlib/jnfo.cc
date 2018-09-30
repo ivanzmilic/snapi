@@ -55,10 +55,12 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,starting_lambda=new fp_t [no],0,no-1,swap_endian); 
     lambda=new fp_t* [no];
     weights = new fp_t*[no];
+    w_stokes = new fp_t*[no];
     name=new char* [no];
     for(int o=0;o<no;++o){
       offs+=unpack(data+offs,lambda[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
       offs+=unpack(data+offs,weights[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
+      offs+=unpack(data+offs,w_stokes[o]=new fp_t [4],0,3,swap_endian);
       offs+=unpack(data+offs,name[o]);
     }
   }
@@ -123,6 +125,8 @@ jnfo::~jnfo(void)
     if(lambda) delete[] lambda;
     if(weights) for(int o=0;o<no;++o) if(weights[o]) delete[] weights[o];
     if(weights) delete[] weights;
+    if (w_stokes) for (int o=0;o<no;++o) delete []w_stokes[o];
+    if (w_stokes) delete []w_stokes;
     if(name) for(int o=0;o<no;++o) delete[] name[o];
     if(name) delete[] name;
     if (scattered_light) delete[]scattered_light;
@@ -152,6 +156,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
       usize+=2*nlambda[o]*sizeof(fp_t);  // lambda,weights
+      usize+=4*sizeof(fp_t); // w_stokes
       usize+=strlen(name[o])+1;        // file name
     }
   }
@@ -197,6 +202,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);
+      offs+=pack(data+offs,w_stokes[o],0,3,swap_endian);
       offs+=pack(data+offs,name[o]);
     }
   }

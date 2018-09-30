@@ -79,6 +79,7 @@ int main(int argc,char *argv[])
   ji.synth_qs = new fp_t [ji.no];
   ji.lambda=new fp_t* [ji.no];
   ji.weights=new fp_t* [ji.no];
+  ji.w_stokes = new fp_t*[ji.no];
   ji.name=new char* [ji.no];
   ji.no_iterations=new int [ji.no];
   ji.starting_lambda = new fp_t [ji.no];
@@ -107,7 +108,9 @@ int main(int argc,char *argv[])
       memcpy(ji.weights[o],cfg.obs[o]->weight,ji.nlambda[o]*sizeof(fp_t));
     else 
       for (int i=0;i<ji.nlambda[o];++i) ji.weights[o][i] = 1.0;
-
+    ji.w_stokes[o] = new fp_t[4];
+    memcpy(ji.w_stokes[o],cfg.obs[o]->w_stokes,4*sizeof(fp_t));
+    
     ji.name[o]=strcpy(new char [strlen(cfg.obs[o]->name)+1],cfg.obs[o]->name);
   }
 //

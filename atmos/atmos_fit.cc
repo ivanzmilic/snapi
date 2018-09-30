@@ -47,7 +47,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   // weights for Stokes parameters. They enter like this in response scaling, and 
   // quadratically in chi_sq. basically they reduce the noise  
-  fp_t ws[4]; ws[0] = 1.0; ws[1] = ws[2] = 0.0; ws[3] = 1.0; 
+  fp_t * ws = spectrum_to_fit->get_w_stokes();
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
@@ -60,8 +60,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   for (int s=0;s<4;++s) if (ws[s]){
     stokes_to_fit[counter] = s+1;
     ++counter;
-  }
-  
+  }  
   fp_t noise_level = 3E-4*S_to_fit[1][1];
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
@@ -226,6 +225,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
       
   delete[](lambda+1);
+  delete[]ws;
   return obs_to_return;
 }
 

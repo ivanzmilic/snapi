@@ -26,6 +26,7 @@ struct ocfg{                  // configuration per object ("color")
   fp_t synth_qs; // quiet sun resulting from falc (or other) model
   int  no_iterations; // maximum number of iterations for the inversion
   fp_t starting_lambda; // starting value of lambda parameter
+  fp_t * w_stokes; // weights for different stokes parameters
 
 //
   ocfg(char *odata,struct gcfg &gdata,io_class&);

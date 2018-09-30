@@ -31,10 +31,10 @@ c_map = 'coolwarm'
 #c_map = 'hot'
 
 
-tau = [-1.5,-0.5,0.5]
+tau = [-2.5,-1.5,-0.5,0.5]
 #tau = [-1.5,-0.4,0.3]
 tau = np.asarray(tau)
-n = [5,6,7]
+n = [6,7,8,9]
 n_nodes = len(tau)
 
 cube_interpol = np.zeros([n_nodes,NX,NY])
@@ -70,8 +70,8 @@ plt.savefig(plot_here+'_V',fmt='eps',bbox_inches='tight')
 plt.savefig(plot_here+'_V',fmt='png',bbox_inches='tight')
 
 
-tau = [-2.0,-0.9,-0.0,0.5]
-n = [0,1,2,3]
+tau = [-3.4,-2.0,-0.8,0.0,0.5]
+n = [0,1,2,3,4]
 n_nodes = len(tau)
 cube_interpol = np.zeros([n_nodes,NX,NY])
 sign = 1
@@ -114,7 +114,7 @@ plt.savefig(plot_here+'_T',fmt='eps',bbox_inches='tight')
 plt.savefig(plot_here+'_T',fmt='png',bbox_inches='tight')
 
 tau = [-1.5,0.3]
-n = [8,9]
+n = [10,11]
 n_nodes = len(tau)
 cube_interpol = np.zeros([n_nodes,NX,NY])
 sign = 1

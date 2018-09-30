@@ -40,6 +40,7 @@ struct jnfo{
   fp_t **weights; // weights for fitting, allows us to mask out some things 
   int * no_iterations;
   fp_t * starting_lambda;
+  fp_t ** w_stokes;
 //
   uid_t uid;
   gid_t gid;

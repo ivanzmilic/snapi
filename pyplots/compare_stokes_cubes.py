@@ -82,7 +82,10 @@ residual /= (2.0*NL)
 print 'chisq_reduced_max = ', np.amax(residual)
 print 'chisq_reduced_mean = ', np.mean(residual)
 
+irange = [0.7,1.3]
+vrange = [-5,5]
 
+#N_y_panels -= 2
 
 #plt.figure(figsize=[N_x_panels*x_size,N_y_panels*y_size])
 fig, axes = plt.subplots(nrows=N_y_panels,ncols=N_x_panels,figsize=(N_x_panels*x_size,N_y_panels*y_size))
@@ -98,7 +101,7 @@ for j in range (1,N_y_panels+1):
 	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+1)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = 0.8,vmax=1.2,cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -111,7 +114,7 @@ for j in range (1,N_y_panels+1):
 	to_plot/=m
 	ax=axes.flat[image_no]
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+2)
-	im = ax.imshow(to_plot,origin='lower',vmin = 0.8,vmax=1.2,cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -129,7 +132,7 @@ for j in range (1,N_y_panels+1):
 
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot1,origin='lower',vmin = -1,vmax=1,cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot1,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -140,7 +143,7 @@ for j in range (1,N_y_panels+1):
 	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+6],axis=2)/m*100.0	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot2,origin='lower',vmin = -1,vmax=1,cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot2,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')

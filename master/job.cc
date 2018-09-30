@@ -301,7 +301,7 @@ int job_class::start(void)
       	 io->msg(IOL_INFO,"master::job : we are synthesizing the data from : %s \n",ji.name[o]);
       
       if (ji.to_invert[o]){ // ------------ INVERSION ----------------------------------------//
-        io->msg(IOL_INFO,"master::job : inverting datacube named %s \n",ji.name[o]);
+        io->msg(IOL_INFO,"master::job : inverting datacube: %s \n",ji.name[o]);
         int n1,n2,n3,n4;
 
         fp_t **** test = read_file(ji.name[o],n1,n2,n3,n4,*io);
@@ -325,11 +325,12 @@ int job_class::start(void)
        	int nl=ji.lh[o]-ji.ll[o]+1;
        	// Save normalized:
        	class observable *obs_to_fit=obs->extract(ji.xl[o],ji.xh[o],ji.yl[o],ji.yh[o],ji.ll[o],ji.lh[o]);
-       	fp_t **** S_to_save = obs_to_fit->get_S();
-       
+       	delete obs;
+
+        fp_t **** S_to_save = obs_to_fit->get_S();
         write_file((char*)"mag_test.f0",S_to_save,nx,ny,4,nl,*io);
         del_ft4dim(S_to_save,1,nx,1,ny,1,4,1,nl);
-        delete obs;
+        
         // Write down lambda
         FILE * output = fopen("lambda_to_fit.dat","w");
         fp_t * lambda_to_fit = obs_to_fit->get_lambda();
@@ -355,6 +356,7 @@ int job_class::start(void)
              obs_subset->set_to_invert(1);
              obs_subset->set_no_iterations(ji.no_iterations[o]);
              obs_subset->set_start_lambda(ji.starting_lambda[o]);
+             obs_subset->set_w_stokes(ji.w_stokes[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
              array_add(chk,raw);     // add new chunk to the raw data list
@@ -546,6 +548,7 @@ int job_class::stop(void)
     	fp_t *** nodes_cube = test_cube->get_data(nx,ny,np);
     	write_file((char*)"inverted_nodes.f0",nodes_cube,nx,ny,np,*io);
     	del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
+      delete test_cube;
     }
     write_file((char*)"inverted_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
     del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);

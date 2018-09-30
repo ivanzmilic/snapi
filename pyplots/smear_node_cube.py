@@ -31,9 +31,11 @@ dims = an.shape
 NP = dims[0]
 
 an_conv = np.copy(an)
+start = int(sys.argv[4])
+end = int(sys.argv[5])
 
-for i in range(0,NP-3):
-	an_conv[i] = flt.medfilt(an[i],5)
+for i in range(start,end+1):
+	an_conv[i] = flt.medfilt(an[i],3)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an_conv[i],sigma)
 

@@ -130,6 +130,27 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       get_number(tmp_str,starting_lambda);
       delete[] tmp_str;
     } else starting_lambda=1E3;
+    int m = 0;
+    if(char *val_str=get_arg(odata,"STOKES_WEIGHTS",0)){
+      if(get_numbers(val_str,w_stokes,m)<0){
+        io.msg(IOL_ERROR|IOL_FATAL,"ocfg::ocfg: failed to convert STOKES_WEIGTHS argument \"%s\" to floating point values\n",val_str);
+        m=0;
+        delete[]w_stokes;
+      }
+      if(m!=4){ 
+        io.msg(IOL_ERROR|IOL_FATAL,"ocfg::ocfg: number of stokes weights differs from 4. Setting them to 1,0,0,1");
+        m=0;
+        delete[]w_stokes;
+      }
+    }
+    else
+      m =0;
+    if (m==0){
+      w_stokes = new fp_t [4]-1;
+      w_stokes[1] = w_stokes[4] = 1.0;
+      w_stokes[2] = w_stokes[3] = 0.0;
+    }
+    w_stokes+=1;
   }
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
@@ -241,6 +262,7 @@ ocfg::~ocfg(void)
   if(lambda) delete[] lambda;
   if(name) delete[] name;
   if(weight) delete[]weight;
+  delete []w_stokes;
 }
 
 mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)

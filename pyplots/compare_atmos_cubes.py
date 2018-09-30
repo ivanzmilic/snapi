@@ -64,7 +64,7 @@ y_panel_size = 2.0*0.8
 
 c_map = ['','','','']
 
-tau = [-1.5,0.5]
+tau = [-3.5,-2.5,-1.5,-0.5,0.5]
 tau = np.asarray(tau)
 N_tau = tau.size
 
@@ -86,7 +86,7 @@ cube2_to_show = np.zeros([N_tau,NX2,NY2])
 
 scale = [1000.0,1000.0,1.0]
 
-for ii in range (2,3):
+for ii in range (0,3):
 
 	plt.clf()
 	plt.cla()
@@ -132,19 +132,27 @@ for ii in range (2,3):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 		fig_no +=1
 		if (i==0):
-			cb_ax = fig.add_axes([0.88, 0.55, 0.03, 0.39])
+			cb_ax = fig.add_axes([0.88, 0.687, 0.03, 0.26])
 			cbar = fig.colorbar(im, cax=cb_ax)
 		if (i==1):
-			cb_ax = fig.add_axes([0.88, 0.06, 0.03, 0.39])
+			cb_ax = fig.add_axes([0.88, 0.37, 0.03, 0.26])
 			cbar = fig.colorbar(im, cax=cb_ax)
+		if (i==2):
+			cb_ax = fig.add_axes([0.88, 0.052, 0.03, 0.26])
+			cbar = fig.colorbar(im, cax=cb_ax)
+
 
 		if (NX2 == NX and NY2 == NY):
 		#ax = axes.flat[fig_no]
-			x,y,c = plot_scatter_hist(cube2_to_show[i].reshape(NX*NY),cube1_to_show[i].reshape(NX*NY))
+			#x,y,c = plot_scatter_hist(cube2_to_show[i].reshape(NX*NY),cube1_to_show[i].reshape(NX*NY))
 		#ax.scatter(x,y,c=np.log(c),s=10)
 		#ax.hist2d(x,y,(100,100),cmap='Purples',vmax=30)
-			print pearsonr(x,y)
-			print np.std((x-y)/np.max(np.abs(y)))
+			#print pearsonr(x,y)
+			std_difference = np.std(cube1_to_show[i] - cube2_to_show[i])
+			print 'Std of difference = ', std_difference
+			mean_mag = np.mean(np.abs(cube2_to_show[i]))
+			print 'Mean magnitude    = ', mean_mag
+			print 'Ratio             = ', std_difference/mean_mag
 		#ax.plot(cube2_to_show[i].reshape(NX*NY),cube2_to_show[i].reshape(NX*NY),color='red')
 		#if (i==0):
 		#	ax.set_title(title[ii])
@@ -156,9 +164,9 @@ for ii in range (2,3):
 		#ax.set_ylim(m-3*s,m+3*s)
 		#fig_no +=1
 
-	for axi in axes.flat:
-		axi.xaxis.set_major_locator(plt.MaxNLocator(6))
-    	axi.yaxis.set_major_locator(plt.MaxNLocator(6))
+	#for axi in axes.flat:
+	#	axi.xaxis.set_major_locator(plt.MaxNLocator(6))
+    	#axi.yaxis.set_major_locator(plt.MaxNLocator(6))
 
 	#fig.tight_layout()
 	fig.savefig(plot_here+'_'+suffix[ii]+'.eps',fmt='eps',bbox_inches='tight')

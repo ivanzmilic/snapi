@@ -16,6 +16,7 @@ observable::observable(int ns_in):ns(ns_in)
   S=0;
   nlambda=0;
   nx=0;ny=0;
+  w_stokes = new fp_t[4];
 }
 
 observable::observable(int nx_in,int ny_in,int ns_in)
@@ -24,6 +25,7 @@ observable::observable(int nx_in,int ny_in,int ns_in)
   nlambda=0;
   ns=ns_in;
   nx=nx_in;ny=ny_in;
+  w_stokes = new fp_t[4];
 }
 observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
 {
@@ -42,6 +44,8 @@ observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
   synth_qs = 1.0; obs_qs = 1.0;
   el=0.0;az=0.0;
   to_invert=0;no_iterations=0;start_lambda=1.0;
+  w_stokes = new fp_t [4];
+  memset(w_stokes,0,4*sizeof(fp_t));
 }
 
 observable::observable(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
@@ -55,6 +59,7 @@ observable::~observable(void){
     delete[] (lambda+1);
     delete[] (mask+1);
   }
+  delete []w_stokes;
 }
 
 int32_t observable::size(io_class &io_in){
@@ -64,6 +69,7 @@ int32_t observable::size(io_class &io_in){
   sz += 2*sizeof(int); // whether to invert or no, max number of iterations
   sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
+  sz += 4*sizeof(fp_t); // weights for stokes;
   return sz;
 }
 
@@ -84,6 +90,7 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,start_lambda,do_swap);
   offs+=::pack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
+  offs+=::pack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 
   return offs;
@@ -108,9 +115,11 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   lambda = new fp_t [nlambda]-1;
   mask = new fp_t [nlambda]-1;
   S=ft4dim(1,nx,1,ny,1,ns,1,nlambda);
+  w_stokes = new fp_t [4];
 
   offs+=::unpack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::unpack(buf+offs,mask,1,nlambda,do_swap);
+  offs+=::unpack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::unpack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 
   return offs;
@@ -177,6 +186,10 @@ void observable::set_start_lambda(fp_t input){
   start_lambda = input;
 }
 
+void observable::set_w_stokes(fp_t * w_stokes_input){
+  memcpy(w_stokes,w_stokes_input,4*sizeof(fp_t));
+}
+
 fp_t **** observable::get_S(){
 
   fp_t **** S_copy;
@@ -237,6 +250,13 @@ fp_t * observable::get_mask(){
   mask_copy = new fp_t [nlambda]-1;
   memcpy(mask_copy+1,mask+1,nlambda*sizeof(fp_t));
   return mask_copy;
+}
+
+fp_t * observable::get_w_stokes(){
+  fp_t * w_stokes_copy;
+  w_stokes_copy = new fp_t[4];
+  memcpy(w_stokes_copy,w_stokes,4*sizeof(fp_t));
+  return w_stokes_copy;
 }
 
 int observable::get_n_lambda(){
