@@ -152,6 +152,9 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     }
     w_stokes+=1;
   }
+  w_stokes = new fp_t [4]-1;
+  memset(w_stokes+1,0,4*sizeof(fp_t));
+  w_stokes+=1;
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
     get_number(tmp_str,az);
