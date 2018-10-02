@@ -1025,6 +1025,7 @@ modelcube::modelcube(model * make_from, int nx_in, int ny_in){
   temp_nodes_tau = 0;
   vt_nodes_tau = 0;
   vs_nodes_tau = 0;
+  B_nodes_tau=0;
   theta_nodes_tau = 0;
   phi_nodes_tau = 0;
   // Set proper values (if we have them)

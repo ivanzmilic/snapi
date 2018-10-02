@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-3
+#define DELTA 1E-6
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -48,6 +48,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // weights for Stokes parameters. They enter like this in response scaling, and 
   // quadratically in chi_sq. basically they reduce the noise  
   fp_t * ws = spectrum_to_fit->get_w_stokes();
+  
+  // other fitting parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
