@@ -17,11 +17,12 @@ temp = pyana.fzread(atmos_in)
 atmos = temp["data"]
 
 # now we need the nodes:
-T_nodes = [-2.9,-1.9,-1.1,-0.5,0.0,0.5]
+T_nodes = [-2.0,-0.8,0.0]
 vt_nodes = [0]
 v_nodes = [-2.0,-0.8,0.0]
-B_nodes = [-2.0,-0.8,0.0]
+B_nodes = [-1.5,0.3]
 theta_nodes=[0]
+phi_nodes=[0]
 
 #now time to interpolate
 NX = atmos.shape[0]
@@ -32,7 +33,8 @@ N_vt = len(vt_nodes)
 N_v = len(v_nodes)
 N_B = len(B_nodes)
 N_theta = len(theta_nodes)
-N_nodes = N_T + N_vt + N_v + N_B + N_theta
+N_phi = len(phi_nodes)
+N_nodes = N_T + N_vt + N_v + N_B + N_theta + N_phi
 nodes = np.zeros([N_nodes,NX,NY])
 
 
@@ -59,6 +61,10 @@ for i in range(0,NX):
 		f = interpol.interp1d(atmos[i,j,0],atmos[i,j,10])
 		theta = f(theta_nodes)
 		nodes[index:index+N_theta,i,j] = theta
+		index+=N_theta
+		f = interpol.interp1d(atmos[i,j,0],atmos[i,j,11])
+		phi = f(phi_nodes)
+		nodes[index:index+N_phi,i,j] = phi
 
 #additional polishing - hardcode
 #nodes[4,:,:] = 2E4

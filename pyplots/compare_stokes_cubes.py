@@ -16,7 +16,8 @@ import colorcet as cc
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
 out_name = sys.argv[3]
-maskfile = sys.argv[4]
+ifmask = sys.argv[4]
+maskfile = sys.argv[5]
 
 temp = pyana.fzread(cube1_in)
 cube1 = temp["data"]
@@ -24,8 +25,9 @@ cube1 = temp["data"]
 temp = pyana.fzread(cube2_in)
 cube2 = temp["data"]
 
-l_l = 1
-l_r = 501
+if (int(ifmask)):
+	mask = np.loadtxt(maskfile,skiprows=1)
+	print mask.shape
 
 
 dims = cube1.shape
@@ -42,6 +44,8 @@ plt.clf()
 plt.cla()
 plt.plot(cube_1_mean,color='red')
 plt.plot(cube_2_mean,color='blue')
+if (int(ifmask)):
+	plt.plot(mask*cube_1_mean[0],'*')
 plt.savefig('mean_profiles',fmt='png')
 cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
 wls = argrelextrema(cube_2_mean,np.less)
@@ -63,27 +67,32 @@ x*=20.8*3.0/1E3
 y*=20.8*3.0/1E3
 
 #make the size of the figure:
-x_size = 2.0
+x_size = 10.0
 ratio = 0.85
 y_size = x_size * float(NY)/float(NX) * ratio
 
 shrinkage = 0.7
 
-noise = 1E-3 * np.sqrt(cube_1_mean[0]*cube_1_mean[:])
+noise = 7E-4 * np.sqrt(cube_1_mean[0]*cube_1_mean[:])
 residual = (cube1-cube2)
 residual[:] /= noise;
 residual = residual * residual
 print residual.shape
+if (int(ifmask)):
+	residual[:,:,:,:] *= mask
 residual = np.sum(residual,axis=3)
-residual = residual[:,:,0] + residual[:,:,3]
+residual = residual[:,:,0] + residual[:,:,3] + residual[:,:,1] + residual[:,:,2]
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
-residual /= (2.0*NL)
+if (int(ifmask)):
+	residual /= 4.0 * np.sum(mask)
+else:
+	residual /= (4.0*NL)
 print 'chisq_reduced_max = ', np.amax(residual)
 print 'chisq_reduced_mean = ', np.mean(residual)
 
-irange = [0.7,1.3]
-vrange = [-5,5]
+irange = [0.8,1.2]
+vrange = [-1,1]
 
 #N_y_panels -= 2
 

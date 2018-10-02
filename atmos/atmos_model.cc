@@ -927,6 +927,18 @@ int model::set_parameters(fp_t * par_input){
   return 0;
 }
 
+int model::polish_angles(){
+  for (int i=1;i<=N_nodes_theta;++i){
+    fp_t temp = cos(theta_nodes_theta[i]);
+    theta_nodes_theta[i] = acos(temp);
+  }
+  for (int i=1;i<=N_nodes_phi;++i){
+    fp_t temp = tan(phi_nodes_phi[i]);
+    phi_nodes_phi[i] = atan(temp);
+  }
+
+}
+
 model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){
   return new model(N_nodes_temp_in, N_nodes_vt_in, N_nodes_vs_in, N_nodes_B_in);
 }
@@ -989,8 +1001,6 @@ model * clone(model * input){
 
   return output;
 }
-
-
 
 // --------------------------------------------------------------------------------------------------------------
 

@@ -1209,6 +1209,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     // at the bottom let's do the same as as FALC:
     if (!is_temp){
       derivatives[N_nodes] = (node_value[N_nodes] - node_value[N_nodes-1]) / (node_tau[N_nodes]-node_tau[N_nodes-1]);
+      derivatives[N_nodes] = 0.0;
     }
     else {
 

@@ -126,7 +126,7 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       no_iterations = int(n_iter);
       delete[] tmp_str;
     } else no_iterations = 10;
-    if(char *tmp_str=get_arg(odata,"STARTING_LAMBDA",0)){
+    if(char *tmp_str=get_arg(odata,"STARTING_LM",0)){
       get_number(tmp_str,starting_lambda);
       delete[] tmp_str;
     } else starting_lambda=1E3;
@@ -152,9 +152,11 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     }
     w_stokes+=1;
   }
-  w_stokes = new fp_t [4]-1;
-  memset(w_stokes+1,0,4*sizeof(fp_t));
-  w_stokes+=1;
+  else {
+    w_stokes = new fp_t [4]-1;
+    memset(w_stokes+1,0,4*sizeof(fp_t));
+    w_stokes+=1;
+  }
   //
   if(char *tmp_str=get_arg(odata,"AZ",0)){
     get_number(tmp_str,az);
@@ -187,8 +189,9 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
   else if(char *tmp_str2=get_arg(odata,"LGRID",0)){
     FILE * tmpinpt = fopen(tmp_str2,"r");
     nlambda = 0;
-    if (fscanf(tmpinpt,"%d", &nlambda)!=EOF)
+    if (fscanf(tmpinpt,"%d", &nlambda)!=EOF){
       lambda = new fp_t [nlambda];
+    }
     else lambda = 0; // SHOULD BE ERROR
     fp_t tmp;
     for (int i=0;i<nlambda;++i)
@@ -198,10 +201,9 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     // should be else - error  
   fclose(tmpinpt);
   delete[] tmp_str2;
-  for (int i=0;i<nlambda;++i)
-      fprintf(stderr,"%d %f \n",i,lambda[i]*1E8);
+  //for (int i=0;i<nlambda;++i)
+  //    fprintf(stderr,"%d %f \n",i,lambda[i]*1E8);
   }else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: observation must have wavelength specified to be observable!\n",id);
-
   if(!(name=get_arg(odata,"NAME",0)))
       io.msg(IOL_ERROR|IOL_FATAL,"obs: no output file name specified!\n");
   
