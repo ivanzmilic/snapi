@@ -269,12 +269,12 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
           for (int ll=0;ll<ncr;++ll){
             int to_level = cfg->ion[z]->level[l]->cr[ll]->to_lvl;
             cr[z][l][to_level-1] = cr_new(0,0,0,0,cfg->ion[z]->level[l]->cr[ll],io_in);
-            printf("I made a specified collisional rate for transition %d,%d !\n",l,to_level-1);
+            //printf("I made a specified collisional rate for transition %d,%d !\n",l,to_level-1);
           }
           for (int ll=0;ll<nl[z];++ll){
             if (!cr[z][l][ll]){
               cr[z][l][ll] = cr_new(0,0,0,0,0,io_in);
-              printf("I made an unspecified collisional rate for transition %d,%d !\n",l,ll);
+              //printf("I made an unspecified collisional rate for transition %d,%d !\n",l,ll);
             }
           }
         }
@@ -1899,6 +1899,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
           Radiative_rates = 1.0 * R_ij(z,l,ll,JJ);
         fp_t Collisional_rates = C_ij(z, l, ll, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
+        //Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates); 
         
@@ -1909,6 +1910,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
           Radiative_rates = 1.0 * R_ij(z,ll,l,JJ);
         Collisional_rates = C_ij(z, ll, l, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
+        //Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         int dl = ll - l;
 
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);  

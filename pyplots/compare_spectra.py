@@ -46,7 +46,7 @@ if (file1 != file2):
 	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])
-#plt.xlim([5892,5894])
+plt.xlim([10826.0,10828.0])
 plt.ylim([0.0,1.2])
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 #plt.ylim([0,1E14])

@@ -13,7 +13,7 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TAU_MIN -5.0
+#define TAU_MIN -6.0
 #define TAU_MAX  1.4
 #define TINY 1E-5
 
@@ -40,7 +40,7 @@ atmos_pp::atmos_pp(acfg *cfg,io_class &io_in):atmosphere(cfg,io_in)
 {
   gtype=ATMOS_GEOM_PP;
   rtstype=ATMOS_RTS_QSC;
-  if((x1l!=x1h)||(x2l!=x2h)) io.msg(IOL_ERROR,"atmos_pp::atmos_pp: plane parallel atmosphere may not extend over extended region (%d:%d x %d:%d) \n",x1l,x1h,x2l,x2h);
+  //if((x1l!=x1h)||(x2l!=x2h)) io.msg(IOL_ERROR,"atmos_pp::atmos_pp: plane parallel atmosphere may not extend over extended region (%d:%d x %d:%d) \n",x1l,x1h,x2l,x2h);
   io.msg(IOL_DEB1,"atmos_pp::atmos_pp: plane parallel atmosphere\n");
 }
 
@@ -48,7 +48,7 @@ atmos_pp::atmos_pp(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in)
 {
   gtype=ATMOS_GEOM_PP;
   rtstype=ATMOS_RTS_QSC;
-  if((x1l!=x1h)||(x2l!=x2h)) io.msg(IOL_ERROR,"atmos_pp::atmos_pp: plane parallel atmosphere may not extend over extended region (%d:%d x %d:%d) \n",x1l,x1h,x2l,x2h);
+  //if((x1l!=x1h)||(x2l!=x2h)) io.msg(IOL_ERROR,"atmos_pp::atmos_pp: plane parallel atmosphere may not extend over extended region (%d:%d x %d:%d) \n",x1l,x1h,x2l,x2h);
   io.msg(IOL_DEB1,"atmos_pp::atmos_pp: plane parallel atmosphere\n");
 }
 
