@@ -64,7 +64,7 @@ y_panel_size = 2.0*0.8
 
 c_map = ['','','','']
 
-tau = [-3.5,-2.5,-1.5,-0.5,0.5]
+tau = [-0.5,0.5,1.0]
 tau = np.asarray(tau)
 N_tau = tau.size
 

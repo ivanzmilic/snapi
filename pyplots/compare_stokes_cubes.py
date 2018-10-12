@@ -67,7 +67,7 @@ x*=20.8*3.0/1E3
 y*=20.8*3.0/1E3
 
 #make the size of the figure:
-x_size = 10.0
+x_size = 2.5
 ratio = 0.85
 y_size = x_size * float(NY)/float(NX) * ratio
 
@@ -81,7 +81,7 @@ print residual.shape
 if (int(ifmask)):
 	residual[:,:,:,:] *= mask
 residual = np.sum(residual,axis=3)
-residual = residual[:,:,0] + residual[:,:,3] + residual[:,:,1] + residual[:,:,2]
+residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,:,2]
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
 if (int(ifmask)):

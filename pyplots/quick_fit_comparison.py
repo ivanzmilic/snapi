@@ -22,6 +22,7 @@ atmos = temp["data"]
 atmos.shape
 temp = pyana.fzread(nodes_in)
 nodes = temp["data"]
+nodes = np.transpose(nodes,(0,2,1))
 
 #fit = np.transpose(fit,(1,0,2,3))
 
