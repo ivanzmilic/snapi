@@ -114,13 +114,13 @@ slv_class::~slv_class(void)
   int64_t day=86400,hr=3600,mn=60;
   int64_t tot=(int64_t)(now-t_start);
   char *tt=new char [1000];
-  sprintf(tt,"%"I64FMT"-%02"I64FMT":%02"I64FMT":%02"I64FMT,tot/day,(tot%day)/hr,(tot%hr)/mn,tot%mn);
+  sprintf(tt,"%" I64FMT "-%02" I64FMT ":%02" I64FMT ":%02" I64FMT,tot/day,(tot%day)/hr,(tot%hr)/mn,tot%mn);
   int64_t istime=(int64_t)stime;
   char *tsys=new char [1000];
-  sprintf(tsys,"%"I64FMT"-%02"I64FMT":%02"I64FMT":%02"I64FMT,istime/day,(istime%day)/hr,(istime%hr)/mn,istime%mn);
+  sprintf(tsys,"%" I64FMT "-%02" I64FMT ":%02" I64FMT ":%02" I64FMT,istime/day,(istime%day)/hr,(istime%hr)/mn,istime%mn);
   int64_t iutime=(int64_t)utime;
   char *tusr=new char [1000];
-  sprintf(tusr,"%"I64FMT"-%02"I64FMT":%02"I64FMT":%02"I64FMT,iutime/day,(iutime%day)/hr,(iutime%hr)/mn,iutime%mn);
+  sprintf(tusr,"%" I64FMT "-%02" I64FMT ":%02" I64FMT ":%02" I64FMT,iutime/day,(iutime%day)/hr,(iutime%hr)/mn,iutime%mn);
   io.msg(IOL_INFO,"%s:  %s pid=%d (%s) - (%s) [%s] user: %s sys: %s\n",te,sid.name,sid.pid,ts,te,tt,tusr,tsys);
   delete[] ts;
   delete[] te;
@@ -284,8 +284,11 @@ void slv_class::helper(void) // thread main loop
             byte *data=sock->recv(size);
             offs+=unpack(data+offs,type,0);
             offs+=unpack(data+offs,mesg);
+            char *xmesg=new char [strlen(mesg)+strlen(sid.name)+8];
+            sprintf(xmesg,"%s(%d):",sid.name,sid.pid,mesg);
             delete[] data;
-            if(job) job->msg(type,mesg); else io.msg(type,mesg);
+            if(job) job->msg(type,xmesg); else io.msg(type,xmesg);
+            delete[] xmesg;
             delete[] mesg;
             break;
           }

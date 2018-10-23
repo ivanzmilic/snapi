@@ -356,7 +356,7 @@ public:
   int state(void){ return active; } // completion info
   int status(void);               // status info
   int priority(void){
-    return (this)?pri:PRI_MAX+1;  // identify end of queue by less than maximum priority number
+    return pri;  // identify end of queue by less than maximum priority number
   }
   void msg(int level,const char *mesg){
     io->msg(level,mesg);
@@ -368,7 +368,7 @@ public:
   int stop(void);                 // finish task
   int kill(void);                 // kill task
   int jid(void){
-    return (this)?id:-1;
+    return id;
   }
   void task_return(uint08_t cmd){
     ::send(spair[1],&cmd,1,0);

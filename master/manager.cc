@@ -233,7 +233,7 @@ int main(int argc,char *argv[])
       }
     } // for(fds.next)
     for(int s=0;aslave[s];++s) if(aslave[s]->idle_time()>time_out) aslave[s]->time_out();
-    if(queue[0]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // start things off
+    if(queue[0]) if(queue[0]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // start things off
     for(int q=0;queue[q];++q){  // clean up the queue 
       switch(queue[q]->state()){
         case(5):
@@ -247,7 +247,7 @@ int main(int argc,char *argv[])
     }
     for(int q=0;queue[q];++q)
       if(queue[q]->state()==0){ // first inactive job in queue
-        if(q) if(queue[q-1]->state()>=3) if(queue[q]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // if previous job>=active : activate job 
+        if(q) if(queue[q-1]->state()>=3) if(queue[0]) if(queue[q]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // if previous job>=active : activate job 
         while(queue[q+1]) ++q;  // seek end of queue
       }
 //

@@ -249,7 +249,7 @@ void *activate(void *p)
 
 int job_class::activate(void)
 {
-  if(!this) return -1;
+//  if(!this) return -1;
   if(active) return 1;
   pthread_t thread;
   pthread_attr_t attr;
@@ -567,7 +567,7 @@ int job_class::stop(void)
   int64_t day=86400,hr=3600,mn=60;
   int64_t tot=(int64_t)(now-t_start);
   char *tt=new char [1000];
-  sprintf(tt,"%"I64FMT"-%02"I64FMT":%02"I64FMT":%02"I64FMT,tot/day,(tot%day)/hr,(tot%hr)/mn,tot%mn);
+  sprintf(tt,"%" I64FMT "-%02" I64FMT ":%02" I64FMT ":%02" I64FMT,tot/day,(tot%day)/hr,(tot%hr)/mn,tot%mn);
   io->msg(IOL_INFO|IOL_NOID,"total reduction time: %s\n",tt);
   delete[] tt;
   io->msg(IOL_INFO|IOL_NOID,"breakdown by slave:\n");
