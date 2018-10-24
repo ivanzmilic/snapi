@@ -443,7 +443,7 @@ int job_class::stop(void)
 {
 // grid of chunks
   struct chunk ***chunks=(struct chunk ***)v2dim(1,nx,1,ny);
-  for(int n=0;fin[n];++n) chunks[fin[n]->x][fin[n]->y]=fin[n];
+  for(int32_t n=0;fin[n];++n) chunks[fin[n]->x][fin[n]->y]=fin[n];
 
 //
   fp_t u_time=0.0,s_time=0.0;
