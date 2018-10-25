@@ -354,10 +354,9 @@ public:
   int unget_chunk(struct chunk*); // work was not done (slave failed?)
   int put_chunk(struct chunk*);   // give back processed data
   int state(void){ return active; } // completion info
-  int status(void);               // status info
-  int priority(void){
-    return (this)? pri : PRI_MAX+1;  // identify end of queue by less than maximum priority number
-  }
+  int status(void);                 // status info
+  int priority(void){ return pri; } // used to identify the end of the queue: all jobs have a priority less than maximum+1
+
   void msg(int level,const char *mesg){
     io->msg(level,mesg);
   }

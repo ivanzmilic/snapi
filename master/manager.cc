@@ -73,7 +73,7 @@ int main(int argc,char *argv[])
             job_class *job=new job_class(ns,++jid,cfg,io);
             if(job->status()>=0){                       // initialisation successful
               int pri=job->priority(),pos=0;
-              while(queue[pos]->priority()<=pri) ++pos; // find the first job with higher priority number in the queue
+              while(((queue[pos])?queue[pos]->priority():PRI_MAX+1)<=pri) ++pos; // find the first job with higher priority number in the queue
               array_ins(job,queue,pos);                 // insert job in queue
             }else{                                      // job initialization failed!
               delete job;
