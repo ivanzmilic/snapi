@@ -246,8 +246,8 @@ int main(int argc,char *argv[])
       }
     }
     for(int q=0;queue[q];++q)
-      if(queue[q]->state()==0){ // first inactive job in queue
-        if(q) if(queue[q-1]->state()>=3) if(queue[0]) if(queue[q]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // if previous job>=active : activate job 
+      if(queue[q]->state()==0){ // first inactive nonzero job in queue
+        if(q) if(queue[q-1]->state()>=3) if(queue[q]->activate()==-2) io.msg(IOL_ERROR,"Could not create thread for job!\n"); // if previous job>=active : activate job 
         while(queue[q+1]) ++q;  // seek end of queue
       }
 //
