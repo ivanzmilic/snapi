@@ -50,12 +50,12 @@ if (shrink):
 	NY2 = NY
 x_scale = np.linspace(0,NX2-1,NX2)
 y_scale = np.linspace(0,NY2-1,NY2)
-x_scale *= 20.8/1E3
-y_scale *= 20.8/1E3
+x_scale *= 20.8/1E3*3.0
+y_scale *= 20.8/1E3*3.0
 scaling  = float(sys.argv[5])
 
-
-
+cube1 = np.transpose(cube1,(1,0,2,3))
+cube2 = np.transpose(cube2,(1,0,2,3))
 
 plt.clf()
 plt.cla()
@@ -64,7 +64,7 @@ y_panel_size = 2.0*0.8
 
 c_map = ['','','','']
 
-tau = [-0.5,0.5,1.0]
+tau = [-1.5,-0.5,0.5]
 tau = np.asarray(tau)
 N_tau = tau.size
 
@@ -116,7 +116,7 @@ for ii in range (0,3):
 		ax = axes.flat[fig_no]
 		ax.imshow(cube2_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
-			ax.set_title('Simulation')
+			ax.set_title('Only PSF')
 		ax.set_ylabel("$\log\\tau=$"+"$"+str(tau[i])+"$")
 		if (i==N_tau-1):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -126,7 +126,7 @@ for ii in range (0,3):
 		ax = axes.flat[fig_no]
 		im=ax.imshow(cube1_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
-			ax.set_title('Inversion')
+			ax.set_title('PSF + stray light')
 		#print np.mean(cube1_to_show[i])
 		if (i==N_tau-1):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')

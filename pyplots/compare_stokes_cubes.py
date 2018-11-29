@@ -40,13 +40,13 @@ print NX, NY
 
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
-plt.clf()
-plt.cla()
-plt.plot(cube_1_mean,color='red')
-plt.plot(cube_2_mean,color='blue')
-if (int(ifmask)):
-	plt.plot(mask*cube_1_mean[0],'*')
-plt.savefig('mean_profiles',fmt='png')
+#plt.clf()
+#plt.cla()
+#plt.plot(cube_1_mean,color='red')
+#plt.plot(cube_2_mean,color='blue')
+#if (int(ifmask)):
+#	plt.plot(mask*cube_1_mean[0],'*')
+#plt.savefig('mean_profiles',fmt='png')
 cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
 wls = argrelextrema(cube_2_mean,np.less)
 wls = np.asarray(wls)
@@ -63,8 +63,8 @@ N_y_panels = len(wls)
 #y = x
 x = np.linspace(0,NX-1,NX)
 y = np.linspace(0,NY-1,NY)
-x*=20.8*3.0/1E3
-y*=20.8*3.0/1E3
+x*=20.8/1E3
+y*=20.8/1E3
 
 #make the size of the figure:
 x_size = 2.5
@@ -72,24 +72,6 @@ ratio = 0.85
 y_size = x_size * float(NY)/float(NX) * ratio
 
 shrinkage = 0.7
-
-noise = 7E-4 * np.sqrt(cube_1_mean[0]*cube_1_mean[:])
-residual = (cube1-cube2)
-residual[:] /= noise;
-residual = residual * residual
-print residual.shape
-if (int(ifmask)):
-	residual[:,:,:,:] *= mask
-residual = np.sum(residual,axis=3)
-residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,:,2]
-print 'chisq_max = ', np.amax(residual)
-print 'chisq_mean = ', np.mean(residual)
-if (int(ifmask)):
-	residual /= 4.0 * np.sum(mask)
-else:
-	residual /= (4.0*NL)
-print 'chisq_reduced_max = ', np.amax(residual)
-print 'chisq_reduced_mean = ', np.mean(residual)
 
 irange = [0.8,1.2]
 vrange = [-1,1]
@@ -136,7 +118,7 @@ for j in range (1,N_y_panels+1):
 		cbar = fig.colorbar(im, cax=cb_ax)
 
 
-	to_plot1 = np.mean(cube1[:,:,3,wls[j-1]:wls[j-1]+6],axis=2)/m*100.0
+	to_plot1 = np.mean(cube1[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0
 	s = np.std(to_plot1)
 
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
@@ -149,7 +131,7 @@ for j in range (1,N_y_panels+1):
 		ax.set_title('Observed $V/I_{qs}\,[\%]$')
 	image_no+=1
 
-	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+6],axis=2)/m*100.0	
+	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
 	ax = axes.flat[image_no]
 	im = ax.imshow(to_plot2,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
@@ -163,10 +145,6 @@ for j in range (1,N_y_panels+1):
 	if (image_no == 4):
 		cb_ax = fig.add_axes([0.88, 0.05, 0.03, 0.44])
 		cbar = fig.colorbar(im, cax=cb_ax)
-
-
-
-	
 
 #fig.tight_layout()
 #plt.show()
