@@ -103,12 +103,12 @@ suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 h = h[0,:,0]
 #h/= 1E5
 
-hmax = -5.0
+hmax = -6.0
 hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(3,4):
+for p in range(0,7):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)
@@ -170,27 +170,24 @@ for p in range(3,4):
 	
 	plt.clf()
 	plt.cla()
-	fig, ax = plt.subplots(1,1,figsize=[6.0, 4.0])
+	#fig, ax = plt.subplots(1,1,figsize=[6.0, 4.0])
 	
 	#ax.set_xlim([6.0+center,11.5+center])
-	ax.set_xlim([15646.0,15654.0])
+	#ax.set_xlim([15646.0,15654.0])
 	#ax.set_xlim([6301.0,6303.0])
-	ax.set_ylim([hmin, hmax])
-	ax.set_title('Stokes$\,I$')
-	ax.set_xlabel('$\lambda\,\mathrm{[\AA]}$')
-	ax.set_ylabel(yname)
-	ax.pcolormesh(wvl, h, np.log10(np.abs(ra[0,3,:,:])/np.amax(ra[0,3,:,:])),vmin=-3,vmax=0, rasterized=True,cmap='coolwarm')
-	ax.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*(-2.0)+ 1.0)
-	ax.plot(wvl,wvl/wvl*0.0)
-	fig.tight_layout()
-	fig.savefig('response_I_V',fmt='png',bbox_inches='tight')
-	fig.savefig('response_I_V.eps',fmt='eps',bbox_inches='tight')
-	plt.close('all')
-	quit();
-
+	#ax.set_ylim([hmin, hmax])
+	#ax.set_title('Stokes$\,I$')
+	#ax.set_xlabel('$\lambda\,\mathrm{[\AA]}$')
+	#ax.set_ylabel(yname)
+	#ax.pcolormesh(wvl, h, np.log10(np.abs(ra[0,3,:,:])/np.amax(ra[0,3,:,:])),vmin=-3,vmax=0, rasterized=True,cmap='coolwarm')
+	#ax.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*(-2.0)+ 1.0)
+	#ax.plot(wvl,wvl/wvl*0.0)
+	#fig.tight_layout()
+	#fig.savefig('response_I_V',fmt='png',bbox_inches='tight')
+	#fig.savefig('response_I_V.eps',fmt='eps',bbox_inches='tight')
+	#plt.close('all')
+	
 	plt.figure(figsize=[9.0, 6.0])
-	plt.clf()
-	plt.cla()
 	plt.subplot(221)
 	plt.xlim([lambda_l, lambda_m])
 	plt.ylim([hmin, hmax])

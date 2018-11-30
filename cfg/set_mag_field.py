@@ -25,14 +25,14 @@ else:
 
 print atmosphere_out[8,:]
 #B
-atmosphere_out[7,:] = 2000.0 - 0.0 * (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
+atmosphere_out[7,:] = 1000.0 - 0.0 * (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
 #v_microturbulent
-atmosphere_out[8,:] = 0.3E5
+#atmosphere_out[8,:] = 0.3E5
 #v_macroscopic
-atmosphere_out[9,:] = 3E5 #* (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
+#atmosphere_out[9,:] = 3E5 #* (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
 #theta
-atmosphere_out[10,:] = 55.0 #* (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
-atmosphere_out[10,:] *= np.pi/180.0
+#atmosphere_out[10,:] = 55.0 #* (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
+atmosphere_out[10,:] = np.pi/4.0
 #azimuth
 atmosphere_out[11,:] = 1.0*np.pi/3.0
 

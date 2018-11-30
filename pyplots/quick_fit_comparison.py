@@ -24,6 +24,8 @@ temp = pyana.fzread(nodes_in)
 nodes = temp["data"]
 nodes = np.transpose(nodes,(0,2,1))
 
+atmos[:,:,7,:] *= np.cos(atmos[:,:,10,:])
+
 #fit = np.transpose(fit,(1,0,2,3))
 
 #l = np.linspace(5887.7914658,5897.18400651,967)
