@@ -83,9 +83,17 @@ fig, axes = plt.subplots(nrows=N_y_panels,ncols=N_x_panels,figsize=(N_x_panels*x
 fig.subplots_adjust(right = 0.85,left=0.05,top=0.95,bottom=0.05)
 image_no = 0
 
+to_plot_1 = cube1[:,:,:,wls]
+del	cube1
+cube1=1.0
+to_plot_2 = cube2[:,:,:,wls]
+del cube2
+cube2=1.0
+
 for j in range (1,N_y_panels+1):
 	
-	to_plot = np.copy(cube1[:,:,0,wls[j-1]])
+	#to_plot = np.copy(cube1[:,:,0,wls[j-1]])
+	to_plot = to_plot_1[:,:,0,j-1]
 	m = np.mean(to_plot)
 	to_plot/=m
 	s = np.std(to_plot)
@@ -101,7 +109,8 @@ for j in range (1,N_y_panels+1):
 		ax.set_title('Observed $I/I_{qs}$')
 	image_no+=1
 
-	to_plot = np.copy(cube2[:,:,0,wls[j-1]])
+	#to_plot = np.copy(cube2[:,:,0,wls[j-1]])
+	to_plot = to_plot_2[:,:,0,j-1]
 	to_plot/=m
 	ax=axes.flat[image_no]
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+2)
@@ -118,7 +127,8 @@ for j in range (1,N_y_panels+1):
 		cbar = fig.colorbar(im, cax=cb_ax)
 
 
-	to_plot1 = np.mean(cube1[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0
+	#to_plot1 = np.mean(cube1[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0
+	to_plot1 = to_plot_1[:,:,3,j-1]/m*100.0
 	s = np.std(to_plot1)
 
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
@@ -132,6 +142,8 @@ for j in range (1,N_y_panels+1):
 	image_no+=1
 
 	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0	
+	to_plot2 = to_plot_2[:,:,0,j-1]/m*100.0
+	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
 	ax = axes.flat[image_no]
 	im = ax.imshow(to_plot2,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
