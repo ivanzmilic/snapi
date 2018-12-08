@@ -86,7 +86,7 @@ image_no = 0
 to_plot_1 = cube1[:,:,:,wls]
 del	cube1
 cube1=1.0
-to_plot_2 = cube2[:,:,:,wls]
+to_plot_2 = cube2[:,:,:,wls+10]
 del cube2
 cube2=1.0
 
@@ -141,7 +141,7 @@ for j in range (1,N_y_panels+1):
 		ax.set_title('Observed $V/I_{qs}\,[\%]$')
 	image_no+=1
 
-	to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0	
+	#to_plot2 = np.mean(cube2[:,:,3,wls[j-1]:wls[j-1]+15],axis=2)/m*100.0	
 	to_plot2 = to_plot_2[:,:,0,j-1]/m*100.0
 	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
