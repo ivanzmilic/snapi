@@ -39,7 +39,8 @@ atmospheres = a_read["data"]
 
 temp = pyana.fzread(input_spectra)
 stokes = temp["data"]
-stokes = np.transpose(stokes,(1,0,2,3))
+#stokes = np.transpose(stokes,(1,0,2,3))
+parameters = np.transpose(parameters,(0,2,1))
 
 I_c = np.mean(stokes[:,:,0,0])
 stokes[:,:,:,:] /= I_c
@@ -54,12 +55,12 @@ T_nodes_tau = [-3.3,-2.4,-0.7,0.0]
 T_nodes = [2,3]
 vs_nodes_tau = [-3.3,-1.6,-0.7]
 #vs_nodes = np.arange(len(vs_nodes_tau)) + len(T_nodes_tau)
-vs_nodes = [4,6]
+vs_nodes = [5,6]
 B_nodes_tau = [-2.8,-1.5,-0.5]
 #B_nodes = np.arange(len(B_nodes_tau)) + len(vs_nodes_tau) + len(T_nodes_tau)
-B_nodes = [7,9]
+B_nodes = [7,8]
 theta_nodes = [len(B_nodes_tau) + len(vs_nodes_tau) + len(T_nodes_tau)]
-theta_nodes=[10]
+theta_nodes=[9]
 
 panelsx=len(T_nodes)
 panelsy=4

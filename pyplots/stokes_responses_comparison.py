@@ -130,7 +130,8 @@ for p in range(0,7):
 		plt.title('$\mathrm{Stokes}\,I$')
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel(yname)
-		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='hot')
+		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='OrRd')
+		plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0)
 		plt.colorbar()
 		plt.tight_layout()
 		plt.subplot(222)
@@ -168,8 +169,8 @@ for p in range(0,7):
 	#then plot the stuff
 	center = (wvl[n_wvl-1] + wvl[0]) / 2.0
 	
-	plt.clf()
-	plt.cla()
+	#plt.clf()
+	#plt.cla()
 	#fig, ax = plt.subplots(1,1,figsize=[6.0, 4.0])
 	
 	#ax.set_xlim([6.0+center,11.5+center])
@@ -194,7 +195,8 @@ for p in range(0,7):
 	plt.title('$\mathrm{Stokes}\,I$')
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel(yname)
-	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='hot')
+	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='OrRd')
+	plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0+1.0)
 	plt.colorbar()
 	plt.tight_layout()
 	plt.subplot(222)

@@ -6,6 +6,11 @@ import sys
 spectrum = np.loadtxt(sys.argv[1])
 spectrum[:,0] *= 1E8
 
+plt.clf()
+plt.cla()
+plt.figure(figsize=[6.5,3.5])
+
+
 plt.plot(spectrum[:,0], spectrum[:,1])
 lambda_l = min(spectrum[:,0])
 lambda_m = max(spectrum[:,0])
@@ -29,4 +34,6 @@ plt.xlim([lambda_l, lambda_m])
 #plt.ylim([1,1.5E14])
 plt.tight_layout()
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
-plt.savefig(sys.argv[2], format='eps')
+plt.savefig(sys.argv[2]+'.eps', format='eps',bbox_inches='tight')
+plt.savefig(sys.argv[2], format='png',bbox_inches='tight')
+

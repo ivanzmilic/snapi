@@ -214,8 +214,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
 
-  //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  fprintf(stderr,"%d %e %e \n",x3i,op_pert[1][7][x3i][x1l][x2l][x3i][1][3], em_pert[1][7][x3i][x1l][x2l][x3i][2]);
+  FILE * op_em;
+  op_em = fopen("op_em.txt","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      fprintf(op_em, "%e %e %e %e \n",rt_grid[x3i],lambda[l],op[l][x1l][x2l][x3i][1][1],em[l][x1l][x2l][x3i][1]);
+  }
+  fclose(op_em);
 
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)

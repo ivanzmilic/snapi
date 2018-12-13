@@ -25,7 +25,7 @@ else:
 
 print atmosphere_out[8,:]
 #B
-atmosphere_out[7,:] = 1000.0 - 0.0 * (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
+atmosphere_out[7,:] = 0.0 - 0.0 * (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
 #v_microturbulent
 #atmosphere_out[8,:] = 0.3E5
 #v_macroscopic
