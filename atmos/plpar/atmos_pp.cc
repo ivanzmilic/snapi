@@ -14,7 +14,7 @@
 #include "mathtools.h"
 
 #define TAU_MIN -6.0
-#define TAU_MAX  1.4
+#define TAU_MAX  1.0
 #define TINY 1E-5
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
