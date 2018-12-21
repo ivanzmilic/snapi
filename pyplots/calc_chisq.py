@@ -48,9 +48,9 @@ residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
 if (int(ifmask)):
-	residual /= 2.0 * np.sum(mask)
+	residual /= 1.0 * np.sum(mask)
 else:
-	residual /= (2.0*NL)
+	residual /= (1.0*NL)
 print 'chisq_reduced_max = ', np.amax(residual)
 print 'chisq_reduced_mean = ', np.mean(residual)
 

@@ -145,8 +145,8 @@ int main(int argc,char *argv[])
           else {
 
             atmos->set_grid(0);
-            //class observable *synth=atmos->obs_stokes(el,az,lambda,nlambda);
-            class observable *synth=atmos->obs_stokes_responses(el,az,lambda,nlambda,0,0,0);
+            class observable *synth=atmos->obs_stokes(el,az,lambda,nlambda);
+            //class observable *synth=atmos->obs_stokes_responses(el,az,lambda,nlambda,0,0,0);
             rsz=atmos->size(io);
             rsz+=synth->size(io);
             rsz+=3*sizeof(int32_t);
