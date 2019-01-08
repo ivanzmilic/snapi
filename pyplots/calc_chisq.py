@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
-from matplotlib import ticker
-import colorcet as cc
+from matplotlib import ticker 
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
