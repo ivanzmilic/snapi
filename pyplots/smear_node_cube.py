@@ -55,11 +55,7 @@ for i in range(B_start,B_end+1):
 
 an_conv[-1] = np.cos(an_conv[-1])
 an_conv[-1] = filters.gaussian_filter(an_conv[-1],sigma)
-
-small = np.where(an_conv[-1] < -0.99)
-an_conv[-1,small] = -0.99
-big = np.where(an_conv[-1] > 0.99)
-an_conv[-1,big] = 0.99
+an_conv[-1] = np.clip(an_conv[-1],-0.99,0.99)
 an_conv[-1] = np.arccos(an_conv[-1])
 
 for i in range(0,0):
