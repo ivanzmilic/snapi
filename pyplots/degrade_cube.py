@@ -29,9 +29,9 @@ NL = 1501
 l = np.linspace(15640.0,15670.0,NL)
 #l = np.linspace(6300.0,6303.0,NL)
 
-sigma = -60 #in mA
+sigma = 60 #in mA
 sigma /= 2.35
-sigma *= 1E-3  / (l[1]-l[0]) #to convert in 'pixels'
+sigma *= 1E-3  / (l[1]-l[0]) #to convert to 'pixels'
 print sigma
 noise_level = 0
 I_c_mean = np.mean(stokes_cube[:,:,0,0])
@@ -43,8 +43,8 @@ plt.plot(stokes_cube[0,0,0],color='red')
 
 #if we want to smear spatially:
 if (to_degrade):
-	A=[0.8,0.2] #two part-psf, weights
-	width = [0.3,5.0] # two part - psf, widths in "
+	A=[1.0,0.0] #two part-psf, weights
+	width = [0.26,2.0] # two part - psf, widths in "
 	A = np.asarray(A)
 	width = np.asarray(width)
 	width *= 725.0  #to km
@@ -52,49 +52,11 @@ if (to_degrade):
 	width /= 2.35 #from FWHM to sigma
 	print width
 
-	#new part, proper airy function implementation:
-
-	#x and y in pixels
-	x = np.linspace(-14.5,14.5,30)
-	y = np.linspace(-14.5,14.5,30)
-	psf = np.zeros([30,30])
-
-	D = 0.75 * 0.8 #telescope radius
-	L = 1.56E-6 # wavelength
-
-	x *= 20.8 / 725. / 206265. #to rad
-	x *= 6.28 * D / L
-	y = np.copy(x)
-	xx,yy = np.meshgrid(x,y)
-
-	r = (xx**2.0 + yy**2.0) ** 0.5
-
-	psf = (spec.jv(1,r)/r)**2.0
-
-	plt.clf()
-	plt.cla()
-	plt.imshow(psf)
-	plt.savefig('psf.png')
-	
-	test = signal.convolve2d(stokes_cube[:200,:200,0,0],psf,boundary='wrap')
-	print test.shape
-	test = test[15:-15,15:-15]
-	print np.std(test)/np.mean(test)
-	plt.clf()
-	plt.cla()
-	plt.imshow(test)
-	plt.savefig('test.png')
-	
-	exit(1);
-
-
-
 	for s in range (0,4):
-		for w in range(0,1):
+		for w in range(0,NL):
 			stokes_cube[:,:,s,w] = A[0] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[0],mode='wrap') + A[1] * flt.gaussian_filter(stokes_cube[:,:,s,w],width[1],mode='wrap')
 print np.std(stokes_cube[:,:,0,0])/np.mean(stokes_cube[:,:,0,0])
 print stokes_cube.shape
-exit(1);
 
 for i in range(0,NX):
 	for j in range(0,NY):
@@ -107,7 +69,7 @@ for i in range(0,NX):
 
 #Then we need to resample
 #NL_new = 301
-NL_new = 1501
+NL_new = 501
 #NL_new = 151
 l_new = np.linspace(15640.0,15670.0,NL_new)
 #l_new = np.linspace(8540.0,8543.0,NL_new)
@@ -147,5 +109,38 @@ plt.savefig('pre_vs_post_degraded',fmt='png')
 
 pyana.fzwrite(file_out,resampled_binned_cube,0,'placeholder')
 
+exit(1);
 
+#new part, proper airy function implementation:
+
+#x and y in pixels
+x = np.linspace(-14.5,14.5,30)
+y = np.linspace(-14.5,14.5,30)
+psf = np.zeros([30,30])
+
+D = 0.75 * 0.8 #telescope radius
+L = 1.56E-6 # wavelength
+
+x *= 20.8 / 725. / 206265. #to rad
+x *= 6.28 * D / L
+y = np.copy(x)
+xx,yy = np.meshgrid(x,y)
+
+r = (xx**2.0 + yy**2.0) ** 0.5
+
+psf = (spec.jv(1,r)/r)**2.0
+
+plt.clf()
+plt.cla()
+plt.imshow(psf)
+plt.savefig('psf.png')
+
+test = signal.convolve2d(stokes_cube[:200,:200,0,0],psf,boundary='wrap')
+print test.shape
+test = test[15:-15,15:-15]
+print np.std(test)/np.mean(test)
+plt.clf()
+plt.cla()
+plt.imshow(test)
+plt.savefig('test.png')
 
