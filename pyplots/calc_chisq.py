@@ -48,6 +48,7 @@ residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,
 plt.clf()
 plt.cla()
 plt.imshow(np.log(residual))
+plt.colorbar()
 plt.savefig('chisq_map.png')
 
 print 'chisq_max = ', np.amax(residual)
