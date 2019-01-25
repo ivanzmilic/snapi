@@ -86,7 +86,7 @@ cube2_to_show = np.zeros([N_tau,NX2,NY2])
 
 scale = [1000.0,1000.0,1.0]
 
-for ii in range (0,3):
+for ii in range (2,3):
 
 	plt.clf()
 	plt.cla()
@@ -108,37 +108,45 @@ for ii in range (0,3):
 
 	for i in range (0,N_tau):
 
-		m = np.mean(cube2_to_show[i])
+		m = np.mean(cube1_to_show[i])
 		if (ii>0):
 			m = 0
-		s = np.std(cube2_to_show[i])
+		s = np.std(cube1_to_show[i])
 		
 		ax = axes.flat[fig_no]
-		ax.imshow(cube2_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
+		ax.imshow(cube1_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
-			ax.set_title('Only PSF')
+			ax.set_title('PSF')
 		ax.set_ylabel("$\log\\tau=$"+"$"+str(tau[i])+"$")
 		if (i==N_tau-1):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')
+		else:
+			ax.set_xticklabels([])
 		#print np.mean(cube2_to_show[i])
 		fig_no +=1
 
 		ax = axes.flat[fig_no]
-		im=ax.imshow(cube1_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
+		im=ax.imshow(cube2_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
 			ax.set_title('PSF + stray light')
+		ax.set_yticklabels([])
 		#print np.mean(cube1_to_show[i])
 		if (i==N_tau-1):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')
+		else:
+			ax.set_xticklabels([])
+		
 		fig_no +=1
 		if (i==0):
-			cb_ax = fig.add_axes([0.88, 0.687, 0.03, 0.26])
+			cb_ax = fig.add_axes([0.88, 0.675, 0.03, 0.26])
+			#cb_ax = fig.add_axes([0.88, 0.53, 0.03, 0.39])
 			cbar = fig.colorbar(im, cax=cb_ax)
 		if (i==1):
 			cb_ax = fig.add_axes([0.88, 0.37, 0.03, 0.26])
+			#cb_ax = fig.add_axes([0.88, 0.075, 0.03, 0.39])
 			cbar = fig.colorbar(im, cax=cb_ax)
 		if (i==2):
-			cb_ax = fig.add_axes([0.88, 0.052, 0.03, 0.26])
+			cb_ax = fig.add_axes([0.88, 0.065, 0.03, 0.26])
 			cbar = fig.colorbar(im, cax=cb_ax)
 
 
@@ -169,6 +177,7 @@ for ii in range (0,3):
     	#axi.yaxis.set_major_locator(plt.MaxNLocator(6))
 
 	#fig.tight_layout()
+	fig.subplots_adjust(hspace=0.05, wspace=0.05)
 	fig.savefig(plot_here+'_'+suffix[ii]+'.eps',fmt='eps',bbox_inches='tight')
 	fig.savefig(plot_here+'_'+suffix[ii],fmt='png',bbox_inches='tight')
 	plt.close('all')

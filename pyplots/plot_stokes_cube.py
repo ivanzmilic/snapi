@@ -38,7 +38,7 @@ size = 1.5
 #1105
 
 x = np.linspace(0.0,NX-1*1.0,NX)
-x *= 2.0*20.8 / 1E3
+x *= 20.8 / 1E3
 y = x
 
 l_line = lines[4]
@@ -49,13 +49,13 @@ plt.figure(figsize=[4.5*1, 3.7*2])
 plt.clf()
 plt.cla()
 plt.subplot(211)
-plt.imshow(stokes_cube[:,:,0,0]/mean[0],origin='lower',cmap=cc.cm['fire'],extent=[x[0],x[-1],y[0],y[-1]])
+plt.imshow(stokes_cube[:,:,0,0]/mean[0],vmin=0.8,vmax=1.2,origin='lower',cmap=cc.cm['fire'],extent=[x[0],x[-1],y[0],y[-1]])
 plt.colorbar(shrink=0.9)
 plt.title('$\mathrm{Stokes}\,I/I_{\mathrm{qs}}$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.ylabel('$\mathrm{Stokes}\,I$')
 plt.subplot(212)
-plt.imshow(stokes_cube[:,:,3,l_line+offset[3]]*stokes_cube[:,:,0,l_line+offset[3]]/mean[0]*100.0,origin='lower',cmap=cc.cm['coolwarm'],vmin=-1,vmax=1,extent=[x[0],x[-1],y[0],y[-1]])
+plt.imshow(stokes_cube[:,:,3,l_line+offset[3]]*stokes_cube[:,:,0,l_line+offset[3]] * np.sqrt(4.0*3.14)/mean[0]*100.0,origin='lower',cmap=cc.cm['coolwarm'],vmin=-3,vmax=3,extent=[x[0],x[-1],y[0],y[-1]])
 plt.title('$V/I_{\mathrm{qs}}\,[\%]$')
 plt.colorbar(shrink=0.9)
 plt.xlabel('$x\,[\mathrm{Mm}]$')
@@ -79,7 +79,7 @@ for l in range(0,N_y):
 plt.tight_layout()
 plt.savefig(sys.argv[2],fmt='png',bbox_inches='tight')
 
-#quit();
+quit();
 i1 = 150
 j1 = 240
 
