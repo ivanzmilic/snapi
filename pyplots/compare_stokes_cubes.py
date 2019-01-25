@@ -1,6 +1,6 @@
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
+rc('text', usetex=False)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -11,7 +11,6 @@ import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib import ticker
-import colorcet as cc
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -86,7 +85,7 @@ image_no = 0
 to_plot_1 = cube1[:,:,:,wls]
 del	cube1
 cube1=1.0
-to_plot_2 = cube2[:,:,:,wls+10]
+to_plot_2 = cube2[:,:,:,wls+0]
 del cube2
 cube2=1.0
 
@@ -100,7 +99,7 @@ for j in range (1,N_y_panels+1):
 	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+1)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='hot',extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -114,7 +113,7 @@ for j in range (1,N_y_panels+1):
 	to_plot/=m
 	ax=axes.flat[image_no]
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+2)
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='hot',extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -133,7 +132,7 @@ for j in range (1,N_y_panels+1):
 
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+3)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot1,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot1,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap='coolwarm',extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -146,7 +145,7 @@ for j in range (1,N_y_panels+1):
 	
 	#plt.subplot(N_y_panels,N_x_panels,(j-1)*N_x_panels+4)
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot2,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot2,origin='lower',vmin = vrange[0],vmax=vrange[1],cmap='coolwarm',extent=[0,x[-1],0,y[-1]])
 	#plt.colorbar(shrink=shrinkage)
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')

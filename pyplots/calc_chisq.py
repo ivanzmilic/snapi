@@ -1,6 +1,6 @@
 from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+#rc('text', usetex=True)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -44,12 +44,18 @@ if (int(ifmask)):
 	residual[:,:,:,:] *= mask
 residual = np.sum(residual,axis=3)
 residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,:,2]
+
+plt.clf()
+plt.cla()
+plt.imshow(np.log(residual))
+plt.savefig('chisq_map.png')
+
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
 if (int(ifmask)):
-	residual /= 1.0 * np.sum(mask)
+	residual /= 2.0 * np.sum(mask)
 else:
-	residual /= (1.0*NL)
+	residual /= (2.0*NL)
 print 'chisq_reduced_max = ', np.amax(residual)
 print 'chisq_reduced_mean = ', np.mean(residual)
 
