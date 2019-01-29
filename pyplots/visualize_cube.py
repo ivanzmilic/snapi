@@ -39,8 +39,8 @@ atmospheres = a_read["data"]
 
 temp = pyana.fzread(input_spectra)
 stokes = temp["data"]
-#stokes = np.transpose(stokes,(1,0,2,3))
-parameters = np.transpose(parameters,(0,2,1))
+stokes = np.transpose(stokes,(1,0,2,3))
+parameters = np.transpose(parameters,(0,1,2))
 
 I_c = np.mean(stokes[:,:,0,0])
 stokes[:,:,:,:] /= I_c
