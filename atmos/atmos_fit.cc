@@ -91,7 +91,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       // Calculate the spectrum and the responses and apply degradation to it:      
-      current_obs = obs_stokes_responses_to_nodes_new(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
+      current_obs = obs_stokes_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
 
       current_obs->add_scattered_light(scattered_light,qs_level);
       if (spectral_broadening){
@@ -1354,141 +1354,8 @@ fp_t ** atmosphere::calculate_legendre_corrections(fp_t **** full_stokes_respons
 
  }
 
- // Same as the above except for polarized radiation (Zeeman mode so far):
- observable *atmosphere::obs_stokes_responses_to_nodes(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters){
-
-  // We first need to create the atmosphere from the model and compute the observable:
-  build_from_nodes(atmos_model);
-  
-  // Now responses have an additional dimension
-  fp_t **** responses_depth_dependent;
-  responses_depth_dependent = ft4dim(1,7,x3l,x3h,1,nlambda,1,4); 
-  observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, responses_depth_dependent);
-
-  io.msg(IOL_INFO, "atmosphere::computed polarized observable from a model. \n");
-
-  int N_parameters = atmos_model->get_N_nodes_total();
-  int N_nodes_T = atmos_model->get_N_nodes_temp();
-  int N_nodes_vt = atmos_model->get_N_nodes_vt();
-  int N_nodes_vs = atmos_model->get_N_nodes_vs();
-  int N_nodes_B = atmos_model->get_N_nodes_B();
-  int N_nodes_theta = atmos_model->get_N_nodes_theta();
-  int N_nodes_phi = atmos_model->get_N_nodes_phi();
-
-  memset(response_to_parameters[1][1]+1, 0, N_parameters*nlambda*4*sizeof(fp_t));
-  
-  io.msg(IOL_INFO, "atmosphere::analytically computing polarized responses to total of %d model parameters. \n", N_parameters);
-
-  fp_t step = delta_T; // We still need step because we want to numerically study the derivative of the interpolation scheme. It does not matter a lot.
-     
-  for (int i=1;i<=N_nodes_T;++i){
-    
-    // First perturb to the one side
-    fp_t * local_T_perturbations = new fp_t [x3h-x3l+1] - x3l;
-    fp_t * local_Nt_perturbations = new fp_t [x3h-x3l+1] - x3l;
-
-    atmos_model->perturb_node_value(i, step * 0.5);
-    build_from_nodes(atmos_model);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      local_T_perturbations[x3i] = T[x1l][x2l][x3i];
-      local_Nt_perturbations[x3i] = Nt[x1l][x2l][x3i];
-    }
-    
-    atmos_model->perturb_node_value(i, -1.0 * step);
-    build_from_nodes(atmos_model);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      local_T_perturbations[x3i] -= T[x1l][x2l][x3i];
-      local_Nt_perturbations[x3i] -= Nt[x1l][x2l][x3i];
-      local_T_perturbations[x3i] /= (1.0 * step);
-      local_Nt_perturbations[x3i] /= (1.0 * step); 
-    }
-
-    atmos_model->perturb_node_value(i, 0.5 * step);
-    build_from_nodes(atmos_model);
-  
-    // Now you need everything together:
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      //printf("%d %e %e \n", x3i, local_T_perturbations[x3i], local_Nt_perturbations[x3i]/Nt[x1l][x2l][x3i]);
-      for (int l=1;l<=nlambda;++l)
-        for (int s=1;s<=4;++s)
-          response_to_parameters[i][l][s] += responses_depth_dependent[1][x3i][l][s] * local_T_perturbations[x3i] + 
-            responses_depth_dependent[2][x3i][l][s] * local_Nt_perturbations[x3i];
-    }
-
-    delete [](local_T_perturbations+x3l);
-    delete [](local_Nt_perturbations+x3l);
-    
-  }
-  
-  // Then for all other parameters it is much simpler as we do not have to build atmosphere, we can just interpolate.
-  for (int i=N_nodes_T+1;i<=N_parameters;++i){
-
-    if (i<=N_nodes_T+N_nodes_vt)
-      step = delta_vt;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs)
-      step = delta_vr;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B)
-      step = delta_B;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta)
-      step = delta_angle;
-    else 
-      step = delta_angle;
-    // First perturb to the one side
-    fp_t * local_perturbations = new fp_t [x3h-x3l+1] - x3l;
-    
-    atmos_model->perturb_node_value(i, step * 0.5);
-    interpolate_from_nodes(atmos_model); 
-
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
-      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
-      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
-      local_perturbations[x3i] = Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B;
-    }
-    
-    atmos_model->perturb_node_value(i, -1.0 * step);
-    interpolate_from_nodes(atmos_model);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      fp_t B_mag = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i]+By[x1l][x2l][x3i]*By[x1l][x2l][x3i]+Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
-      fp_t theta_B = acos(Bz[x1l][x2l][x3i]/B_mag);
-      fp_t phi_B = atan(By[x1l][x2l][x3i]/Bx[x1l][x2l][x3i]);
-      local_perturbations[x3i] -= (Vt[x1l][x2l][x3i] + Vz[x1l][x2l][x3i] + B_mag + theta_B + phi_B);
-      local_perturbations[x3i] /= step;
-    }
-
-    atmos_model->perturb_node_value(i, 0.5 * step);
-    interpolate_from_nodes(atmos_model);
-  
-    // Now you need everything together:
-    int param = 0; // Which parameter are we accounting for? 
-    if (i<=N_nodes_T+N_nodes_vt)
-      param = 3;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs)
-      param = 4;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B)
-      param = 5;
-    else if (i<=N_nodes_T+N_nodes_vt+N_nodes_vs+N_nodes_B+N_nodes_theta)
-      param = 6;
-    else 
-      param = 7;
-    for (int x3i=x3l;x3i<=x3h;++x3i){
-      for (int l=1;l<=nlambda;++l)
-        for (int s=1;s<=4;++s)
-          response_to_parameters[i][l][s] += responses_depth_dependent[param][x3i][l][s] * local_perturbations[x3i];
-    }
-    delete [](local_perturbations+x3l);
-  }
-
-  del_ft4dim(responses_depth_dependent,1,7,x3l,x3h,1,nlambda,1,4);
-  return o;
-
- }
-
 // Same as the above except for polarized radiation (Zeeman mode so far):
-observable *atmosphere::obs_stokes_responses_to_nodes_new(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters, fp_t filter_width){
+observable *atmosphere::obs_stokes_responses_to_nodes(model * atmos_model, fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** response_to_parameters, fp_t filter_width){
 
   // We first need to create the atmosphere from the model and compute the observable:
   

@@ -489,7 +489,17 @@ int32_t atom::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
           cr[i][l][ll] = cr_new(buf,offs,do_swap,io);
       }
     }
-  } 
+  }
+
+  /*if (check_if_nlte()){
+    printf("%e %e \n", 3000.0,C_ij(0,0,1,3000.0,1E12)/1E18);
+    printf("%e %e \n", 5000.0,C_ij(0,0,1,5000.0,1E12)/1E18);
+    printf("%e %e \n", 7000.0,C_ij(0,0,1,7000.0,1E12)/1E18);
+    printf("%e %e \n", 10000.0,C_ij(0,0,1,10000.0,1E12)/1E18);
+    printf("%e %e \n", 20000.0,C_ij(0,0,1,20000.0,1E12)/1E18);
+    printf("%e %e \n", 30000.0,C_ij(0,0,1,30000.0,1E12)/1E18);
+    printf("%e %e \n", 100000.0,C_ij(0,0,1,100000.0,1E12)/1E18);
+  } */
   return offs;
 }
 
