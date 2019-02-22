@@ -27,7 +27,7 @@ print atmosphere_out[8,:]
 #B
 atmosphere_out[7,:] = 0.0 - 0.0 * (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
 #v_microturbulent
-#atmosphere_out[8,:] = 0.3E5
+atmosphere_out[8,:] = 0.0
 #v_macroscopic
 #atmosphere_out[9,:] = 3E5 #* (atmosphere[0,:] - atmosphere[0,-1])/(atmosphere[0,0]-atmosphere[0,-1])
 #theta

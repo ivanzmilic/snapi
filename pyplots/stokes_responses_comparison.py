@@ -95,7 +95,7 @@ wvl = wvl[0][0]
 wvl *= 1E8
 #wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 
-lambda_l = wvl[0]
+lambda_l = wvl[100]
 lambda_m = wvl[-1]
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
@@ -108,7 +108,7 @@ hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(0,7):
+for p in range(0,1):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)

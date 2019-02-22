@@ -102,13 +102,19 @@ protected:
 // atmos_rad.cc: radiative quantities
 // frequency-by-frequency
   fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
   fp_t ***opacity_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***emissivity_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+  fp_t ***opacity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***emissivity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
   
   fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
   fp_t ** opacity_continuum_derivative(fp_t, fp_t, fp_t, int, int, int);
 
-  fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  
   fp_t ***thomson_sc(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ***thomson_em(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
 // And then their corresponding sister functions:

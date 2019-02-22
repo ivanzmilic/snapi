@@ -279,17 +279,13 @@ int atom::boundfree_op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp
 int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B_vec, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){
 
+  
   for (int z=0;z<=Z;++z) // All ionization stages
     for (int i=1;i<nl[z];++i) // upper level
       for (int ii=0;ii<i;++ii){ // lower level
-      	if (A[z][i][ii] > 1E1){ // If transition is important at all
+      	if (A[z][i][ii] > 1E0){ // If transition is important at all
 
       	  fp_t lam=h*c/(ee[z][i]-ee[z][ii]);   // transition wavelength: may be shifted by the local velocity
-          //printf("Line core wavelength = %e \n",lam/n_air*1E8);
-          //fp_t alpha = alpha_col_dam[z][i][ii];
-          //fp_t bla = 5.62E-17 * pow((4.0 / pi), alpha/2.0) * tgamma(2.0 - alpha / 2.0);
-          //printf("Sigma = %e \n",col_dam_cross_section[z][i][ii]/bla);
-          //printf("alpha = %e \n",alpha_col_dam[z][i][ii]);
           fp_t ar=damp_rad(A[z],ii,i);
           fp_t gc = 0.0;
           fp_t Blu=B[z][ii][i],Bul=B[z][i][ii]; fp_t Aul = A[z][i][ii];

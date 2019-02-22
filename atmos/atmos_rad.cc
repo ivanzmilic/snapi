@@ -108,7 +108,6 @@ fp_t ***atmosphere::opacity(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_i
                             fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
 {
   fp_t ***op=thomson_sc(Ne_in,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering
-  //memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t)); 
   for(int a=0;a<natm;++a) op=add(atml[a]->opacity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
   return op;
 }
@@ -116,8 +115,28 @@ fp_t ***atmosphere::opacity(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_i
 fp_t ***atmosphere::emissivity(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_in,fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
 {
   fp_t ***em=thomson_em(Ne_in,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering
-  //memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t)); 
   for(int a=0;a<natm;++a) em=add(atml[a]->emissivity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h); 
+  return em;
+}
+
+fp_t ***atmosphere::opacity_active_only(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_in,
+                            fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
+{
+  fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+  memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  for(int a=0;a<natm;++a)
+    if (atml[a]->check_if_nlte()) 
+      op=add(atml[a]->opacity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
+  return op;
+}
+
+fp_t ***atmosphere::emissivity_active_only(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_in,fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
+{
+  fp_t ***em=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+  memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  for(int a=0;a<natm;++a) 
+    if (atml[a]->check_if_nlte())
+      em=add(atml[a]->emissivity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h); 
   return em;
 }
 
@@ -190,6 +209,17 @@ fp_t ***atmosphere::opacity_lte(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***
     if (!atml[a]->check_if_nlte()) 
       op=add(atml[a]->opacity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
   return op;
+}
+
+fp_t ***atmosphere::emissivity_lte(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_in,
+                            fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
+{
+  fp_t *** em = opacity_lte(T_in, Ne_in, Vlos, Vt_in, B, theta,phi,lambda);
+  for (int x1i=x1l;x1i<=x1h;++x1i)
+    for (int x2i=x2l;x2i<=x2h;++x2i)
+      for (int x3i=x3l;x3i<=x3h;++x3i)
+        em[x1i][x2i][x3i] *= Planck_f(lambda,T[x1i][x2i][x3i]);
+  return em;
 }
 
 

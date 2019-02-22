@@ -16,6 +16,8 @@ spectra2 = np.loadtxt(file2, unpack = True)
 
 spectra1[1] /= max(spectra1[1])
 spectra2[1] /= max(spectra2[1])
+#spectra1[1] /= spectra1[1][0]
+#spectra2[1] /= spectra2[1][0]
 
 if spectra1[0][0] < 1:
 	spectra1[0] *= 1E8
@@ -38,18 +40,19 @@ lambda_max = max([spectra1[0,-1],spectra2[0,-1]])
 lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
-plt.figure(figsize=[10,4])
+plt.figure(figsize=[4,3])
 
 plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = 'Calculation')
 if (file1 != file2):
-	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = 'FTS atlas')
+	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = 'Observation')
 	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])
-plt.ylim([0.0,1.2])
+plt.ylim([0.0,1.6])
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 #plt.ylim([0,1E14])
 plt.xlabel("$\lambda [\AA]$")
 plt.ylabel("Normalized Intensity")
+plt.tight_layout()
 
-plt.savefig(output)
+plt.savefig(output,bbox_inches='tight')

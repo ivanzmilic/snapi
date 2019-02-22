@@ -126,6 +126,16 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
   int32_t iter = 0;
 
+  fp_t ***** op_background;
+  fp_t ***** em_background;
+  op_background = new fp_t****[ntp]-1;
+  em_background = new fp_t****[ntp]-1;
+
+  for (int tp=1;tp<=ntp;++tp){
+    op_background[tp] = new fp_t***[nlambda];
+    em_background[tp] = new fp_t***[nlambda];
+  }
+
   for (iter = 0; iter<max_iter; ++iter){
       
     for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each atom
@@ -140,8 +150,18 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
           for (int a = 0; a<natm; ++a)
             atml[a]->prof_init();
 
-          fp_t ***op=opacity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
-          fp_t ***em=emissivity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
+          // If it is the first iteration calculate the background opacities, otherwise re-use old ones.
+          if (iter==0){
+            op_background[tp][l] = opacity_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
+            em_background[tp][l] = emissivity_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
+          }
+          fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+          fp_t ***em = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+          memcpy(op[x1l][x2l]+x3l,op_background[tp][l][x1l][x2l]+x3l,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+          memcpy(em[x1l][x2l]+x3l,em_background[tp][l][x1l][x2l]+x3l,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+          
+          op=add(opacity_active_only(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]),op,x1l,x1h,x2l,x2h,x3l,x3h);
+          em=add(emissivity_active_only(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]),em,x1l,x1h,x2l,x2h,x3l,x3h);
 
           if (tau_grid) normalize_to_referent_opacity(op,em);
 
@@ -177,6 +197,17 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
   
   for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
+// cleanup background opacity
+  for (int tp=1;tp<=ntp;++tp){
+    for (int l=0;l<nlambda;++l){
+      del_ft3dim(op_background[tp][l],x1l,x1h,x2l,x2h,x3l,x3h);
+      del_ft3dim(em_background[tp][l],x1l,x1h,x2l,x2h,x3l,x3h);
+    }
+    delete[](op_background[tp]);
+    delete[](em_background[tp]);
+  }
+  delete[](op_background+1);
+  delete[](em_background+1);
 
 // cleanup angular quadrature arrays
   delete[] (bin+1);
