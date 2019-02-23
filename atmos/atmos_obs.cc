@@ -379,7 +379,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   // The similar one as the the atmosphere::obs:
 
-
   boundary_condition_for_rt = -1;
   popsetup(); // 
   

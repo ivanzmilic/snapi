@@ -283,7 +283,6 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
   }
   else 
     cr = 0; 
-//
   numid=Z;
   io_in.msg(IOL_INFO,"atom::atom: %s = 0x%016lX\n",name,numid);
   pop=0;

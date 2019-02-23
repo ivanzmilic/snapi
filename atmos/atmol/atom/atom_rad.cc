@@ -1804,7 +1804,7 @@ fp_t atom::C_ij(int z, int from, int to, fp_t T, fp_t Ne){
 
 	fp_t q_ij = 5.465E-11 * sqrt(T) * 14.5 * oscillator_str * 4.7468212E-22 / en_difference / en_difference * u_0 * exp(-u_0) * Gamma_collisional;
 
-	q_ij = (from < to) ? q_ij : q_ij * exp(u_0) * fp_t(g[z][to]) / fp_t(g[z][from]);
+  q_ij = (from < to) ? q_ij : q_ij * exp(u_0) * fp_t(g[z][to]) / fp_t(g[z][from]);
 
 	return (from != to) ? q_ij * Ne  : 0.0;
 }
