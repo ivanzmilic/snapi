@@ -108,7 +108,7 @@ hmin = h[-1]
 
 yname = '$\log\,\\tau_{500}$'
 #yname = '$h\,[\mathrm{km}]$'
-for p in range(0,1):
+for p in range(0,6):
 
 	v_min = np.zeros(4)
 	v_max = np.zeros(4)
