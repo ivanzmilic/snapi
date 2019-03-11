@@ -371,7 +371,9 @@ void observable::add_scattered_light(fp_t fraction, fp_t continuum_level){
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
       for (int l=1;l<=nlambda;++l){
-        S[i][j][1][l] = S[i][j][1][l]/(1.0+fraction) + fraction/(1.0+fraction) * continuum_level;
+        // THis looks wierd to me:
+        //S[i][j][1][l] = S[i][j][1][l]/(1.0+fraction) + fraction/(1.0+fraction) * continuum_level;
+        S[i][j][1][l] = S[i][j][1][l]+ fraction * continuum_level;
   } // wvl, spatial 
 }
 
