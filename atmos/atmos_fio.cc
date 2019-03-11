@@ -102,7 +102,7 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
   for (int x1i=1;x1i<=nx;++x1i)
     for (int x2i=1;x2i<=ny;++x2i)
       for (int x3i=1;x3i<=nz;++x3i){
-        tau_referent[x1i][x2i][x3i] = pow(10.0,atmoscube[1][x1i][x2i][x3i]);
+        tau_referent[x1i][x2i][x3i] = -pow(10.0,atmoscube[1][x1i][x2i][x3i]);
         T[x1i][x2i][x3i] = atmoscube[3][x1i][x2i][x3i];
         Nt[x1i][x2i][x3i] = atmoscube[4][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
         Ne[x1i][x2i][x3i] = atmoscube[5][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
@@ -120,8 +120,8 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
         Vz[x1i][x2i][x3i] = atmoscube[10][x1i][x2i][x3i];
   }
   // Test:
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    printf("%e %e %e %e %e \n",tau_referent[x1l][x2l][x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Bz[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+  //  printf("%e %e %e %e %e \n",tau_referent[x1l][x2l][x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Bz[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
   del_ft4dim(atmoscube,1,np,1,nx,1,ny,1,nz);
 }
 

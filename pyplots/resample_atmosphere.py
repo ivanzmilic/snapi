@@ -10,8 +10,8 @@ file_out = sys.argv[2]
 temp = pyana.fzread(file_in)
 atmos = temp["data"]
 
-N_new = 81
-tau_uniform = np.linspace(-5,3,N_new)
+N_new = 41
+tau_uniform = np.linspace(-5,1,N_new)
 
 dims = atmos.shape
 NX = dims[0]

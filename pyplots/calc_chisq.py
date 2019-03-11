@@ -37,13 +37,15 @@ residual = cube1
 del cube2
 cube2 = 0.0 #wierd way to clear memory! 
 
+weigths = [1.0,0.0,0.0,2.0]
 residual[:] /= noise;
 residual *= residual
 print residual.shape
 if (int(ifmask)):
 	residual[:,:,:,:] *= mask
 residual = np.sum(residual,axis=3)
-residual = residual[:,:,0] + 0*residual[:,:,3] + 0*residual[:,:,1] + residual[:,:,2]
+residual *= weigths**2.0
+residual = np.sum(residual,axis=2)
 
 plt.clf()
 plt.cla()
