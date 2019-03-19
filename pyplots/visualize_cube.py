@@ -53,10 +53,10 @@ stokes[:,:,:,:] /= I_c
 T_nodes_tau = [-3.3,-2.4,-0.7,0.0]
 #T_nodes = np.arange(len(T_nodes_tau))
 T_nodes = [2,3]
-vs_nodes_tau = [-3.3,-1.6,-0.7]
+vs_nodes_tau = [-3.3,-0.5]
 #vs_nodes = np.arange(len(vs_nodes_tau)) + len(T_nodes_tau)
 vs_nodes = [5,6]
-B_nodes_tau = [-2.8,-1.5,-0.5]
+B_nodes_tau = [-2.8,-0.3]
 #B_nodes = np.arange(len(B_nodes_tau)) + len(vs_nodes_tau) + len(T_nodes_tau)
 B_nodes = [7,8]
 theta_nodes = [len(B_nodes_tau) + len(vs_nodes_tau) + len(T_nodes_tau)]
@@ -78,7 +78,7 @@ plt.cla()
 panel_no = 1
 
 defsize = 5.5
-ratio = 0.38
+ratio = 0.33
 barshrink=0.8
 plt.figure(figsize=[defsize*panelsx, ratio*defsize*panelsy])
 k =0
@@ -132,7 +132,7 @@ for i in T_nodes:
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('Temperature [K] at $\log\,\\tau$ = '+str(T_nodes_tau[i]))
 	plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
-	if (i!=0):
+	if (i!=T_nodes[0]):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 	panel_no += 1
 
@@ -148,7 +148,7 @@ for i in vs_nodes:
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('LOS velocity [km/s] at $\log\,\\tau$ = '+str(vs_nodes_tau[i-vs_nodes[0]]))
 	plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
-	if (i!=4):
+	if (i!=vs_nodes[0]):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 	panel_no += 1
 
@@ -165,7 +165,7 @@ for i in B_nodes:
 	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=2000)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
-	if (i!=7):
+	if (i!=B_nodes[0]):
 		plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 	panel_no += 1
 

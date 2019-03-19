@@ -59,6 +59,7 @@ plt.savefig('chisq_map.png')
 
 print 'chisq_max = ', np.amax(residual)
 print 'chisq_mean = ', np.mean(residual)
+print 'chisq_median = ', np.median(residual)
 print weights
 weights = np.asarray(weights)
 N_Stokes = float(len(np.asarray(np.where(weights > 0.0)[0])))
@@ -68,4 +69,4 @@ else:
 	residual /= (N_Stokes*NL)
 print 'chisq_reduced_max = ', np.amax(residual)
 print 'chisq_reduced_mean = ', np.mean(residual)
-
+print 'chisq_reduced_median = ', np.median(residual)

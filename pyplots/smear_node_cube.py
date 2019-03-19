@@ -37,26 +37,31 @@ end = int(sys.argv[5])
 
 B_start = start
 B_end = end
+NB = B_end - B_start
 
-B_v = an[start:end+1]*np.cos(an[-1])
-B_h = an[start:end+1]*np.sin(an[-1])
+if (NB):
+	B_v = an[start:end+1]*np.cos(an[-1])
+	B_h = an[start:end+1]*np.sin(an[-1])
 
 
 for i in range(0,B_start):
-	#an_conv[i] = flt.medfilt(an[i],5)
+	an_conv[i] = flt.medfilt(an[i],5)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an_conv[i],sigma)
 
-for i in range(B_start,B_end+1):
-	if (sigma):
-		B_v[i-B_start] = filters.gaussian_filter(B_v[i-B_start],sigma)
-		B_h[i-B_start] = filters.gaussian_filter(B_h[i-B_start],sigma)
-	an_conv[i] = np.sqrt(B_v[i-B_start] ** 2.0 + B_h[i-B_start] ** 2.0)
+if (NB):
+	for i in range(B_start,B_end+1):
+		if (sigma):
+			B_v[i-B_start] = filters.gaussian_filter(B_v[i-B_start],sigma)
+			B_h[i-B_start] = filters.gaussian_filter(B_h[i-B_start],sigma)
+		an_conv[i] = np.sqrt(B_v[i-B_start] ** 2.0 + B_h[i-B_start] ** 2.0)
 
-an_conv[-1] = np.cos(an_conv[-1])
-an_conv[-1] = filters.gaussian_filter(an_conv[-1],sigma)
-an_conv[-1] = np.clip(an_conv[-1],-0.99,0.99)
-an_conv[-1] = np.arccos(an_conv[-1])
+
+if (NB):
+	an_conv[-1] = np.cos(an_conv[-1])
+	an_conv[-1] = filters.gaussian_filter(an_conv[-1],sigma)
+	an_conv[-1] = np.clip(an_conv[-1],-0.99,0.99)
+	an_conv[-1] = np.arccos(an_conv[-1])
 
 for i in range(0,0):
 	plt.clf()

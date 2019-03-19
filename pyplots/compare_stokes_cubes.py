@@ -1,6 +1,6 @@
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
+rc('text', usetex=False)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -11,7 +11,6 @@ import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib import ticker
-import colorcet as cc
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -96,7 +95,7 @@ for j in range (1,N_y_panels+1):
 	
 	#Observed intensity:
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='magma',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	else:
@@ -110,7 +109,7 @@ for j in range (1,N_y_panels+1):
 	to_plot = np.copy(to_plot_2[:,:,0,j-1])
 	to_plot/=m
 	ax=axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap=cc.cm['fire'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='magma',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	if (j!=N_y_panels):
@@ -129,7 +128,7 @@ for j in range (1,N_y_panels+1):
 	s = np.std(to_plot1)
 
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot1*np.sqrt(4.0*3.14),origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot1*np.sqrt(4.0*3.14),origin='lower',vmin = vrange[0],vmax=vrange[1],cmap='coolwarm',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	if (j!=N_y_panels):
@@ -143,7 +142,7 @@ for j in range (1,N_y_panels+1):
 	to_plot2 = to_plot_2[:,:,3,j-1]/m*100.0
 	
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot2*np.sqrt(4.0*3.14),origin='lower',vmin = vrange[0],vmax=vrange[1],cmap=cc.cm['coolwarm'],extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot2*np.sqrt(4.0*3.14),origin='lower',vmin = vrange[0],vmax=vrange[1],cmap='coolwarm',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	if (j!=N_y_panels):
