@@ -20,8 +20,8 @@ stokes_cube = temp["data"]
 dims = stokes_cube.shape
 NX = dims[0]
 NY = dims[1]
-NL = 1501
-#NL = 601
+#NL = 1001
+NL = 501
 
 #hardcode wavelength, in principle we could also read it (just a thought)
 # in Angstrom
@@ -29,11 +29,11 @@ NL = 1501
 l = np.linspace(15640.0,15670.0,NL)
 #l = np.linspace(6300.0,6303.0,NL)
 
-sigma = 60 #in mA
+sigma = 150 #in mA
 sigma /= 2.35
 sigma *= 1E-3  / (l[1]-l[0]) #to convert to 'pixels'
 print sigma
-noise_level = 0
+noise_level = 3E-4
 I_c_mean = np.mean(stokes_cube[:,:,0,0])
 noise_level *= I_c_mean
 

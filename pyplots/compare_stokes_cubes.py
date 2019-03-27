@@ -39,13 +39,7 @@ print NX, NY
 
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
-#plt.clf()
-#plt.cla()
-#plt.plot(cube_1_mean,color='red')
-#plt.plot(cube_2_mean,color='blue')
-#if (int(ifmask)):
-#	plt.plot(mask*cube_1_mean[0],'*')
-#plt.savefig('mean_profiles',fmt='png')
+
 cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
 wls = argrelextrema(cube_2_mean,np.less)
 wls = np.asarray(wls)
@@ -53,8 +47,6 @@ wls = wls[0]
 wls = np.append(0,wls)
 print wls
 wls = wls[[0,-2,-1]]
-#wls[0] += 15
-#wls[3] += 15
 N_x_panels = 4
 N_y_panels = len(wls)
 
@@ -73,18 +65,25 @@ shrinkage = 0.7
 irange = [0.8,1.2]
 vrange = [-3,3]
 
-
-fig, axes = plt.subplots(nrows=N_y_panels,ncols=N_x_panels,figsize=(N_x_panels*x_size,N_y_panels*y_size))
-fig.subplots_adjust(right = 0.85,left=0.05,top=0.95,bottom=0.05)
-image_no = 0
-
+shift = 2
 #restrict ourselves only to single wavelengths:
-to_plot_1 = cube1[:,:,:,wls]
+to_plot_1 = np.zeros([NX,NY,4,len(wls)])
+to_plot_1[:,:,0,:] = cube1[:,:,0,wls]
+to_plot_1[:,:,3,:] = cube1[:,:,3,wls+shift]
 del	cube1
 cube1=1.0
-to_plot_2 = cube2[:,:,:,wls]
+to_plot_2 = np.zeros([NX,NY,4,len(wls)])
+to_plot_2[:,:,0,:] = cube2[:,:,0,wls]
+to_plot_2[:,:,3,:] = cube2[:,:,3,wls+shift]
 del cube2
 cube2=1.0
+
+
+fig, axes = plt.subplots(nrows=N_y_panels,ncols=N_x_panels,figsize=(N_x_panels*x_size,N_y_panels*y_size))
+fig.subplots_adjust(right = 0.85,left=0.05,top=0.95,bottom=0.1)
+image_no = 0
+
+
 
 for j in range (1,N_y_panels+1):
 	
@@ -95,7 +94,7 @@ for j in range (1,N_y_panels+1):
 	
 	#Observed intensity:
 	ax = axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='magma',extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='hot',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	else:
@@ -109,7 +108,7 @@ for j in range (1,N_y_panels+1):
 	to_plot = np.copy(to_plot_2[:,:,0,j-1])
 	to_plot/=m
 	ax=axes.flat[image_no]
-	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='magma',extent=[0,x[-1],0,y[-1]])
+	im = ax.imshow(to_plot,origin='lower',vmin = irange[0],vmax= irange[1],cmap='hot',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):
 		ax.set_xlabel('$x\,[\mathrm{Mm}]$')
 	if (j!=N_y_panels):
@@ -120,7 +119,7 @@ for j in range (1,N_y_panels+1):
 	image_no+=1
 
 	if (image_no == 2):
-		cb_ax = fig.add_axes([0.88, 0.51, 0.03, 0.44])
+		cb_ax = fig.add_axes([0.88, 0.55, 0.03, 0.4])
 		cbar = fig.colorbar(im, cax=cb_ax)
 
 	#Observed V/I_qs
@@ -153,11 +152,9 @@ for j in range (1,N_y_panels+1):
 	image_no +=1
 
 	if (image_no == 4):
-		cb_ax = fig.add_axes([0.88, 0.05, 0.03, 0.44])
+		cb_ax = fig.add_axes([0.88, 0.1, 0.03, 0.4])
 		cbar = fig.colorbar(im, cax=cb_ax)
 
-#fig.tight_layout()
-#plt.show()
 fig.subplots_adjust(hspace=0.05, wspace=0.05)
 fig.savefig(out_name,fmt='png',bbxox_inches='tight')
 fig.savefig(out_name+'.eps',fmt='eps',bbxox_inches='tight')

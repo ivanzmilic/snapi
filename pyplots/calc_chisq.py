@@ -28,8 +28,8 @@ NL = cube1.shape[-1]
 if (int(ifmask)):
 	mask = np.loadtxt(maskfile,skiprows=1)
 	print mask.shape
+	mask = mask[:NL]
 
-mask = mask[:NL]
 
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 

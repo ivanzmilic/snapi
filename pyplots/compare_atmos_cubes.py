@@ -53,6 +53,7 @@ x_scale *= 20.8/1E3*3.0
 y_scale *= 20.8/1E3*3.0
 scaling  = float(sys.argv[5])
 
+
 cube1 = np.transpose(cube1,(1,0,2,3))
 cube2 = np.transpose(cube2,(1,0,2,3))
 
@@ -67,25 +68,27 @@ tau = [-1.5,-0.5,0.5]
 tau = np.asarray(tau)
 N_tau = tau.size
 
-params = [2,7,9]
-maps = ['hot','coolwarm','coolwarm']
+params = [2,7,9,8]
+maps = ['hot','coolwarm','coolwarm','PuOr']
 suffix = ['T','B','V']
-title = ['Temperature [K]', 'LOS B [G]', 'LOS velocity [km/s]']
-units = [500.0,100.0,1.0]
+title = ['Temperature [K]', 'LOS B [G]', 'LOS velocity [km/s]','turbulent velocity']
+units = [500.0,100.0,1.0,1.0]
 
 
-cube1[:,:,7,:] *= np.cos(cube1[:,:,10,:])#/np.sqrt(4.0*3.141)
-cube2[:,:,7,:] *= np.cos(cube2[:,:,10,:])
+cube1[:,:,7,:] *= np.cos(cube1[:,:,10,:]) *np.sqrt(4.0*3.141)
+cube2[:,:,7,:] *= np.cos(cube2[:,:,10,:]) *np.sqrt(4.0*3.141)
 cube1[:,:,9,:] /= -1E5
-#cube1[:,:,9,:] -= 0.35
 cube2[:,:,9,:] /= -1E5
+cube1[:,:,8,:] /= -1E5
+cube2[:,:,8,:] /= -1E5
+
 
 cube1_to_show = np.zeros([N_tau,NX,NY])
 cube2_to_show = np.zeros([N_tau,NX2,NY2])
 
 scale = [1000.0,1000.0,1.0]
 
-for ii in range (2,3):
+for ii in range(0,3):
 
 	plt.clf()
 	plt.cla()
@@ -93,6 +96,7 @@ for ii in range (2,3):
 	fig.subplots_adjust(right = 0.85,left=0.05,top=0.95,bottom=0.05)
 	fig_no = 0
 
+	print ii
 	p = params[ii]
 	
 	for i in range(0,NX):
@@ -115,7 +119,7 @@ for ii in range (2,3):
 		ax = axes.flat[fig_no]
 		ax.imshow(cube1_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
-			ax.set_title('PSF')
+			ax.set_title('Original cube')
 		ax.set_ylabel("$\log\\tau=$"+"$"+str(tau[i])+"$")
 		if (i==N_tau-1):
 			ax.set_xlabel('$x\,[\mathrm{Mm}]$')
@@ -127,7 +131,7 @@ for ii in range (2,3):
 		ax = axes.flat[fig_no]
 		im=ax.imshow(cube2_to_show[i],origin='lower',cmap=maps[ii],vmin=m-3*s,vmax=m+3*s,extent=[x_scale[0],x_scale[-1],y_scale[0],y_scale[-1]])
 		if (i==0):
-			ax.set_title('PSF + stray light')
+			ax.set_title('Inversion')
 		ax.set_yticklabels([])
 		#print np.mean(cube1_to_show[i])
 		if (i==N_tau-1):
@@ -154,10 +158,10 @@ for ii in range (2,3):
 			ax.hist2d(cube1_to_show[i].flatten(),cube2_to_show[i].flatten(),bins=(100,100),cmap='Purples',vmax=30,range=[[m-3*s,m+3*s],[m-3*s,m+3*s]])
 			#print pearsonr(x,y)
 			std_difference = np.std(cube1_to_show[i] - cube2_to_show[i])
-			print 'Std of difference = ', std_difference
+			#print 'Std of difference = ', std_difference
 			mean_mag = np.mean(np.abs(cube2_to_show[i]))
-			print 'Mean magnitude    = ', mean_mag
-			print 'Ratio             = ', std_difference/mean_mag
+			#print 'Mean magnitude    = ', mean_mag
+			#print 'Ratio             = ', std_difference/mean_mag
 			ax.plot(cube1_to_show[i].flatten(),cube1_to_show[i].flatten(),color='red')
 			if (i==0):
 				ax.set_title("Inversion vs Simulation")

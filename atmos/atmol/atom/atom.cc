@@ -1029,7 +1029,8 @@ int atom::compute_damp_col(int z, int lu, int ll){
     fp_t C6 = 6.46E-34 * (R_upper - R_lower);
   	col_dam_cross_section[z][lu][ll] = col_dam_cross_section[z][ll][lu] = 17.0 * pow(C6, 0.4) / 251.0;
   }
-
+  //printf("%d %d %d %e %f \n",z,lu,ll,col_dam_cross_section[z][lu][ll]*1E16,alpha_col_dam[z][lu][ll]);
+  
   return 0;
 }
 
