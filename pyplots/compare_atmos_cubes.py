@@ -45,12 +45,12 @@ NY2 = int(dims2[1])
 
 shrink = int(sys.argv[6])
 if (shrink):
-	NX2 = NX
-	NY2 = NY
+	NX = NX2
+	NY = NY2
 x_scale = np.linspace(0,NX2-1,NX2)
 y_scale = np.linspace(0,NY2-1,NY2)
-x_scale *= 20.8/1E3*3.0
-y_scale *= 20.8/1E3*3.0
+x_scale *= 20.8/1E3
+y_scale *= 20.8/1E3
 scaling  = float(sys.argv[5])
 
 

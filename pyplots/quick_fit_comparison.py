@@ -37,9 +37,10 @@ model = np.transpose(model,(1,0,2,3))
 #l = l[0:957]
 #l = np.linspace(6301,6303,201)
 #l = np.linspace(6300.8921,6303.2671,112)
-#l = np.linspace(15642.5,15667.5,501)
+l = np.linspace(15640.0,15670,501)
 #l = np.linspace(8540.0,8543.0,151)
 #l = l[:151]
+l = l[50:451]
 
 x = int(sys.argv[6])
 y = int(sys.argv[7])
@@ -51,8 +52,8 @@ for i in range (x,x+1):
 		plt.figure(figsize=[9.0,11.0])
 
 		plt.subplot(421)
-		plt.plot(obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot(l,obs[i,j,0]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,0]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.plot((fit[i,j,0]/max(obs[i,j,0]) - obs[i,j,0]/max(obs[i,j,0])) * 10.0,label='Residual')
 		#plt.xlim([0,22])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
@@ -62,8 +63,8 @@ for i in range (x,x+1):
 		plt.legend()
 
 		plt.subplot(422)
-		plt.plot(obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
-		plt.plot(fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
+		plt.plot(l,obs[i,j,3]/max(obs[i,j,0]),color='red',label='Observation')
+		plt.plot(l,fit[i,j,3]/max(obs[i,j,0]),'--',color='blue',label='Fit')
 		#plt.xlim([l[0],l[-1]])
 		plt.xlabel('$\lambda\,[\mathrm{\AA}]$')
 		plt.ylabel('$\mathrm{Stokes\,V/I_c}$')

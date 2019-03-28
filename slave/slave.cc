@@ -144,7 +144,7 @@ int main(int argc,char *argv[])
           }
           else {
 
-            atmos->set_grid(0);
+            atmos->set_grid(1);
             class observable *synth=atmos->obs_stokes(el,az,lambda,nlambda);
             //class observable *synth=atmos->obs_stokes_responses(el,az,lambda,nlambda,0,0,0);
             //class observable *synth=atmos->obs_stokes_num_responses(el,az,lambda,nlambda,0);
