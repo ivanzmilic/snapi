@@ -468,7 +468,7 @@ int job_class::stop(void)
     fp_t ****fitted_atmos;
     // These are either really fitted atmospheres, or atmospheres which were used for synthesis 
     // but now with added tau
-    fitted_atmos = ft4dim(1,nx,1,ny,1,NP,1,ND);
+    fitted_atmos = ft4dim(1,NP,1,nx,1,ny,1,ND);
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -532,7 +532,8 @@ int job_class::stop(void)
             	delete mod;
             }
             fp_t ** atm_array = atmos->return_as_array();
-            memcpy(fitted_atmos[x][y][1]+1,atm_array[1]+1,ND*NP*sizeof(fp_t));
+            for (int p =1;p<=NP;++p)
+              memcpy(fitted_atmos[p][x][y]+1,atm_array[p]+1,ND*sizeof(fp_t));
             del_ft2dim(atm_array,1,NP,1,ND);
             delete atmos;
          }
@@ -550,8 +551,8 @@ int job_class::stop(void)
     	del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
       delete test_cube;
     }
-    write_file((char*)"inverted_atmos.f0",fitted_atmos,nx,ny,NP,ND,*io);
-    del_ft4dim(fitted_atmos,1,nx,1,ny,1,NP,1,ND);
+    write_file((char*)"inverted_atmos.f0",fitted_atmos,NP,nx,ny,ND,*io);
+    del_ft4dim(fitted_atmos,1,NP,1,nx,1,ny,1,ND);
     if ((nx > 1 || ny > 1) && !ji.to_invert[o])
     	write_file(ji.name[o],fitted_spectra,nx,ny,4,nl,*io);
     else if (ji.to_invert[o]) 

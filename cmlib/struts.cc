@@ -6,6 +6,16 @@
 
 #include "struts.h"
 
+
+// How come that I did not find this before?
+char *add(char *a, char * b){
+  char * c = new char [strlen(a)+strlen(b)-1];
+  memcpy(c,a,(strlen(a)-1)*sizeof(char));
+  memcpy(c+strlen(a)-1,b,strlen(b)*sizeof(char));
+  printf("%s \n",c);
+  return c;
+}
+
 char **append(char **a,const char *b)
 {
   int la=0;

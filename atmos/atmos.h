@@ -287,15 +287,8 @@ public:
   virtual fp_t ** calculate_legendre_corrections(fp_t ****, fp_t *, fp_t, int, int, int);
   virtual void regularize_hessian(fp_t **, fp_t *, model*);
   virtual void regularize_parameter(fp_t **, fp_t *, model *, int);
-  //virtual void regularize_temp(fp_t **,fp_t *,model*);
-  //virtual void regularize_vt(fp_t **,fp_t *,model*);
-  //virtual void regularize_vs(fp_t **,fp_t *,model*);
-  //virtual void regularize_B(fp_t **,fp_t *,model*);
-  //virtual void regularize_theta(fp_t **,fp_t *,model*);
-  //virtual void regularize_phi(fp_t **,fp_t *,model*);
 
   virtual int polish_extreme_values();
-  //virtual int interpolate_with_legendre(fp_t ***,int, int);
   
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
@@ -528,8 +521,6 @@ public:
   fp_t *** get_data(int &nx_in, int &ny_in, int &np_in);
   void set_data(fp_t ***);
   void simple_print(const char*);
-
-  //void anaprint(const * char,);
 };
 
 #endif              // __ATMOS_H__

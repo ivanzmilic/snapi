@@ -4,6 +4,7 @@
 #include "types.h"
 #include "io.h"
 
+char *add(char *,char*);
 char **append(char**,const char*);
 char **append(char**,char**);
 char **remove(char**,const char*);

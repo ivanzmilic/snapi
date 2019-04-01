@@ -491,11 +491,10 @@ fp_t ** atmosphere::return_as_array(){
   for (int x3i=x3l;x3i<=x3h;++x3i){
     int i=x3i-x3l+1;
     atmos[1][i] = log10(-tau_referent[x1l][x2l][x3i]);
-    //fprintf(stderr,"%d %e \n",x3i,tau_referent[x1l][x2l][x3i]);
     atmos[2][i] = x3[x3i];
     atmos[3][i] = T[x1l][x2l][x3i];
-    atmos[4][i] = Nt[x1l][x2l][x3i];
-    atmos[5][i] = Ne[x1l][x2l][x3i];
+    atmos[4][i] = Nt[x1l][x2l][x3i]*k*T[x1l][x2l][x3i]; // We want this as total gaspressure
+    atmos[5][i] = Ne[x1l][x2l][x3i]*k*T[x1l][x2l][x3i]; // We want this as electron pressure
     atmos[6][i] = 0.0;
     atmos[7][i] = op_referent[x1l][x2l][x3i];
     fp_t B = sqrt(Bx[x1l][x2l][x3i]*Bx[x1l][x2l][x3i] + By[x1l][x2l][x3i]*By[x1l][x2l][x3i] + Bz[x1l][x2l][x3i]*Bz[x1l][x2l][x3i]);
