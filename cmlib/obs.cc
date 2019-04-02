@@ -350,11 +350,9 @@ void observable::normalize(){
 
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
-      for (int l=1;l<=nlambda;++l){
-        S[i][j][1][l] *= scale;
-        for (int s=2;s<=4;++s)
-          S[i][j][s][l] *= S[i][j][1][l];
-  }
+      for (int l=1;l<=nlambda;++l)
+        for (int s=1;s<=4;++s)
+        S[i][j][s][l] *= scale;
 }
 
 // ================================================================================================
