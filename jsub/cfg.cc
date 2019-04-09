@@ -282,6 +282,18 @@ mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)
     get_number(tmp_str,read_from_file);
     delete[] tmp_str;
   }else read_from_file=0; // default
+  if(char *tmp_str=get_arg(mdata,"TAUGRID",0)){
+    fp_t * taurange;
+    int temp=0;
+    if(get_numbers(tmp_str,taurange,temp)<0) io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: failed to convert VALUE argument \"%s\" to floating point values\n",id,tmp_str);
+    taurange +=1;
+    tau_min = int(taurange[0]);tau_max=int(taurange[1]);
+    delete[] tmp_str;
+    delete[] taurange;
+  }else{
+    tau_min=-5.0;
+    tau_max=1.0;
+  }
   if (read_from_file){
     if(!(filename=get_arg(mdata,"FILENAME",0))){ 
       io.msg(IOL_ERROR|IOL_FATAL,"mod config: filename needed but not specified\n");

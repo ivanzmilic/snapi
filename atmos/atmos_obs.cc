@@ -407,7 +407,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
 
   /*FILE * op_em;
-  op_em = fopen("op_em.txt","w");
+  op_em = fopen("op_em_5892.txt","w");
   for (int x3i=x3l;x3i<=x3h;++x3i)
     for (int l=1;l<=nlambda;++l){
       fprintf(op_em, "%1.9e %1.9e %1.9e %1.9e \n",rt_grid[x3i],lambda[l],op_vector[l][x1l][x2l][x3i][1][1],em_vector[l][x1l][x2l][x3i][1]);

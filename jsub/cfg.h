@@ -52,6 +52,8 @@ struct mcfg{                  // configuration for model, which consists from no
   int np;
   int read_from_file; // whetwher to read cube of models from file. Needed for multi-step approach.
   char *filename;
+  double tau_min; // Upper tau (typically -4 to -8)
+  double tau_max; // Lower tau (typically 1 to 2)
   mcfg(char *mdata,struct gcfg &gdata,io_class&);
   ~mcfg(void);
 };

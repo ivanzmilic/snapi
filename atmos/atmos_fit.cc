@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-7
+#define DELTA 1E-2
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -63,7 +63,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     stokes_to_fit[counter] = s+1;
     ++counter;
   }  
-  fp_t noise_level = 3E-4*S_to_fit[1][1];
+  fp_t noise_level = 1E-3*S_to_fit[1][1];
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
    noise_scaling[l] = sqrt(S_to_fit[1][l]/S_to_fit[1][1]);
@@ -153,6 +153,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       else {
         model_to_fit->cpy_values_from(test_model);
         lm_parameter /= lm_multiplicator;
+        if (lm_parameter <= 1E-3) lm_parameter = 1E-3;
       }
 
       // Except in the first iteration and then we look for the optimal lambda:
@@ -161,14 +162,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3)
-        if ((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1] < DELTA &&
-          (chi_to_track[n_chi_to_track-3] - chi_to_track[n_chi_to_track-2]) / chi_to_track[n_chi_to_track-2] < DELTA)
+        if ((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1] < DELTA)
           to_break = 1;
     }
     else{
       lm_parameter *= lm_multiplicator;
       corrected = 0;
     }
+
+    if (lm_parameter >= 1E5)
+      to_break = 1;
 
     if(corrected || to_break || iter==MAX_ITER){
       
@@ -192,7 +195,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       delete[](errors+1);
     }*/
 
-    //fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
+
+    fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
 
     delete[](residual+1);
     delete test_model;

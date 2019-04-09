@@ -13,8 +13,6 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TAU_MIN -6.0
-#define TAU_MAX  1.0
 #define TINY 1E-5
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
@@ -69,8 +67,8 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   // Grid in tau, equidistantly spaced in log scale:
   int N_depths = x3h-x3l+1;
   fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
-  fp_t tau_min = TAU_MIN;
-  fp_t tau_max = TAU_MAX;
+  fp_t tau_min = atmos_model->get_tau_min();
+  fp_t tau_max = atmos_model->get_tau_max();
   
   for (int x3i=x3l;x3i<=x3h;++x3i)
     logtau[x3i] = tau_min + (tau_max-tau_min) / (x3h-x3l) * (x3i-x3l);
@@ -259,8 +257,8 @@ int atmos_pp::interpolate_from_nodes(model * atmos_model){
   int N_depths = x3h-x3l+1;
   fp_t * logtau = new fp_t [N_depths] - x3l; // This is tau500
   
-  fp_t tau_min = TAU_MIN;
-  fp_t tau_max = TAU_MAX;
+  fp_t tau_min = atmos_model->get_tau_min();
+  fp_t tau_max = atmos_model->get_tau_max();
   
   for (int x3i=x3l;x3i<=x3h;++x3i)
     logtau[x3i] = tau_min + (tau_max-tau_min) / (x3h-x3l) * (x3i-x3l);
@@ -407,6 +405,7 @@ int atmos_pp::enforce_hequilibrium(){
     if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
       break;
   }
+  //Nt[x1l][x2l][x3l] = 0.3 / k / T[x1l][x2l][x3l];
   // Go downward, enforcing differential form of HE equation:
   for (int x3i=x3l+1;x3i<=x3h;++x3i){ 
 

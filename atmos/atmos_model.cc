@@ -32,6 +32,9 @@ model::model(){
   phi_nodes_phi = 0;
 
   response_to_parameters = 0;
+  tau_min = -5.0;
+  tau_max = 1.0;
+  N_depths = 41;
 
 }
 
@@ -217,6 +220,8 @@ model::model(mcfg *cfg,io_class &io_in){
   B_nodes_tau = B_nodes_B = 0;
   theta_nodes_tau = theta_nodes_theta = 0;
   phi_nodes_tau = phi_nodes_phi = 0;
+  tau_min = cfg->tau_min;
+  tau_max = cfg->tau_max;
   for (int p=0;p<cfg->np;++p){
     if (strcmp(cfg->par[p]->id,"TEMP") == 0){
       N_nodes_temp = cfg->par[p]->n;
@@ -317,6 +322,7 @@ int32_t model::size(io_class &io_in)
   int32_t sz=7*sizeof(int);
   sz += 6*sizeof(int); // regularizaton types
   sz += 6*sizeof(fp_t); // regularization alphas
+  sz += 2*sizeof(fp_t); // tau_min, tau_max
   sz+=2*N_nodes_temp*sizeof(fp_t);
   sz+=2*N_nodes_vt*sizeof(fp_t);
   sz+=2*N_nodes_vs*sizeof(fp_t);
@@ -331,6 +337,8 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
   int32_t offs=::pack(buf,N_depths,do_swap);
+  offs+=::pack(buf+offs,tau_min,do_swap);
+  offs+=::pack(buf+offs,tau_max,do_swap);
   int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,-1};
   for (int i=0;P[i]>-1;++i) offs+=::pack(buf+offs,P[i],do_swap);
   
@@ -379,6 +387,8 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 {
 
   int32_t offs=::unpack(buf,N_depths,do_swap);
+  offs+=::unpack(buf+offs,tau_min,do_swap);
+  offs+=::unpack(buf+offs,tau_max,do_swap);
   offs+=::unpack(buf+offs,N_nodes_temp,do_swap);
   offs+=::unpack(buf+offs,N_nodes_vt,do_swap);
   offs+=::unpack(buf+offs,N_nodes_vs,do_swap);
@@ -812,6 +822,8 @@ int model::set_response_to_parameters(fp_t *** responses_in, int Nd_in){
 
 int model::cpy_values_from(model* input){
 
+  tau_min = input->get_tau_min();
+  tau_max = input->get_tau_max();
   fp_t * tau, * value;
   tau = input->get_temp_nodes_tau();
   value = input->get_temp_nodes_temp();
@@ -885,14 +897,14 @@ int model::correct(fp_t * correction){
   // is the fastest, and does not require writing new models and things like that.
 
   // First make sure that corrections are not too big:
-  for (int i=1;i<=N_nodes_temp;++i)
-    if (correction[i] > 1000.0) correction[i] = 1000.0;
+  //for (int i=1;i<=N_nodes_temp;++i)
+  ///  if (correction[i] > 1000.0) correction[i] = 1000.0;
 
   int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
   int B_stop  = B_start-1+N_nodes_B;
 
-  for (int i=B_start;i<=B_stop;++i)
-    if (correction[i] > 500.0) correction[i] = 500.0;
+  //for (int i=B_start;i<=B_stop;++i)
+  //  if (correction[i] > 500.0) correction[i] = 500.0;
 
   for (int i=1;i<=N_parameters;++i)
     perturb_node_value(i,correction[i]);
@@ -905,11 +917,11 @@ int model::correct(fp_t * correction){
   }
   for (int i=1;i<=N_nodes_vt;++i){
     if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
-    if (vt_nodes_vt[i] > 5E5) vt_nodes_vt[i] = 5E5; // highest possible vt
+    if (vt_nodes_vt[i] > 20E5) vt_nodes_vt[i] = 20E5; // highest possible vt
   }
   for (int i=1;i<=N_nodes_B;++i){
     if (B_nodes_B[i] < 0.0) B_nodes_B[i] = fabs(B_nodes_B[i]);
-    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0; // Highest possible B
+    if (B_nodes_B[i] > 10000.0) B_nodes_B[i] = 10000.0; // Highest possible B
   }
   return 0;
 }
@@ -966,6 +978,8 @@ model * clone(model * input){
   int N_nodes_phi = input->get_N_nodes_phi();
 
   output = new model(N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
+  output->set_tau_min(input->get_tau_min());
+  output->set_tau_max(input->get_tau_max());
 
   fp_t * tau, * value;
   tau = input->get_temp_nodes_tau();
