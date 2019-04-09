@@ -253,7 +253,6 @@ fp_t tabbf::U(fp_t lam)
   if(lam<=lambda_tabulated[n-1] && lam >= lambda_tabulated[0])
     cross_section=interpol(lam,lambda_tabulated,bf_tabulated,n);  
 
-  //printf("lam = %e lambda_tabulated[n-1] = %e cs = %e \n", lam, lambda_tabulated[n-1], cross_section);
   return cross_section;
 }
 
@@ -263,7 +262,6 @@ fp_t *tabbf::getlambda(int &np)
     np = n;
     fp_t *ll=new fp_t [n];
     memcpy(ll,lambda_tabulated,n*sizeof(fp_t));
-    //ll[n]=l_b;
     return ll;
   }
   return 0;

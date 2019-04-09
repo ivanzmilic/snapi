@@ -353,8 +353,8 @@ atom::~atom(void)
             delete cr[z][l][ll];
           delete[]cr[z][l];
         }
+        delete[]cr[z];
       }
-      delete[]cr[z];
     }
     delete[]cr;
   }

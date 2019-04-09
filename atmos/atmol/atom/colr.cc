@@ -73,9 +73,6 @@ tbcr::tbcr(fp_t *t_in,fp_t *v_in,int n_in,io_class &io):colr(COLR_TYPE_TAB)
   v=new fp_t [n];
   memcpy(t,t_in,n*sizeof(fp_t));
   memcpy(v,v_in,n*sizeof(fp_t));
-  //printf("a tab type has been created, these are the values:\n");
-  //for (int i=0;i<n;++i)
-    //printf("%d %e %e \n",i,t[i],v[i]);
 //
 }
 

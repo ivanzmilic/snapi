@@ -347,7 +347,7 @@ void observable::normalize(){
   // Normalizes already arranged observable to physical units. 
   
   fp_t scale = synth_qs/obs_qs;
-
+  
   for (int i=1;i<=nx;++i)
     for (int j=1;j<=ny;++j)
       for (int l=1;l<=nlambda;++l)
