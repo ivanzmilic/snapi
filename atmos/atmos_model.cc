@@ -897,14 +897,14 @@ int model::correct(fp_t * correction){
   // is the fastest, and does not require writing new models and things like that.
 
   // First make sure that corrections are not too big:
-  //for (int i=1;i<=N_nodes_temp;++i)
-  ///  if (correction[i] > 1000.0) correction[i] = 1000.0;
+  for (int i=1;i<=N_nodes_temp;++i)
+    if (correction[i] > 2000.0) correction[i] = 2000.0;
 
   int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
   int B_stop  = B_start-1+N_nodes_B;
 
-  //for (int i=B_start;i<=B_stop;++i)
-  //  if (correction[i] > 500.0) correction[i] = 500.0;
+  for (int i=B_start;i<=B_stop;++i)
+    if (correction[i] > 1000.0) correction[i] = 1000.0;
 
   for (int i=1;i<=N_parameters;++i)
     perturb_node_value(i,correction[i]);
