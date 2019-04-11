@@ -196,7 +196,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     }*/
 
 
-    fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
+    //fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
 
     delete[](residual+1);
     delete test_model;
