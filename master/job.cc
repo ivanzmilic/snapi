@@ -292,13 +292,14 @@ int job_class::start(void)
       	io->msg(IOL_INFO,"master::job : return_model mode is : %d \n",ji.return_model[o]);
       	io->msg(IOL_INFO,"master::job : return_atmos mode is : %d \n",ji.return_atmos[o]);
       }
-      else 
+      else {
         if (ji.models ){
           io->msg(IOL_INFO,"master::job : model is provided in synth mode. synthesizing from : \n");
           ji.atmos[a]->build_from_nodes(ji.models[0]);
         }
         else 
-      	 io->msg(IOL_INFO,"master::job : we are synthesizing the data from : %s \n",ji.name[o]);
+      	 io->msg(IOL_INFO,"master::job : synthesizing the data from : %s \n",ji.name[o]);
+      }
       
       if (ji.to_invert[o]){ // ------------ INVERSION ----------------------------------------//
         io->msg(IOL_INFO,"master::job : inverting datacube: %s \n",ji.name[o]);
@@ -345,7 +346,7 @@ int job_class::start(void)
         	int nn1,nn2,nn3;
           model_cube = read_file(ji.input_models[0],nn1,nn2,nn3,*io);
           io->msg(IOL_INFO,"master::job:: modelcube sucessfully read from file and will be used.\n");
-          io->msg(IOL_INFO,"%d %d %d \n",nn1,nn2,nn3);
+          io->msg(IOL_INFO,"dimensions of the model cube (for your sanity) :%d %d %d \n",nn1,nn2,nn3);
         }
                   
          for(int x=1,n=1;x<=nx;++x)
@@ -466,7 +467,7 @@ int job_class::stop(void)
     int ND = ji.atmos[0]->get_N_depths();
     int NP=12;
     fp_t ****fitted_atmos;
-    // These are either really fitted atmospheres, or atmospheres which were used for synthesis 
+    // These are either fitted atmospheres, or atmospheres which were used for synthesis 
     // but now with added tau
     fitted_atmos = ft4dim(1,NP,1,nx,1,ny,1,ND);
     
