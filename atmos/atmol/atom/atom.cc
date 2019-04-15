@@ -1959,12 +1959,11 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   }
   //level_to_replace = nmap-1;
 
-  for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;  // final equation: sum(n)=cst (number of particles remains the same)
+  for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
 
-
-  // Print the rate matrix:
   
+  // Print the rate matrix: (turn this ito a debug mode?)
   /*if (x3i == x3i_control){
     printf("Rate matrix:\n");
     io.msg(IOL_INFO,"atom::pops: %s\n",name);
@@ -1976,7 +1975,8 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     }
   }*/
 
-  fp_t relaxation_factor = 1.0;
+  fp_t relaxation_factor = 1.0; // 1.0 for no relaxation, > 1 for overrelaxation (makes no sense imo)
+                                // 0.0 does not change the solution. <1 relaxed the solution (uder-corrects)
 
   // Let us invert the matrix: 
   fp_t * M_to_solve = M[1] +1;
@@ -1995,42 +1995,19 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   bool zeros = false;
   for (int i = 0; i<nmap; ++i){
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
-    //if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
-      //pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] - solution[i] * relaxation_factor)/(1.0-relaxation_factor);
-      //zeros = true;
-      //printf("Negative population n = %e for z = %d i = %d @ x3i = %d \n", pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]], zmap[i],lmap[i],x3i);
-      //break;
-      /*
-      delta = 1.0;
-      //exit(1);
-      printf("Rate matrix:\n");
-      io.msg(IOL_INFO,"atom::pops: %s\n",name);
-      FILE * to_invert;
-      to_invert = fopen("matrix_to_invert.txt","w");
-      for(int ii=1;ii<=nmap;++ii){
-        for(int iii=1;iii<=nmap;++iii){
-         fprintf(stderr,"%5.10E ",M[ii][iii]);      
-         fprintf(to_invert,"%5.10E ",M[ii][iii]);      
-        }
-        fprintf(stderr,"%5.10E \n", b[ii-1]);
-        fprintf(to_invert,"%5.10E \n", b[ii-1]);
-      }
-      fclose(to_invert);
-      exit(1);*/
-    //} 
+    if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0)
+      zeros = true;
   }
-  //if (strcmp(id,"Na")==0)
-  //print_populations();
- 
+
   del_ft2dim(M,1,nmap,1,nmap);
   delete []M_LU;
   delete []b;
   delete []solution;
 
-  //if (zeros && alo)
-  //  delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
-  //else if (zeros && !alo)
-  //  delta = 0; // don't do anything!
+  if (zeros && alo) // if there were zeros, then re-do using the regular lambda itera
+    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
+  else if (zeros && !alo) // if we tried lambda iter, revert to old. // TO DO
+    delta = 0; // don't do anything!
 
   return delta;
 
