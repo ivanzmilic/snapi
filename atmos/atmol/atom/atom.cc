@@ -2012,7 +2012,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   return delta;
 
   }
-return 0.0;
+return 0.0; // If not (J && NLTE)
 }
 
 

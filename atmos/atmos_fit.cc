@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-2
+#define DELTA 1E-5
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -153,7 +153,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       else {
         model_to_fit->cpy_values_from(test_model);
         lm_parameter /= lm_multiplicator;
-        if (lm_parameter <= 1E-3) lm_parameter = 1E-3;
+        if (lm_parameter <= 1E-5) lm_parameter = 1E-5;
       }
 
       // Except in the first iteration and then we look for the optimal lambda:
@@ -162,7 +162,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3)
-        if ((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1] < DELTA)
+        if (fabs((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1]) < DELTA)
           to_break = 1;
     }
     else{
@@ -170,7 +170,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       corrected = 0;
     }
 
-    if (lm_parameter >= 1E5)
+    // Usually very large LM parameter means we are stuck so we can stop.
+    if (lm_parameter >= 1E7)
       to_break = 1;
 
     if(corrected || to_break || iter==MAX_ITER){

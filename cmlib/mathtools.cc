@@ -1201,6 +1201,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     if (is_temp){
       derivatives[1] = (node_value[2] - node_value[1]) / (node_tau[2]-node_tau[1]);
       //derivatives[1] *= (node_tau[2]-node_tau[1])/(node_tau[1]-tau_grid[1]); // HACK
+      derivatives[1] = 0.0;
     }
     else {
       derivatives[1] = 0.0; // For other than T, we want to have flat distribution
