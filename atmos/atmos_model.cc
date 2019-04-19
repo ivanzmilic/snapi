@@ -898,7 +898,7 @@ int model::correct(fp_t * correction){
 
   // First make sure that corrections are not too big:
   for (int i=1;i<=N_nodes_temp;++i)
-    if (fabs(correction[i]) > 2000.0) correction[i] = 2000.0 * fabs(correction[i])/correction[i];
+    if (fabs(correction[i]) > 1000.0) correction[i] = 1000.0 * fabs(correction[i])/correction[i];
 
   int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
   int B_stop  = B_start-1+N_nodes_B;
@@ -917,11 +917,11 @@ int model::correct(fp_t * correction){
   }
   for (int i=1;i<=N_nodes_vt;++i){
     if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
-    if (vt_nodes_vt[i] > 20E5) vt_nodes_vt[i] = 20E5; // highest possible vt
+    if (vt_nodes_vt[i] > 5E5) vt_nodes_vt[i] = 5E5; // highest possible vt
   }
   for (int i=1;i<=N_nodes_B;++i){
     if (B_nodes_B[i] < 0.0) B_nodes_B[i] = fabs(B_nodes_B[i]);
-    if (B_nodes_B[i] > 10000.0) B_nodes_B[i] = 10000.0; // Highest possible B
+    if (B_nodes_B[i] > 4000.0) B_nodes_B[i] = 4000.0; // Highest possible B
   }
   return 0;
 }
