@@ -9,6 +9,7 @@
 #define PF_TYPE_NONE   0
 #define PF_TYPE_CONST  1
 #define PF_TYPE_TRAV   2
+#define PF_TYPE_IRWIN  3 
 
 //
 // MULTI OPTIONS:
@@ -60,6 +61,22 @@ public:
   trav(uint08_t*,int32_t&,uint08_t,io_class&);
   trav(int08_t,fp_t,tpfcfg**,int);
   ~trav(void);
+  virtual fp_t U(fp_t,fp_t,io_class&);
+  virtual fp_t dU(fp_t,fp_t,io_class&);
+//
+  virtual int32_t size(io_class&);
+  virtual int32_t pack(uint08_t*,uint08_t,io_class&);
+  virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
+};
+
+class irwin:public pf{ // Traving et. al. partition function
+  fp_t z;
+  fp_t *a;
+  int n; // number of coefficients
+public:
+  irwin(uint08_t*,int32_t&,uint08_t,io_class&);
+  irwin(int08_t,iwpfcfg*);
+  ~irwin(void);
   virtual fp_t U(fp_t,fp_t,io_class&);
   virtual fp_t dU(fp_t,fp_t,io_class&);
 //

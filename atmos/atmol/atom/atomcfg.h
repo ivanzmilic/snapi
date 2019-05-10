@@ -14,12 +14,21 @@ public:
   ~tpfcfg(void);
 };
 
+struct iwpfcfg{  // Irwin 1981, config info
+  fp_t *a;
+  int n;
+public:
+  iwpfcfg(int n_in, fp_t * a_in, io_class&);
+  ~iwpfcfg(void);
+};
+
 struct pcfg{    // partition config
   char *pftype; // type of PF to use
   fp_t value;   // for constant PF
   fp_t g0;      // for Traving et.al. PF
 //
   tpfcfg **pfc;
+  iwpfcfg *ipfc;
   int npfc;
 public:
   pcfg(char *pdata,io_class&);

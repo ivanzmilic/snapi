@@ -15,6 +15,7 @@ class pf *pf_new(int08_t z,struct pcfg *cfg)
 {
   if(!cfg) return new pf(PF_TYPE_NONE);
   if(!strcmp(cfg->pftype,"TRAV")) return new trav(z,cfg->g0,cfg->pfc,cfg->npfc);
+  if(!strcmp(cfg->pftype,"IRWIN")) return new irwin(z,cfg->ipfc);
   if(!strcmp(cfg->pftype,"CONST")) return new cpf(cfg->value);
   return new pf(PF_TYPE_NONE);
 }
@@ -25,6 +26,7 @@ class pf *pf_new(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io)
   ::unpack(buf+offs,type);
   switch(type){
     case(PF_TYPE_TRAV): return new trav(buf,offs,do_swap,io);
+    case(PF_TYPE_IRWIN): return new irwin(buf,offs,do_swap,io);
     case(PF_TYPE_CONST): return new cpf(buf,offs,do_swap,io);
   }
   return new pf(buf,offs,do_swap,io);
@@ -279,6 +281,82 @@ fp_t trav::dqas_f(fp_t l,fp_t p,fp_t Dz)
   fp_t axl2=Dz/(l*l);
   return 4.0*(1.0+axl2*(0.33333333+0.1*axl2))*p*p*p/l;
 }
+
+// -------------------------------------------------------------------------------------------------------
+
+// Irwin 1981 style partition function
+//
+
+irwin::irwin(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io):pf(buf,offs,do_swap,io)
+{
+  offs+=unpack(buf+offs,do_swap,io);
+}
+
+irwin::irwin(int08_t z_in,iwpfcfg *cfg):pf(PF_TYPE_IRWIN) // Traving et al (1965ZA.....61...92S)
+{
+  z=(fp_t)z_in+1.0;
+  n = cfg->n;
+  a=new fp_t [n];
+  memcpy(a,cfg->a,n*sizeof(fp_t));
+}
+
+irwin::~irwin(void)
+{
+ if (a)
+  delete []a;
+}
+
+//
+
+int32_t irwin::size(io_class &io)
+{
+  int sz=pf::size(io);
+  sz+=sizeof(int); // n
+  sz+=n*sizeof(fp_t); // a
+  sz+=sizeof(fp_t);    // z
+  return sz;
+}
+
+int32_t irwin::pack(uint08_t *buf,uint08_t do_swap,io_class &io)
+{
+  int32_t offs=pf::pack(buf,do_swap,io);
+// local stuff
+  offs+=::pack(buf+offs,z,do_swap);
+  offs+=::pack(buf+offs,n,do_swap);
+  for (int i=0;i<n;i++)
+    offs+=::pack(buf+offs,a[i],do_swap);
+  return offs;
+}
+
+int32_t irwin::unpack(uint08_t *buf,uint08_t do_swap,io_class &io)
+{
+// only unpack local stuff
+  int32_t offs=::unpack(buf,z,do_swap);
+  offs+=::unpack(buf+offs,n,do_swap);
+// allocate arrays
+  a = new fp_t [n];
+  for(int i=0;i<n;++i)
+    offs+=::unpack(buf+offs,a[i],do_swap);
+  return offs;
+}
+
+//
+
+fp_t irwin::U(fp_t T,fp_t ne,io_class &io)
+{
+  fp_t lnT = log(T);
+  fp_t sum = 0.0;
+  for (int i =0;i<n;++i)
+    sum+=a[i]*pow(lnT,i);
+  sum = exp(sum);
+  return sum;
+}
+
+fp_t irwin::dU(fp_t T,fp_t ne,io_class &io)
+{
+  return 0;
+}
+
 
 /* 
 C

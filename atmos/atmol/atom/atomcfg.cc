@@ -63,6 +63,17 @@ tpfcfg::~tpfcfg(void)
   if(g) delete[] g;
 }
 
+iwpfcfg::iwpfcfg(int n_in,fp_t *a_in,io_class &io){
+  n=n_in;
+  a = new fp_t[n];
+  memcpy(a,a_in,n*sizeof(fp_t));
+}
+
+iwpfcfg::~iwpfcfg(void)
+{
+  if(a) delete[] a;
+}
+
 pcfg::pcfg(char *pdata,io_class &io)
 {
   if(!(pftype=get_arg(pdata,"TYPE",0))) io.msg(IOL_ERROR|IOL_FATAL,"pcfg::pcfg: no partition type specified!\n");
@@ -86,6 +97,21 @@ pcfg::pcfg(char *pdata,io_class &io)
     npfc=0;
   }
 //
+  if(!strcmp(pftype,"IRWIN")){
+//
+    if(char *tmpstr=get_arg(pdata,"A_PART",0)){
+      int nvals;
+      fp_t *vals;
+      if(get_numbers(tmpstr,vals,nvals)<0) io.msg(IOL_ERROR|IOL_FATAL,"iwpfcfg::iwpfcfg: failed to convert A_PART argument %s to valid floating point values\n",tmpstr);
+      vals+=1;
+      delete[] tmpstr;
+      ipfc = new iwpfcfg(nvals,vals,io);
+      delete[]vals;
+    }else io.msg(IOL_ERROR|IOL_FATAL,"iwpfcfg::iwpfcfg: no A_PART values specified for Irwin style partition function\n");
+  }else{
+    ipfc = 0;
+  }
+//  
   if(!strcmp(pftype,"CONST")){
     if(char *val_str=get_arg(pdata,"VALUE",0)){
       if(get_number(val_str,value)<0) io.msg(IOL_ERROR|IOL_FATAL,"pcfg::pcfg: failed to convert VALUE \"%s\" to floating point value\n",val_str);
