@@ -63,7 +63,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     stokes_to_fit[counter] = s+1;
     ++counter;
   }  
-  fp_t noise_level = 1E-3*S_to_fit[1][1];
+  fp_t noise_level = 1.0*S_to_fit[1][1]; // The magnitude does not really matter.
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
    noise_scaling[l] = sqrt(S_to_fit[1][l]/S_to_fit[1][1]);
@@ -81,9 +81,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
-  //FILE * chi_out;
-  //chi_out = fopen("chi_sq.dat","w");
-  
   for (iter=1;iter<=MAX_ITER;++iter){
 
     if (corrected){      
@@ -113,9 +110,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
 
     }
-
-    //fprintf(chi_out,"%d %e \n",iter,metric);
-    
+  
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
@@ -131,8 +126,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
-    
-    //test_model->print();
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -170,32 +163,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       corrected = 0;
     }
 
-    // Usually very large LM parameter means we are stuck so we can stop.
-    if (lm_parameter >= 1E7)
-      to_break = 1;
-
     if(corrected || to_break || iter==MAX_ITER){
       
       del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
       delete current_obs;
       del_ft2dim(S_current,1,4,1,nlambda);
     }
-
-    // Then calculate the errors and show them:
-    /*if (to_break || iter==MAX_ITER){
-      fp_t * errors = new fp_t [N_parameters]-1;
-      memset(errors+1,0,N_parameters*sizeof(fp_t));
-      for (int i=1;i<=N_parameters;++i)
-        errors[i] = sqrt(2.0*metric*n_stokes_to_fit*nlambda/(N_parameters)/fabs(JTJ[i][i]))*noise_level;
-      scale_corrections(errors,model_to_fit,N_parameters);
-      FILE * error;
-      error = fopen("errors.dat","w");
-      for (int i=1;i<=N_parameters;++i)
-        fprintf(error,"%d %e \n",i,errors[i]);
-      fclose(error);
-      delete[](errors+1);
-    }*/
-
 
     //fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
 
@@ -213,8 +186,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (to_break)
       break;
   }
-  //fclose(chi_out);
-
   io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
@@ -225,7 +196,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete[]chi_to_track;
 
   // Full version:
-  //model_to_fit->print();
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
@@ -234,6 +204,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   model_to_fit->polish_angles();   
   delete[](lambda+1);
   delete[]ws;
+
   return obs_to_return;
 }
 
@@ -1642,3 +1613,53 @@ void atmosphere::regularize_parameter(fp_t ** JTJ, fp_t * rhs, model * model_to_
  // OLD:::::
 
  observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){};
+
+
+    // ------------------------------------------------------------------------------------------------
+    //DEBUG - ILLUSTRATION:
+
+    /*fp_t ** current_atm = this->return_as_array();
+    for (int p =1;p<=NP;++p)
+      memcpy(atmos_by_iter[p][1][iter]+1,current_atm[p]+1,ND*sizeof(fp_t));
+    del_ft2dim(current_atm,1,NP,1,ND);
+    nodes_by_iter->add_model(model_to_fit,1,iter);
+    fp_t * lambda_full = spectrum_to_fit->get_lambda();
+    int nlambda_full = spectrum_to_fit->get_n_lambda();
+    observable * current_obs_full = forward_evaluate(theta,phi,lambda_full,nlambda_full,scattered_light,qs_level,spectral_broadening);
+    fp_t ** current_S_full = current_obs_full->get_S(1,1);
+    memcpy(stokes_by_iter[1][iter][1]+1,current_S_full[1]+1,4*nlambda_full*sizeof(fp_t));
+    del_ft2dim(current_S_full,1,4,1,nlambda_full);
+    delete current_obs_full;
+    delete[](lambda_full+1);*/
+
+    //---------------------------------------------------------------------------------------------------
+ //---------------------------------------------------------------------------------------------------
+  /*N_parameters = model_to_fit->get_N_nodes_total();
+  int nx,ny,np;
+  fp_t *** nodes_cube = nodes_by_iter->get_data(nx,ny,np);
+  write_file((char*)"nodes_by_iter.f0",nodes_cube,nx,ny,np,io);
+  del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
+  delete nodes_by_iter;
+  
+  write_file((char*)"atmos_by_iter.f0",atmos_by_iter,NP,1,MAX_ITER,ND,io);
+  del_ft4dim(atmos_by_iter,1,NP,1,1,1,MAX_ITER,1,ND);
+  nlambda = spectrum_to_fit->get_n_lambda();
+  write_file((char*)"spectra_by_iter.f0",stokes_by_iter,1,MAX_ITER,4,nlambda,io);  
+  del_ft4dim(stokes_by_iter,1,1,1,MAX_ITER,1,4,1,nlambda);*/
+
+  //---------------------------------------------------------------------------------------------------
+
+ //------------------------------------------------------------------------------------------------
+  //DEBUG - ILLUSTRATION
+ /* int NP = 12;
+  int ND = x3h-x3l+1;
+  fp_t **** atmos_by_iter = ft4dim(1,NP,1,1,1,MAX_ITER,1,ND);
+  modelcube * nodes_by_iter;
+  nodes_by_iter = new modelcube(model_to_fit,1,MAX_ITER);
+  fp_t **** stokes_by_iter = ft4dim(1,1,1,MAX_ITER,1,4,1,spectrum_to_fit->get_n_lambda());*/
+  // -----------------------------------------------------------------------------------------------
+  //
+
+
+
+
