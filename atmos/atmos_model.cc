@@ -108,7 +108,7 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   response_to_parameters = 0;
   N_depths = 41;
   tau_min = -5.0;
-  tau_max = 1.0
+  tau_max = 1.0;
 }
 
 model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in, int N_nodes_theta_in, int N_nodes_phi_in){
@@ -213,7 +213,7 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   response_to_parameters = 0; 
   N_depths = 41;
   tau_min = -5.0;
-  tau_max = 1.0
+  tau_max = 1.0;
 }
 
 model::model(mcfg *cfg,io_class &io_in){
