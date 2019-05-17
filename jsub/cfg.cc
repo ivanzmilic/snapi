@@ -40,10 +40,6 @@ gcfg::gcfg(cmdln &cmd,io_class &io)
   for(nm=0;mods[nm];++nm);
   while(strlen(fc)&&(fc[strlen(fc)-1]=='\n')) fc[strlen(fc)-1]=0;
 //
-// initialise gcfg first
-//
-
-//
   if(char *s=arg_test(fc)) io.msg(IOL_WARN,"global config: the following lines were not processed:%s\n",s);
   delete[] fc;
 //
@@ -287,7 +283,8 @@ mcfg::mcfg(char *mdata,struct gcfg &gdata,io_class &io)
     int temp=0;
     if(get_numbers(tmp_str,taurange,temp)<0) io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: failed to convert VALUE argument \"%s\" to floating point values\n",id,tmp_str);
     taurange +=1;
-    tau_min = int(taurange[0]);tau_max=int(taurange[1]);
+    tau_min = taurange[0];
+    tau_max = taurange[1];
     delete[] tmp_str;
     delete[] taurange;
   }else{

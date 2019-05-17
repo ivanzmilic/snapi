@@ -359,8 +359,8 @@ private:
   int N_nodes_phi;
 
   int N_depths; // This depends on the specific atmosphere we are using:
-  double tau_min;
-  double tau_max;
+  fp_t tau_min;
+  fp_t tau_max;
   
   // Does it make sense to have separate number of nodes for different components of velocity/magnetic field? 
   // To me it does not. But maybe we want to allow for possibillity for that in the code?
@@ -493,14 +493,14 @@ public:
   
   int cpy_values_from(model *);
 
-  double get_tau_min(){
+  fp_t get_tau_min(){
     return tau_min;
   }
-  double get_tau_max(){
+  fp_t get_tau_max(){
     return tau_max;
   }
-  void set_tau_min(double input){tau_min=input;};
-  void set_tau_max(double input){tau_max=input;};
+  void set_tau_min(fp_t input){tau_min=input;};
+  void set_tau_max(fp_t input){tau_max=input;};
 };
 
 model * clone(model *);

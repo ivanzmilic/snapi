@@ -106,6 +106,9 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
   N_nodes_theta = 0;
   N_nodes_phi = 0;
   response_to_parameters = 0;
+  N_depths = 41;
+  tau_min = -5.0;
+  tau_max = 1.0
 }
 
 model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in, int N_nodes_theta_in, int N_nodes_phi_in){
@@ -208,6 +211,9 @@ model::model(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_no
     exit(1);
   }
   response_to_parameters = 0; 
+  N_depths = 41;
+  tau_min = -5.0;
+  tau_max = 1.0
 }
 
 model::model(mcfg *cfg,io_class &io_in){
@@ -342,7 +348,6 @@ int32_t model::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   int P[]={N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi,-1};
   for (int i=0;P[i]>-1;++i) offs+=::pack(buf+offs,P[i],do_swap);
   
-//  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
   if (N_nodes_temp){
     offs+=::pack(buf+offs,temp_nodes_tau,1,N_nodes_temp,do_swap);
     offs+=::pack(buf+offs,temp_nodes_temp,1,N_nodes_temp,do_swap);
@@ -407,7 +412,6 @@ int32_t model::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   theta_nodes_theta = 0;
   phi_nodes_tau = 0;
   phi_nodes_phi = 0;
-//  fprintf(stderr,"%d %d %d %d %d %d %d \n", N_depths,N_nodes_temp,N_nodes_vt,N_nodes_vs,N_nodes_B,N_nodes_theta,N_nodes_phi);
   if (N_nodes_temp){
     temp_nodes_tau = new fp_t [N_nodes_temp] -1;
     temp_nodes_temp = new fp_t [N_nodes_temp] -1;
