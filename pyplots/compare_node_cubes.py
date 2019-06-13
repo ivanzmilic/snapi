@@ -24,21 +24,29 @@ cube2[-NB-NT:-NT] *= cube2[-1]
 
 plt.clf()
 plt.cla()
-plt.figure(figsize=[16.5,4*NP])
 
-params = [3,4,8,9,10,11]
-cmaps = ['magma','magma','bwr']
+params = [2,3,7,8,10,11]
+cmaps = ['inferno','inferno','bwr','bwr','PRGn','PRGn']
 
-for p in range(0,NP):
-	plt.subplot(NP,3,3*p+1)
+index = 0
+for p in params:
+	if (cmaps[index] == 'bwr'):
+		cube1[p] /= -1E5
+		cube2[p] /= -1E5
+	plt.figure(figsize=[13.0,3.5])
+	plt.clf()
+	plt.cla()
+	plt.subplot(1,3,1)
 	m = np.mean(cube1[p])
 	s = np.std(cube1[p])
-	plt.imshow(cube1[p],vmin=m-3*s,vmax=m+3*s)
+	plt.imshow(cube1[p],vmin=m-3*s,vmax=m+3*s,cmap=cmaps[index])
+	plt.title('Standard Inversion')
 	plt.colorbar()
-	plt.subplot(NP,3,3*p+2)
-	plt.imshow(cube2[p],vmin=m-3*s,vmax=m+3*s)
+	plt.subplot(1,3,2)
+	plt.imshow(cube2[p],vmin=m-3*s,vmax=m+3*s,cmap=cmaps[index])
+	plt.title('CNN')
 	plt.colorbar()
-	plt.subplot(NP,3,3*p+3)
+	plt.subplot(1,3,3)
 	#plt.hist(cube1[p].flatten(),bins=100,alpha=0.5,color='red')
 	#plt.hist(cube2[p].flatten(),bins=100,alpha=0.5,color='blue')
 	#plt.subplot(224)
@@ -47,10 +55,12 @@ for p in range(0,NP):
 	r = stats.pearsonr(cube1[p].flatten(),cube2[p].flatten())
 	r = np.asarray(r)
 	r[1] = np.std(cube1[p].flatten()-cube2[p].flatten())
-	plt.text(m-3*s,m-3*s,str(r))
+	plt.text(m-3*s,m-3*s,str(r),fontsize=18)
 	print r
+	plt.tight_layout()
+	plt.savefig(sys.argv[3]+'_'+str(p)+'_.png',fmt='png',bbox_inches='tight')
+	index +=1
 
-plt.tight_layout()
-plt.savefig(sys.argv[3]+'.png',fmt='png',bbox_inches='tight')
+
 	
 	
