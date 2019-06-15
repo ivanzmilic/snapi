@@ -2004,9 +2004,9 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   delete []b;
   delete []solution;
 
-  if (zeros && alo) // if there were zeros, then re-do using the regular lambda itera
+  if (zeros && alo) // if there were zeros, then re-do using the regular lambda iteration
     delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
-  else if (zeros && !alo) // if we tried lambda iter, revert to old. // TO DO
+  else if (zeros && !alo) // if we tried lambda iteration, revert to old. // Can this be done better?
     delta = 0; // don't do anything!
 
   return delta;

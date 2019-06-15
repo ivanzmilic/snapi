@@ -25,15 +25,16 @@ cube2[-NB-NT:-NT] *= cube2[-1]
 plt.clf()
 plt.cla()
 
-params = [2,3,7,8,10,11]
+params = [0,3,7,8,10,11]
 cmaps = ['inferno','inferno','bwr','bwr','PRGn','PRGn']
+unit = ['K','K','km/s','km/s','Gauss','Gauss']
 
 index = 0
 for p in params:
 	if (cmaps[index] == 'bwr'):
 		cube1[p] /= -1E5
 		cube2[p] /= -1E5
-	plt.figure(figsize=[13.0,3.5])
+	plt.figure(figsize=[12.5,3.5])
 	plt.clf()
 	plt.cla()
 	plt.subplot(1,3,1)
@@ -52,14 +53,64 @@ for p in params:
 	#plt.subplot(224)
 	plt.hist2d(cube1[p].flatten(),cube2[p].flatten(),bins=(100,100),cmap='Purples',vmax=30,range=[[m-3*s,m+3*s],[m-3*s,m+3*s]])
 	plt.plot(cube1[p].flatten(),cube1[p].flatten(),color='red')
+	plt.xlabel('Standard inversion')
+	plt.ylabel('CNN')
 	r = stats.pearsonr(cube1[p].flatten(),cube2[p].flatten())
 	r = np.asarray(r)
 	r[1] = np.std(cube1[p].flatten()-cube2[p].flatten())
-	plt.text(m-3*s,m-3*s,str(r),fontsize=18)
+	r[0] = round(r[0],3)
+	r[1] = round(r[1],3)
+	plt.text(m-3*s,m-2.8*s,'r='+str(r[0])+' $\\sigma=$'+str(r[1])+unit[index],fontsize=14)
 	print r
 	plt.tight_layout()
 	plt.savefig(sys.argv[3]+'_'+str(p)+'_.png',fmt='png',bbox_inches='tight')
+	plt.savefig(sys.argv[3]+'_'+str(p)+'_.eps',fmt='eps',bbox_inches='tight')
 	index +=1
+
+#Here we plot correlations of correlations
+
+combo1 = [3,8]
+combo2 = [8,11]
+combo3 = [7,10]
+
+plt.clf()
+plt.cla()
+plt.subplot(131)
+v1 = (cube1[combo1[0]] * cube1[combo1[1]]).flatten()
+v2 = (cube2[combo1[0]] * cube2[combo1[1]]).flatten()
+m = np.mean(v1)
+s = np.std(v1)
+plt.hist2d(v1,v2,bins=(100,100),cmap='Purples',vmax=30,range=[[m-3*s,m+3*s],[m-3*s,m+3*s]])
+plt.plot(v1,v1,color='red')
+plt.xlabel('Standard inversion')
+plt.ylabel('CNN')
+r = stats.pearsonr(v1,v2)
+plt.text(m-3*s,m-2.8*s,'r='+str(r[0]),fontsize=14)
+plt.subplot(132)
+v1 = (cube1[combo2[0]] * cube1[combo2[1]]).flatten()
+v2 = (cube2[combo2[0]] * cube2[combo2[1]]).flatten()
+m = np.mean(v1)
+s = np.std(v1)
+plt.hist2d(v1,v2,bins=(100,100),cmap='Purples',vmax=30,range=[[m-3*s,m+3*s],[m-3*s,m+3*s]])
+plt.plot(v1,v1,color='red')
+plt.xlabel('Standard inversion')
+plt.ylabel('CNN')
+r = stats.pearsonr(v1,v2)
+plt.text(m-3*s,m-2.8*s,'r='+str(r[0]),fontsize=14)
+plt.subplot(133)
+v1 = (cube1[combo3[0]] * cube1[combo3[1]]).flatten()
+v2 = (cube2[combo3[0]] * cube2[combo3[1]]).flatten()
+m = np.mean(v1)
+s = np.std(v1)
+plt.hist2d(v1,v2,bins=(100,100),cmap='Purples',vmax=30,range=[[m-3*s,m+3*s],[m-3*s,m+3*s]])
+plt.plot(v1,v1,color='red')
+plt.xlabel('Standard inversion')
+plt.ylabel('CNN')
+r = stats.pearsonr(v1,v2)
+plt.text(m-3*s,m-2.8*s,'r='+str(r[0]),fontsize=14)
+plt.tight_layout()
+plt.savefig('corr_of_corr.png',fmt='png',bbox_inches='tight')
+plt.savefig('corr_of_corr.eps',fmt='eps',bbox_inches='tight')
 
 
 	
