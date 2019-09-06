@@ -1274,7 +1274,7 @@ int atmospheric_interpolation(fp_t * node_tau, fp_t * node_value, int N_nodes, f
     if (is_temp){  
       for (int i=from;i<=to;++i){
         if (quantity[i] < 3400.0) quantity[i] = 3400.0;
-        if (quantity[i] > 12000.0) quantity[i] = 12000.0; // put these in constants
+        if (quantity[i] > 20000.0) quantity[i] = 20000.0; // put these in constants
       }
     }
     return 0;

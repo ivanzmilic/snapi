@@ -132,7 +132,7 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   }
   else 
     for (int x3i=x3l;x3i<=x3h;++x3i)
-      B[x3i] = 0.0; 
+      B[x3i] = TINY; 
 
   
   int N_nodes_theta = atmos_model->get_N_nodes_theta();
@@ -148,7 +148,6 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   else
     for (int x3i=x3l;x3i<=x3h;++x3i)
       theta[x3i] = TINY; 
-
 
   int N_nodes_phi = atmos_model->get_N_nodes_phi();
   fp_t * phi = new fp_t[x3h-x3l+1] - x3l;

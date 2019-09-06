@@ -13,7 +13,7 @@
 #include "obs.h"
 #include "mathtools.h"
 
-#define DELTA 1E-5
+#define DELTA 1E-3
 
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
@@ -154,9 +154,11 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       // From then on, it proceeds normally:
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
-      if (n_chi_to_track >=3)
-        if (fabs((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1]) < DELTA)
+      if (n_chi_to_track >=3){
+        fp_t change = fabs((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1]);
+        if (change < DELTA)
           to_break = 1;
+      }
     }
     else{
       lm_parameter *= lm_multiplicator;
@@ -1488,7 +1490,7 @@ int atmosphere::polish_extreme_values(){
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i){
         if (T[x1i][x2i][x3i] < 3400.0) T[x1i][x2i][x3i] = 3400.0;
-        if (T[x1i][x2i][x3i] > 12000.0) T[x1i][x2i][x3i] = 12000.0;
+        if (T[x1i][x2i][x3i] > 20000.0) T[x1i][x2i][x3i] = 20000.0;
         if (Vz[x1i][x2i][x3i] < -2E6) Vz[x1i][x2i][x3i] = -2E6;
         if (Vz[x1i][x2i][x3i] > 2E6) Vz[x1i][x2i][x3i] = 2E6;
 

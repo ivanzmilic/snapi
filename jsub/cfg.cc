@@ -197,8 +197,6 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
     // should be else - error  
   fclose(tmpinpt);
   delete[] tmp_str2;
-  //for (int i=0;i<nlambda;++i)
-  //    fprintf(stderr,"%d %f \n",i,lambda[i]*1E8);
   }else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: observation must have wavelength specified to be observable!\n",id);
   if(!(name=get_arg(odata,"NAME",0)))
       io.msg(IOL_ERROR|IOL_FATAL,"obs: no output file name specified!\n");
