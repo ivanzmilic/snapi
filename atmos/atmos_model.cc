@@ -9,6 +9,15 @@
 #include "profiles.h"
 #include "const.h"
 
+#define T_MIN 3400.0
+#define T_MAX 12000.
+#define VT_MIN 1E2
+#define VT_MAX 5E5
+#define VS_MIN -5E5
+#define VS_MAX 5E5
+#define B_MIN 1.0
+#define B_MAX 1E4
+
 model::model(){
 
   N_nodes_temp = 0;
@@ -901,32 +910,69 @@ int model::correct(fp_t * correction){
   // is the fastest, and does not require writing new models and things like that.
 
   // First make sure that corrections are not too big:
-  for (int i=1;i<=N_nodes_temp;++i)
-    if (fabs(correction[i]) > 1000.0) correction[i] = 1000.0 * fabs(correction[i])/correction[i];
+  /*for (int i=1;i<=N_nodes_temp;++i)
+    if (fabs(correction[i]) > 1000.0) correction[i] = 1000.0 * fabs(correction[i])/correction[i];*/
+  
+  /*int vt_start = N_nodes_temp+1;
+  int vt_stop = N_nodes_temp+N_nodes_vt;
+  for (int i=vt_start;i<=vt_stop;++i)
+    if (fabs(correction[i]) > 3E5) correction[i] = 3E5 * fabs(correction[i])/correction[i];
 
-  int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
+  int vs_start = N_nodes_temp+N_nodes_vt+1;
+  int vs_stop = N_nodes_temp+N_nodes_vt+N_nodes_vs;
+  for (int i=vs_start; i<=vs_stop; ++i)
+    if (fabs(correction[i]) > 3E5) correction[i] = 3E5 * fabs(correction[i])/correction[i];*/
+    
+  /*int B_start = N_nodes_temp+N_nodes_vt+N_nodes_vs+1;
   int B_stop  = B_start-1+N_nodes_B;
 
   for (int i=B_start;i<=B_stop;++i)
     if (fabs(correction[i]) > 1000.0) correction[i] = 1000.0 * fabs(correction[i])/correction[i];
-
+  */
   for (int i=1;i<=N_parameters;++i)
     perturb_node_value(i,correction[i]);
-
+  /*
   // Check temperatures:
   for (int i=1;i<=N_nodes_temp;++i){
     if (temp_nodes_temp[i] < 3400.0) temp_nodes_temp[i] = 3400.0; // Lowest possible T
-    if (temp_nodes_temp[i] > 20000.0) temp_nodes_temp[i] = 20000.0; // Highest possible T (?)
+    if (temp_nodes_temp[i] > 10000.0) temp_nodes_temp[i] = 20000.0; // Highest possible T (?)
                                                                     // These quantities are very questionable
   }
   for (int i=1;i<=N_nodes_vt;++i){
     if (vt_nodes_vt[i] < 0) vt_nodes_vt[i] *= (-1.0);
     if (vt_nodes_vt[i] > 20E5) vt_nodes_vt[i] = 20E5; // highest possible vt
   }
+  
+  for (int i=1;i<=N_nodes_vs;++i)
+    if (fabs(vs_nodes_vs[i])>20E5) vs_nodes_vs[i] = 20E5*fabs(vs_nodes_vs[i])/vs_nodes_vs[i];
+  
   for (int i=1;i<=N_nodes_B;++i){
     if (B_nodes_B[i] < 0.0) B_nodes_B[i] = fabs(B_nodes_B[i]);
     if (B_nodes_B[i] > 10000.0) B_nodes_B[i] = 10000.0; // Highest possible B
   }
+  */
+  return 0;
+}
+
+int model::bracket_parameter_values(){
+
+  for (int i=1;i<=N_nodes_temp;++i){
+    if (temp_nodes_temp[i]<T_MIN) temp_nodes_temp[i] = T_MIN;
+    if (temp_nodes_temp[i]>T_MAX) temp_nodes_temp[i] = T_MAX;
+  }
+  for (int i=1;i<=N_nodes_vt;++i){
+    if (vt_nodes_vt[i]<VT_MIN) vt_nodes_vt[i] = VT_MIN;
+    if (vt_nodes_vt[i]>VT_MAX) vt_nodes_vt[i] = VT_MAX;
+  }
+  for (int i=1;i<=N_nodes_vs;++i){
+    if (vs_nodes_vs[i]<VS_MIN) vs_nodes_vs[i] = VS_MIN;
+    if (vs_nodes_vs[i]>VS_MAX) vs_nodes_vs[i] = VS_MAX;
+  }
+  for (int i=1;i<=N_nodes_B;++i){
+    if (B_nodes_B[i]<B_MIN) B_nodes_B[i] = B_MIN;
+    if (B_nodes_B[i]>B_MAX) B_nodes_B[i] = B_MAX;
+  }
+
   return 0;
 }
 

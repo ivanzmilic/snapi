@@ -13,7 +13,7 @@
 #include "atmos_ppbez.h"
 #include "mathtools.h"
 
-#define TINY 1E-5
+#define TINY 1E-3
 
 atmos_pp *atmos_pp_new(acfg *cfg,io_class &io_in)
 {
@@ -148,6 +148,9 @@ int atmos_pp::build_from_nodes(model * atmos_model){
   else
     for (int x3i=x3l;x3i<=x3h;++x3i)
       theta[x3i] = TINY; 
+  
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+      if (fabs(theta[x3i])<TINY) theta[x3i] = TINY; 
 
   int N_nodes_phi = atmos_model->get_N_nodes_phi();
   fp_t * phi = new fp_t[x3h-x3l+1] - x3l;

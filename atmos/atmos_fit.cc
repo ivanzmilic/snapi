@@ -78,10 +78,14 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int filtergraph_mode=0;
   
   int N_parameters = model_to_fit->get_N_nodes_total();
+  //model_to_fit->print();
+  model_to_fit->bracket_parameter_values();
 
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
   for (iter=1;iter<=MAX_ITER;++iter){
+
+    //printf("\nENTERING ITERATION # %d \n", iter);
 
     if (corrected){      
       // These quantities are only re-computed if the model has been modified:    
@@ -89,12 +93,21 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
       // Calculate the spectrum and the responses and apply degradation to it:      
       current_obs = obs_stokes_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
-
       current_obs->add_scattered_light(scattered_light,qs_level);
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       }
+      
+      /*int s=1;
+      FILE * debug;
+      debug = fopen("JTJ.dat","w");
+      for (int l=1;l<=nlambda;++l){
+        for (int pp=1;pp<=N_parameters;++pp)
+          fprintf(debug,"%e ", derivatives_to_parameters[pp][l][s]);
+        fprintf(debug,"\n");
+      }
+      fclose(debug);*/
 
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,noise_scaling);
       S_current = current_obs->get_S(1,1);
@@ -126,6 +139,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
+    test_model->bracket_parameter_values();
+    //test_model->print();
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -184,6 +199,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
+
+    //model_to_fit->print();
 
     if (to_break)
       break;
@@ -279,6 +296,7 @@ int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_para
     // Apply the correction:
     model_test = clone(model_to_fit); // We want to correct original model.
     model_test->correct(correction);
+    model_test->bracket_parameter_values();
     build_from_nodes(model_test);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -300,6 +318,7 @@ int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_para
       correction = solve(JTJ, rhs, 1, N_parameters);
       scale_corrections(correction,model_to_fit,N_parameters);
       model_to_fit->correct(correction);
+      model_to_fit->bracket_parameter_values();
       delete[](correction+1);
       break; 
     }

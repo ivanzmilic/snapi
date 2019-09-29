@@ -5,6 +5,8 @@
 **/*.a
 **/*.png
 **/*.eps
+**/*.cfg
+*.cfg
 *.png
 *.eps
 *.o

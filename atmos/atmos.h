@@ -489,6 +489,7 @@ public:
 
   int correct(fp_t * correction);
   int set_parameters(fp_t * par_input);
+  int bracket_parameter_values();
   int polish_angles();
   
   int cpy_values_from(model *);
