@@ -12,9 +12,9 @@
 #define T_MIN 3400.0
 #define T_MAX 12000.
 #define VT_MIN 1E2
-#define VT_MAX 5E5
-#define VS_MIN -5E5
-#define VS_MAX 5E5
+#define VT_MAX 15E5
+#define VS_MIN -15E5
+#define VS_MAX 15E5
 #define B_MIN 1.0
 #define B_MAX 1E4
 
