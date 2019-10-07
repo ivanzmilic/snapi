@@ -522,8 +522,6 @@ fp_t ***atom::boundbound_op(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t *
               fp_t dld=broad_dop(lam,T[x1i][x2i][x3i],Vt[x1i][x2i][x3i]);
 
               gc = damp_col(x1i, x2i, x3i, z, i, ii, T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], lam);
-              //if (Z==2)
-              //  printf("%d %e %e \n", x3i,parent_atm->get_x3(x3i),gc);
               fp_t a=sf*(ar+gc*turn_on_damping)/dld;
               fp_t x=(lam-lambda*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
               fp_t profile = 1.0 / dld * fvoigt(x, a);
@@ -535,7 +533,6 @@ fp_t ***atom::boundbound_op(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t *
               op[x1i][x2i][x3i]+= op_current_transition;
             }
       }
-  //printf("op_unpol = %e \n", op[x1l][x2l][25]);
   return op;
 }
 
@@ -1754,12 +1751,7 @@ fp_t atom::R_ij_local_ALO(int z, int from, int to, fp_t JJ, fp_t local_ALO_opera
 	}
 	fp_t line_source_funtion = upper_pop * A[z][u][l] / (lower_pop * B[z][l][u] - upper_pop * B[z][u][l]);
   fp_t total_rate = A[z][from][to] * (1.0 - local_ALO_operator) + B[z][from][to] * (JJ - local_ALO_operator * line_source_funtion);
-  //if (total_rate < 0){
-    //printf("Radiative rate less than zero? %e %e %e %e \n", total_rate, local_ALO_operator, JJ, line_source_funtion);
-    //exit(1);
-    //total_rate = 0.0;
-  //}
-	return total_rate;
+  return total_rate;
 
 }
 
@@ -1781,14 +1773,20 @@ fp_t atom::C_ij(int z, int from, int to, fp_t T, fp_t Ne){
   int l_up = (from > to) ? from : to;
   int l_down = (from > to) ? to : from;
 
+  // First check whether we have an interpolation formula to return the rates. By default the 
+  // interpolation should provide an expression for de-excitation, that is upper -> lower.
   if (cr[z][l_up][l_down]->get_type()){
-  
-    fp_t en_difference = (ee[z][l_up] - ee[z][l_down]);
+
+    fp_t en_difference = fabs(ee[z][l_up] - ee[z][l_down]);
     fp_t u_0 = en_difference / k / T;
     fp_t rates = (from > to) ? cr[z][l_up][l_down]->C(T,Ne) : cr[z][l_up][l_down]->C(T,Ne) * exp(-u_0) * fp_t(g[z][l_up]) / fp_t(g[z][l_down]);
     return rates;
+    
   }
-	fp_t oscillator_str = osc_str[z][from][to];
+	
+  // This is the default expression for computing collisional rates for given transition. By default we mean van Regemorter formula: 
+  //Stel. Atm. 3rd edition and references therein, page 276
+  fp_t oscillator_str = osc_str[z][from][to];
 	fp_t en_difference = aps(ee[z][from] - ee[z][to]);
 	fp_t u_0 = en_difference / k / T;
 	fp_t Gamma_collisional;
@@ -1864,6 +1862,8 @@ fp_t atom::C_i_cont(int z, int i, fp_t T, fp_t n_e){
 	fp_t lambda = h * c / dE;
 	fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda) : -1.0;
   fp_t rate = 1.55E13 / sqrt(T) * g_i * sigma * exp(-u0) / u0 * n_e;
+
+  //printf("%d %e %e \n",i,T,1.55E13 * g_i * sigma * exp(-u0) / u0);
 
 	return rate;
 

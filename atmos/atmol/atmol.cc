@@ -207,15 +207,3 @@ fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int)
 {
   return 0;
 }
-
-void atmol::add(fp_t ***R,fp_t ***L,fp_t ***op,fp_t***,fp_t***,fp_t***,fp_t bin,fp_t lambda,fp_t theta,fp_t phi)
-{
-//  io.msg(IOL_INFO,"atmol::add: add %s\n",name);
-}
-
-/*int responses_setup(fp_t *, fp_t *, int, fp_t*, int, int, int, int, int, int, int){
-  return 0;
-}
-int responses_clear(fp_t *, fp_t *, int, fp_t*, int, int, int, int, int, int, int){
-  return 0;
-}*/

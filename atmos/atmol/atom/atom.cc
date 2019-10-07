@@ -947,23 +947,8 @@ fp_t atom::damp_col(int ix1, int ix2, int ix3, int z, int i_from, int i_to, fp_t
   fp_t red_mass = 1.66E-24 / (1.0/1.008 + 1.66E-24/mass); // Reduced mass which goes into equation for mean relative velocity
   fp_t vmean = sqrt(8.0*k*Temp/pi/red_mass); // Mean relative velocity
 
-  fp_t w = 0.0;
-  
-  //if (z >= 1)
-  w += fetch_population(ix1, ix2, ix3, 0, 0) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
+  fp_t w = fetch_population(ix1, ix2, ix3, 0, 0) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
 
-  //if (z==0) // Van der Waals
-  //  w+= 8.08 * 8.31E-13 * pow(vmean,0.6) * fetch_population(ix1, ix2, ix3, 0, 0);
-  //if (z == 1)
-  //printf("%e \n", w/fetch_population(ix1, ix2, ix3, 0, 0));
-   
-  //if (Z == 2)
-    //printf("Z = %d d = %d from = %d to = %d  w = %e colliders = %e \n",Z, ix3, i_from, i_to,  w, fetch_population(ix1, ix2, ix3, 0, 0, 0));
-
-  // And then we add resonance broadening, which depends on the ground level of the same ion:
-  //w += pop[ix1][ix2][ix3].N[z] * 4.0 * e * e / mass * lambda_0 / c;
-  
-  // TWEAK: Broadening multiplied by sqrt(2). Not sure why but this helps! 
   return w;
 }
 
@@ -1366,9 +1351,9 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
             dld_max = broad_dop(lam,1E5,2E5);
             dld_min = broad_dop(lam,4E4,0.5E5);
 
-            fp_t core_size = 4.0;
-            fp_t core_step = 0.66;
-            fp_t total_span = 20.0;
+            fp_t core_size = 5.0;
+            fp_t core_step = 0.5;
+            fp_t total_span = 50.0;
             fp_t delta = 1.3;
 
             int n_core = 2 * int(core_size * dld_max / dld_min / core_step) + 1;
@@ -1892,6 +1877,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   
     // Setup the rate equation:
     for(int i=0;i<nmap-1;++i){ // For all the 'levels' but the last one 
+      
       uint16_t l=lmap[i]; // "current lvl
       uint08_t z=zmap[i]; // apropriate ionization stage
 
@@ -1957,24 +1943,12 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       level_to_replace = i;
     }
   }
-  //level_to_replace = nmap-1;
-
+  
   for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
 
   
-  // Print the rate matrix: (turn this ito a debug mode?)
-  /*if (x3i == x3i_control){
-    printf("Rate matrix:\n");
-    io.msg(IOL_INFO,"atom::pops: %s\n",name);
-    for(int i=1;i<=nmap;++i){
-      for(int ii=1;ii<=nmap;++ii){
-        fprintf(stderr,"%5.10E ",M[i][ii]);      
-      }
-      fprintf(stderr,"%5.10E \n", b[i-1]);
-    }
-  }*/
-
+  
   fp_t relaxation_factor = 1.0; // 1.0 for no relaxation, > 1 for overrelaxation (makes no sense imo)
                                 // 0.0 does not change the solution. <1 relaxed the solution (uder-corrects)
 
@@ -2032,9 +2006,6 @@ fp_t **atom::weight(fp_t op,fp_t T,fp_t Ne,fp_t Vr,fp_t Vt,struct pps &pp,fp_t l
   return w;
 }
 
-void atom::add(fp_t ***I,fp_t ***L,fp_t ***op,fp_t ***T,fp_t ***Ne,fp_t ***Vr,fp_t bin,fp_t lambda,fp_t t,fp_t p){}; // Obsolete!
-
-
 void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w, fp_t angular_weight){
 
   // Ok Ivan, you wrote this more or less from the scratch. So see if you really want it to look like this.
@@ -2057,7 +2028,7 @@ void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w,
           for (int i=0; i<ncmp; ++i)
             for (int tr=1; tr<=ntr; ++tr){
 
-              // Add appropriate contribution to norm, in case the integral of the absorption profile is not one.
+              // Add appropriate contribution to norm, in case the integral of the absorption profile is not unity.
               nrm[tr] += lambda_w * angular_weight * current_profile[x1i][x2i][x3i][tr] * 0.25 / pi;
 
               // Now, for the general case which involves the presence of the continuum and the overlapping lines, the approximate lambda operator for the transition 'tr'
@@ -2067,7 +2038,8 @@ void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w,
               int lower_level = inverse_tmap[tr][3];
               int upper_level = inverse_tmap[tr][4]; 
 
-              if (upper_level < nl[z_state]){
+              if (upper_level < nl[z_state]){ // If this is the line transition:
+
 
                 fp_t line_energy = ee[z_state][upper_level] - ee[z_state][lower_level];
 
@@ -2075,8 +2047,7 @@ void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w,
                 fp_t line_opacity = (pop[x1i][x2i][x3i].n[z_state][lower_level] * B[z_state][lower_level][upper_level] - pop[x1i][x2i][x3i].n[z_state][upper_level] * B[z_state][upper_level][lower_level]) 
                   * current_profile[x1i][x2i][x3i][tr] * line_energy * 0.25 / pi;
                 fp_t line_factor = line_opacity / opp[x1i][x2i][x3i];
-                //line_factor = 1.0; // DEBUG
-
+                
                 fp_t elementary_contribution = lambda_w * angular_weight * I[x1i][x2i][x3i] * current_profile[x1i][x2i][x3i][tr] * line_factor * 0.25 / pi;
 
                 Jm[tr] += elementary_contribution;
@@ -2088,9 +2059,10 @@ void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w,
 
               else if (upper_level == nl[z_state]){
                 fp_t sigma = (bf[z_state][lower_level]) ? bf[z_state][lower_level]->U(lambda) : 0.0;
+                // Photoinization:
                 Jm[tr] += lambda_w * angular_weight * sigma * lambda / h /c * I[x1i][x2i][x3i];
-                Jn[tr] += lambda_w * angular_weight * sigma * lambda / h /c * (I[x1i][x2i][x3i] + 2.0 * h * c * c / pow(lambda, 5.0)) * exp(-h * c / lambda / k / fetch_temperature(x1i, x2i, x3i));
-                
+                // Radiative Recombination:
+                Jn[tr] += lambda_w * angular_weight * sigma * lambda / h /c * (I[x1i][x2i][x3i] + 2.0 * h * c * c / pow(lambda, 5.0)) * exp(-h * c / lambda / k / fetch_temperature(x1i, x2i, x3i));     
               }
             }
           }
@@ -2283,11 +2255,7 @@ void atom::print_radiation_field_tensor(){
           fp_t depolarization_magnetic_derivative = -0.4 * (2.0/(1.0+GHsq)/(1.0+GHsq) + 8.0/(1.0+4.0*GHsq)/(1.0+4.0*GHsq)) * Gamma_Hanle_derivative;
 
           J_02_responses[5][x3i][x3i][tr] = J_02[x1l][x2l][x3i][tr] / depolarization_magnetic * depolarization_magnetic_derivative;
-          //printf("%d %e \n", x3i, J_02_responses[5][x3i][x3i][tr]);
           
-          
-
-
         }
   }
     if (Z>1)

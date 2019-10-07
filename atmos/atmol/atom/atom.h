@@ -359,7 +359,6 @@ public:
  
   virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int);
   
-  virtual void add(fp_t***,fp_t***,fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t,fp_t,fp_t);
   // New one:
   virtual void add(fp_t***, fp_t***, fp_t ***, fp_t, fp_t, fp_t);
   virtual void add_to_radiation_tensor(fp_t***, fp_t***, fp_t ***, fp_t, fp_t, fp_t, fp_t);

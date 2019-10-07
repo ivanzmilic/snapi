@@ -62,8 +62,6 @@ int32_t colr::unpack(uint08_t *buf,uint08_t do_swap,io_class &io)
 tbcr::tbcr(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io):colr(buf,offs,do_swap,io)
 {
   offs+=unpack(buf+offs,do_swap,io);
-  //printf("My type is %d: \n",type);
-  //printf("%e \n",C(8000.0,1E5));
 }
 
 tbcr::tbcr(fp_t *t_in,fp_t *v_in,int n_in,io_class &io):colr(COLR_TYPE_TAB)
