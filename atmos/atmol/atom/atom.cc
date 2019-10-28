@@ -1687,9 +1687,9 @@ void atom::zeeman_setup(){
               norm_p += S_p[tr][i];
               norm_total += S_p[tr][i];
             }
-
             for (int i=0;i<nm[tr][0];++i)
               S_p[tr][i] /= norm_p;
+          
             // SIGMA_B/R
             fp_t norm_b = 0.0;
             fp_t norm_r = 0.0;
@@ -1890,10 +1890,15 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         // Transitions from this level
         fp_t Radiative_rates;
         if (alo == 1)
-          Radiative_rates = 1.0 * R_ij_local_ALO(z, l, ll, JJ, LL, pop[x1i][x2i][x3i].n[z][l], pop[x1i][x2i][x3i].n[z][ll]);
+          Radiative_rates = R_ij_local_ALO(z, l, ll, JJ, LL, pop[x1i][x2i][x3i].n[z][l], pop[x1i][x2i][x3i].n[z][ll]);
         else
-          Radiative_rates = 1.0 * R_ij(z,l,ll,JJ);
+          Radiative_rates = R_ij(z,l,ll,JJ);
         fp_t Collisional_rates = C_ij(z, l, ll, Temp, ne);
+        /*if (l==4 && ll == 2){
+          fp_t col_temp = C_ij(z, ll, l, Temp, ne);
+
+          fprintf(stderr,"%d %e %e %e \n",x3i,Collisional_rates,col_temp, fetch_Ne(x1l,x2l,x3i));
+        }*/
         //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
         //Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         
@@ -1901,9 +1906,9 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         
         // Transitions to this level:
         if (alo)
-          Radiative_rates = 1.0 * R_ij_local_ALO(z, ll, l, JJ, LL, pop[x1i][x2i][x3i].n[z][ll], pop[x1i][x2i][x3i].n[z][l]);
+          Radiative_rates = R_ij_local_ALO(z, ll, l, JJ, LL, pop[x1i][x2i][x3i].n[z][ll], pop[x1i][x2i][x3i].n[z][l]);
         else 
-          Radiative_rates = 1.0 * R_ij(z,ll,l,JJ);
+          Radiative_rates = R_ij(z,ll,l,JJ);
         Collisional_rates = C_ij(z, ll, l, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         //Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
@@ -1943,6 +1948,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       level_to_replace = i;
     }
   }
+  //fprintf(stderr,"%d %e\n",x3i, M[3][5]);
   
   for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
@@ -2060,9 +2066,10 @@ void atom::add(fp_t *** I, fp_t *** L, fp_t *** opp, fp_t lambda, fp_t lambda_w,
               else if (upper_level == nl[z_state]){
                 fp_t sigma = (bf[z_state][lower_level]) ? bf[z_state][lower_level]->U(lambda) : 0.0;
                 // Photoinization:
-                Jm[tr] += lambda_w * angular_weight * sigma * lambda / h /c * I[x1i][x2i][x3i];
+                Jm[tr] += (lambda_w * angular_weight * sigma * lambda / h /c * I[x1i][x2i][x3i]);
                 // Radiative Recombination:
-                Jn[tr] += lambda_w * angular_weight * sigma * lambda / h /c * (I[x1i][x2i][x3i] + 2.0 * h * c * c / pow(lambda, 5.0)) * exp(-h * c / lambda / k / fetch_temperature(x1i, x2i, x3i));     
+                Jn[tr] += (lambda_w * angular_weight * sigma * lambda / h /c * (I[x1i][x2i][x3i] + 
+                  2.0 * h * c * c / pow(lambda, 5.0)) * exp(-h * c / lambda / k / fetch_temperature(x1i, x2i, x3i)));
               }
             }
           }

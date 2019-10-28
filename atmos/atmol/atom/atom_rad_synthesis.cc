@@ -34,12 +34,129 @@
 // We compute opacity and emissivity separately 
 // The file contains following methods: 
 //
-// 1) int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta,fp_t phi,
+// int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** B, fp_t theta,fp_t phi,
 //   fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector);
 // 
-// 2) int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
+// int atom::op_em_vector_plus_pert(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
 //   fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector, fp_t ********op_vector_pert, fp_t*******em_vector_pert)
 
+int atom::op_em_scalar(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
+   fp_t* lambda,int nlambda,fp_t **** op, fp_t **** em){
+
+  // Input quantities are usual ones, T, Ne, Vlos, Vt, B are atmospheric quantities
+  // theta,phi,lambda and nlambda give us angles and wavelengths for which to compute opacity/emissivity
+  // contributions from given atom that are added to op and em, assuming the scalar problem.
+  // (no polarization! For polarized version see below)
+
+  rayleigh_op_em_scalar(T, Ne, Vlos, theta, phi, lambda, nlambda, op, em);
+  freefree_op_em_scalar(T, Ne, Vlos, theta, phi, lambda, nlambda, op, em);
+  boundfree_op_em_scalar(T, Ne, Vlos, theta, phi, lambda, nlambda, op, em);
+  boundbound_op_em_scalar(T, Ne, Vlos, Vt, Bmag, theta, phi, lambda, nlambda, op, em);
+
+  return 0;
+}
+
+int atom::rayleigh_op_em_scalar(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
+   fp_t* lambda,int nlambda,fp_t **** op, fp_t **** em){
+
+  if (Z == 1){ // if Hydrogen, we don't have others implemented yet:
+    for (int l=1;l<=nlambda;++l){
+
+      fp_t cross_section = 0;
+      // Add all the possible resonances:
+      int i = 0;
+      int z = 0;
+      fp_t lambda_0 = 1215.67E-8; // Ly alpha wavelength
+      
+      // We use approach from Lee, 2005 (found in references from Stellar Atmospheres)
+
+      fp_t cp[5] = {1.26563, 3.73828125, 8.813130, 19.15379502, 39.92303};
+      for (int ii=0;ii<=5;++ii)
+        cross_section += cp[i] * pow(lambda_0/lambda[l], 2*ii);
+
+      cross_section *= pow(lambda_0/lambda[l], 4);
+
+      cross_section *= cross_section * 6.65E-25;
+      
+      for (int x1i=x3l;x1i<=x1h;++x1i)
+        for (int x2i=x2l;x2i<=x2h;++x2i)
+          for (int x3i=x3l;x3i<=x3h;++x3i){
+            fp_t op_temp = cross_section * pop[x1i][x2i][x3i].N[z];
+            op[l][x1i][x2i][x3i] += op_temp;
+            em[l][x1i][x2i][x3i] += op_temp * Planck_f(lambda[l], T[x1i][x2i][x3i]);
+          }
+    }
+  }
+  return 0;
+}
+
+int atom::freefree_op_em_scalar(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
+  fp_t* lambda,int nlambda,fp_t **** op, fp_t **** em){
+
+  for (int l=1;l<=nlambda;++l){
+    
+    fp_t fudge = parent_atm->get_opacity_fudge(lambda[l]);
+
+    fp_t fct=(e*e*c*h*h*Ryd)/(6.0*pi*pi*pi*e0*me*c)*sqrt((2.0*pi)/(3.0*k*me*me*me));
+    for(int x1i=x1l;x1i<=x1h;++x1i)
+      for(int x2i=x2l;x2i<=x2h;++x2i)
+        for(int x3i=x3l;x3i<=x3h;++x3i){
+          fp_t gff=1.1; // see Berger, ApJ 1956 for expressions
+          fp_t a=fct*gff*Ne[x1i][x2i][x3i]/(sqrt(T[x1i][x2i][x3i])*c*c*c);
+          fp_t op_temp = 0.;
+          for(int z=1;z<=Z;++z) op_temp+=a*sqr((fp_t)z)*pop[x1i][x2i][x3i].N[z];
+          // wavelength dependence
+          fp_t b=-(h*c)/(k*T[x1i][x2i][x3i]); // stimulated emission correction
+          fp_t ll=lambda[l]*(1.0+Vlos[x1i][x2i][x3i]/c);
+          op_temp*=ll*sqr(ll)*(1.0-exp(b/ll));
+          op_temp*=fudge;
+          op[l][x1i][x2i][x3i] += op_temp;
+          em[l][x1i][x2i][x3i] += op_temp * Planck_f(lambda[l], T[x1i][x2i][x3i]);
+        }
+  }
+  return 0;
+}
+
+int atom::boundfree_op_em_scalar(fp_t*** T,fp_t*** Ne,fp_t*** Vlos, fp_t theta,fp_t phi,
+   fp_t* lambda,int nlambda,fp_t **** op, fp_t **** em){
+
+  for (int l=1;l<=nlambda;++l){
+  
+    fp_t fudge=parent_atm->get_opacity_fudge(lambda[l]);
+//
+    for(int z=0;z<Z;++z) // skip final stage: it cannot be ionized
+      for(int i=0;i<nl[z];++i)
+      for(int x1i=x1l;x1i<=x1h;++x1i)
+        for(int x2i=x2l;x2i<=x2h;++x2i)
+          for(int x3i=x3l;x3i<=x3h;++x3i){
+            fp_t sigma = (bf[z][i]) ? bf[z][i]->U(lambda[l] * (1.0 + 0.0*Vlos[x1i][x2i][x3i]/c)) : 0.0;
+            if (sigma){
+
+              // Absorption:
+              fp_t pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * fetch_Ne(x1i, x2i, x3i) * saha_const * pow(T[x1i][x2i][x3i], -1.5) 
+              * fp_t(g[z][i]) / fp_t(g[z+1][0]) * exp((ip[z] - ee[z][i] - h * c / lambda[l])/k/T[x1i][x2i][x3i]);
+              op[l][x1i][x2i][x3i] += sigma * (pop[x1i][x2i][x3i].n[z][i] - pop_mod)*fudge;
+              // Emission:
+              pop_mod = pop[x1i][x2i][x3i].n[z+1][0] * Ne[x1i][x2i][x3i] * saha_const * pow(T[x1i][x2i][x3i], -1.5) * fp_t(g[z][i]) / fp_t(g[z+1][0])
+              * exp((ip[z] - ee[z][i]) / k /  T[x1i][x2i][x3i]);          
+              em[l][x1i][x2i][x3i] += sigma * pop_mod * (1.0 - exp(- h * c / lambda[l] / k /T[x1i][x2i][x3i])) * Planck_f(lambda[l], T[x1i][x2i][x3i])*fudge;
+            }
+    }
+  }
+  return 0;
+}
+
+int atom::boundbound_op_em_scalar(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
+   fp_t* lambda,int nlambda,fp_t **** op, fp_t **** em){
+
+
+  return 0;
+}
+
+
+
+
+/////////////// VECTOR VERSIONS: //////////////////////////////////////////////////////////////////
 
 int atom::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t**** Bmag, fp_t theta,fp_t phi,
    fp_t* lambda,int nlambda,fp_t ****** op_vector, fp_t ***** em_vector){

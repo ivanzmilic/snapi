@@ -179,6 +179,11 @@ protected:
 
   // Now the boundbound, boundfree, freefree and Raileygh scattering functions. These ones compute the 
   // opacity and emissivity at once.
+  virtual int rayleigh_op_em_scalar(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
+  virtual int freefree_op_em_scalar(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
+  virtual int boundbound_op_em_scalar(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
+  virtual int boundfree_op_em_scalar(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
+  
   virtual int freefree_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int rayleigh_op_em_vector(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   
@@ -313,6 +318,7 @@ public:
   virtual fp_t ******emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
 
   // Method which computes both op and em, at the whole wavelength grid at once:
+  virtual int op_em_scalar(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
   virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****);
   virtual int op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,
     fp_t ******, fp_t *****, fp_t********,fp_t*******);

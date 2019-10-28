@@ -1064,9 +1064,7 @@ fp_t ***** atom::boundbound_op_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***
           for(int x2i=x2l;x2i<=x2h;++x2i)
             for(int x3i=x3l;x3i<=x3h;++x3i){
 
-              
               fp_t Bmag = B_vec[1][x1i][x2i][x3i];
-              //printf("%e \n", Bmag);
               fp_t theta = B_vec[2][x1i][x2i][x3i] * pi /180.0;
               fp_t phi = B_vec[3][x1i][x2i][x3i] * pi/180.0;
               if (Bmag < 0.001)  // very small
@@ -1092,7 +1090,6 @@ fp_t ***** atom::boundbound_op_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***
                 x=(lam-lambda*(1.0+Vlos[x1i][x2i][x3i]/c))/dld;
                 fp_t profile_scalar = fvoigt(x,a) / dld;
                 fp_t scalar_op = constant_factor * profile_scalar;
-                //printf("%d Wow %d -> %d %e! \n",x3i, i,ii,scalar_op);
                 for (int s=1;s<=4;++s)
                   op[x1i][x2i][x3i][s][s] += scalar_op;
               }
@@ -1158,7 +1155,6 @@ fp_t ***** atom::boundbound_op_vector(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***
               }
             }
   }
-  //printf("op_pol = %e %e %e %e \n", op[x1l][x2l][25][1][1], op[x1l][x2l][25][1][2],op[x1l][x2l][25][1][3],op[x1l][x2l][25][1][4]);
   return op;
 }
 

@@ -43,6 +43,9 @@ fp_t *atmos_pp::anglesetup(fp_t *&th,fp_t *&ph,int &ntp)
     bin[tp]=wmu[tp-1]*2.0*pi;
     bin[ntp-tp+1]=wmu[tp-1]*2.0*pi;  
   }
+  fp_t norm = 0;
+  for (int tp=1;tp<=ntp;++tp)
+    norm += bin[tp];
   return bin;
 }
 

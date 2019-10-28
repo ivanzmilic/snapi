@@ -110,6 +110,9 @@ protected:
   fp_t ***opacity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***emissivity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
+  // Active opacity/emissivity. All wavelengths simultaneously.
+  // Written taking into account that this is a method, so we don't have
+  // to pass everything.
   
   fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
   fp_t ** opacity_continuum_derivative(fp_t, fp_t, fp_t, int, int, int);
@@ -138,6 +141,8 @@ protected:
   // Special versions of functions which compute opacity and emissivity for full wavelength grid in one go.
   // We still account for the atmosphere as if it were 3D, although we might not need it like that.
 
+  // Calculates opacity and emissivity all wavelengths at once, op and em together:
+  int op_em_scalar_active_only(fp_t ***, fp_t ****, fp_t, fp_t, fp_t*,int32_t,fp_t ****,fp_t ****);
   int op_em_vector(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****); // With less arguments as most are already contained in the atmosphere
   int op_em_vector_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t********,fp_t*******){return 0;}; // Basically the same as the one above, except taking different arguments
   int op_em_vector_plus_pert(fp_t ***, fp_t ****, fp_t,fp_t,fp_t*,int,fp_t******,fp_t*****,fp_t********,fp_t*******);

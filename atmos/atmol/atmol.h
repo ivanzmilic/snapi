@@ -71,6 +71,7 @@ public:
   virtual fp_t ******  emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
   
   // Merged version with all wavelength points at once:
+  virtual int op_em_scalar(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****){return 0;};
   virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****){return 0;};
   virtual int op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,
     fp_t ******, fp_t *****, fp_t ********, fp_t *******){return 0;};
