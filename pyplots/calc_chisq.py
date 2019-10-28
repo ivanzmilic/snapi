@@ -11,17 +11,24 @@ import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib import ticker 
+from astropy.io import fits
+
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
 stn = float(sys.argv[3])
 ifmask = sys.argv[4]
 maskfile = sys.argv[5]
+fmt = sys.argv[6]
 
-temp = pyana.fzread(cube1_in)
-cube1 = temp["data"]
-temp = pyana.fzread(cube2_in)
-cube2 = temp["data"]
+if (fmt == 1):
+	temp = pyana.fzread(cube1_in)
+	cube1 = temp["data"]
+	temp = pyana.fzread(cube2_in)
+	cube2 = temp["data"]
+else:
+	cube1 = fits.open(cube1_in)[0].data
+	cube2 = fits.open(cube2_in)[0].data
 
 NL = cube1.shape[-1]
 

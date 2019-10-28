@@ -11,18 +11,26 @@ import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib import ticker
+from astropy.io import fits
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
 out_name = sys.argv[3]
 ifmask = sys.argv[4]
 maskfile = sys.argv[5]
+fmt = sys.argv[6]
 
-temp = pyana.fzread(cube1_in)
-cube1 = temp["data"]
-#cube1 = np.transpose(cube1,(1,0,2,3))
-temp = pyana.fzread(cube2_in)
-cube2 = temp["data"]
+if (fmt == 1):
+	temp = pyana.fzread(cube1_in)
+	cube1 = temp["data"]
+	#cube1 = np.transpose(cube1,(1,0,2,3))
+	temp = pyana.fzread(cube2_in)
+	cube2 = temp["data"]
+
+else:
+	cube1 = fits.open(cube1_in)[0].data 
+	cube2 = fits.open(cube2_in)[0].data 
+
 
 if (int(ifmask)):
 	mask = np.loadtxt(maskfile,skiprows=1)
@@ -40,15 +48,19 @@ print NX, NY
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
 
-cube_1_mean = flt.gaussian_filter(cube_1_mean,2)
-wls = argrelextrema(cube_2_mean,np.less)
+#cube_1_mean = flt.gaussian_filter(cube_1_mean)
+wls = argrelextrema(cube_1_mean,np.less)
 wls = np.asarray(wls)
 wls = wls[0]
 wls = np.append(0,wls)
 print wls
-wls = wls[[0,-2,-1]]
 N_x_panels = 4
 N_y_panels = len(wls)
+
+plt.plot(cube_1_mean)
+plt.savefig('test.png')
+plt.clf()
+plt.cla()
 
 x = np.linspace(0,NX-1,NX)
 y = np.linspace(0,NY-1,NY)
