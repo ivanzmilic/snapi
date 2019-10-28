@@ -119,6 +119,15 @@ fp_t ***atmosphere::emissivity(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***V
   return em;
 }
 
+// ======================================================================================
+// NLTE (active) species only versions: 
+//
+// fp_t *** atmosphere::opacity_active_only - calculates 3D opacity for one wavelength
+// fp_t *** atmosphere::emissivity_active_only - calculated 3D em for one wavelength
+// Next two are coded taking into account that this is atmosphere method:
+// fp_t **** atmosphere::opacity_active_only - calculates 3D opacity for all the wavelengths
+// fp_t **** atmosphere::emissivity_active_only - calculated 3D em for all the wavelengths
+
 fp_t ***atmosphere::opacity_active_only(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t ***Vt_in,
                             fp_t ****B,fp_t theta,fp_t phi,fp_t lambda)
 {
@@ -139,6 +148,18 @@ fp_t ***atmosphere::emissivity_active_only(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vl
       em=add(atml[a]->emissivity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h); 
   return em;
 }
+
+// Not the difference in the output of the method here. This one does not return a new 
+// array, just modifies input ones. Be careful what you put into this!
+int atmosphere::op_em_scalar_active_only(fp_t ***Vlos, fp_t ****B, fp_t theta, fp_t phi,
+  fp_t *lambda, int32_t nlambda,fp_t **** op,fp_t **** em){
+
+  for (int a=0;a<natm;++a)
+    if (atml[a]->check_if_nlte())
+      atml[a]->op_em_scalar(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op,em);
+}
+
+// ======================================================================================
 
 void atmosphere::normalize_to_referent_opacity(fp_t *** op, fp_t *** em){
 
