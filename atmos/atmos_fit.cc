@@ -48,6 +48,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // weights for Stokes parameters. They enter like this in response scaling, and 
   // quadratically in chi_sq. basically they reduce the noise  
   fp_t * ws = spectrum_to_fit->get_w_stokes();
+
+  for (int l=1;l<=nlambda;++l)
+      fprintf(stderr,"%d %e \n",l,ws[l]);
   
   // other fitting parameters
   fp_t scattered_light = spectrum_to_fit->get_scattered_light();
@@ -78,7 +81,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int filtergraph_mode=0;
   
   int N_parameters = model_to_fit->get_N_nodes_total();
-  //model_to_fit->print();
+  model_to_fit->print();
   model_to_fit->bracket_parameter_values();
 
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
@@ -99,15 +102,15 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       }
       
-      /*int s=1;
+      int s=4;
       FILE * debug;
-      debug = fopen("JTJ.dat","w");
+      debug = fopen("rf.dat","w");
       for (int l=1;l<=nlambda;++l){
         for (int pp=1;pp<=N_parameters;++pp)
           fprintf(debug,"%e ", derivatives_to_parameters[pp][l][s]);
         fprintf(debug,"\n");
       }
-      fclose(debug);*/
+      fclose(debug);
 
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,noise_scaling);
       S_current = current_obs->get_S(1,1);
@@ -123,16 +126,40 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
 
     }
-  
+
+    FILE * debug;
+    debug = fopen("J.dat","w");
+    for (int s=1;s<=n_stokes_to_fit;++s){
+      fprintf(debug,"s = %d \n",s);
+      for (int l=1;l<=nlambda;++l){
+        for (int pp=1;pp<=N_parameters;++pp)
+          fprintf(debug,"%e ", J[(l-1)*n_stokes_to_fit+s][pp]);
+        fprintf(debug,"\n");
+      }
+    }
+    fclose(debug);
+
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, n_stokes_to_fit*nlambda);
 
+    
     regularize_hessian(JTJ,rhs,model_to_fit);
+
+    //FILE * debug;
+    debug = fopen("JTJ.dat","w");
+    for (int p=1;p<=N_parameters;++p){
+      for (int pp=1;pp<=N_parameters;++pp)
+        fprintf(debug,"%e ", JTJ[p][pp]);
+      fprintf(debug,"\n");
+    }
+    fclose(debug);
   
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
-    fp_t * correction = solve(JTJ, rhs, 1, N_parameters);    
+    fp_t * correction = solve(JTJ, rhs, 1, N_parameters); 
+    for (int i=1;i<=N_parameters;++i)
+      fprintf(stderr,"%d %e \n",i,correction[i]);   
     scale_corrections(correction,model_to_fit,N_parameters);
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
   
@@ -140,7 +167,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
     test_model->bracket_parameter_values();
-    //test_model->print();
+    test_model->print();
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -187,7 +214,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       del_ft2dim(S_current,1,4,1,nlambda);
     }
 
-    //fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
+    fprintf(stderr,"Iteration # %d done. Metric = %e lambda = %e \n",iter, metric,lm_parameter);
 
     delete[](residual+1);
     delete test_model;
@@ -200,7 +227,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](correction+1);
     metric = 0.0;
 
-    //model_to_fit->print();
+    model_to_fit->print();
 
     if (to_break)
       break;
