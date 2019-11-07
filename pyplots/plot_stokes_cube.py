@@ -38,7 +38,7 @@ size = 1.5
 #1105
 
 x = np.linspace(0.0,NX-1*1.0,NX)
-x *= 20.8 / 1E3
+x *= 8.0 / 1E3
 y = x
 
 l_line = lines[0]
@@ -54,7 +54,7 @@ plt.title('$\mathrm{Stokes}\,I/I_{\mathrm{qs}}$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.ylabel('$\mathrm{Stokes}\,I$')
 plt.subplot(212)
-plt.imshow(stokes_cube[:,:,3,l_line+offset[3]]*stokes_cube[:,:,0,l_line+offset[3]] * np.sqrt(4.0*3.14)/mean[0]*100.0,origin='lower',cmap=cc.cm['coolwarm'],vmin=-3,vmax=3,extent=[x[0],x[-1],y[0],y[-1]])
+plt.imshow(stokes_cube[:,:,3,lines[-2]+5]/mean[0]*100,origin='lower',cmap=cc.cm['coolwarm'],vmin=-3,vmax=3,extent=[x[0],x[-1],y[0],y[-1]])
 plt.title('$V/I_{\mathrm{qs}}\,[\%]$')
 plt.colorbar(shrink=0.9)
 plt.xlabel('$x\,[\mathrm{Mm}]$')
@@ -64,18 +64,18 @@ plt.savefig(sys.argv[2],bbox_inches='tight')
 plt.savefig(sys.argv[2]+'.eps',fmt='eps',bbox_inches='tight')
 
 
-plt.clf()
-plt.cla()
-plt.figure(figsize=[size * float(NX)/float(NY)*N_x,size*N_y])
+#plt.clf()
+#plt.cla()
+#plt.figure(figsize=[size * float(NX)/float(NY)*N_x,size*N_y])
 
-for l in range(0,N_y):
-	for s in range(0,4):
-		plt.subplot(N_y,N_x,l*N_x+s+1)
-		plt.imshow(stokes_cube[:,:,s,lines[l]+offset[s]],origin='lower')
-		plt.colorbar(shrink=0.75)
+#for l in range(0,N_y):
+	#for s in range(0,4):
+	#	plt.subplot(N_y,N_x,l*N_x+s+1)
+	#	plt.imshow(stokes_cube[:,:,s,lines[l]+offset[s]],origin='lower')
+	#	plt.colorbar(shrink=0.75)
 
-plt.tight_layout()
-plt.savefig(sys.argv[2],fmt='png',bbox_inches='tight')
+#plt.tight_layout()
+#plt.savefig(sys.argv[2],fmt='png',bbox_inches='tight')
 
 
 
@@ -89,7 +89,7 @@ plt.savefig(sys.argv[2],fmt='png',bbox_inches='tight')
 #plt.ylabel("Normalized $I$")
 #plt.savefig('spectra_'+str(i1)+'_'+str(j1),fmt='png',bbox_inches='tight')
 
-to_plot=range(0,NL)
+to_plot=range(0,0)
 
 
 wvl = np.linspace(5887.7914658,5897.18400651,NL)
