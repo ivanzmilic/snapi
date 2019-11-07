@@ -18,7 +18,7 @@ cube2_in = sys.argv[2]
 out_name = sys.argv[3]
 ifmask = sys.argv[4]
 maskfile = sys.argv[5]
-fmt = sys.argv[6]
+fmt = int(sys.argv[6])
 
 if (fmt == 1):
 	temp = pyana.fzread(cube1_in)
