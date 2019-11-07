@@ -38,8 +38,8 @@ if (int(ifmask)):
 
 
 dims = cube1.shape
-NX = dims[1]
-NY = dims[0]
+NX = dims[0]
+NY = dims[1]
 NL = dims[3]
 print NX, NY
 
@@ -48,7 +48,7 @@ print NX, NY
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
 
-#cube_1_mean = flt.gaussian_filter(cube_1_mean)
+cube_1_mean = flt.gaussian_filter(cube_1_mean,5)
 wls = argrelextrema(cube_1_mean,np.less)
 wls = np.asarray(wls)
 wls = wls[0]
