@@ -45,7 +45,7 @@ if (NB):
 
 
 for i in range(0,B_start):
-	an_conv[i] = flt.medfilt(an[i],5)
+	an_conv[i] = flt.medfilt(an[i],11)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an_conv[i],sigma)
 
