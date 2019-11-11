@@ -48,8 +48,8 @@ print NX, NY
 cube_1_mean = np.mean(cube1[:,:,0,:],axis=(0,1))
 cube_2_mean = np.mean(cube2[:,:,0,:],axis=(0,1))
 
-cube_1_mean = flt.gaussian_filter(cube_1_mean,5)
-wls = argrelextrema(cube_1_mean,np.less)
+cube_1_mean_s = flt.gaussian_filter(cube_1_mean,5)
+wls = argrelextrema(cube_1_mean_s,np.less)
 wls = np.asarray(wls)
 wls = wls[0]
 wls = np.append(0,wls)
@@ -58,6 +58,7 @@ N_x_panels = 4
 N_y_panels = len(wls)
 
 plt.plot(cube_1_mean)
+plt.plot(cube_2_mean)
 plt.savefig('test.png')
 plt.clf()
 plt.cla()
