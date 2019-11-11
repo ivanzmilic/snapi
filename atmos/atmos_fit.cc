@@ -30,6 +30,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Set initial value of Levenberg-Marquardt parameter
   fp_t lm_parameter = spectrum_to_fit->get_start_lambda();
   fp_t lm_multiplicator = 10.0;
+
   
   // Some fitting related parameters:
   fp_t metric = 0.0;
@@ -40,6 +41,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     MAX_ITER = -MAX_ITER;
     search_for_optimum_lambda = 1;
   }
+  fp_t stopping_chisq = spectrum_to_fit->get_stopping_chisq();
+
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
   int corrected = 1;
@@ -102,6 +105,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda,n_stokes_to_fit,stokes_to_fit, ws);
     metric = calc_chisq(nlambda, n_stokes_to_fit, stokes_to_fit, residual, noise, ws);
+    if (metric < stopping_chisq)
+      to_break = 1;
     fp_t ** J = ft2dim(1,n_stokes_to_fit*nlambda,1,N_parameters);
     for (int i=1;i<=N_parameters;++i) 
       for (int l=1;l<=nlambda;++l) 
@@ -182,8 +187,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
-
-    model_to_fit->print();
 
     if (to_break)
       break;

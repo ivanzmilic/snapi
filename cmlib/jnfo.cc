@@ -39,8 +39,6 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_model=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_atmos=new int [no],0,no-1,swap_endian);
-    //printf("Helllooo\n");
-    // /printf("%d %d \n",return_model[0],return_atmos[0]);
     offs+=unpack(data+offs,xl=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,xh=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,yl=new int [no],0,no-1,swap_endian);
@@ -53,6 +51,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,synth_qs=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,no_iterations=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,starting_lambda=new fp_t [no],0,no-1,swap_endian); 
+    offs+=unpack(data+offs,stopping_chisq=new fp_t [no],0,no-1,swap_endian); 
     lambda=new fp_t* [no];
     weights = new fp_t*[no];
     w_stokes = new fp_t*[no];
@@ -135,6 +134,7 @@ jnfo::~jnfo(void)
     if (obs_qs) delete []obs_qs;
     if (no_iterations) delete []no_iterations;
     if (starting_lambda) delete []starting_lambda;
+    if (stopping_chisq) delete []stopping_chisq;
   }
   if(uname) delete[] uname;
   
@@ -151,7 +151,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   usize+=sizeof(int);                            // no
   if(no){
-    usize+=7*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth,starting_lambda
+    usize+=8*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth,starting_lambda, stopping chisq
     usize+=2*no*sizeof(int);                       // nlambda,no_iterations
     usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
@@ -199,6 +199,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,synth_qs,0,no-1,swap_endian);
     offs+=pack(data+offs,no_iterations,0,no-1,swap_endian);
     offs+=pack(data+offs,starting_lambda,0,no-1,swap_endian);
+    offs+=pack(data+offs,stopping_chisq,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);
@@ -222,7 +223,6 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
   offs+=pack(data+offs,nmth); // # master threads
   offs+=pack(data+offs,nsth); // # slave threads
   offs+=pack(data+offs,nsln); // # slave nodes
-//  io.msg(IOL_INFO,"jnfo::compress: %d %d\n",offs,usize);
 //
   if(offs!=usize) io.msg(IOL_WARN,"jnfo::compress: number of packed bytes was %d but %d bytes allocated\n",offs,usize);
 //

@@ -357,6 +357,7 @@ int job_class::start(void)
              obs_subset->set_to_invert(1);
              obs_subset->set_no_iterations(ji.no_iterations[o]);
              obs_subset->set_start_lambda(ji.starting_lambda[o]);
+             obs_subset->set_stopping_chisq(ji.stopping_chisq[o]);
              obs_subset->set_w_stokes(ji.w_stokes[o]);
 
              struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);

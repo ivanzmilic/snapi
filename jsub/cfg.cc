@@ -126,6 +126,10 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
       get_number(tmp_str,starting_lambda);
       delete[] tmp_str;
     } else starting_lambda=1E3;
+    if(char *tmp_str=get_arg(odata,"STOPPING_CHISQ",0)){
+      get_number(tmp_str,stopping_chisq);
+      delete[] tmp_str;
+    } else stopping_chisq=1.0;
     int m = 0;
     if(char *val_str=get_arg(odata,"STOKES_WEIGHTS",0)){
       if(get_numbers(val_str,w_stokes,m)<0){

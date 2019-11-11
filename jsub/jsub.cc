@@ -83,6 +83,7 @@ int main(int argc,char *argv[])
   ji.name=new char* [ji.no];
   ji.no_iterations=new int [ji.no];
   ji.starting_lambda = new fp_t [ji.no];
+  ji.stopping_chisq = new fp_t [ji.no];
   for(int o=0;o<ji.no;++o){
     ji.az[o]=cfg.obs[o]->az;
     ji.el[o]=cfg.obs[o]->el;
@@ -100,6 +101,7 @@ int main(int argc,char *argv[])
       ji.synth_qs[o] = cfg.obs[o]->synth_qs;
       ji.no_iterations[o] = cfg.obs[o]->no_iterations;
       ji.starting_lambda[o] = cfg.obs[o]->starting_lambda;
+      ji.stopping_chisq[o] = cfg.obs[o]->stopping_chisq;
     }
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
     memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));

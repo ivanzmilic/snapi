@@ -14,6 +14,7 @@ class observable{
   int to_invert;
   int no_iterations; // number of L-M iterations to use
   fp_t start_lambda; // starting value of lambda for LM
+  fp_t stopping_chisq; // value of chisq (reduced) to stop LM iterations at
   fp_t * w_stokes;
 public:
   observable(int ns_in);
@@ -39,6 +40,7 @@ public:
   void set_to_invert(int);
   void set_no_iterations(int);
   void set_start_lambda(fp_t);
+  void set_stopping_chisq(fp_t);
   void set_w_stokes(fp_t *);
   int get_to_invert();
   void write(const char*,io_class&,int,int);
@@ -62,6 +64,7 @@ public:
   fp_t get_az();
   int get_no_iterations();
   fp_t get_start_lambda();
+  fp_t get_stopping_chisq();
   fp_t * get_w_stokes();
 
   void normalize();
