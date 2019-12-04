@@ -36,6 +36,8 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // * we only have equilibrium constants
 // ***************************************************************************************
   
+  printf("input = %e %e \n",T_in,Nt_in);
+
   class atmol **atoms=0,**mols=0;
   int natoms=0,nmol=0,ncomp=0;
   for(int a=0,nc;a<natm_in;++a){
@@ -304,7 +306,7 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // **********************************************************************************
     iter++;
     if (iter > 20) break;
-  }while(!converged(1E-8,N,d,natoms));
+  }while(!converged(1E-6,N,d,natoms));
   //printf("converged in %d iterations in spatial point %d where T = %f \n",iter,x3i,T_in);
 //
   io.msg(IOL_XNFO,"atmosphere::chemeq: final values: T=%E, Nt=%E:\n",T_in,Nt_in);

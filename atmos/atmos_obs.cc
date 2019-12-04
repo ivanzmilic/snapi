@@ -16,9 +16,7 @@
 observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda)
   // You have to write this down or you will forget. 
   // This function ONLY does the synthesis of the spectra. 
-{
-
-  
+{  
   boundary_condition_for_rt = -1;
   popsetup(); // setup
   for (int a = 0; a<natm; ++a)
@@ -378,10 +376,8 @@ fp_t *atmosphere::test_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
 observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
 
   // The similar one as the the atmosphere::obs:
-
-  boundary_condition_for_rt = -1;
+  boundary_condition_for_rt = -1; 
   popsetup(); // 
-  
   compute_op_referent();
   if (!tau_grid)
     compute_tau_referent();

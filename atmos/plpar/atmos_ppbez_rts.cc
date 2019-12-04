@@ -260,7 +260,9 @@ int atmos_ppbez::compute_op_referent(){
     for (int x2i=x2l;x2i<=x2h;++x2i)
       for (int x3i=x3l;x3i<=x3h;++x3i){
         fp_t T_local = T[x1i][x2i][x3i];
+        printf("%d \n",x3i);
         chemeq(atml, natm, T_local, Nt[x1i][x2i][x3i], Ne[x1i][x2i][x3i], x1i, x2i, x3i);
+        printf("DONE!\n");
         for (int a=0;a<natm;++a) atml[a]->lte(T_local, Ne[x1i][x2i][x3i], x1i, x2i, x3i);
         op_referent[x1i][x2i][x3i] = opacity_continuum(T_local,Ne[x1i][x2i][x3i], lr, x1i,x2i,x3i);
       }
