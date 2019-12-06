@@ -617,6 +617,7 @@ int atmosphere::op_em_pert_numerical_scalar(fp_t ***T_in,fp_t ***Ne_in,fp_t ***V
 
 fp_t atmosphere::get_opacity_fudge(fp_t lambda){
 
+  // Calculates and fetches the opacity fudge according to the paper of Busa (1988?)
   lambda *= 1E8;
   fp_t fudge=1.0;
 
