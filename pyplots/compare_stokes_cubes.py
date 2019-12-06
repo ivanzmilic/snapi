@@ -12,6 +12,7 @@ from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
 from matplotlib import ticker
 from astropy.io import fits
+from scipy.stats import pearsonr
 
 cube1_in = sys.argv[1]
 cube2_in = sys.argv[2]
@@ -56,6 +57,7 @@ wls = np.append(0,wls)
 print wls
 N_x_panels = 4
 N_y_panels = len(wls)
+wls[-1] +=1
 
 plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
@@ -69,7 +71,7 @@ x*=20.8/1E3
 y*=20.8/1E3
 
 #make the size of the figure:
-x_size = 2.5
+x_size = 4.5
 ratio = 0.85
 y_size = x_size * float(NY)/float(NX) * ratio
 
@@ -96,13 +98,12 @@ fig, axes = plt.subplots(nrows=N_y_panels,ncols=N_x_panels,figsize=(N_x_panels*x
 fig.subplots_adjust(right = 0.85,left=0.05,top=0.95,bottom=0.1)
 image_no = 0
 
-
-
 for j in range (1,N_y_panels+1):
 	
 	to_plot = np.copy(to_plot_1[:,:,0,j-1])
 	m = np.mean(to_plot)
 	to_plot/=m
+	debug1 = np.copy(to_plot)
 	s = np.std(to_plot)
 	
 	#Observed intensity:
@@ -120,6 +121,11 @@ for j in range (1,N_y_panels+1):
 	#Fitted intensity:
 	to_plot = np.copy(to_plot_2[:,:,0,j-1])
 	to_plot/=m
+	debug2 = np.copy(to_plot)
+	print np.std(debug1-debug2)
+	print pearsonr(debug1.flatten(),debug2.flatten())
+	print (np.mean(debug1),np.mean(debug2))
+
 	ax=axes.flat[image_no]
 	im = ax.imshow(to_plot.T,origin='lower',vmin = irange[0],vmax= irange[1],cmap='hot',extent=[0,x[-1],0,y[-1]])
 	if (j==N_y_panels):

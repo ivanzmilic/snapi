@@ -36,7 +36,7 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // * we only have equilibrium constants
 // ***************************************************************************************
   
-  printf("input = %e %e \n",T_in,Nt_in);
+  //printf("input = %e %e \n",T_in,Nt_in);
 
   class atmol **atoms=0,**mols=0;
   int natoms=0,nmol=0,ncomp=0;
@@ -257,11 +257,6 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
         A[a][b]=abund[a]*dNr-abund[1]*dNc;                           // the derivative
       }
     }
-/*    for(int a=0;a<=natoms;++a){
-      fprintf(stderr,"%d: ",a);
-      for(int b=0;b<=natoms;++b) fprintf(stderr,"%E ",A[a][b]);
-      fprintf(stderr,"\n");
-    }*/
 //
 // SVD solution
 //    

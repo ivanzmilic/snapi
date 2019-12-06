@@ -15,37 +15,33 @@ NP = cube1.shape[0]
 
 print 'Number of parameters : ', NP
 
-NB = 2
+NB = 3
 NT = 1
 cube1[-1] = np.cos(cube1[-1])
-cube1[-NB-NT:-NT] *= cube1[-1]
+cube1[-(NB+NT):-NT] *= cube1[-1]
 cube2[-1] = np.cos(cube2[-1])
-cube2[-NB-NT:-NT] *= cube2[-1]
+cube2[-(NB+NT):-NT] *= cube2[-1]
 
 plt.clf()
 plt.cla()
 
-params = [0,1,2,3,4,5,6,7,8,9,10,11]
+params = [0,1,2,3,4,5,6,7,8,9,10]
 #cmaps = ['inferno','inferno','inferno','inferno','inferno','inferno','bwr','bwr','bwr','bwr','PRGn','PRGn']
 #unit = ['K','K','km/s','km/s','Gauss','Gauss']
 cmaps = [None] * 12
-for i in range(0,5):
-	cmaps[i] = 'inferno'
-cmaps[5]  = 'inferno'
-for i in range(6,10):
-	cmaps[i] = 'bwr'
-for i in range(10,12):
-	cmaps[i] = 'PRGn'
-print cmaps
-
 unit = [None] * 12
-for i in range(0,5):
+for i in range(0,4):
+	cmaps[i] = 'inferno'
 	unit[i] = 'K'
-unit[5]  = 'km/s'
-for i in range(6,10):
+cmaps[4]  = 'inferno'
+unit[4]  = 'km/s'
+for i in range(5,8):
+	cmaps[i] = 'bwr'
 	unit[i] = 'km/s'
-for i in range(10,12):
+for i in range(8,11):
+	cmaps[i] = 'PRGn'
 	unit[i] = 'Gauss'
+print cmaps
 
 cubename1 = 'Low starting value'
 cubename2 = 'High starting value'

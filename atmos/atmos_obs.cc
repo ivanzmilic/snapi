@@ -40,8 +40,6 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
   lambda_vacuum -=1;
 
-  FILE * opem = fopen("op_em.dat","w");
-
   for(int l=1;l<=nlambda;++l){
 
     for (int a = 0; a<natm; ++a)
@@ -52,10 +50,6 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
     fp_t *** tau = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
     optical_depth_scale(tau,op,pi-theta,phi);
-
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      fprintf(opem,"%e %e %e %e %e \n",x3[x3i],tau[x1l][x2l][x3i],lambda[l],
-        op[x1l][x2l][x3i],em[x1l][x2l][x3i]);
 
     del_ft3dim(tau,x1l,x1h,x2l,x2h,x3l,x3h);
 
@@ -68,7 +62,6 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
     del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
   }
-  fclose(opem);
     
   // Clear un-needed quantities
   for (int a = 0; a<natm; ++a){
@@ -401,14 +394,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
-
-  /*FILE * op_em;
-  op_em = fopen("op_em_5892.txt","w");
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    for (int l=1;l<=nlambda;++l){
-      fprintf(op_em, "%1.9e %1.9e %1.9e %1.9e \n",rt_grid[x3i],lambda[l],op_vector[l][x1l][x2l][x3i][1][1],em_vector[l][x1l][x2l][x3i][1]);
-  }
-  fclose(op_em);*/
 
   for (int l = 1; l<=nlambda; ++l){
 

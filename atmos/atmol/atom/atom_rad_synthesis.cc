@@ -422,7 +422,7 @@ int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, 
 
             	fp_t dld=broad_dop(lam,T[x1i][x2i][x3i],Vt[x1i][x2i][x3i]);
             	gc = damp_col(x1i, x2i, x3i, z, i, ii, T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], lam);
-            	fp_t a=sf*(ar+gc*turn_on_damping)/dld;
+              fp_t a=sf*(ar+gc*turn_on_damping)/dld;
 
             	fp_t op_loc = (pop[x1i][x2i][x3i].n[z][ii]*Blu - pop[x1i][x2i][x3i].n[z][i]*Bul)*h*c/lam/4.0/pi;
             	fp_t em_loc = pop[x1i][x2i][x3i].n[z][i]*Aul*h*c/lam/4.0/pi;

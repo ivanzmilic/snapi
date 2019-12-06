@@ -36,7 +36,8 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
   memset(op_vector[1][x1l][x2l][x3l][1]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
   memset(em_vector[1][x1l][x2l][x3l]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*4*sizeof(fp_t));
 
-  /*for (int x1i=x1l;x1i<=x1h;++x1i)
+  // e- absorption/emission
+  for (int x1i=x1l;x1i<=x1h;++x1i)
 	  for (int x2i=x2l;x2i<=x2h;++x2i)
 	    for (int x3i=x3l;x3i<=x3h;++x3i){
 	      fp_t op = Ne[x1i][x2i][x3i] * 6.65E-25;
@@ -45,7 +46,7 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
 		      em_vector[l][x1i][x2i][x3i][1] = em;
 		      op_vector[l][x1i][x2i][x3i][1][1] = op;
 		    }
-  }*/
+  }
   // Then add all the contributors from opacity and emissivity from atoms and molecules
 
   for (int a=0;a<natm;++a)

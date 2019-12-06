@@ -50,24 +50,24 @@ stokes[:,:,:,:] /= I_c
 #-----------------------------------------------------------------------------------------------------
 
 
-T_nodes_tau = [-3.3,-2.4,-0.7,0.0]
+T_nodes_tau = [-3.0,-2.0,-1.0,0.0]
 #T_nodes = np.arange(len(T_nodes_tau))
-T_nodes = [2,3]
-vs_nodes_tau = [-3.3,-0.5]
+T_nodes = [1,3]
+vs_nodes_tau = [-2.5,-1.0,0.0]
 #vs_nodes = np.arange(len(vs_nodes_tau)) + len(T_nodes_tau)
-vs_nodes = [5,6]
-B_nodes_tau = [-2.8,-0.3]
+vs_nodes = [5,7]
+B_nodes_tau = [-2.0,-0.0]
 #B_nodes = np.arange(len(B_nodes_tau)) + len(vs_nodes_tau) + len(T_nodes_tau)
-B_nodes = [7,8]
+B_nodes = [8,9]
 theta_nodes = [len(B_nodes_tau) + len(vs_nodes_tau) + len(T_nodes_tau)]
-theta_nodes=[9]
+theta_nodes=[10]
 
 panelsx=len(T_nodes)
 panelsy=4
 
 Tmap = 'hot'
 Vmap = 'coolwarm'
-Bmap = 'summer'
+Bmap = 'cividis'
 Imap = 'hot'
 Pmap = 'Spectral'
 Dmap = 'coolwarm'
@@ -77,8 +77,8 @@ plt.cla()
 
 panel_no = 1
 
-defsize = 5.5
-ratio = 0.33
+defsize = 8
+ratio = 0.5
 barshrink=0.8
 plt.figure(figsize=[defsize*panelsx, ratio*defsize*panelsy])
 k =0
@@ -112,10 +112,10 @@ ll = wls[-1]
 #plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 
 plt.subplot(panelsy,panelsx,panel_no)
-plt.imshow(np.mean(stokes[:,:,3,ll+4:ll+10],axis=2),origin='lower',cmap=Bmap,vmin=0,vmax=0.05)
+plt.imshow(np.mean(stokes[:,:,3,ll+4:ll+10],axis=2),origin='lower',cmap=Bmap,vmin=-0.05,vmax=0.05)
 #if (i==2):
 plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
-plt.title('Stokes $V$ (Sodium D1 line)')
+plt.title('Stokes $V$ (Iron line)')
 plt.tick_params(axis='x',which='both',bottom='off',top='off',labelbottom='off') 
 plt.tick_params(axis='y',which='both',left='off',right='off',labelleft='off') 
 panel_no +=1
@@ -162,7 +162,7 @@ for i in B_nodes:
 for i in B_nodes:
 	print i
 	plt.subplot(panelsy,panelsx,panel_no)
-	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=0,vmax=2000)
+	plt.imshow(-parameters[i],origin='lower',cmap=Bmap,vmin=-1000,vmax=1000)
 	plt.colorbar(fraction=0.046, pad=0.04,shrink=barshrink)
 	plt.title('$\mathrm{B\,[Gauss]}$ at $\log\,\\tau =$'+str(B_nodes_tau[i-B_nodes[0]]))
 	if (i!=B_nodes[0]):

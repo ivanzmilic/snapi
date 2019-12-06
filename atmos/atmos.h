@@ -299,6 +299,7 @@ public:
   fp_t get_pop(int, int, int, int, int);
   fp_t get_T(int, int, int);
   fp_t get_Ne(int, int, int);
+  fp_t set_Ne(int, int, int,fp_t);
   fp_t get_Nt(int, int, int);
   fp_t get_ne_lte_derivative(int, int, int, int);
   fp_t get_neutral_H_derivative_lte(int,int, int, int);

@@ -189,7 +189,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
     //io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    //printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
 
     if (relative_change < 1E-3)
       break; 
@@ -409,4 +409,8 @@ fp_t atmosphere::get_pop(int x1i, int x2i, int x3i, int species, int z){
 
 fp_t atmosphere::get_Ne(int x1i, int x2i, int x3i){
   return Ne[x1i][x2i][x3i];
+}
+
+fp_t atmosphere::set_Ne(int x1i, int x2i, int x3i, fp_t input){
+  Ne[x1i][x2i][x3i] = input;
 }

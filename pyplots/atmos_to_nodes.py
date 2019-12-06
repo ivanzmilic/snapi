@@ -17,16 +17,14 @@ temp = pyana.fzread(atmos_in)
 atmos = temp["data"]
 
 # now we need the nodes:
-T_nodes = [-3.0,-2.1,-1.3,-6.0,0.0]
+T_nodes = [-3.0,-2.0,-1.0,0.0]
 vt_nodes = [0]
-v_nodes = [-3.3,-0.5]
-B_nodes = [-2.8,0.3]
+v_nodes = [-2.5,-1.2,-0.0]
+B_nodes = [-2.0,0.0]
 theta_nodes=[0]
 phi_nodes=[]
 
 #now time to interpolate
-NX = atmos.shape[0]
-NY = atmos.shape[1]
 
 N_T = len(T_nodes)
 N_vt = len(vt_nodes)
@@ -35,6 +33,10 @@ N_B = len(B_nodes)
 N_theta = len(theta_nodes)
 N_phi = len(phi_nodes)
 N_nodes = N_T + N_vt + N_v + N_B + N_theta + N_phi
+
+atmos = atmos.transpose(1,2,0,3)
+NX = atmos.shape[0]
+NY = atmos.shape[1]
 nodes = np.zeros([N_nodes,NX,NY])
 
 
@@ -70,6 +72,7 @@ for i in range(0,NX):
 #nodes[4,:,:] = 2E4
 
 nodes = np.transpose(nodes,(0,2,1))
+print nodes.shape
 #write down nodes in the file:
 output_file = sys.argv[2]
 pyana.fzwrite(output_file,nodes,0,'placeholder')

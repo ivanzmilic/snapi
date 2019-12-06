@@ -1003,7 +1003,7 @@ int atom::compute_damp_col(int z, int lu, int ll){
   else if (l_qn[z][lu] + l_qn[z][ll] == 3 && z == 0) // pd transition
   	interpolate_col_damp_pd(n_eff_u, n_eff_l, z, lu, ll);
   else if (l_qn[z][lu] + l_qn[z][ll] == 5 && z == 0) // df transition
-  	interpolate_col_damp_sp(n_eff_u, n_eff_l, z, lu, ll);
+  	interpolate_col_damp_df(n_eff_u, n_eff_l, z, lu, ll);
   else{
   	// We will use Van der Waals approximation as given in Stell Atm. 3rd edition.
     // page 239, eq. 8.55 and table 8.1
@@ -1011,11 +1011,9 @@ int atom::compute_damp_col(int z, int lu, int ll){
     fp_t R_upper = n_eff_u * n_eff_u / 2.0 / (z+1) / (z+1) * (5.0 * n_eff_u * n_eff_u + 1.0); // This is Unsold, this is actually rsq
     fp_t R_lower = n_eff_l * n_eff_l / 2.0 / (z+1) / (z+1) * (5.0 * n_eff_l * n_eff_l + 1.0); // This is Unsold, this is actually rsq
 
-    fp_t C6 = 6.46E-34 * (R_upper - R_lower);
+    fp_t C6 = 1.41*6.46E-34 * (R_upper - R_lower);
   	col_dam_cross_section[z][lu][ll] = col_dam_cross_section[z][ll][lu] = 17.0 * pow(C6, 0.4) / 251.0;
   }
-  //printf("%d %d %d %e %f \n",z,lu,ll,col_dam_cross_section[z][lu][ll]*1E16,alpha_col_dam[z][lu][ll]);
-  
   return 0;
 }
 
@@ -1083,9 +1081,6 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
     // First we determine which one is s which one is p
     fp_t p_for_interpolation=0.0, s_for_interpolation=0.0;
 
-    //printf("Atom: %s z = %d upperlvl = %d lowerlvl = %d \n", id, z, lu, ll);
-    //printf("%f %f \n", s_for_interpolation, p_for_interpolation);
-
     if (l_qn[z][lu] == 1){
     	p_for_interpolation = n_eff_u;
     	s_for_interpolation = n_eff_l;
@@ -1095,15 +1090,8 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
     	p_for_interpolation = n_eff_l;
     }
 
-    //printf("%f %f \n", s_for_interpolation, p_for_interpolation);
-
-    //printf("s_for interpolation = %f p_for interpolation = %f \n", s_for_interpolation, p_for_interpolation);
-
-    
     fp_t cross_section = interpol_2d(cs_table, s_state, p_state, 21, 18, s_for_interpolation, p_for_interpolation);
     fp_t alpha = interpol_2d(alpha_table, s_state, p_state, 21, 18, s_for_interpolation, p_for_interpolation);
-
-    //printf("Z = %d Cross section = %e Alpha = %e \n",Z, cross_section, alpha);
 
     cross_section *= 5.62E-17 * pow((4.0 / pi), alpha/2.0) * tgamma(2.0 - alpha / 2.0);
 
@@ -1113,10 +1101,8 @@ int atom::interpolate_col_damp_sp(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int
     del_ft2dim(alpha_table, 0, 20, 0, 17);
     delete[]s_state;
     delete[]p_state;
-
-    //printf("sp!\n");
-    
-	return 0;
+	
+  return 0;
 }
 
 int atom::interpolate_col_damp_pd(fp_t n_eff_u, fp_t n_eff_l, int z, int lu, int ll){
@@ -1858,7 +1844,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 // In this particular function we do it by means of MALI as given in Rybicki & Hummer. Equations 
 // of SE are linear with respect to level populations.
 
-
 {
   int x3i_control = x3h+1;
 
@@ -1894,13 +1879,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         else
           Radiative_rates = R_ij(z,l,ll,JJ);
         fp_t Collisional_rates = C_ij(z, l, ll, Temp, ne);
-        /*if (l==4 && ll == 2){
-          fp_t col_temp = C_ij(z, ll, l, Temp, ne);
-
-          fprintf(stderr,"%d %e %e %e \n",x3i,Collisional_rates,col_temp, fetch_Ne(x1l,x2l,x3i));
-        }*/
         //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
-        //Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates); 
         
@@ -1911,7 +1890,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
           Radiative_rates = R_ij(z,ll,l,JJ);
         Collisional_rates = C_ij(z, ll, l, Temp, ne);
         //if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
-        //Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         int dl = ll - l;
 
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);  
@@ -1948,13 +1926,9 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       level_to_replace = i;
     }
   }
-  //fprintf(stderr,"%d %e\n",x3i, M[3][5]);
-  
   for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
-
-  
-  
+ 
   fp_t relaxation_factor = 1.0; // 1.0 for no relaxation, > 1 for overrelaxation (makes no sense imo)
                                 // 0.0 does not change the solution. <1 relaxed the solution (uder-corrects)
 
@@ -1964,6 +1938,22 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   fp_t * solution = new fp_t [nmap];  
   Crout(nmap,M_to_solve, M_LU);
   solveCrout(nmap,M_LU,b,solution);
+
+  // Then if we are trying to conserve the charge, we have to modify the electron density
+  // Change in electron density resulting from this species.
+  int conserve_charge = 1;
+  if (conserve_charge){
+    fp_t d_ne = 0.0;
+    for (int i=0;i<nmap;++i){ // For all the 'levels' but the last one 
+      uint16_t l=lmap[i]; // "current lvl
+      uint08_t z=zmap[i]; // apropriate ionization stage
+      d_ne += z * (solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
+    }
+  // Use get-set and be disciplined:
+    fp_t Ne = parent_atm->get_Ne(x1i,x2i,x3i);
+    Ne += d_ne;
+    parent_atm->set_Ne(x1i,x2i,x3i,Ne);
+  }
 
   fp_t delta = 0.0;
   for (int i = 0; i<nmap; ++i){
