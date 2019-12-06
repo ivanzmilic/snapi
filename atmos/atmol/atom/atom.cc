@@ -1942,7 +1942,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   // Then if we are trying to conserve the charge, we have to modify the electron density
   // Change in electron density resulting from this species.
   int conserve_charge = parent_atm->get_conserve_charge();
-  printf("!!!!!!! %d \n",conserve_charge);
   if (conserve_charge){
     fp_t d_ne = 0.0;
     for (int i=0;i<nmap;++i){ // For all the 'levels' but the last one 
