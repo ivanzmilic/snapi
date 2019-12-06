@@ -123,6 +123,10 @@ acfg::acfg(char *adata,io_class &io)
     of_filename=get_arg(adata,"OF_FILE",0);
   else 
     of_filename=0;
+  if(char *tmp_str=get_arg(adata,"ELECTRONS",0)){
+    get_number(tmp_str,conserve_charge);
+    delete[] tmp_str;
+  }else conserve_charge = 0;
 //
   if(char *s=arg_test(adata)) io.msg(IOL_WARN,"atmos config: ID=%s: the following lines were not processed:%s\n",id,s);
 

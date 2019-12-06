@@ -113,6 +113,7 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   }
   else 
     N_of=0;
+  conserve_charge = cfg->conserve_charge;
 //
   flags.set(ATMOS_FLAG_DEF);
 //
@@ -196,6 +197,7 @@ int32_t atmosphere::size(io_class &io_in)
 
   sz+=sizeof(int);// N_of (opacity_fudge)
   sz+=2*N_of*sizeof(fp_t);
+  sz+=sizeof(int);// whether to conserve charge
 
   return sz;
 }
@@ -227,6 +229,7 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
     offs+=::pack(buf+offs,lambda_of,1,N_of,do_swap);
     offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
   } 
+  offs+=::pack(buf+offs,conserve_charge,do_swap);
   //
   return offs;
 }
@@ -314,7 +317,8 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   if (N_of){
     offs+=::pack(buf+offs,lambda_of,1,N_of,do_swap);
     offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
-  } 
+  }
+  offs+=::pack(buf+offs,conserve_charge,do_swap); 
 
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
@@ -366,6 +370,7 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
     offs+=::unpack(buf+offs,lambda_of,1,N_of,do_swap);
     offs+=::unpack(buf+offs,value_of,1,N_of,do_swap);
   }
+  offs+=::unpack(buf+offs,conserve_charge,do_swap);
   
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
@@ -483,6 +488,13 @@ fp_t atmosphere::get_partf(int who, int z, fp_t T_in, fp_t Ne_in){
   return atml[who]->get_partf(z,T_in,Ne_in);
 }
 
+void atmosphere::set_conserve_charge(int input){
+  conserve_charge = input;
+}
+int atmosphere::get_conserve_charge(){
+  return conserve_charge;
+}
+
 fp_t ** atmosphere::return_as_array(){
   fp_t ** atmos;
   int ND = x3h-x3l+1;
@@ -527,8 +539,6 @@ int atmosphere::copy_from_array(fp_t ** array){
   }
   return 0;
 }
-
-
 
 int atmosphere::build_from_nodes(model *){
   return 0;

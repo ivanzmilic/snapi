@@ -116,7 +116,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
 
 // NLTE population loop
-  int32_t max_iter = 100;
+  int32_t max_iter = 200;
   fp_t relative_change = 1.0;
   
   if (tau_grid) compute_op_referent();

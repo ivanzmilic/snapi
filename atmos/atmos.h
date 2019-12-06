@@ -80,6 +80,7 @@ protected:
   fp_t * lambda_of;
   fp_t * value_of;
   int N_of;
+  int conserve_charge; // whether we conserve charge or not
 //
 //
 //
@@ -328,6 +329,8 @@ public:
   fp_t ** return_as_array();
   int copy_from_array(fp_t **);
   virtual fp_t get_opacity_fudge(fp_t lambda);
+  void set_conserve_charge(int);
+  int get_conserve_charge();
 //
 // ----------------------------------------------------------------------------------------------------------------
 // -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------

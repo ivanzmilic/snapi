@@ -24,6 +24,7 @@ struct acfg{                  // atmosphere config
   int of; //opacity fudge yes/no
   char *of_filename; // opacity fudge filename
   int N_of; // number of wavelenghts for opacity fudge
+  int conserve_charge; // How to treat ne (0 - LTE, 1 - simple charge conservation...)
 //
   acfg(void);
   acfg(char *adata,io_class&);
