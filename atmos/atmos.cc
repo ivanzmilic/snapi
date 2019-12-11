@@ -236,7 +236,6 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
 
 atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   
-  
   atmosphere * column;
   uint08_t do_swap = 0;
   grid * column_grid = grid::extract_grid(i,j,io_in);
@@ -258,6 +257,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
 
   sz+=sizeof(N_of);
   sz+=2.0*N_of*sizeof(fp_t);
+  sz+=sizeof(conserve_charge);
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
@@ -374,7 +374,6 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
-
   return offs;
 }
 
