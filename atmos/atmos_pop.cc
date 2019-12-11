@@ -358,9 +358,6 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 // *************************************************************************
 
 {
-
-  //io.msg(IOL_INFO,"atmosphere::newpops \n");
-
   fp_t *** convergence = ft3dim(1, 1, 1, 1, x3l, x3h);
   int * rel_change_index = new int [x3h-x3l+1] - x3l;
   memset(convergence[1][1]+1, 0, (x3h - x3l+1)*sizeof(fp_t));
