@@ -1343,15 +1343,13 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
             fp_t delta = 1.3;
 
             int n_core = 2 * int(core_size * dld_max / dld_min / core_step) + 1;
-            //io.msg(IOL_INFO, "atom::getlambda # of points in the core = %d \n", n_core);
-
+            
             fp_t wing_size = total_span - core_size;
             int n_wing = 0;
             if (wing_size <= 0) wing_size = 0.0;
             
             n_wing = 2* int (log10((delta-1.0)*(wing_size*dld_max / dld_min / core_step -1.0)) / log10(delta) +1);
-            //io.msg(IOL_INFO, "atom::getlambda # of points in the wing = %d \n", n_wing);
-
+            
             int np = n_core + n_wing;
 
             fp_t * ll;
@@ -1368,13 +1366,11 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
             }
 
             for(int jj=0;jj<np;++jj){
-              //printf("%d %f \n", jj, ll[jj] * dld_min / dld_max);
               ll[jj]=lam+ll[jj]*dld_min;           
             }
 
             // At some point a was computed here (damping). It caused some errors. Rather then fixing that, I have removed that computation of a. 
             // Now I cannot reproduce the problem. Wierd.
-
             io.msg(IOL_INFO,"%s %d %d %9.2f A [%9.2f - %9.2f] A np=%d A=%E log(gf)=%6.3f\n",id,ii,i,1E8*lam,1E8*ll[0],1E8*ll[np-1],np,A[z][i][ii],log10(gf)); // ERROR HERE, FIX! 
             io.msg(IOL_DEB1,"%s %d %d %9.2f A (%E %E %E %E) %E\n",id,ii,i,1E8*lam,6.669E+15*gf*0.25/(1E16*lam*lam),damp_rad(A[z],ii,i),damp_col(x1h, x2h, x3h, z,i, ii, Temp_in, Ne_in, lam),dld_min,gf);
             
@@ -1515,7 +1511,6 @@ uint08_t atom::rtsetup(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t x2h_
           for (int ii = i+1; ii<nl[z]; ++ii){ // Upper level
 
             if (A[z][ii][i]) ++ntr_temp;
-            //printf("%d \n", ntr_temp);
             inverse_tmap[ntr_temp][1] = ntr_temp;
             inverse_tmap[ntr_temp][2] = z;
             inverse_tmap[ntr_temp][3] = i;
@@ -1523,7 +1518,6 @@ uint08_t atom::rtsetup(int32_t x1l_in,int32_t x1h_in,int32_t x2l_in,int32_t x2h_
           }
           // Bound-free transition:
           ++ntr_temp;
-          //printf("%d \n", ntr_temp);
           inverse_tmap[ntr_temp][1] = ntr_temp;
           inverse_tmap[ntr_temp][2] = z;
           inverse_tmap[ntr_temp][3] = i; // Lower level
