@@ -617,7 +617,7 @@ int atmosphere::op_em_pert_numerical_scalar(fp_t ***T_in,fp_t ***Ne_in,fp_t ***V
 
 fp_t atmosphere::get_opacity_fudge(fp_t lambda){
 
-  // Calculates and fetches the opacity fudge according to the paper of Busa (1988?)
+  // Calculates and fetches the opacity fudge according to the paper of Busa (2001)
   lambda *= 1E8;
   fp_t fudge=1.0;
 
@@ -627,6 +627,7 @@ fp_t atmosphere::get_opacity_fudge(fp_t lambda){
         (lambda-lambda_of[l])/(lambda_of[l+1]-lambda_of[l]) * value_of[l+1];
     }
   }
+  // From Busa (2001)
   double lb_coeff = 2.1177*exp(-(lambda-2087.7)*(lambda-2087.7)/2.421E6) + 0.68738;
   if (lambda > 4500.0)
     lb_coeff=0.0;

@@ -215,13 +215,13 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
 
-  /*FILE * op_em;
+  FILE * op_em;
   op_em = fopen("op_em.txt","w");
   for (int x3i=x3l;x3i<=x3h;++x3i)
     for (int l=1;l<=nlambda;++l){
       fprintf(op_em, "%e %e %e %e \n",rt_grid[x3i],lambda[l],op[l][x1l][x2l][x3i][1][1],em[l][x1l][x2l][x3i][1]);
   }
-  fclose(op_em);*/
+  fclose(op_em);
 
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
@@ -238,6 +238,8 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     N_parameters = input_model->get_N_nodes_total();
   }
   
+  //op_em = fopen("op_em_pert.dat","w");
+
   for(int l=1;l<=nlambda;++l){
 
     // Now we formally solve for each wavelength:
@@ -257,8 +259,15 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
                 }
                 em_pert[l][2][x3k][x1i][x2i][x3i][s] *= Nt[x1i][x2i][x3k]*delta_Nt_frac;
                 em_pert[l][6][x3k][x1i][x2i][x3i][s] *= delta_angle;
-                em_pert[l][7][x3k][x1i][x2i][x3i][s] *= delta_angle;
+                em_pert[l][7][x3k][x1i][x2i][x3i][s] *= delta_angle;                
       }
+      /*for (int x3i=x3l;x3i<=x3h;++x3i)
+        fprintf(op_em,"%1.7e %1.7e %1.7e %1.7e %1.7e %1.7e %1.7e %1.7e\n", 
+          rt_grid[x3i],lambda[l],op[l][x1l][x2l][x3i][1][1], em[l][x1l][x2l][x3i][1],
+          op_pert[l][1][x3i][x1l][x2l][x3i][1][1],em_pert[l][1][x3i][x1l][x2l][x3i][1],
+          op_pert[l][2][x3i][x1l][x2l][x3i][1][1]/Nt[x1l][x2l][x3i]*delta_Nt_frac,
+          em_pert[l][2][x3i][x1l][x2l][x3i][1]/Nt[x1l][x2l][x3i]*delta_Nt_frac);*/
+
       for (int param=1;param<=7;++param){
         formal_pert_numerical(dS, op[l], em[l], op_pert[l][param], em_pert[l][param], theta, phi, boundary_condition_for_rt);
   
@@ -326,6 +335,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     // Add the synthesized spectrum to the observable
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);    
   }
+  //fclose(op_em);
     
   // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
