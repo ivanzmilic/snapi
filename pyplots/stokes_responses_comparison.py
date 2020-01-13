@@ -95,19 +95,19 @@ wvl = wvl[0][0]
 wvl *= 1E8
 #wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 
-lambda_l = wvl[0]
+lambda_l = wvl[100]
 lambda_m = wvl[-1]
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 h = h[0,:,0]
-h/= 1E5
+#h/= 1E5
 
-hmax = h[0]
+hmax = -6.0
 hmin = h[-1]
 
-#yname = '$\log\,\\tau_{500}$'
-yname = '$h\,[\mathrm{km}]$'
+yname = '$\log\,\\tau_{500}$'
+#yname = '$h\,[\mathrm{km}]$'
 for p in range(0,6):
 
 	v_min = np.zeros(4)
@@ -131,7 +131,7 @@ for p in range(0,6):
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='OrRd')
-		#plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0)
+		plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0)
 		plt.colorbar()
 		plt.tight_layout()
 		plt.subplot(222)

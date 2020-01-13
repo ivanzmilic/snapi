@@ -12,6 +12,7 @@
 #include "const.h"
 #include "atomcfg.h"
 #include "mathtools.h"
+
 #include "H/hydrogen.h"
 #include "He/helium.h"
 //#include "Li/lithium.h"
@@ -1844,8 +1845,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 // of SE are linear with respect to level populations.
 
 {
-  if (alo == 0)
-    return 0.0;
+  int x3i_control = x3h+1;
 
   if(Jb && NLTE){
 
@@ -1975,9 +1975,9 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   delete []solution;
 
   if (zeros && alo) // if there were zeros, then re-do using the regular lambda iteration
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,-1);
-  else if (zeros && alo<0) // if we tried lambda iteration, don't do anything
     delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
+  else if (zeros && !alo) // if we tried lambda iteration, revert to old. // Can this be done better?
+    delta = 0; // don't do anything!
 
   return delta;
 
