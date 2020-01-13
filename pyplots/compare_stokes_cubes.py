@@ -57,7 +57,7 @@ wls = np.append(0,wls)
 print wls
 N_x_panels = 4
 N_y_panels = len(wls)
-wls[-1] +=3
+wls[-1] +=1
 
 plt.plot(cube_1_mean)
 plt.plot(cube_2_mean)
