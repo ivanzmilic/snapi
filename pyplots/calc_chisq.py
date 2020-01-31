@@ -34,7 +34,7 @@ NL = cube1.shape[-1]
 
 if (int(ifmask)):
 	mask = np.loadtxt(maskfile,skiprows=1)
-	print mask.shape
+	print (mask.shape)
 	mask = mask[:NL]
 
 
@@ -51,7 +51,7 @@ for i in range(0,4):
 	weights[i] *= weights[i]
 residual[:] /= noise;
 residual *= residual
-print residual.shape
+print (residual.shape)
 if (int(ifmask)):
 	residual[:,:,:,:] *= mask
 residual = np.sum(residual,axis=3)
@@ -64,16 +64,16 @@ plt.imshow(np.log(residual))
 plt.colorbar()
 plt.savefig('chisq_map.png')
 
-print 'chisq_max = ', np.amax(residual)
-print 'chisq_mean = ', np.mean(residual)
-print 'chisq_median = ', np.median(residual)
-print weights
+print ('chisq_max = ', np.amax(residual))
+print ('chisq_mean = ', np.mean(residual))
+print ('chisq_median = ', np.median(residual))
+print (weights)
 weights = np.asarray(weights)
 N_Stokes = float(len(np.asarray(np.where(weights > 0.0)[0])))
 if (int(ifmask)):
 	residual /= N_Stokes * np.sum(mask)
 else:
 	residual /= (N_Stokes*NL)
-print 'chisq_reduced_max = ', np.amax(residual)
-print 'chisq_reduced_mean = ', np.mean(residual)
-print 'chisq_reduced_median = ', np.median(residual)
+print ('chisq_reduced_max = ', np.amax(residual))
+print ('chisq_reduced_mean = ', np.mean(residual))
+print ('chisq_reduced_median = ', np.median(residual))
