@@ -408,7 +408,6 @@ int atmos_pp::enforce_hequilibrium(){
     if (fabs(dN/Nt[x1l][x2l][x3l])<break_me)
       break;
   }
-  //Nt[x1l][x2l][x3l] = 0.3 / k / T[x1l][x2l][x3l];
   // Go downward, enforcing differential form of HE equation:
   for (int x3i=x3l+1;x3i<=x3h;++x3i){ 
 

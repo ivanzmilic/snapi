@@ -213,8 +213,6 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
     }
     nmap+=nl[i];
   }
-  //printf("This atom has total of %d mapped levels. \n", nmap);
-// level maps...
   lmap=new uint16_t [nmap];
   zmap=new uint08_t [nmap];
   for(int z=0,m=0;z<=Z;++z)
