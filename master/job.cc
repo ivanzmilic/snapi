@@ -394,8 +394,7 @@ int job_class::start(void)
         		mini_obs->set_to_invert(0);
         		
         		class atmosphere * atmos_column = ji.atmos[a]->extract(x+ji.xl[o]-1,y+ji.yl[o]-1,*io);
-        		atmos_column->set_grid(0);
-
+        		
         		struct chunk *chk=new chunk(x,y,0,0,0,0,cfg);
 
             array_add(chk,raw);     // add new chunk to the raw data list

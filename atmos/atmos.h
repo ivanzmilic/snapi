@@ -71,7 +71,7 @@ protected:
   fp_t *****op_referent_derivative; // derivative (strictry local), of the referent opacity. It is strictly local because it is in LTE
 
   fp_t boundary_condition_for_rt; // I am not sure that this is the best solution for an atmosphere, but this i easiest to work with at the moment.
-  bool tau_grid; // This is a 'switch' which determines whether we use tau grid as a coordinate grid. If we do, it is a grid in continuum optical
+  int tau_grid; // This is a 'switch' which determines whether we use tau grid as a coordinate grid. If we do, it is a grid in continuum optical
                  // depth at lambda=500. If we do not, we use h which is given in the input atmosphere. 
   fp_t * rt_grid; // This is grid we use to perform radiative transfer solution. It will either be geometrical grid (x3) or it will be optical depth grid
                   // (tau_referent)
@@ -236,7 +236,7 @@ public:
 //  obs observable(lamda,prm);
 //  void restruct(obs *difference,fp_t *meritfunc());
   virtual void set_grid(int);
-  virtual bool is_tau_grid(){
+  virtual int get_grid(){
     return tau_grid; 
   };
 //

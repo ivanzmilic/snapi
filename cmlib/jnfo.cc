@@ -39,6 +39,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_model=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_atmos=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,extra_settings=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,xl=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,xh=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,yl=new int [no],0,no-1,swap_endian);
@@ -114,6 +115,7 @@ jnfo::~jnfo(void)
     if(to_invert) delete[] to_invert;
     if(return_model) delete[] return_model;
     if(return_atmos) delete[] return_atmos;
+    if(extra_settings) delete[] extra_settings;
     if (xl) delete[] xl;
     if (xh) delete[] xh;
     if (yl) delete[] yl;
@@ -151,9 +153,10 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
 //
   usize+=sizeof(int);                            // no
   if(no){
-    usize+=8*no*sizeof(fp_t);                    // az,el,scat_l,broadedning,qs obs and synth,starting_lambda, stopping chisq
-    usize+=2*no*sizeof(int);                       // nlambda,no_iterations
-    usize+=no*9*sizeof(int);                       // to_invert,return_model,return_atmos,xl,xh,yl,yh,ll,lh
+    usize+=8*no*sizeof(fp_t);   // az,el,scat_l,broadedning,qs obs and synth,starting_lambda, stopping chisq
+    usize+=2*no*sizeof(int);    // nlambda,no_iterations
+    usize+=no*10*sizeof(int);   // to_invert,return_model,return_atmos
+                                // extra_settings, xl,xh,yl,yh,ll,lh
     for(int o=0;o<no;++o){
       usize+=2*nlambda[o]*sizeof(fp_t);  // lambda,weights
       usize+=4*sizeof(fp_t); // w_stokes
@@ -187,6 +190,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,to_invert,0,no-1,swap_endian);
     offs+=pack(data+offs,return_model,0,no-1,swap_endian);
     offs+=pack(data+offs,return_atmos,0,no-1,swap_endian);
+    offs+=pack(data+offs,extra_settings,0,no-1,swap_endian);
     offs+=pack(data+offs,xl,0,no-1,swap_endian);
     offs+=pack(data+offs,xh,0,no-1,swap_endian);
     offs+=pack(data+offs,yl,0,no-1,swap_endian);

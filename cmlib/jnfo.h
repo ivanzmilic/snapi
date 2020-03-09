@@ -33,6 +33,10 @@ struct jnfo{
   int *xl,*xh,*yl,*yh,*ll,*lh;
   int *return_model; //whether to return model as the result of the inversion
   int *return_atmos; //whether to return full atmosphere as the result of the inversion
+  int *extra_settings; // Clarifies what extra output should be done, binary format
+                       // from the right
+                       // first switch = output opacity/emissivit
+                       // second switch = calculate and output the response functions
   fp_t *scattered_light; // amount of scattered gray light
   fp_t *spectral_broadening; // spectral broaddening due to the instrument
   fp_t *obs_qs; // observed quiet sun level

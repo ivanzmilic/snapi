@@ -114,6 +114,7 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   else 
     N_of=0;
   conserve_charge = cfg->conserve_charge;
+  tau_grid = cfg->tau_grid;
 //
   flags.set(ATMOS_FLAG_DEF);
 //
@@ -152,11 +153,11 @@ atmosphere::~atmosphere(void)
 void atmosphere::set_grid(int input){
   // If you gave positive number, set it to tau. Otherwise, leave it intact
   if (input){
-    tau_grid = true;
+    tau_grid = 1;
     rt_grid = tau_referent[x1l][x2l];
   }
   else {
-    tau_grid = false;
+    tau_grid = 0;
     rt_grid = x3;
   }
 }
@@ -198,6 +199,7 @@ int32_t atmosphere::size(io_class &io_in)
   sz+=sizeof(int);// N_of (opacity_fudge)
   sz+=2*N_of*sizeof(fp_t);
   sz+=sizeof(int);// whether to conserve charge
+  sz+=sizeof(int);// whether to use tau or h as the grid
 
   return sz;
 }
@@ -230,6 +232,7 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
     offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
   } 
   offs+=::pack(buf+offs,conserve_charge,do_swap);
+  offs+=::pack(buf+offs,tau_grid,do_swap);
   //
   return offs;
 }
@@ -258,6 +261,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   sz+=sizeof(N_of);
   sz+=2.0*N_of*sizeof(fp_t);
   sz+=sizeof(conserve_charge);
+  sz+=sizeof(tau_grid);
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
@@ -319,6 +323,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
     offs+=::pack(buf+offs,value_of,1,N_of,do_swap);
   }
   offs+=::pack(buf+offs,conserve_charge,do_swap); 
+  offs+=::pack(buf+offs,tau_grid,do_swap);
 
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
@@ -371,7 +376,7 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
     offs+=::unpack(buf+offs,value_of,1,N_of,do_swap);
   }
   offs+=::unpack(buf+offs,conserve_charge,do_swap);
-  
+  offs+=::unpack(buf+offs,tau_grid,do_swap);
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
   return offs;

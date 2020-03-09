@@ -70,6 +70,7 @@ int main(int argc,char *argv[])
   ji.to_invert = new int [ji.no];
   ji.return_model = new int [ji.no];
   ji.return_atmos = new int [ji.no];
+  ji.extra_settings = new int [ji.no];
   ji.xl = new int [ji.no]; ji.xh = new int [ji.no];
   ji.yl = new int [ji.no]; ji.yh = new int [ji.no];
   ji.ll = new int [ji.no]; ji.lh = new int [ji.no];
@@ -91,6 +92,7 @@ int main(int argc,char *argv[])
     ji.to_invert[o]=cfg.obs[o]->to_invert;
     ji.return_model[o]=cfg.obs[o]->return_model;
     ji.return_atmos[o]=cfg.obs[o]->return_atmos;
+    ji.extra_settings[o] = 3;
     ji.xl[o] = cfg.obs[o]->xl;ji.xh[o] = cfg.obs[o]->xh;
     ji.yl[o] = cfg.obs[o]->yl;ji.yh[o] = cfg.obs[o]->yh;
     ji.ll[o] = cfg.obs[o]->ll;ji.lh[o] = cfg.obs[o]->lh;

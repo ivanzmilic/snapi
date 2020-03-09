@@ -369,6 +369,7 @@ fp_t *atmosphere::test_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
 observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
 
   // The similar one as the the atmosphere::obs:
+  this->set_grid(tau_grid);
   boundary_condition_for_rt = -1; 
   popsetup(); // 
   compute_op_referent();

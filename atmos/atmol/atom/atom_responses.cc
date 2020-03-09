@@ -662,7 +662,7 @@ int atom::add_response_contributions_new(fp_t *** I, fp_t ** response_to_op, fp_
   fp_t *** vlos, fp_t ***** op_pert_lte, fp_t ***** em_pert_lte){
 
   int ncmp = 1; // total number of Stokes components
-  int istaugrid = parent_atm->is_tau_grid();
+  int istaugrid = parent_atm->get_grid();
 
   if (!Jb || !norm || !NLTE) // No reason to proceed.
     return 0;
@@ -1128,7 +1128,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
   // In principle you should compute all the quantities which are needed for the computation of radiative rates, but then also some other stuff.
 
   int ncmp = 1; // total number of Stokes components
-  int istaugrid = parent_atm->is_tau_grid();
+  int istaugrid = parent_atm->get_grid();
 
   // If this is the proper transition, i.e. if it has mean intensiy, approximate operator and `norm' 
   if (Jb && norm && NLTE){
@@ -1252,7 +1252,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                   is_bf = -1; // free-bound
 
               fp_t op_ref = 1.0;
-              if (parent_atm->is_tau_grid())
+              if (parent_atm->get_grid())
                 op_ref = parent_atm->get_op_referent(x1l,x2l,ll);
 
               // If it is a b-b transition (line):
@@ -1413,7 +1413,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                     exit(1);
                   }*/
                 // Then, an additional term if we are using taugrid as a primary grid:
-                if (parent_atm->is_tau_grid()){
+                if (parent_atm->get_grid()){
                   
                   fp_t op_ref_der = parent_atm->get_op_referent_der(1,ll,x1l,x2l,ll);
                   
@@ -1436,7 +1436,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
                 beta_density[ll][(l-x3l) * nmap +i +1] += (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
                   * elementary_contribution * (response_to_op[l][ll] * op_pert_lte[2][ll][x1l][x2l][ll] + response_to_em[l][ll] * em_pert_lte[2][ll][x1l][x2l][ll]) / op_ref / norm[x1l][x2l][l][tr];;
                 
-                if (parent_atm->is_tau_grid()){
+                if (parent_atm->get_grid()){
                   fp_t op_ref_der = parent_atm->get_op_referent_der(2,ll,x1l,x2l,ll);
                   beta_density[ll][(l-x3l) * nmap +i +1] -= (B[z_i][l_i][l_ii] * pop[x1l][x2l][l].n[z_i][l_i] - B[z_i][l_ii][l_i] * pop[x1l][x2l][l].n[z_i][l_ii]) 
                   * elementary_contribution * (response_to_op[l][ll] * op_ref_der * opp[x1l][x2l][ll] 
@@ -1526,7 +1526,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
               beta_Temp[ll][(l-x3l) * nmap +i + 1] -= pop[x1l][x2l][l].n[z_ii][l_ii] * ddR_cont_i_dI * dI_dqk_lte[1] * angular_weight * lambda_w/op_ref;
               beta_density[ll][(l-x3l) * nmap +i + 1] -= pop[x1l][x2l][l].n[z_ii][l_ii] * ddR_cont_i_dI * dI_dqk_lte[2] * angular_weight * lambda_w/op_ref;
 
-              if (parent_atm->is_tau_grid()){ // if tau grid
+              if (parent_atm->get_grid()){ // if tau grid
 
                 // First sort out temperature
                 fp_t op_ref_der = parent_atm->get_op_referent_der(1,ll,x1l,x2l,ll);
@@ -1626,7 +1626,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
               beta_Temp[ll][(l-x3l) * nmap +i + 1] -= pop[x1l][x2l][l].n[z_ii][l_ii] * ddR_i_cont_dI * dI_dqk_lte[1] * angular_weight * lambda_w/op_ref;
               beta_density[ll][(l-x3l) * nmap +i + 1] -= pop[x1l][x2l][l].n[z_ii][l_ii] * ddR_i_cont_dI * dI_dqk_lte[2] * angular_weight * lambda_w/op_ref;
 
-              if (parent_atm->is_tau_grid()){ // if tau grid
+              if (parent_atm->get_grid()){ // if tau grid
 
                 op_ref = parent_atm->get_op_referent(x1l,x2l,ll);
                 // First sort out temperature
