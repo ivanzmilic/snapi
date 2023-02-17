@@ -281,6 +281,7 @@ fp_t ***** h_minus_mol::opacity_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***V
 // Very simple functions to compute population responses. So far, only to Temperature:
 
 void h_minus_mol::compute_lte_population_responses(){
+
   // This one will be made in a really simple way:
   dN = ft4dim(1,7,x1l,x1h,x2l,x2h,x3l,x3h); 
   memset(dN[1][x1l][x2l]+x3l,0,7*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
@@ -290,6 +291,7 @@ void h_minus_mol::compute_lte_population_responses(){
 
         // Temperature
         fp_t local_T = fetch_temperature(x1i,x2i,x3i);
+        
         // Perturb Temperature:
         parent_atm->set_Temp(x1i,x2i,x3i,local_T+delta_T * 0.5);
         // Solve chemeq for the local point only:

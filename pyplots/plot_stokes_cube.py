@@ -1,6 +1,4 @@
 from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -10,7 +8,6 @@ import pyana
 import sys
 from scipy.signal import argrelextrema
 import scipy.ndimage.filters as flt
-from matplotlib_scalebar.scalebar import ScaleBar
 import colorcet as cc
 
 
@@ -25,7 +22,7 @@ mean = np.mean(stokes_cube[:,:,0,:],axis=(0,1))
 mean = flt.gaussian_filter(mean,15)
 lines=argrelextrema(mean, np.less)
 lines=np.asarray(lines[0])
-print lines
+print (lines)
 offset = [0,0,0,4]
 NL = stokes_cube.shape[3]
 NX = stokes_cube.shape[1]
@@ -38,11 +35,12 @@ size = 1.5
 #1105
 
 x = np.linspace(0.0,NX-1*1.0,NX)
-x *= 8.0 / 1E3
+x *= 16.0 / 1E3
 y = x
 
 l_line = lines[0]
 
+intV = int((6301.61 - 6301.) /0.005)
 
 plt.figure(figsize=[4.5*1, 3.7*2])
 plt.clf()
@@ -54,16 +52,16 @@ plt.title('$\mathrm{Stokes}\,I/I_{\mathrm{qs}}$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.ylabel('$\mathrm{Stokes}\,I$')
 plt.subplot(212)
-plt.imshow(stokes_cube[:,:,3,lines[-2]+5]/mean[0]*100,origin='lower',cmap=cc.cm['coolwarm'],vmin=-3,vmax=3,extent=[x[0],x[-1],y[0],y[-1]])
+plt.imshow(stokes_cube[:,:,3,intV]/mean[0]*100,origin='lower',cmap=cc.cm['coolwarm'],vmin=-20,vmax=20,extent=[x[0],x[-1],y[0],y[-1]])
 plt.title('$V/I_{\mathrm{qs}}\,[\%]$')
 plt.colorbar(shrink=0.9)
 plt.xlabel('$x\,[\mathrm{Mm}]$')
 plt.ylabel('$y\,[\mathrm{Mm}]$')
 #plt.tight_layout()
 plt.savefig(sys.argv[2],bbox_inches='tight')
-plt.savefig(sys.argv[2]+'.eps',fmt='eps',bbox_inches='tight')
+plt.savefig(sys.argv[2]+'.eps',bbox_inches='tight')
 
-
+exit();
 #plt.clf()
 #plt.cla()
 #plt.figure(figsize=[size * float(NX)/float(NY)*N_x,size*N_y])

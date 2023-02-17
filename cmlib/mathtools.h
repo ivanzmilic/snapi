@@ -40,8 +40,6 @@ void solveCrout(int d,fp_t*LU,fp_t*b,fp_t*x);
 void Crout(int d,__float128*S,__float128*D);
 void solveCrout(int d,__float128*LU,__float128*b,__float128*x);
 
-int Broyden_update(fp_t ** , fp_t *, fp_t *, int);
-
 // Routines regarding the computation of the exponential integral:
 
 double      Exponential_Integral_Ei( double x );

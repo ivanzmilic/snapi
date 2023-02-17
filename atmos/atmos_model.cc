@@ -830,7 +830,7 @@ int model::set_response_to_parameters(fp_t *** responses_in, int Nd_in){
     for (int q=1;q<=7;++q)
       for (int x3k=1;x3k<=N_depths;++x3k)
         response_to_parameters[p][q][x3k] = responses_in[p][q][x3k];
-
+  return 0;
 }
 
 int model::cpy_values_from(model* input){
@@ -998,7 +998,7 @@ int model::polish_angles(){
     fp_t temp = tan(phi_nodes_phi[i]);
     phi_nodes_phi[i] = atan(temp);
   }
-
+  return 0;
 }
 
 model * model_new(int N_nodes_temp_in, int N_nodes_vt_in, int N_nodes_vs_in, int N_nodes_B_in){

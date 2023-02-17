@@ -1478,12 +1478,14 @@ observable *atmosphere::obs_stokes_responses_to_nodes(model * atmos_model, fp_t 
     o->setlambda(lambda);
     del_ft4dim(S,1,1,1,1,1,4,1,nlambda);
     delete o_fine;
+    return o;
   }
   // If there is no filter, everything is the same as before:
   else{
     observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model,0);
     return o;
   }
+  return 0;
 }
 
  // ===============================================================================================
@@ -1614,59 +1616,4 @@ void atmosphere::regularize_parameter(fp_t ** JTJ, fp_t * rhs, model * model_to_
     }
 }
 
- // ===============================================================================================
-
- /////////////////////
- // OLD:::::
-
- observable * atmosphere::scalar_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, fp_t * lambda, int nlambda){};
-
-
-    // ------------------------------------------------------------------------------------------------
-    //DEBUG - ILLUSTRATION:
-
-    /*fp_t ** current_atm = this->return_as_array();
-    for (int p =1;p<=NP;++p)
-      memcpy(atmos_by_iter[p][1][iter]+1,current_atm[p]+1,ND*sizeof(fp_t));
-    del_ft2dim(current_atm,1,NP,1,ND);
-    nodes_by_iter->add_model(model_to_fit,1,iter);
-    fp_t * lambda_full = spectrum_to_fit->get_lambda();
-    int nlambda_full = spectrum_to_fit->get_n_lambda();
-    observable * current_obs_full = forward_evaluate(theta,phi,lambda_full,nlambda_full,scattered_light,qs_level,spectral_broadening);
-    fp_t ** current_S_full = current_obs_full->get_S(1,1);
-    memcpy(stokes_by_iter[1][iter][1]+1,current_S_full[1]+1,4*nlambda_full*sizeof(fp_t));
-    del_ft2dim(current_S_full,1,4,1,nlambda_full);
-    delete current_obs_full;
-    delete[](lambda_full+1);*/
-
-    //---------------------------------------------------------------------------------------------------
- //---------------------------------------------------------------------------------------------------
-  /*N_parameters = model_to_fit->get_N_nodes_total();
-  int nx,ny,np;
-  fp_t *** nodes_cube = nodes_by_iter->get_data(nx,ny,np);
-  write_file((char*)"nodes_by_iter.f0",nodes_cube,nx,ny,np,io);
-  del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
-  delete nodes_by_iter;
-  
-  write_file((char*)"atmos_by_iter.f0",atmos_by_iter,NP,1,MAX_ITER,ND,io);
-  del_ft4dim(atmos_by_iter,1,NP,1,1,1,MAX_ITER,1,ND);
-  nlambda = spectrum_to_fit->get_n_lambda();
-  write_file((char*)"spectra_by_iter.f0",stokes_by_iter,1,MAX_ITER,4,nlambda,io);  
-  del_ft4dim(stokes_by_iter,1,1,1,MAX_ITER,1,4,1,nlambda);*/
-
-  //---------------------------------------------------------------------------------------------------
-
- //------------------------------------------------------------------------------------------------
-  //DEBUG - ILLUSTRATION
- /* int NP = 12;
-  int ND = x3h-x3l+1;
-  fp_t **** atmos_by_iter = ft4dim(1,NP,1,1,1,MAX_ITER,1,ND);
-  modelcube * nodes_by_iter;
-  nodes_by_iter = new modelcube(model_to_fit,1,MAX_ITER);
-  fp_t **** stokes_by_iter = ft4dim(1,1,1,MAX_ITER,1,4,1,spectrum_to_fit->get_n_lambda());*/
-  // -----------------------------------------------------------------------------------------------
-  //
-
-
-
-
+ 

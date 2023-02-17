@@ -1,4 +1,4 @@
-#include <math.h>
+  #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -298,8 +298,11 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // * conservation perhaps it should be treated separately in that regime...?
 // **********************************************************************************
     iter++;
-    if (iter > 20) break;
-  }while(!converged(1E-6,N,d,natoms));
+    if (iter > 20){
+      //fprintf(stderr, "Too much iterations man. \n");
+      break;
+    }
+  }while(!converged(1E-8  ,N,d,natoms));
 //
   io.msg(IOL_XNFO,"atmosphere::chemeq: final values: T=%E, Nt=%E:\n",T_in,Nt_in);
   Ne_in=N[0];
@@ -354,11 +357,15 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
   delete[] (atoms+1);
   delete[] (abund+1);
   delete[] N;
+
   return 0;     // return error code if necessary
+
 }
 
 int atmosphere::execute_chemeq_for_point(int x1i, int x2i, int x3i){
 
+  // This function exectutes chemical equilibrium (see above) for a given point.
+  
   chemeq(atml,natm,T[x1i][x2i][x3i],Nt[x1i][x2i][x3i],Ne[x1i][x2i][x3i],x1i,x2i,x3i);
 
   return 0;

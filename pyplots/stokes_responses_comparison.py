@@ -6,7 +6,7 @@ import scipy.ndimage as ndimage
 
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
+rc('text', usetex=False)
 mpl.rcParams['axes.formatter.useoffset'] = False
 
 #turn input arguments into something usable
@@ -22,7 +22,7 @@ output_file = sys.argv[6]
 spectrum = np.loadtxt(profile_file)
 plt.plot(spectrum[:,0] * 1E8, spectrum[:,1])
 spectrum[:,0] *= 1E8
-spectrum[:,0] -= (spectrum[-1,0] + spectrum[0,0]) * 0.5 
+#spectrum[:,0] -= (spectrum[-1,0] + spectrum[0,0]) * 0.5 
 
 lambda_l = min(spectrum[:,0])
 lambda_m = max(spectrum[:,0])
@@ -63,7 +63,8 @@ plt.plot(spectrum[:,0], spectrum[:,4])
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 plt.tight_layout()
 
-plt.savefig(output_file+'_stokes_spectrum.eps', format='eps')
+plt.savefig(output_file+'_stokes_spectrum.eps', format='eps',bbox_inches='tight')
+plt.savefig(output_file+'_stokes_spectrum.png', format='png',bbox_inches='tight')
 
 #then load numerical and analytical responses
 
@@ -81,12 +82,12 @@ N_Parameters_to_plot = 7
 rn = rn.reshape(4,N_Parameters,n_depths, n_wvl)
 ra = ra.reshape(4,N_Parameters,n_depths, n_wvl)
 
-for n in range(0,n_wvl):
-	rn[:,:,:,n] /= spectrum[n,1]
-	ra[:,:,:,n] /= spectrum[n,1]
+#for n in range(0,n_wvl):
+#	rn[:,:,:,n] /= spectrum[n,1]
+#	ra[:,:,:,n] /= spectrum[n,1]
 
-rn *= 1E4
-ra *= 1E4
+#rn *= 1E4
+#ra *= 1E4
 
 wvl = wvl.reshape(N_Parameters,n_depths, n_wvl)
 h = h.reshape(N_Parameters,n_depths, n_wvl)
@@ -95,19 +96,19 @@ wvl = wvl[0][0]
 wvl *= 1E8
 #wvl -= (wvl[n_wvl-1] + wvl[0]) / 2.0
 
-lambda_l = wvl[100]
+lambda_l = wvl[0]
 lambda_m = wvl[-1]
 
 suffix = ['temperature','density','vt','vmacro','B', 'theta', 'phi']
 
 h = h[0,:,0]
-#h/= 1E5
+h/= 1E5
 
-hmax = -6.0
+hmax = h[0]
 hmin = h[-1]
 
-yname = '$\log\,\\tau_{500}$'
-#yname = '$h\,[\mathrm{km}]$'
+#yname = '$\log\,\\tau_{500}$'
+yname = '$h\,[\mathrm{km}]$'
 for p in range(0,6):
 
 	v_min = np.zeros(4)
@@ -131,7 +132,7 @@ for p in range(0,6):
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel(yname)
 		plt.pcolormesh(wvl, h, rn[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='OrRd')
-		plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0)
+		plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*300.0)
 		plt.colorbar()
 		plt.tight_layout()
 		plt.subplot(222)
@@ -196,7 +197,7 @@ for p in range(0,6):
 	plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 	plt.ylabel(yname)
 	plt.pcolormesh(wvl, h, ra[0,p,:,:], vmin = v_min[0], vmax = v_max[0], rasterized=True,cmap='OrRd')
-	plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*-3.0+1.0)
+	plt.plot(wvl,spectrum[:,1]/max(spectrum[:,1])*300.0)
 	plt.colorbar()
 	plt.tight_layout()
 	plt.subplot(222)
@@ -227,6 +228,7 @@ for p in range(0,6):
 	plt.colorbar()
 	plt.tight_layout()
 	plt.savefig(output_file+'_analytical_responses_intensity_'+suffix[p]+'.eps', format='eps',bbox_inches='tight')
+	plt.savefig(output_file+'_analytical_responses_intensity_'+suffix[p]+'.png', format='png',bbox_inches='tight')
 
 	rmax = np.zeros(4)
 	for s in range(0,4): rmax[s] = np.amax(np.abs(rn[s][p]))
@@ -240,12 +242,13 @@ for p in range(0,6):
 		plt.ylim([h[0], h[n_depths-1]])
 		plt.xlabel('$\lambda\,\mathrm{[\AA]}$')
 		plt.ylabel('$h\,\mathrm{[km]}$')
-		plt.pcolormesh(wvl, h, rel_diff,vmin = -10.0,vmax=-1.0, rasterized=True)
+		plt.pcolormesh(wvl, h, rel_diff,vmin = -10.0,vmax=-10.0, rasterized=True)
 		plt.colorbar()
 		plt.tight_layout()
-		plt.savefig(output_file+'_relative_difference_responses_intensity_'+suffix[p]+'.eps', format='eps')
-		print suffix[p]
+		plt.savefig(output_file+'_relative_difference_responses_intensity_'+suffix[p]+'.eps', format='eps',bbox_inches='tight')
+		plt.savefig(output_file+'_relative_difference_responses_intensity_'+suffix[p]+'.png', format='png',bbox_inches='tight')
+		print (suffix[p])
 		for s in range(0,4):
 			rel_diff = (np.abs((ra[s,p,:,:]-rn[s,p,:,:]))/rmax[s])
-			print np.amax(rel_diff)
+			print (np.amax(rel_diff))
 

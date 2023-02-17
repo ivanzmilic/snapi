@@ -467,7 +467,7 @@ int08_t atmosphere::init(const char *wd,io_class *io_in)
   return 0;
 }
 
-int atmosphere::set_Temp(int x1i, int x2i, int x3i, fp_t Temp_in){
+void atmosphere::set_Temp(int x1i, int x2i, int x3i, fp_t Temp_in){
 
   T[x1i][x2i][x3i] = Temp_in;
 }
@@ -476,7 +476,7 @@ fp_t atmosphere::get_Nt(int x1i, int x2i, int x3i){
   return Nt[x1i][x2i][x3i];
 }
 
-int atmosphere::set_Nt(int x1i, int x2i, int x3i, fp_t Nt_in){
+void atmosphere::set_Nt(int x1i, int x2i, int x3i, fp_t Nt_in){
   Nt[x1i][x2i][x3i] = Nt_in;
 }
 

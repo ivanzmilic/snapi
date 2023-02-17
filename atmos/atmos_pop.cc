@@ -65,6 +65,7 @@ fp_t atmosphere::ne_derivative(int x1i, int x2i, int x3i){
 int atmosphere::nltepops(void) // compute the NLTE populations (polarization free for now)
 {
 
+
 // Start by initializing everything to lte pops
   ltepops();
 
@@ -77,9 +78,10 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
   if(nlambda == 1)lambda[0] = 500E-7;
   // Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
+  //printf("atmos::nltepops () Line 81 works. \n");
   for(int a=0;a<natm;++a) atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
   for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
- 
+  
   // If it turns out there are no wavelengths where RT needs to be done, we are done! 
   if (nlambda == 0){
 
@@ -120,7 +122,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   fp_t relative_change = 1.0;
   
   if (tau_grid) compute_op_referent();
-
+  
   for (int a=0;a<natm;++a){
     atml[a]->compute_active_population(T, Ne);
   }
@@ -188,7 +190,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
-    //io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
+    io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
     //printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
 
     if (relative_change < 1E-3)
@@ -222,6 +224,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
 
   io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
+  return 0;
 }
 
 int atmosphere::nltepops_taugrid(void){
@@ -345,7 +348,7 @@ int atmosphere::nltepops_taugrid(void){
   del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
 
   io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
-
+  return 0;
 }
 
 fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda)
@@ -410,4 +413,5 @@ fp_t atmosphere::get_Ne(int x1i, int x2i, int x3i){
 
 fp_t atmosphere::set_Ne(int x1i, int x2i, int x3i, fp_t input){
   Ne[x1i][x2i][x3i] = input;
+  return 0;
 }

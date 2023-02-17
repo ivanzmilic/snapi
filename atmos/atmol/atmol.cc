@@ -11,6 +11,7 @@
 
 atmol **append(atmol *q,atmol **p,int &len)
 {
+  //printf("atmol::append started, len = %d \n ",len);
   for(int i=0;i<len;++i) if(p[i]==q) return p;
   atmol **tmp=new atmol* [len+1];
   if(len){
@@ -190,10 +191,12 @@ fp_t ****atmol::emissivity_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_
 
 uint08_t atmol::rtsetup(int32_t,int32_t,int32_t,int32_t,int32_t,int32_t)
 {
+  return 0;
 }
 
 uint08_t atmol::rtclean(int,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t)
 {
+  return 0;
 }
 
 void atmol::rtinit(void)

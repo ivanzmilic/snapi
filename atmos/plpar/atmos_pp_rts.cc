@@ -165,6 +165,7 @@ int atmos_pp::formal(fp_t * spatial_grid, fp_t ****S,fp_t ***L,fp_t *****op,fp_t
       if(L) L[x1l][x2l][x3i]=0.0;
     }
   }
+  return 0;
 }
 
 int atmos_pp::formal_pert_numerical(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){

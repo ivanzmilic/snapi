@@ -1,6 +1,10 @@
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=False)
+import matplotlib
+font = {'family' : 'normal',
+        'weight' : 'normal',
+        'size'   : 18}
+
+matplotlib.rc('font', **font)
+matplotlib.rc('text', usetex=True)
 
 import matplotlib
 matplotlib.use('Agg')

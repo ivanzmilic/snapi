@@ -28,8 +28,9 @@ int atmosphere::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t 
   io.msg(IOL_INFO,"atmosphere::formal: em[%d][%d][%d] = %E\n",x1l,x2l,x3l,em[x1l][x2l][x3l]);
 // 
 // RAM management: we must compute the integrated intensity over each transition and all angles. 
-// General approach: if we 
+// General approach: if we...
 //
+  return 0;
 
 }
 
@@ -93,6 +94,7 @@ int atmosphere::formal(fp_t * spatial_grid, fp_t ****S,fp_t ***L,fp_t *****op,fp
 //
 
 // integrate Unno-Rachowsky using DELO/HERM?
+  return 0;
 }
 
 int atmosphere::formal_pert_numerical(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){

@@ -104,6 +104,9 @@ int atmosphere::op_em_vector_plus_pert(fp_t *** Vlos, fp_t **** B, fp_t theta,fp
         fp_t *op_pert = new fp_t[2]-1; // Only for temperature and density
         op_pert[1] = Ne_lte_der[1][x1i][x2i][x3i] * 6.65E-25;
         op_pert[2] = Ne_lte_der[2][x1i][x2i][x3i] * 6.65E-25;
+
+        //if (x3i==20)
+        //  fprintf(stderr,"%1.7e %1.7e \n", Ne[x1i][x2i][x3i], Ne_lte_der[1][x1i][x2i][x3i]);
         
         fp_t em = op * Planck_f(lambda_m, T[x1i][x2i][x3i]);
         fp_t *em_pert = new fp_t[2]-1; // Only for temperature and density
@@ -167,6 +170,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   // analyticaly or numerically, but the final computation of perturbation is computed analyticaly.
 
   boundary_condition_for_rt = -1;
+  this->set_grid(tau_grid);
   popsetup(); // setup
 
   for (int a = 0; a<natm; ++a)
@@ -176,12 +180,11 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
     compute_op_referent();
     compute_op_referent_derivative();
   }
-  
   nltepops();
   respsetup();
   ne_lte_derivatives();
-  
-  //compute_nlte_population_responses_numerical(x3l,x3h);
+      
+  //compute_nlte_population_responses_numerical (x3l,x3h);
 
   compute_nlte_population_responses(0);//
 
@@ -215,14 +218,23 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
   op_em_vector_plus_pert(Vr,B,theta,phi,lambda_vacuum,nlambda,op,em,op_pert,em_pert);
 
-  /*FILE * op_em;
-  op_em = fopen("op_em.txt","w");
+  FILE * op_em;
+  op_em = fopen("op_em.dat","w");
   for (int x3i=x3l;x3i<=x3h;++x3i)
     for (int l=1;l<=nlambda;++l){
-      fprintf(op_em, "%e %e %e %e \n",rt_grid[x3i],lambda[l],op[l][x1l][x2l][x3i][1][1],em[l][x1l][x2l][x3i][1]);
+      fprintf(op_em, "%1.13e %1.13e %1.13e %1.13e \n",rt_grid[x3i],lambda[l],op[l][x1l][x2l][x3i][1][1],em[l][x1l][x2l][x3i][1]);
   }
-  fclose(op_em);*/
-
+  fclose(op_em);
+  op_em = fopen("opacity_derivatives.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l){
+      fp_t loc = 0;
+      if (tau_grid) loc = log10(-tau_referent[x1l][x2l][x3i]); else loc = x3[x3i];
+      fprintf(op_em,"%1.13e %1.13e %1.13e %1.13e %1.13e %1.13e %1.13e \n", loc, lambda[l], T[x1l][x2l][x3i], 
+        Nt[x1l][x2l][x3i]*k*T[x1l][x2l][x3i],op[l][x1l][x2l][x3i][1][1],op_pert[l][1][x3i][x1l][x2l][x3i][1][1],op_pert[l][2][x3i][x1l][x2l][x3i][1][1]);
+  }
+  fclose(op_em);
+        
   // Normalize to referent opacity, for each wavelength:
   if (tau_grid)
     for (int l=1;l<=nlambda;++l){
@@ -381,7 +393,6 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  //fprintf(stderr,"%e %e \n",intensity_responses[11][1][2],intensity_responses[11][1][3]);
   return o;
 
 }

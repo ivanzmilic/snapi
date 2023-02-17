@@ -15,16 +15,20 @@ dims = atmos_in.shape
 ND_old = dims[0]
 N_param = dims[1]
 
-print ND_old, N_param
+print (ND_old, N_param)
 
 atmos_out = np.zeros((ND, N_param))
 
 #start by making an independent variable, which is, of course, h
 if (index == 0):
 	atmos_out[:,0] = np.linspace(atmos_in[0,0], atmos_in[-1,0], num = ND)
-	atmos_out[:,0] = np.linspace(-5.0, 1.2, num = ND)
+	atmos_out[:,0] = np.linspace(-5.0, 1.0, num = ND)
 elif (index == 1):
 	atmos_out[:,1] = np.linspace(-atmos_in[0,1], -atmos_in[-1,1], num = ND)
+
+atmos_in[:,3] = np.log10(atmos_in[:,3])
+#atmos_in[4] = np.log10(atmos_in[4])
+print (atmos_in[:,3])
 
 for i in range (0,N_param):
 	if (index == 0):
@@ -38,4 +42,10 @@ for i in range (0,N_param):
 if (index == 1):
 	atmos_out[:,1] *= -1.0
 
-np.savetxt(output_atmosphere, atmos_out, fmt = "%6.6e", header = str(ND) + " " + output_atmosphere)	
+atmos_out[:,3] = 10.**atmos_out[:,3]
+#atmos_out[:,2] *= 1.001
+#atmos_out[:,3] *= 1.001
+
+atmos_out[:,2] += 1.0
+
+np.savetxt(output_atmosphere, atmos_out, fmt = "%1.7e", header = str(ND) + " " + output_atmosphere)	

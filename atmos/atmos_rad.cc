@@ -157,6 +157,7 @@ int atmosphere::op_em_scalar_active_only(fp_t ***Vlos, fp_t ****B, fp_t theta, f
   for (int a=0;a<natm;++a)
     if (atml[a]->check_if_nlte())
       atml[a]->op_em_scalar(T,Ne,Vlos,Vt,B,theta,phi,lambda,nlambda,op,em);
+  return 0;
 }
 
 // ======================================================================================
@@ -463,10 +464,10 @@ fp_t ***** atmosphere::thomson_em_pert(fp_t ***Ne_in,fp_t lambda,int32_t x1l_in,
 
 // old:
 // ===============================================================================================
-fp_t *atmosphere::opacity(fp_t *lambda,int32_t nlambda,int32_t x1i,int32_t x2i,int32_t x3i){}
-fp_t *atmosphere::emissivity(fp_t *lambda,int32_t nlambda,int32_t x1i,int32_t x2i,int32_t x3i){}
-fp_t *atmosphere::thomson_op(fp_t ne,fp_t *lambda,int32_t nlambda){}
-fp_t *atmosphere::thomson_em(fp_t Te,fp_t ne,fp_t *lambda,int32_t nlambda){}
+//fp_t *atmosphere::opacity(fp_t *lambda,int32_t nlambda,int32_t x1i,int32_t x2i,int32_t x3i){}
+//fp_t *atmosphere::emissivity(fp_t *lambda,int32_t nlambda,int32_t x1i,int32_t x2i,int32_t x3i){}
+//fp_t *atmosphere::thomson_op(fp_t ne,fp_t *lambda,int32_t nlambda){}
+//fp_t *atmosphere::thomson_em(fp_t Te,fp_t ne,fp_t *lambda,int32_t nlambda){}
 // ===============================================================================================
 
 // Fetching:
@@ -474,7 +475,7 @@ fp_t atmosphere::get_T(int x1i, int x2i, int x3i){
   return T[x1i][x2i][x3i];
 }
 
-fp_t * atmosphere::get_magnetic_field(int x1i, int x2i, int x3i){} // You cannot get transformed magnetic field.
+fp_t * atmosphere::get_magnetic_field(int x1i, int x2i, int x3i){return 0;} // You cannot get transformed magnetic field.
 
 //-------------------------------------------------------------------------------------------------------------------------------------------
 

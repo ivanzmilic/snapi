@@ -732,8 +732,6 @@ fp_t aps(fp_t x){
   return (x>0) ? x : -x;
 }
 
-int Broyden_update (fp_t ** Broyden, fp_t * defect, fp_t * correction, int size){} // OBSOLETE
-
 // Stolen implementation of E1 exponential integral, taken from: http://www.mymathlib.com/c_source/functions/exponential_integrals/exponential_integral_Ei.c
 
 //                         Internally Defined Routines                        //
@@ -1429,6 +1427,7 @@ int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_paramet
   } // each parameter
   
   del_ft2dim(S_temp,1,4,1,N_lambda);
+  return 0;
 }
 
 int convolve_response_with_gauss_tau(fp_t *** response, int x3l, int x3h, fp_t * taugrid, int nlambda, fp_t sigma){
@@ -1442,6 +1441,7 @@ int convolve_response_with_gauss_tau(fp_t *** response, int x3l, int x3h, fp_t *
       for (int x3i=x3l;x3i<=x3h;++x3i)
         response[x3i][s][l] = temp[x3i-x3l+1];
     }
+  return 0;
 }
 
 int convolve_with_gauss(fp_t * y, fp_t * x, int N, fp_t sigma){
@@ -1506,6 +1506,7 @@ int set_to_zero_except(fp_t * x, int N, int to_keep){
       x[i] = 0.0;
   }
   delete[]indices;
+  return 0;
 }
 
 int stupid_sort_indices_by_abs(fp_t * A, int * indices, int N){
@@ -1516,6 +1517,7 @@ int stupid_sort_indices_by_abs(fp_t * A, int * indices, int N){
     A_temp[indices[i]] = 0.0;
   }
   delete[]A_temp;
+  return 0;
 }
 
 int index_of_max_abs(fp_t * x, int N){

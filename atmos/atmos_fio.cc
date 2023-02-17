@@ -121,8 +121,9 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
   }
   // Test:
   //for (int x3i=x3l;x3i<=x3h;++x3i)
-  //  printf("%e %e %e %e %e \n",tau_referent[x1l][x2l][x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Bz[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
+  //   printf("%e %e %e %e %e \n",tau_referent[x1l][x2l][x3i],T[x1l][x2l][x3i],Nt[x1l][x2l][x3i],Bz[x1l][x2l][x3i],Vz[x1l][x2l][x3i]);
   del_ft4dim(atmoscube,1,np,1,nx,1,ny,1,nz);
+  return 0;
 }
 
 int08_t atmosphere::read_mhd(const char *wd,const char *filename,io_class *io_in)

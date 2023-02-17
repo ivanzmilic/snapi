@@ -1886,5 +1886,5 @@ fp_t atom::C_cont_i(int z, int i, fp_t T, fp_t n_e){
 	return rate;
 }
 
-fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) {};
+fp_t atom::boundfree_op(uint08_t z,uint16_t l,fp_t Vlos,fp_t lambda,struct pps &p) {return 0;};
 

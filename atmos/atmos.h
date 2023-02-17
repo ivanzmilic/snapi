@@ -153,7 +153,7 @@ protected:
 // Referent optical depth scale related functions:
   virtual int compute_op_referent();
   virtual int compute_tau_referent();
-  virtual int compute_op_referent_derivative(){};
+  virtual int compute_op_referent_derivative(){return 0;};
   virtual void delete_op_referent_derivative();
   virtual void normalize_to_referent_opacity(fp_t ***, fp_t ***);
   virtual void normalize_to_referent_opacity(fp_t *****, fp_t ****); // Overloaded vector vesion
@@ -162,10 +162,10 @@ protected:
   virtual void de_normalize(fp_t *****, fp_t ****); // Overloaded vector version
 
 // point-by-point
-  fp_t *opacity(fp_t*,int32_t,int32_t,int32_t,int32_t);
-  fp_t *emissivity(fp_t*,int32_t,int32_t,int32_t,int32_t);
-  fp_t *thomson_op(fp_t,fp_t*,int32_t);
-  fp_t *thomson_em(fp_t,fp_t,fp_t*,int32_t);
+  //fp_t *opacity(fp_t*,int32_t,int32_t,int32_t,int32_t);
+  //fp_t *emissivity(fp_t*,int32_t,int32_t,int32_t,int32_t);
+  //fp_t *thomson_op(fp_t,fp_t*,int32_t);
+  //fp_t *thomson_em(fp_t,fp_t,fp_t*,int32_t);
 // atmos_chm.cc: chemistry
   uint08_t chemeq(class atmol**,int,fp_t,fp_t,fp_t&,int32_t,int32_t,int32_t);  
 // atmos_pop.cc: populations
@@ -208,7 +208,7 @@ protected:
   {return 0;};
 
   virtual int formal_pert_analytical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
-  virtual int formal_pert_numerical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****,fp_t ***, fp_t ****, fp_t, fp_t, fp_t){};
+  virtual int formal_pert_numerical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****,fp_t ***, fp_t ****, fp_t, fp_t, fp_t){return 0;};
 // atmos_fio.cc: file I/O
   int08_t read_atmos(const char*,const char*,uint08_t,io_class*);
   int08_t read_spinor(const char*,const char*,io_class*);
@@ -223,8 +223,8 @@ public:
 
   virtual int build_from_nodes(model *);
   virtual int interpolate_from_nodes(model *); // the same as above except it does not re-evaluate HE
-  virtual int enforce_hequilibrium(){}; // enforces hydrostatic equilibrium
-  virtual fp_t ** calculate_dN_dT(){}; 
+  virtual int enforce_hequilibrium(){return 0;}; // enforces hydrostatic equilibrium
+  virtual fp_t ** calculate_dN_dT(){return 0;}; 
 
   virtual ~atmosphere(void);
 //
@@ -285,7 +285,7 @@ public:
   };
 
 // atmos_fit.cc various fitting examples, routines and testing:
-  virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
+  //virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t); // LM fits trying out nodeless inversion
   virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int, int);
@@ -308,8 +308,8 @@ public:
   fp_t get_vt(int, int, int);
   fp_t * get_magnetic_field(int, int, int);
   int execute_chemeq_for_point(int, int, int); // Just to execture chemeq in point x1i, x2i, x3i, populations will be automatically updated
-  int set_Temp(int, int, int, fp_t); // We might have merged this with the previous one, but it might be handy to "remotely" change the atmospheric parameters
-  int set_Nt(int, int, int, fp_t);
+  void set_Temp(int, int, int, fp_t); // We might have merged this with the previous one, but it might be handy to "remotely" change the atmospheric parameters
+  void set_Nt(int, int, int, fp_t);
   fp_t get_x1(int index){
     return x1[index];
   }

@@ -209,7 +209,7 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
 
 int atmos_ppbez::optical_depth_scale(fp_t ***tau,fp_t ***op,fp_t t,fp_t p){
 
-  fp_t *tt = tau[x1l][x2l]; // "Current" value of intensity. I.e. the one for this "column" 
+  fp_t *tt = tau[x1l][x2l]; // "Current" value of optical depth. I.e. the one for this "column" 
   fp_t *oo = op[x1l][x2l]; // Same for the opacity
    
   fp_t ct=cos(t); // Cosinus of the direction. If you are for first time looking @ this, do not be confused, the directions are the opposite: 
@@ -246,9 +246,11 @@ int atmos_ppbez::optical_depth_scale(fp_t ***tau,fp_t ***op,fp_t t,fp_t p){
     fp_t delta_t = (x3[z] - x3[z-dz]) / (-ct) / 3.0 * (oo[z-dz] + oo[z] + C);
     tt[z] = tt[z-dz] + delta_t;
   }
+  //for (int x3i=x3l;x3i<=x3h;++x3i)
+  //  printf("%e \n",opp_derivative[x3i]);
 
   delete [](opp_derivative+x3l);
-
+  
   return 0;
 }
 

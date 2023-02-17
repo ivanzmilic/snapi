@@ -14,8 +14,8 @@ shiftcomp = float(sys.argv[6]) #in angstrom
 spectra1 = np.loadtxt(file1, unpack = True)
 spectra2 = np.loadtxt(file2, unpack = True)
 
-#spectra1[1] /= max(spectra1[1])
-#spectra2[1] /= max(spectra2[1])
+spectra1[1] /= max(spectra1[1])
+spectra2[1] /= max(spectra2[1])
 #spectra1[1] /= spectra1[1][0]
 #spectra2[1] /= spectra2[1][0]
 
@@ -42,9 +42,11 @@ lambda_max = spectra1[0,-1]
 
 plt.figure(figsize=[8,6])
 
-plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = 'Calculation')
+print(spectra1[0,:]+shiftcomp)
+
+plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = file1)
 if (file1 != file2):
-	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = 'Observation')
+	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
 	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])

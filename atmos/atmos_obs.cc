@@ -37,6 +37,8 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     atml[a]->prof_setup();
 
   class observable *o=new observable(1,1,1,nlambda);
+  
+
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
   lambda_vacuum -=1;
 
@@ -362,7 +364,7 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 }
 
 
-fp_t *atmosphere::test_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){}
+fp_t *atmosphere::test_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){return 0;}
 
 // Same version as the above. This one however returns the observable, as intended
 
@@ -375,24 +377,18 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   compute_op_referent();
   if (!tau_grid)
     compute_tau_referent();
-
   nltepops();
-
-  /*FILE * testne;
-  testne = fopen("ne_nlte.dat","w");
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    fprintf(testne,"%e \n",Ne[x1l][x2l][x3i]);
-  fclose(testne);*/
-
+  
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
   fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
 
+  
   for (int a=0;a<natm;++a){
     atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h);
     atml[a]->zeeman_setup();
   }
-
+  
   class observable *o=new observable(1,1,4,nlambda);
 
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
@@ -401,6 +397,14 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
   op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
+  
+  /*FILE * opem;
+  opem = fopen("op_em.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opem,"%e %e %e %e \n",rt_grid[x3i],lambda[l],
+        op_vector[l][x1l][x2l][x3i][1][1],em_vector[l][x1l][x2l][x3i][1]);
+  fclose(opem);*/
 
   for (int l = 1; l<=nlambda; ++l){
 
@@ -410,7 +414,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
     o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);
   }
-
+  
   del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
   del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);

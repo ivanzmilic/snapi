@@ -36,11 +36,12 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	for(int a=0;a<natm;++a) if(atml[a]->check_if_nlte()) atml[a]->responses_init(); // clear response parameters for each species
 	
 	// First solve ones which are in lte:
-	for (int a=0;a<natm;++a)
+	for (int a=0;a<natm;++a){
 		if(!atml[a]->check_if_nlte()){
 			atml[a]->responses_init();
 			atml[a]->compute_lte_population_responses_analytical(T,Ne);
 			//atml[a]->compute_lte_population_responses();
+		}
 	}
 	
 	// Same ordering like in the case of NLTEpop
@@ -77,7 +78,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
       lambda_w[0] = 1.0;  
 
 	// Perform the angular integration: 
-	clock_t begin = clock();  
+	//clock_t begin = clock();  
 	for(int tp=1;tp<=ntp;++tp){
 
 		fp_t ***Vr=project(Vx,Vy,Vz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h);   // LOS projected velocity
@@ -123,8 +124,8 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	    del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
 	    del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
 	} 
-	clock_t end = clock();
-  double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	//clock_t end = clock();
+  //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
   //printf("Time spent on adding contributions = %f \n", time_spent); 
 	
 	delete[] lambda;
@@ -152,7 +153,7 @@ int atmosphere::compute_nlte_population_responses(int lvl_of_approximation){
 	}
 	for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration	
 	io.msg(IOL_INFO, "nlte population responses::responses of the population to the pertubations have been computed\n");
-
+	return 0;
 }
 
 void atmosphere::compute_anisotropy_responses(){
@@ -457,16 +458,25 @@ void atmosphere::ne_lte_derivatives(){
 		for (int x2i=x2l;x2i<=x2h;++x2i)
 			for (int x3i=x3l;x3i<=x3h;++x3i){
 
+				//if (x3i==20)
+				//	fprintf(stderr,"%1.7e %1.7e \n", T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]);
+
 				// Temperature
-				T[x1i][x2i][x3i] += delta_T * 0.5;
+				T[x1i][x2i][x3i] += delta_T;
 				execute_chemeq_for_point(x1i,x2i,x3i);
 				Ne_lte_der[1][x1i][x2i][x3i] = Ne[x1i][x2i][x3i];
+				//if (x3i==20)
+				//	fprintf(stderr,"%1.7e %1.7e \n", T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]);
+
 
 				for (int a=0;a<natm;++a)
 					atml[a]->add_to_ion_responses(1,x3i, 1.0);
 
 				T[x1i][x2i][x3i] -= delta_T;
 				execute_chemeq_for_point(x1i,x2i,x3i);
+				//if (x3i==20)
+				//	fprintf(stderr,"%1.7e %1.7e \n", T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]);
+
 				Ne_lte_der[1][x1i][x2i][x3i] -= Ne[x1i][x2i][x3i];
 				Ne_lte_der[1][x1i][x2i][x3i] /= delta_T;
 

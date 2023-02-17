@@ -452,12 +452,14 @@ void atom::compute_lte_population_responses(){
 
 void atom::compute_lte_population_responses_analytical(fp_t *** T, fp_t *** Ne){
 
-  // We just start from Saha boltzman distribution and solve everything. 
+  // We just start from Saha boltzman distribution and solve everything.   
   if (ntr){
     for(int z=0;z<=Z;++z)
       for(int x1i=x1l;x1i<=x1h;++x1i)
         for(int x2i=x2l;x2i<=x2h;++x2i)
           for(int x3i=x3l;x3i<=x3h;++x3i){
+
+            //fprintf(stderr,"atom::compute_lte_population_responses_analytical #0\n");
 
             fp_t U=partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i],io);
             
@@ -469,9 +471,13 @@ void atom::compute_lte_population_responses_analytical(fp_t *** T, fp_t *** Ne){
             fp_t dU_dne = partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]+dne*0.5,io);
             dU_dne -= partf[z]->U(T[x1i][x2i][x3i],Ne[x1i][x2i][x3i]-dne*0.5,io);
             dU_dne /= dne;
+
+            //fprintf(stderr,"atom::compute_lte_population_responses_analytical #1\n");
             
             fp_t d_ne_d_T = parent_atm->get_ne_lte_derivative(1,x1i,x2i,x3i);
+            //fprintf(stderr,"atom::compute_lte_population_responses_analytical #2\n");
             fp_t d_ne_d_Nt = parent_atm->get_ne_lte_derivative(2,x1i,x2i,x3i);
+            //fprintf(stderr,"atom::compute_lte_population_responses_analytical #3\n");
             
             for(int l=0;l<nl[z];++l){ 
               int i = rmap[z][l];
@@ -489,6 +495,7 @@ void atom::compute_lte_population_responses_analytical(fp_t *** T, fp_t *** Ne){
               *exp(-ee[z][l]/(k*T[x1i][x2i][x3i]))/U/U*(dU_dne*d_ne_d_Nt);
               
             }
+            //fprintf(stderr,"atom::compute_lte_population_responses_analytical #4\n");
       }
   }        
 }
@@ -1691,7 +1698,7 @@ int atom::add_response_contributions(fp_t *** I, fp_t ** response_to_op, fp_t **
 // Same version but now written to work @ taugrid: REDUNDANT NOW
 
 int atom::add_response_contributions_taugrid(fp_t *** I, fp_t *** op_ref, fp_t ***** op_ref_der, fp_t ** response_to_op, fp_t ** response_to_em, fp_t *** opp, fp_t *** em, fp_t lambda, fp_t lambda_w, fp_t theta, fp_t phi, fp_t angular_weight, 
-  fp_t *** vlos, fp_t ***** op_pert_lte, fp_t ***** em_pert_lte){};
+  fp_t *** vlos, fp_t ***** op_pert_lte, fp_t ***** em_pert_lte){return 0;};
 
 int atom::add_pops_to_response(int depth_of_perturbation, int parameter_no){
 

@@ -739,11 +739,6 @@ fp_t atom::boundbound_op(uint08_t z,uint16_t ll,uint16_t lu,fp_t T,fp_t Ne,fp_t 
   fp_t x=(lambda-(1.0+Vr/c)*lam)/dld;               // Doppler shifted wavelength in Doppler widths...
   fp_t prof=(lam*lam/c)*fvoigt(x,a)/dld;                        // normalized to the Doppler width...
   return prof*(Blu*p.n[z][ll]-Bul*p.n[z][lu])*(h*c/(4.0*pi*lam));
-//  return prof;
-//  fprintf(stderr,"boundbound_op: %d %d %d %E %E %E %E %E\n",z,ll,lu,x,a,fvoigt(x,a),lambda,lam);
-//  fp_t fct=me*c/(8.0*pi*pi*e*e);
-//  fp_t f=fct*lam*lam*A[z][lu][ll];
-//  return fvoigt(x,a)*(Blu*p.n[z][ll]-Bul*p.n[z][lu])*(sqrt(pi)*e*e*f/(me*c*dld));
 }
 
 
@@ -990,8 +985,6 @@ int atom::compute_damp_col(int z, int lu, int ll){
 
   fp_t n_eff_l = sqrt((z+1) * (z+1) * 2.18E-11 / (ip[z] - ee[z][ll]));
   fp_t n_eff_u = sqrt((z+1) * (z+1) * 2.18E-11 / (ip[z] - ee[z][lu]));
-
-  //printf("%f %f \n", n_eff_l, n_eff_u);
 
   // Now these are upper and lower but we also have to check what are the their angular quantum numbers.
   // In addition, if we want to use Barkleem formalism, it has to be neutral so z == 0
@@ -1832,6 +1825,7 @@ void atom::prof_clear(void){
 }
 
 fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t x2i,int32_t x3i, int alo)
+
 // *********************************************************
 // * Solve the rate equations for given temperature and    *
 // * electron density. The ionization fractions and        *
@@ -1850,12 +1844,12 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     fp_t *J_lu=Jb[x1i][x2i][x3i]; // integrated intensity
     fp_t *J_ul=Ju[x1i][x2i][x3i];
     fp_t *L=Ls[x1i][x2i][x3i]; // approximate lambda operator
-    fp_t *nrm = norm[x1i][x2i][x3i]; // norm of the profile: <---- Who thought that THIS would be thing you need to save? Frequency-by-frequency approach is a bitch
+    fp_t *nrm = norm[x1i][x2i][x3i]; // norm of the profile: 
 
     fp_t **M=ft2dim(1,nmap,1,nmap); // Allocate the rate matrix
     memset(M[1]+1,0,nmap*nmap*sizeof(fp_t)); // Set all elements to zero
 
-    fp_t* b = new fp_t[nmap];
+    fp_t* b = new fp_t[nmap]; // Right hand side of the SE equations
     memset(b,0,nmap*sizeof(fp_t));
   
     // Setup the rate equation:
@@ -1916,7 +1910,10 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         M[i+1+dl][i+1+dl] -= (Radiative_rates + Collisional_rates);
       }
   }
-  int level_to_replace = nmap-1;
+
+  // Pick which level to replace with the conservation equation:
+  // Default is the last one, but that is the poor choice you want to replace one with the largest population.
+  int level_to_replace = nmap-1; 
   fp_t maxpop = pop[x1i][x2i][x3i].n[zmap[level_to_replace]][lmap[level_to_replace]];
   for (int i=0;i<nmap-1;++i){
     if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] > maxpop){
@@ -1924,6 +1921,8 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       level_to_replace = i;
     }
   }
+  
+  // Do the replacement
   for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
  
@@ -1941,19 +1940,22 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   // Change in electron density resulting from this species.
   
   if (parent_atm->get_conserve_charge()){
+    //fprintf(stderr,"We are trying to get NLTE electrons!\n");
+    
     fp_t d_ne = 0.0;
     for (int i=0;i<nmap;++i){ // For all the 'levels' but the last one 
-      uint16_t l=lmap[i]; // "current lvl
+      uint16_t l=lmap[i]; // current lvl
       uint08_t z=zmap[i]; // apropriate ionization stage
       d_ne += z * (solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
     }
-  // Use get-set and be disciplined:
+    //fprintf(stderr,"%d %e \n", x3i, d_ne);
+  // Use get-set to adjust the electron density in the atmosphere:
     fp_t Ne = parent_atm->get_Ne(x1i,x2i,x3i);
     Ne += d_ne;
     parent_atm->set_Ne(x1i,x2i,x3i,Ne);
   }
 
-  fp_t delta = 0.0;
+  fp_t delta = 0.0; // relative change
   for (int i = 0; i<nmap; ++i){
     fp_t rel_delta = fabs(solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]) / pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]];
     delta = (rel_delta > delta) ? rel_delta : delta;

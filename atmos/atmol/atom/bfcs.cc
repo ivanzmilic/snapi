@@ -44,6 +44,7 @@ class bfcs *bf_new(fp_t ee,fp_t ip,fp_t n,fp_t Z,struct bfcfg *cfg,io_class &io_
     return new phbf(ee,ip,n,Z,cfg->l,cfg->v,cfg->n,io_in);
     //printf("PHY! \n");
   }
+  return 0;
 }
 
 bfcs::bfcs(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io)
