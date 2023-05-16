@@ -35,5 +35,5 @@ plt.xlim([lambda_l, lambda_m])
 plt.tight_layout()
 plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
 plt.savefig(sys.argv[2]+'.eps', format='eps',bbox_inches='tight')
-plt.savefig(sys.argv[2]+'.png', format='png',bbox_inches='tight')
+plt.savefig(sys.argv[2]+'.png', bbox_inches='tight')
 
