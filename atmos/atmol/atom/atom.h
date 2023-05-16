@@ -291,6 +291,11 @@ public:
   virtual int32_t pack(uint08_t*,uint08_t,io_class&);
   virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
 //
+  // some get functions for atomic constants etc:
+  virtual int get_no_ions();
+  virtual int get_no_lvls(int z_in);
+  virtual int get_total_lvls();
+//
 // radiative properties
 //
   virtual fp_t *opacity(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);

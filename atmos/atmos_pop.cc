@@ -41,6 +41,7 @@ void atmosphere::ltepops(void) // compute the populations in LTE
   io.msg(IOL_INFO,"atmosphere::ltepops:\n");  
   for(int a=0;a<natm;++a) atml[a]->info();
 
+  // If the switch is on, write these in the atmosphere  
 }
 
 fp_t atmosphere::ne_derivative(int x1i, int x2i, int x3i){
@@ -224,6 +225,58 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
 
   io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
+  return 0;
+}
+
+  //int atm_pop_setup(void);
+  //int atm_pop_clean(void);
+
+int atmosphere::atm_pop_setup(){
+
+  // Find the total number of levels in the atmosphere:
+  if (use_atm_lvls){
+    n_lvls = 0;
+    for (int a=0; a<natm; ++a)
+      n_lvls += atml[a]->get_total_lvls();
+  
+    //fprintf(stderr, "atmosphere::atm_pop_setup Total number of levels to consider is : %d \n", n_lvls);
+    if (n_lvls)
+      atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+    else
+      atm_lvl_pops = 0;
+  }
+  //fprintf(stderr, "atmosphere::atm_pop_setup allocated \n");
+  return 0;
+}
+
+int atmosphere::atm_pop_fill(){
+
+  if (use_atm_lvls){
+    FILE * pops_output;
+    pops_output = fopen("pops.dat","w");
+    for (int x1i=x1l; x1i<=x1h; ++x1i)
+      for (int x2i=x2l; x2i<=x2h; ++x2i)
+        for (int x3i=x3l; x3i<=x3h; ++x3i){
+          
+            int i = 1;
+            for (int a=0;a<natm;++a)
+              for (int z=0; z<atml[a]->get_no_ions(); ++z)
+                for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
+                  atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z,n);
+                  fprintf(pops_output, "%d %d %d %d %e \n",x3i,a,z,n, atm_lvl_pops[x1i][x2i][x3i][i]);
+                  i++;
+                }
+            fprintf(pops_output, "%d %d %d %d %e \n", x3i, natm, 0, 0, Ne[x1i][x2i][x3i]);
+        }
+    fclose(pops_output);
+  }
+  return 0;
+}
+
+int atmosphere::atm_pop_clean(){
+
+  if (use_atm_lvls && n_lvls)
+    del_ft4dim(atm_lvl_pops, x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
   return 0;
 }
 

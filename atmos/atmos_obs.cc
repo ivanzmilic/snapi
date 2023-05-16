@@ -378,6 +378,9 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   if (!tau_grid)
     compute_tau_referent();
   nltepops();
+
+  atm_pop_setup();
+  atm_pop_fill();
   
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
   fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
@@ -425,8 +428,13 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     atml[a]->rtclean(0,0,x1l,x1h,x2l,x2h,x3l,x3h);
     atml[a]->zeeman_clear();
   }
+
+  // This is where we deal with the populations:
+
+  //atm_pop_clean();
   popclean();
-  
+
+
   io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");
 
   // ------------------------------------------------------------------------------------------------------------

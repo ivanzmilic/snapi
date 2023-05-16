@@ -559,6 +559,22 @@ fp_t ******* atom::add(fp_t *******src, fp_t *******dst, int32_t ll1, int32_t ul
 }
 
 // 
+int atom::get_no_ions(){
+  return Z+1;
+}
+
+int atom::get_no_lvls(int z_in){
+  return nl[z_in];
+}
+//
+int atom::get_total_lvls(){
+  int n_levels = 0;
+  for (int z=0;z<=Z;++z)
+    n_levels += nl[z];
+  return n_levels;
+}
+
+// 
 fp_t *atom::rayleigh_em(fp_t *lambda,int32_t nlambda)
 // *************************************************************************
 // Rayleigh scattering emission=redistributed(J)/absorption?
@@ -1940,7 +1956,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   // Change in electron density resulting from this species.
   
   if (parent_atm->get_conserve_charge()){
-    //fprintf(stderr,"We are trying to get NLTE electrons!\n");
     
     fp_t d_ne = 0.0;
     for (int i=0;i<nmap;++i){ // For all the 'levels' but the last one 
@@ -1948,7 +1963,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
       uint08_t z=zmap[i]; // apropriate ionization stage
       d_ne += z * (solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
     }
-    //fprintf(stderr,"%d %e \n", x3i, d_ne);
+
   // Use get-set to adjust the electron density in the atmosphere:
     fp_t Ne = parent_atm->get_Ne(x1i,x2i,x3i);
     Ne += d_ne;

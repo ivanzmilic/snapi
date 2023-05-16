@@ -115,6 +115,9 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
     N_of=0;
   conserve_charge = cfg->conserve_charge;
   tau_grid = cfg->tau_grid;
+  use_atm_lvls = cfg->use_atm_lvls;
+  n_lvls = 0; // Still not calculated 
+  atm_lvl_pops = 0; // Still not allocated
 //
   flags.set(ATMOS_FLAG_DEF);
 //
@@ -148,6 +151,8 @@ atmosphere::~atmosphere(void)
     delete[](lambda_of+1);
     delete[](value_of+1);
   }
+  if (n_lvls)
+    del_ft4dim(atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
 }
 
 void atmosphere::set_grid(int input){
@@ -200,7 +205,10 @@ int32_t atmosphere::size(io_class &io_in)
   sz+=2*N_of*sizeof(fp_t);
   sz+=sizeof(int);// whether to conserve charge
   sz+=sizeof(int);// whether to use tau or h as the grid
-
+  sz+=2*sizeof(int);// whether to use atomic level populations, and how many levels there are
+  
+  sz+=(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t);
+  
   return sz;
 }
 
@@ -233,11 +241,22 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   } 
   offs+=::pack(buf+offs,conserve_charge,do_swap);
   offs+=::pack(buf+offs,tau_grid,do_swap);
+  offs+=::pack(buf+offs,use_atm_lvls,do_swap);
+  offs+=::pack(buf+offs,n_lvls,do_swap);
+  
+  if (use_atm_lvls && n_lvls)
+    offs+=::pack(buf+offs,atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
+
+  //fprintf(stderr, "atmosphere::pack USE_ATM_LVLS and N_LVLS are %d, %d \n", use_atm_lvls,n_lvls);
+
   //
   return offs;
 }
 
 atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
+
+  // Extracts the given column, packs it into a buffer and then extracts it a fresh 1d atmosphere
+  // This seemed genius a while back, is it still?
   
   atmosphere * column;
   uint08_t do_swap = 0;
@@ -262,6 +281,12 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   sz+=2.0*N_of*sizeof(fp_t);
   sz+=sizeof(conserve_charge);
   sz+=sizeof(tau_grid);
+  sz+=sizeof(use_atm_lvls);
+  sz+=sizeof(n_lvls);
+
+  if (use_atm_lvls && n_lvls){
+    sz+=(x3h-x3l+1)*n_lvls*sizeof(fp_t);
+  }
 //
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   for(int ii=0;p[ii];++ii) sz+=(x3h-x3l+1)*sizeof(fp_t);
@@ -311,6 +336,13 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   memcpy(tau_referent_small[1][1]+x3l,tau_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
   fp_t *** op_referent_small = ft3dim(1,1,1,1,x3l,x3h);
   memcpy(op_referent_small[1][1]+x3l,op_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
+
+  
+  if (use_atm_lvls && n_lvls){
+    fp_t **** atm_lvl_pops_small = ft4dim(1,1,1,1,x3l,x3h,1,n_lvls);
+    memcpy(atm_lvl_pops_small[1][1][x3l]+1, atm_lvl_pops[i][j][x3l]+1,(x3h-x3l+1)*n_lvls*sizeof(fp_t));
+    del_ft4dim(atm_lvl_pops_small,1,1,1,1,x3l,x3h,1,n_lvls);
+  }
 //
   fp_t **** pp[]={&T_small,&rho_small,&Nt_small,&Ne_small,&Bx_small,&By_small,&Bz_small,&Vx_small,
     &Vy_small,&Vz_small,&Vt_small,&tau_referent_small,&op_referent_small,0};
@@ -324,6 +356,11 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   }
   offs+=::pack(buf+offs,conserve_charge,do_swap); 
   offs+=::pack(buf+offs,tau_grid,do_swap);
+  offs+=::pack(buf+offs,use_atm_lvls,do_swap);
+  offs+=::pack(buf+offs,n_lvls,do_swap);
+
+  if (use_atm_lvls && n_lvls)
+    offs+=::pack(buf+offs,atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
 
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
   del_ft3dim(rho_small,1,1,1,1,x3l,x3h);
@@ -361,7 +398,6 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   atml=new atmol* [natm];
   for(int a=0;a<natm;++a) atml[a]=atmol_new(buf,offs,do_swap,atml,a,io_in);
 //
-//  fprintf(stderr,"atmosphere:trying to unpack %d %d %d %d %d %d\n",x1l,x1h,x2l,x2h,x3l,x3h);
   fp_t ****p[]={&T,&rho,&Nt,&Ne,&Bx,&By,&Bz,&Vx,&Vy,&Vz,&Vt,&tau_referent,&op_referent,0};
   if((x1l<=x1h)&&(x2l<=x2h)&&(x3l<=x3h))
     for(int i=0;p[i];++i) offs+=::unpack(buf+offs,(*(p[i]))=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h),x1l,x1h,x2l,x2h,x3l,x3h,do_swap);
@@ -377,6 +413,15 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   }
   offs+=::unpack(buf+offs,conserve_charge,do_swap);
   offs+=::unpack(buf+offs,tau_grid,do_swap);
+  offs+=::unpack(buf+offs,use_atm_lvls,do_swap);
+  offs+=::unpack(buf+offs,n_lvls,do_swap);
+
+  //fprintf(stderr, "atmosphere::unpack USE_ATM_LVLS and N_LVLS are %d, %d \n", use_atm_lvls,n_lvls);
+
+  if (use_atm_lvls && n_lvls)
+    offs+=::unpack(buf+offs, atm_lvl_pops=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls),x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
+  
+  
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
   return offs;

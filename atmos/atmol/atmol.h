@@ -40,6 +40,9 @@ public:
   virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
   const char *get_frm(void){ return id; };
   uint64_t get_id(void){ return numid; };
+  virtual int get_no_ions(){return 0;};
+  virtual int get_no_lvls(int){return 0;};
+  virtual int get_total_lvls(){return 0;};
   int08_t has_id(uint64_t numid_in){ return numid==numid_in; };
   int08_t has_id(const char *id_in){ return !strcmp(id,id_in); };
 // opacity sources
@@ -196,7 +199,7 @@ public:
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int, int){
     return 0; // As this is the atmol, not atom, nor molecule (nor H- molecule as a matter of fact), do not return anything
   }
-
+  
   virtual fp_t get_J(int, int, int, int){
     return 0;
   }

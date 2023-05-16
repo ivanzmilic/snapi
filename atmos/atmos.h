@@ -81,7 +81,12 @@ protected:
   fp_t * value_of;
   int N_of;
   int conserve_charge; // whether we conserve charge or not
-//
+
+  // Atomic level populations to be stored and input / output when neeed, a la RH
+  // Not sure if this is a good idea, but let's go.
+  int use_atm_lvls; // Whether we are using atomic levels as a part of the atmospheric model
+  int n_lvls; // How many atomic levels are we considering, default is 0;
+  fp_t **** atm_lvl_pops; // Level populations 
 //
 //
   virtual int08_t resize(int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
@@ -183,6 +188,10 @@ protected:
   fp_t ne_derivative(int, int, int);
   void ne_lte_derivatives();
   void clear_ne_lte_derivatives();
+  int atm_pop_setup(void);
+  int atm_pop_fill(void);
+  int atm_pop_clean(void);
+
 
 // atmos_rts.cc: radiative transfer solver[s]
   virtual fp_t *anglesetup(fp_t*&,fp_t*&,int&);

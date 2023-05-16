@@ -131,6 +131,10 @@ acfg::acfg(char *adata,io_class &io)
     get_number(tmp_str,tau_grid);
     delete[] tmp_str;
   }else tau_grid = 0;
+  if(char *tmp_str=get_arg(adata,"LEVEL_POPS",0)){
+    get_number(tmp_str,use_atm_lvls);
+    delete[] tmp_str;
+  }else use_atm_lvls = 0;
 //
   if(char *s=arg_test(adata)) io.msg(IOL_WARN,"atmos config: ID=%s: the following lines were not processed:%s\n",id,s);
 

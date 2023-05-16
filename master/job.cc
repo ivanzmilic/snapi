@@ -293,7 +293,7 @@ int job_class::start(void)
       	io->msg(IOL_INFO,"master::job : return_atmos mode is : %d \n",ji.return_atmos[o]);
       }
       else {
-        if (ji.models ){
+        if (ji.models){
           io->msg(IOL_INFO,"master::job : model is provided in synth mode. synthesizing from : \n");
           ji.atmos[a]->build_from_nodes(ji.models[0]);
         }
