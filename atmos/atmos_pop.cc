@@ -86,7 +86,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   // If it turns out there are no wavelengths where RT needs to be done, we are done! 
   if (nlambda == 0){
 
-    io.msg(IOL_INFO, "atmosphere::nltepops : no iterative procedure necessary, no nlte processes. we are done here.\n");
+    io.msg(IOL_INFO, "atmosphere::nltepops : no iterative procedure necessary, no nlte processes.\n");
     for(int a=0;a<natm;++a) atml[a]->rtclean(0,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
     return 0; 
   }
@@ -178,7 +178,13 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
             del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
             return rv; // pass error to parent level
           }  
-          if (tau_grid) de_normalize(op,em);   
+          if (tau_grid) de_normalize(op,em);  
+
+          /*fprintf(stderr, "%d %d %e %e %e \n", tp, l, th[tp], lambda[l], S[x1l][x2l][6]); 
+
+          if (tp==1 && l==251)
+            for (int x3i=x3l; x3i<=x3h;++x3i)
+              fprintf(stderr, "%d %e %e \n", x3i, op[x1l][x2l][x3i], em[x1l][x2l][x3i]);*/
          
           for(int a=0;a<natm;++a) atml[a]->add(S, L, op, lambda[l], lambda_w[l], bin[tp]); // give each species access to radiation field, that is, add the radiation field to the mean intensity
           del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
@@ -192,7 +198,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    //printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
 
     if (relative_change < 3E-3)
       break; 
@@ -238,6 +244,9 @@ int atmosphere::atm_pop_setup(){
     n_lvls = 0;
     for (int a=0; a<natm; ++a)
       n_lvls += atml[a]->get_total_lvls();
+
+  // Add electrons: 
+  n_lvls += 1;
   
     //fprintf(stderr, "atmosphere::atm_pop_setup Total number of levels to consider is : %d \n", n_lvls);
     if (n_lvls)
@@ -251,24 +260,23 @@ int atmosphere::atm_pop_setup(){
 
 int atmosphere::atm_pop_fill(){
 
-  if (use_atm_lvls){
-    FILE * pops_output;
-    pops_output = fopen("pops.dat","w");
+  if (use_atm_lvls && atm_lvl_pops){
     for (int x1i=x1l; x1i<=x1h; ++x1i)
       for (int x2i=x2l; x2i<=x2h; ++x2i)
         for (int x3i=x3l; x3i<=x3h; ++x3i){
-          
             int i = 1;
             for (int a=0;a<natm;++a)
               for (int z=0; z<atml[a]->get_no_ions(); ++z)
                 for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
                   atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z,n);
-                  fprintf(pops_output, "%d %d %d %d %e \n",x3i,a,z,n, atm_lvl_pops[x1i][x2i][x3i][i]);
                   i++;
                 }
-            fprintf(pops_output, "%d %d %d %d %e \n", x3i, natm, 0, 0, Ne[x1i][x2i][x3i]);
-        }
-    fclose(pops_output);
+            atm_lvl_pops[x1i][x2i][x3i][n_lvls] = Ne[x1i][x2i][x3i];
+    }
+    //Debug part with outputting stuff:
+    FILE * pops_out fopen("pops_debug.dat", "w");
+
+
   }
   return 0;
 }
@@ -405,6 +413,7 @@ int atmosphere::nltepops_taugrid(void){
 }
 
 fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda)
+
 // *************************************************************************
 // * solve the NLTE populations consistently with the chemical equilibrium *
 // * This is necessary because the ionization fractions couple back to the *
@@ -412,6 +421,7 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 // * chemical equilibrium. This coupling may need to be explicitly treated *
 // * to stabilize the solution or improve efficiency                       *
 // *************************************************************************
+// MvN has a good point here. But are still not there. We currently solve ONLY NLTE populations
 
 {
   fp_t *** convergence = ft3dim(1, 1, 1, 1, x3l, x3h);
@@ -428,7 +438,7 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
           memset(changes, 0, natm*sizeof(fp_t));
           
           for(int a=0;a<natm;++a)
-            changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,1); // solve the rate equations for each atom
+            changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,1, 1.0); // solve the rate equations for each atom
           
 
           convergence[1][1][x3i] = max_1d(changes, 0, natm-1);

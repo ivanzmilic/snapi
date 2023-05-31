@@ -368,7 +368,7 @@ public:
 
   virtual void compute_profile_norm(fp_t, fp_t, fp_t *, fp_t *, fp_t ***, int);
  
-  virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int);
+  virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int, fp_t);
   
   // New one:
   virtual void add(fp_t***, fp_t***, fp_t ***, fp_t, fp_t, fp_t);

@@ -1840,7 +1840,7 @@ void atom::prof_clear(void){
 
 }
 
-fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t x2i,int32_t x3i, int alo)
+fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t x2i,int32_t x3i, int alo, fp_t  relaxation_factor)
 
 // *********************************************************
 // * Solve the rate equations for given temperature and    *
@@ -1853,9 +1853,11 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 // of SE are linear with respect to level populations.
 
 {
-  int x3i_control = x3h+1;
 
   if(Jb && NLTE){
+
+    if (relaxation_factor < 0)
+      return 0.0;
 
     fp_t *J_lu=Jb[x1i][x2i][x3i]; // integrated intensity
     fp_t *J_ul=Ju[x1i][x2i][x3i];
@@ -1901,6 +1903,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         int dl = ll - l;
 
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);  
+
       }
       // Then account for b-f and f-b transitions:
       if(int dl=nl[z]-l){              // ground level of next ionization stage (if not this level)
@@ -1909,7 +1912,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         fp_t JJ=(tmap[z][l][nl[z]])?J_lu[tmap[z][l][nl[z]]]:-1.0;     // angular and frequency integrated intensity
         
         // Transitions from this level:
-        fp_t Radiative_rates = 1.0 * R_i_cont(z, l, JJ, Temp);
+        fp_t Radiative_rates = R_i_cont(z, l, JJ, Temp);
         fp_t Collisional_rates = C_i_cont(z, l, Temp, ne);
 
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates);
@@ -1918,7 +1921,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         
         JJ=(tmap[z][l][nl[z]])?J_ul[tmap[z][l][nl[z]]]:-1.0;     // angular and frequency integrated intensity
         
-        Radiative_rates = 1.0 * R_cont_i(z, l, JJ, Temp, ne);
+        Radiative_rates = R_cont_i(z, l, JJ, Temp, ne);
         Collisional_rates = C_cont_i(z, l, Temp, ne);
         
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);
@@ -1928,7 +1931,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   }
 
   // Pick which level to replace with the conservation equation:
-  // Default is the last one, but that is the poor choice you want to replace one with the largest population.
+  // Default is the last one, but that is the poor choice, you want to replace one with the largest population.
   int level_to_replace = nmap-1; 
   fp_t maxpop = pop[x1i][x2i][x3i].n[zmap[level_to_replace]][lmap[level_to_replace]];
   for (int i=0;i<nmap-1;++i){
@@ -1942,9 +1945,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   for(int ii=1;ii<=nmap;++ii) M[level_to_replace+1][ii]=1.0;
   b[level_to_replace] = pop[x1i][x2i][x3i].Na;
  
-  fp_t relaxation_factor = 1.0; // 1.0 for no relaxation, > 1 for overrelaxation (makes no sense imo)
-                                // 0.0 does not change the solution. <1 relaxed the solution (uder-corrects)
-
   // Let us invert the matrix: 
   fp_t * M_to_solve = M[1] +1;
   fp_t * M_LU = new fp_t [nmap * nmap];
@@ -1972,27 +1972,44 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 
   fp_t delta = 0.0; // relative change
   for (int i = 0; i<nmap; ++i){
-    fp_t rel_delta = fabs(solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]) / pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]];
+    fp_t rel_delta = fabs((solution[i] - pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]) / pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
     delta = (rel_delta > delta) ? rel_delta : delta;
   }
   
-  // If population is negative, don't correct but re-do using normal lambda iteration
+  // Check if the population is negative: 
   bool zeros = false;
   for (int i = 0; i<nmap; ++i){
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
-    if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0)
+    if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
+      //printf("%d %d %e \n", x3i, i, pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
       zeros = true;
+    }
   }
+  /*if (zeros){
+    for (int i=0; i<nmap; ++i){
+      for (int ii=0; ii<nmap; ++ii)
+        fprintf(stderr, "%e , ", M[i+1][ii+1]);
+      fprintf(stderr, "%e \n", b[i]);
+    }
+    exit(0);
+  }*/
+
+  // Free the memory:
 
   del_ft2dim(M,1,nmap,1,nmap);
   delete []M_LU;
   delete []b;
   delete []solution;
 
-  if (zeros && alo) // if there were zeros, then re-do using the regular lambda iteration
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0);
-  else if (zeros && !alo) // if we tried lambda iteration, revert to old. // Can this be done better?
-    delta = 0; // don't do anything!
+  // If there were negative populations, try a gentler solution
+
+  if (zeros && alo) // if there were zeros, and we were doing ALO then re-do using the regular lambda iteration
+    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,1.0);
+  else if (zeros && !alo){ // if we tried lambda iteration, and it still does not work revert to old. // Can this be done better?
+                          // old in this case means do the lambda iteration with 0.0 relaxation, in order not to change anything
+    //fprintf(stderr,"Going LTE. \n");
+    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,-1.0);
+  }
 
   return delta;
 

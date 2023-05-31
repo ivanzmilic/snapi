@@ -115,7 +115,7 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
   }
 
   // Now we need to formally solve RTE, layer by layer, EXCEPT THE LAST LAYER, which we do at the end.
-  for(int z = zl+dz; (z-zh)*dz < 0; z+=dz){ // This one should work both ways, like Thirteen, and I have verified it works.
+  for(int z = zl+dz; (z-zh)*dz < 0; z+=dz){ // This one should work both ways,  and I have verified it works.
     
     fp_t tb = delta_tau[z];
     fp_t tf = delta_tau[z+dz];  
@@ -173,6 +173,17 @@ int atmos_ppbez::formal(fp_t * spatial_grid, fp_t ***S,fp_t ***L,fp_t ***op,fp_t
 
     // Finally, calculate the contribution to I_mu
     I[z] = I[z-dz] * etb + w0 * s0 + w1 * s1 + w2 * C;
+
+    /* if (I[z] < 0){
+      printf("Negative intensity! %e %d \n", I[z], z);
+      //printf("Debug %e %e %e %e %e %e %e %e %e %e %e %e \n", I[z-dz], etb, w0, s0, w1, s1, w2, C, s_derivative[z], s_derivative[z-dz], tb, tf);
+      //printf("S-es %e %e %e %e \n", ee[z-dz-dz] / oo[z-dz-dz], s0, s1, s2);
+      FILE * debug = fopen("full_detail.txt","w");
+      for (int x3i=x3l; x3i<=x3h; ++x3i)
+        fprintf(debug, "%d %e %e %e %e %e %e \n", x3i, x3[x3i], oo[x3i], ee[x3i], delta_tau[x3i],ee[x3i]/oo[x3i],s_derivative[x3i]);
+      fprintf(stderr,"Direction = %d \n",dz); 
+      exit(1);            
+    } */
 
     // And compute the local operator
     if(L) l[z] = (w1+0.5*w2);

@@ -206,7 +206,7 @@ void atmol::rtinit(void)
 void atmol::prof_init(void){
 }
 
-fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int)
+fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int, fp_t)
 {
   return 0;
 }
