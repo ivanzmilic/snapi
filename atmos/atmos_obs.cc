@@ -23,8 +23,7 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     atml[a]->set_parent_atmosphere(this);// all atoms now have pointer to this atmosphere
 
   nltepops();
-  atml[0]->print_populations(); // Print hydrogen populations. 
-
+  
   io.msg(IOL_INFO,"atmosphere::obs: synthesizing observable: theta=%f phi=%f\n",theta,phi);
 
   fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection

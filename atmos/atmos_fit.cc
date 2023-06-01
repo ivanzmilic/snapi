@@ -18,7 +18,7 @@
 
 observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
-  clock_t start = clock();
+  //clock_t start = clock();
 
   // Perform LM fitting and return the best fitting spectrum
   
@@ -100,8 +100,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
-  clock_t point1 = clock();
-  fprintf(stderr,"Time needed to set-up: %e \n", (double)(point1-start)/CLOCKS_PER_SEC);
+  //clock_t point1 = clock();
+  //fprintf(stderr,"Time needed to set-up: %e \n", (double)(point1-start)/CLOCKS_PER_SEC);
 
   for (iter=1;iter<=MAX_ITER;++iter){
 
@@ -110,32 +110,39 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       // These quantities are only re-computed if the model has been modified:    
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
+
+      fprintf(stderr,"We are starting from the following model: \n");
+      model_to_fit->print();
       
       // Calculate the spectrum and the responses and apply degradation to it:      
       current_obs = obs_stokes_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
       
       current_obs->add_scattered_light(scattered_light,qs_level);
 
-      clock_t point2 = clock();
+      //clock_t point2 = clock();
 
-      fprintf(stderr,"Time needed to calculate responses: %e \n", (double)(point2-point1)/CLOCKS_PER_SEC);      
+      //fprintf(stderr,"Time needed to calculate responses: %e \n", (double)(point2-point1)/CLOCKS_PER_SEC);      
       
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       }
 
-      clock_t point3 = clock();
+      //clock_t point3 = clock();
 
-      fprintf(stderr,"Time needed to convolve: %e \n", (double)(point3-point2)/CLOCKS_PER_SEC);      
+      //fprintf(stderr,"Time needed to convolve: %e \n", (double)(point3-point2)/CLOCKS_PER_SEC);      
       
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,noise_scaling);
       S_current = current_obs->get_S(1,1);
+      fprintf(stderr,"Derivatives calculated and scaled. \n");
     }
 
-    clock_t point3 = clock();
+    //clock_t point3 = clock();
     
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda,n_stokes_to_fit,stokes_to_fit, ws);
+
+    //for (int l=1; l<=nlambda; ++l)
+    //  fprintf(stderr, "%e %e %e \n", lambda[l], S_to_fit[1][l], S_current[1][l]);
     metric = calc_chisq(nlambda, n_stokes_to_fit, stokes_to_fit, residual, noise, ws);
     if (metric < stopping_chisq)
       to_break = 1;
@@ -146,6 +153,12 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
           int stf = stokes_to_fit[s-1];
           J[(l-1)*n_stokes_to_fit+s][i] = derivatives_to_parameters[i][l][stf];
     }
+    //for (int i=1; i<=N_parameters;++i){
+    //  for (int ii=1; ii<=N_parameters; ++ii)
+    //    fprintf(stderr, "%e ", J[i][ii]);
+    //  fprintf(stderr,"\n");
+    //}
+
 
     fp_t ** J_transpose = transpose(J,n_stokes_to_fit*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, n_stokes_to_fit*nlambda, N_parameters);
@@ -162,6 +175,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
     test_model->bracket_parameter_values();
+
+    fprintf(stderr,"Model corrected. \n");
+    test_model->print();
+
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
@@ -172,7 +189,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     
     if (metric_reference < metric){
 
-      clock_t point3 = clock();
+      //clock_t point3 = clock();
       
       // Everything is ok, and we can decrease lm_parameter:
       if (iter == 1 && search_for_optimum_lambda)
@@ -186,10 +203,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
         lm_parameter /= lm_multiplicator;
         if (lm_parameter <= 1E-5) lm_parameter = 1E-5;
       }
-
-      // Except in the first iteration and then we look for the optimal lambda:
       
-      // From then on, it proceeds normally:
       corrected=1;
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3){
@@ -224,14 +238,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     if (to_break)
       break;
 
-    clock_t point4 = clock();
+    //clock_t point4 = clock();
 
-    fprintf(stderr,"Time to do LM stuff: %e \n", (double)(point4-point3)/CLOCKS_PER_SEC);      
+    //fprintf(stderr,"Time to do LM stuff: %e \n", (double)(point4-point3)/CLOCKS_PER_SEC); 
+    fprintf(stderr,"Iteration complete. \n");
+    model_to_fit->print();     
       
   }
   //io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);
   
-  clock_t point5 = clock();
+  //clock_t point5 = clock();
   // Clean-up:
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
@@ -250,9 +266,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   delete[](lambda+1);
   delete[]ws;
 
-  clock_t point6 = clock();
+  //clock_t point6 = clock();
 
-  fprintf(stderr,"Clean -up time: %e \n", (double)(point6-point5)/CLOCKS_PER_SEC);      
+  //fprintf(stderr,"Clean -up time: %e \n", (double)(point6-point5)/CLOCKS_PER_SEC);      
       
 
   return obs_to_return;

@@ -190,7 +190,6 @@ protected:
   int atm_pop_fill(void);
   int atm_pop_clean(void);
 
-
 // atmos_rts.cc: radiative transfer solver[s]
   virtual fp_t *anglesetup(fp_t*&,fp_t*&,int&);
   virtual int formal(fp_t*, fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t, fp_t);
@@ -303,8 +302,13 @@ public:
 
   virtual int polish_extreme_values();
   
+  // Population related stuff:
   fp_t get_pop(int, int, int, int, int, int);
   fp_t get_pop(int, int, int, int, int);
+  int get_total_atomic_levels(void);
+  int get_atm_pop_switch(void);
+  int atm_pop_output(void);
+  
   fp_t get_T(int, int, int);
   fp_t get_Ne(int, int, int);
   fp_t set_Ne(int, int, int,fp_t);

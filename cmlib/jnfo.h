@@ -37,6 +37,7 @@ struct jnfo{
                        // from the right
                        // first switch = output opacity/emissivit
                        // second switch = calculate and output the response functions
+                       // third switch = output the level populations
   fp_t *scattered_light; // amount of scattered gray light
   fp_t *spectral_broadening; // spectral broaddening due to the instrument
   fp_t *obs_qs; // observed quiet sun level

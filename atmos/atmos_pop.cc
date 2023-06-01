@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+//#include <fitsio.h>
 
 #include "types.h"
 #include "io.h"
@@ -14,6 +15,9 @@
 
 #include "atmos.h"
 #include "mathtools.h"
+
+
+#include "../cmlib/fits_read.h"
 
 void atmosphere::popsetup(void) // setup essential quantities
 {
@@ -198,9 +202,9 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    //printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
 
-    if (relative_change < 3E-3)
+    if (relative_change < 2E-2)
       break; 
   }
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
@@ -239,6 +243,8 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
 int atmosphere::atm_pop_setup(){
 
+  n_lvls = 0;
+
   // Find the total number of levels in the atmosphere:
   if (use_atm_lvls){
     n_lvls = 0;
@@ -273,10 +279,18 @@ int atmosphere::atm_pop_fill(){
                 }
             atm_lvl_pops[x1i][x2i][x3i][n_lvls] = Ne[x1i][x2i][x3i];
     }
-    //Debug part with outputting stuff:
-    FILE * pops_out fopen("pops_debug.dat", "w");
+  }
+  return 0;
+}
+
+int atmosphere::atm_pop_output(){
+
+  if (use_atm_lvls && n_lvls){
+
+    fprintf(stderr, "\nwhat-what!\n");
 
 
+    return 0;
   }
   return 0;
 }
@@ -286,6 +300,14 @@ int atmosphere::atm_pop_clean(){
   if (use_atm_lvls && n_lvls)
     del_ft4dim(atm_lvl_pops, x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
   return 0;
+}
+
+int atmosphere::get_total_atomic_levels(){
+  return n_lvls;
+}
+
+int atmosphere::get_atm_pop_switch(){
+  return use_atm_lvls;
 }
 
 int atmosphere::nltepops_taugrid(void){

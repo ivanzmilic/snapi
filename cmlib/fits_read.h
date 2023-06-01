@@ -3,5 +3,6 @@
 
 byte *fits_read(char *file_name,int *&ds,int &nd,char *&header,int &type,io_class &io);
 int fits_data_type(const char *file_name,io_class &io);
+int fits_write_4d_fpt(char * filename, fp_t ****);
 
 #endif                      // __FITS_READ_H__

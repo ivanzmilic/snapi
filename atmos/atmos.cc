@@ -117,6 +117,7 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   tau_grid = cfg->tau_grid;
   use_atm_lvls = cfg->use_atm_lvls;
   n_lvls = 0; // Still not calculated 
+
   atm_lvl_pops = 0; // Still not allocated
 //
   flags.set(ATMOS_FLAG_DEF);
@@ -393,7 +394,7 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,ftype);
 //
   offs+=::unpack(buf+offs,natm,do_swap);
-  offs+=::pack(buf+offs,boundary_condition_for_rt,do_swap);
+  offs+=::unpack(buf+offs,boundary_condition_for_rt,do_swap);
   io_in.msg(IOL_DEB1,"atmosphere::atmosphere: natmol=%d\n",natm);
   atml=new atmol* [natm];
   for(int a=0;a<natm;++a) atml[a]=atmol_new(buf,offs,do_swap,atml,a,io_in);

@@ -64,6 +64,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
       offs+=unpack(data+offs,name[o]);
     }
   }
+  
   if (nm){
     offs+=unpack(data+offs,read_model_from_file=new int [nm],0,nm-1,swap_endian);
     input_models = new char*[nm];

@@ -1903,7 +1903,7 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
         int dl = ll - l;
 
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);  
-
+ 
       }
       // Then account for b-f and f-b transitions:
       if(int dl=nl[z]-l){              // ground level of next ionization stage (if not this level)

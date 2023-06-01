@@ -68,3 +68,9 @@ byte *fits_read(char *file_name,int *&ds,int &nd,char *&header,int &type,io_clas
   header=0;
   return data; */
 }
+
+int fits_write_4d_fpt(char * filename, fp_t **** data){
+
+  
+  return 0;
+}

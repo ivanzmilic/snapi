@@ -467,9 +467,15 @@ int job_class::stop(void)
     int ND = ji.atmos[0]->get_N_depths();
     int NP=12;
     fp_t ****fitted_atmos;
+    fp_t ****fitted_atmos_pops;
     // These are either fitted atmospheres, or atmospheres which were used for synthesis 
     // but now with added tau
     fitted_atmos = ft4dim(1,NP,1,nx,1,ny,1,ND);
+    if (ji.atmos[0]->get_atm_pop_switch()){
+      fprintf(stderr,"we are outputting level populations..\n");
+      int n_levels_total = ji.atmos[0]->get_total_atomic_levels();
+      fitted_atmos_pops = ft4dim(1,nx,1,ny,1,ND,1,n_levels_total);
+    }
     
     for(int x=1;x<=nx;++x)
       for(int y=1;y<=ny;++y) 
@@ -536,6 +542,8 @@ int job_class::stop(void)
             for (int p =1;p<=NP;++p)
               memcpy(fitted_atmos[p][x][y]+1,atm_array[p]+1,ND*sizeof(fp_t));
             del_ft2dim(atm_array,1,NP,1,ND);
+            atmos->atm_pop_output();
+
             delete atmos;
          }
        }else{
@@ -552,8 +560,15 @@ int job_class::stop(void)
     	del_ft3dim(nodes_cube,1,nx,1,ny,1,np);
       delete test_cube;
     }
+
     write_file((char*)"inverted_atmos.f0",fitted_atmos,NP,nx,ny,ND,*io);
     del_ft4dim(fitted_atmos,1,NP,1,nx,1,ny,1,ND);
+
+    if (ji.atmos[0]->get_atm_pop_switch()){
+      int n_levels_total = ji.atmos[0]->get_total_atomic_levels();
+      write_file((char*)"inverted_atmos_populations.f0",fitted_atmos_pops,nx,ny,ND,n_levels_total,*io);
+      del_ft4dim(fitted_atmos_pops,1,nx,1,ny,1,ND,1,n_levels_total);
+    }
     if ((nx > 1 || ny > 1) && !ji.to_invert[o])
     	write_file(ji.name[o],fitted_spectra,nx,ny,4,nl,*io);
     else if (ji.to_invert[o]) 
