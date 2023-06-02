@@ -243,22 +243,18 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
 int atmosphere::atm_pop_setup(){
 
-  n_lvls = 0;
 
   // Find the total number of levels in the atmosphere:
   if (use_atm_lvls){
-    n_lvls = 0;
-    for (int a=0; a<natm; ++a)
-      n_lvls += atml[a]->get_total_lvls();
-
-  // Add electrons: 
-  n_lvls += 1;
   
     //fprintf(stderr, "atmosphere::atm_pop_setup Total number of levels to consider is : %d \n", n_lvls);
-    if (n_lvls)
+    if (n_lvls){
       atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+      use_atm_lvls = 2;
+    }
     else
       atm_lvl_pops = 0;
+
   }
   //fprintf(stderr, "atmosphere::atm_pop_setup allocated \n");
   return 0;
@@ -283,22 +279,35 @@ int atmosphere::atm_pop_fill(){
   return 0;
 }
 
-int atmosphere::atm_pop_output(){
+int atmosphere::atm_pop_output(){ // Posibbillity to output directly the data?
 
-  if (use_atm_lvls && n_lvls){
-
-    fprintf(stderr, "\nwhat-what!\n");
-
+  if (use_atm_lvls == 2 && n_lvls){
 
     return 0;
   }
   return 0;
 }
 
+fp_t ** atmosphere::get_atm_pop(){
+
+  if (use_atm_lvls == 2 && n_lvls){
+
+    fp_t ** output = ft2dim(1,x3h-x3l+1,1,n_lvls);
+    memcpy(output[1]+1,atm_lvl_pops[x1l][x2l][x3l]+1,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t));
+    //fprintf(stderr,"get_atm_pop %e \n", atm_lvl_pops[x1l][x2l][x3l][1]);
+    //fprintf(stderr,"get_atm_pop %e \n", output[1][1]);
+
+    return output;
+  }
+  return 0;
+}
+
 int atmosphere::atm_pop_clean(){
 
-  if (use_atm_lvls && n_lvls)
+  if (use_atm_lvls == 2 && n_lvls){
     del_ft4dim(atm_lvl_pops, x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+    use_atm_lvls = 1;
+  }
   return 0;
 }
 

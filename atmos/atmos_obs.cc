@@ -430,7 +430,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   // This is where we deal with the populations:
 
-  //atm_pop_clean();
   popclean();
 
 

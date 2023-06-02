@@ -308,6 +308,7 @@ public:
   int get_total_atomic_levels(void);
   int get_atm_pop_switch(void);
   int atm_pop_output(void);
+  fp_t** get_atm_pop(void);
   
   fp_t get_T(int, int, int);
   fp_t get_Ne(int, int, int);

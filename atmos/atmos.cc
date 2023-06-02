@@ -118,6 +118,12 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   use_atm_lvls = cfg->use_atm_lvls;
   n_lvls = 0; // Still not calculated 
 
+  if (use_atm_lvls){
+    for (int a=0; a<natm; ++a)
+      n_lvls += atml[a]->get_total_lvls();
+    n_lvls += 1; // This is for electrons 
+  }
+
   atm_lvl_pops = 0; // Still not allocated
 //
   flags.set(ATMOS_FLAG_DEF);
@@ -152,7 +158,7 @@ atmosphere::~atmosphere(void)
     delete[](lambda_of+1);
     delete[](value_of+1);
   }
-  if (n_lvls)
+  if (use_atm_lvls == 2 && n_lvls)
     del_ft4dim(atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
 }
 
@@ -208,7 +214,8 @@ int32_t atmosphere::size(io_class &io_in)
   sz+=sizeof(int);// whether to use tau or h as the grid
   sz+=2*sizeof(int);// whether to use atomic level populations, and how many levels there are
   
-  sz+=(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t);
+  if (use_atm_lvls == 2)
+    sz+=(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t);
   
   return sz;
 }
@@ -244,11 +251,9 @@ int32_t atmosphere::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::pack(buf+offs,tau_grid,do_swap);
   offs+=::pack(buf+offs,use_atm_lvls,do_swap);
   offs+=::pack(buf+offs,n_lvls,do_swap);
-  
-  if (use_atm_lvls && n_lvls)
-    offs+=::pack(buf+offs,atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
 
-  //fprintf(stderr, "atmosphere::pack USE_ATM_LVLS and N_LVLS are %d, %d \n", use_atm_lvls,n_lvls);
+  if (use_atm_lvls == 2 && n_lvls) // Only try to pack if it's actually allocated, hence == 2
+    offs+=::pack(buf+offs,atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
 
   //
   return offs;
@@ -339,7 +344,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   memcpy(op_referent_small[1][1]+x3l,op_referent[i][j]+x3l,(x3h-x3l+1)*sizeof(fp_t));
 
   
-  if (use_atm_lvls && n_lvls){
+  if (use_atm_lvls == 2 && n_lvls){ // Again only extract if it's actually allocated
     fp_t **** atm_lvl_pops_small = ft4dim(1,1,1,1,x3l,x3h,1,n_lvls);
     memcpy(atm_lvl_pops_small[1][1][x3l]+1, atm_lvl_pops[i][j][x3l]+1,(x3h-x3l+1)*n_lvls*sizeof(fp_t));
     del_ft4dim(atm_lvl_pops_small,1,1,1,1,x3l,x3h,1,n_lvls);
@@ -360,7 +365,7 @@ atmosphere * atmosphere::extract(int i, int j,io_class &io_in){
   offs+=::pack(buf+offs,use_atm_lvls,do_swap);
   offs+=::pack(buf+offs,n_lvls,do_swap);
 
-  if (use_atm_lvls && n_lvls)
+  if (use_atm_lvls == 2 && n_lvls) // Pack this if it exists
     offs+=::pack(buf+offs,atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
 
   del_ft3dim(T_small,1,1,1,1,x3l,x3h);
@@ -417,9 +422,7 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   offs+=::unpack(buf+offs,use_atm_lvls,do_swap);
   offs+=::unpack(buf+offs,n_lvls,do_swap);
 
-  //fprintf(stderr, "atmosphere::unpack USE_ATM_LVLS and N_LVLS are %d, %d \n", use_atm_lvls,n_lvls);
-
-  if (use_atm_lvls && n_lvls)
+  if (use_atm_lvls == 2 && n_lvls) // Only unpack if it it alocated
     offs+=::unpack(buf+offs, atm_lvl_pops=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls),x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
   
   
