@@ -111,8 +111,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
 
-      fprintf(stderr,"We are starting from the following model: \n");
-      model_to_fit->print();
+      //fprintf(stderr,"We are starting from the following model: \n");
+      //model_to_fit->print();
       
       // Calculate the spectrum and the responses and apply degradation to it:      
       current_obs = obs_stokes_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
@@ -134,7 +134,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,noise_scaling);
       S_current = current_obs->get_S(1,1);
-      fprintf(stderr,"Derivatives calculated and scaled. \n");
     }
 
     //clock_t point3 = clock();
@@ -176,8 +175,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     test_model->correct(correction);
     test_model->bracket_parameter_values();
 
-    fprintf(stderr,"Model corrected. \n");
-    test_model->print();
+    //fprintf(stderr,"Model corrected. \n");
+    //test_model->print();
 
     build_from_nodes(test_model);
     // Compare again:
@@ -241,8 +240,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     //clock_t point4 = clock();
 
     //fprintf(stderr,"Time to do LM stuff: %e \n", (double)(point4-point3)/CLOCKS_PER_SEC); 
-    fprintf(stderr,"Iteration complete. \n");
-    model_to_fit->print();     
+    //fprintf(stderr,"Iteration complete. \n");
+    //model_to_fit->print();     
       
   }
   //io.msg(IOL_INFO, "fitting complete. Total number of iterations is : %d \n", iter-1);

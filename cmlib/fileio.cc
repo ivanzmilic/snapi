@@ -283,7 +283,7 @@ void write_file(char *name,fp_t ***data,int nx1,int nx2,int nx3,io_class &io)
       for(int x3=1;x3<=nx3;++x3) q[x3][x2][x1]=data[x1][x2][x3];
   ana_fzwrite((byte*)(q[1][1]+1),name,ds,3,0,FLOAT32,io);
   del_f3dim(q,1,nx3,1,nx2,1,nx1);
-  delete (ds+1);
+  delete[] (ds+1);
 }
 
 void write_file(char *name,fp_t ****data,int nx1,int nx2,int *nx3,int nx4,io_class &io)
