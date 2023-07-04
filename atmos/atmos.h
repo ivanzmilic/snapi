@@ -291,8 +291,10 @@ public:
   };
 
 // atmos_fit.cc various fitting examples, routines and testing:
-  //virtual observable *scalar_lm_fit(observable *, fp_t, fp_t, fp_t *, int); // Function which performs a levenberg-marquard fit
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
+  
+  virtual observable *stokes_lm_fit_old(observable *, fp_t, fp_t, model *); // Reworking the one above, this is backup.
+
   virtual observable *stokes_lm_nodeless_fit(observable *, fp_t, fp_t); // LM fits trying out nodeless inversion
   virtual fp_t * calculate_svd_corrections(fp_t ****,fp_t *, fp_t, int, int);
   virtual fp_t ** calculate_svd_corrections(fp_t ****, fp_t *, fp_t, int);

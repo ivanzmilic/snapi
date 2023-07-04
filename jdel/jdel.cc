@@ -28,10 +28,10 @@ int main(int argc,char *argv[])
   io_class io(cmd);
 //
   int *jid,nj=0;
-  if(argc<2) io.msg(MFBD_ERROR|MFBD_FATAL,"job ID required\n");
+  if(argc<2) io.msg(IOL_ERROR|IOL_FATAL,"job ID required\n");
   for(int a=1;a<=argc-1;++a){
     int id;
-    if(!sscanf(argv[a],"%d",&id)) io.msg(MFBD_ERROR|MFBD_FATAL,"could not convert %s to job ID\n",argv[1]);
+    if(!sscanf(argv[a],"%d",&id)) io.msg(IOL_ERROR|IOL_FATAL,"could not convert %s to job ID\n",argv[1]);
     int *tmp=new int [nj+1]-1;
     if(nj){
       memcpy(tmp+1,jid+1,nj*sizeof(int));
@@ -68,7 +68,7 @@ int main(int argc,char *argv[])
   offs+=unpack(buf+offs,nj,swap_endian);
   offs+=unpack(buf+offs,jid=new int [nj]-1,1,nj,swap_endian);
   for(int j=1;j<=nj;++j)
-    if(jid[j]) io.msg(MFBD_ERROR,"no job with ID %d found\n",jid[j]);
+    if(jid[j]) io.msg(IOL_ERROR,"no job with ID %d found\n",jid[j]);
   delete[] buf;
   return 0;
 }

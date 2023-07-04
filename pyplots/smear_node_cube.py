@@ -1,4 +1,4 @@
-import scipy.ndimage.filters as filters
+import scipy.ndimage as filters
 import scipy.signal as flt 
 import numpy as np 
 import pyana
@@ -14,7 +14,7 @@ def svd_compress(A,limit):
 	small = np.where(s<max(s)*limit)
 	s[small] = 0.0
 	s_m = np.zeros(dims)
-	print small
+	print (small)
 	s_m[:dims[0],:dims[0]] = np.diag(s)
 
 	A_sparse = np.dot(U,np.dot(s_m,V))
@@ -45,7 +45,7 @@ if (NB):
 
 
 for i in range(0,B_start):
-	an_conv[i] = flt.medfilt(an[i],11)
+	an_conv[i] = flt.medfilt(an[i],1)
 	if (sigma):
 		an_conv[i] = filters.gaussian_filter(an_conv[i],sigma)
 
