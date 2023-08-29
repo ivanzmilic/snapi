@@ -29,23 +29,26 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // New version from 14/06/2023. The idea is to: 
   // a) Minimize the creation of the new atmospheres, thus minimize the allocation / deallocation 
   // b) Do not "squish" the spectum that is to be fit. Use all the wavelengths until you get 
-  //    to the momen where you are calculating the Hessian 
+  //    to the momen where you are calculating the Hessian. This costs a bit more calculation, but should 
+  //    make it EXTREMELY more easy to invert uneven Fabry-Perot data.
+  // 
+  // Continuing to work on this 29/08/2023. It was hard two months
   
   // ------------------------------------------------------------------------------------------------------------------
 
   // First extract the spectrum, number of wavelengths and the wavelength grid 
   // from the observation:
-  fp_t ** S_to_fit = spectrum_to_fit->get_S_to_fit(1,1);
-  int nlambda = spectrum_to_fit->get_n_lambda_to_fit();
-  fp_t * lambda = spectrum_to_fit->get_lambda_to_fit();
+  fp_t ** S_to_fit = spectrum_to_fit->get_S(1,1);
+  int nlambda = spectrum_to_fit->get_n_lambda();
+  fp_t * lambda = spectrum_to_fit->get_lambda();
 
-  // Grid has to be set to be tau at the momen:
+  // Grid has to be set to be tau (in principle this can be changed):
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
   // Here we also hardcode how big changes we make in the LM jumps
   fp_t lm_parameter = spectrum_to_fit->get_start_lambda();
-  fp_t lm_multiplicator = 10.0;
+  fp_t lm_multiplicator = 10.0; // This is so technical, makes sense to have it hard-coded
 
   
   // Some fitting related parameters:
@@ -70,7 +73,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Auxiliary variables that tell us when to terminate the iteration:
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
-  int corrected = 1; // At the start we assume the state of the atmosphere has been corrected
+  int corrected = 1; // At the start we assume the state of the atmosphere has been corrected ->
+                     // i.e. RF has to be recalculated
   int to_break = 0;
 
   // weights for Stokes parameters. They enter like this in response scaling, and 
@@ -78,8 +82,9 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t * ws = spectrum_to_fit->get_w_stokes();
 
   // other fitting parameters
-  fp_t scattered_light = spectrum_to_fit->get_scattered_light();
-  fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening();
+  fp_t scattered_light = spectrum_to_fit->get_scattered_light(); // This is probably obsolete
+  fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening(); // This needs to be changed to that we can 
+                                                                         // have different PSFs for different observables
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
   
   // A complicated piece of code to isolate what we want to fit
