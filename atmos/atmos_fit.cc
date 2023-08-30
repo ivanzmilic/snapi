@@ -105,6 +105,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int N_parameters = model_to_fit->get_N_nodes_total();
   model_to_fit->bracket_parameter_values(); // This puts them in physical limits
 
+  fprintf(stderr, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
   io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
   for (iter=1;iter<=MAX_ITER;++iter){
@@ -126,6 +127,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,wl);
       S_current = current_obs->get_S(1,1);
+      fprintf(stderr, "atmosphere::calculated the spectra and the responses. scaled rfs etc\n");
     }
 
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda, ws, wl);
@@ -151,17 +153,23 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters); 
     scale_corrections(correction,model_to_fit,N_parameters);
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
+
+    fprintf(stderr, "atmosphere::corrections proposed\n");
   
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
-    test_model->bracket_parameter_values(); // Polish
+    test_model->bracket_parameter_values(); // polish
+
+
 
     build_from_nodes(test_model);
     // Compare again:
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda,ws,wl);
+
+    fprintf(stderr, "atmosphere::test model assessed \n");
     
     if (metric_reference < metric){
 
@@ -199,6 +207,8 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](rhs+1);
     delete [](correction+1);
     metric = 0.0;
+
+    fprintf(stderr, "atmosphere::iteration complete \n");
 
     if (to_break)
       break;
