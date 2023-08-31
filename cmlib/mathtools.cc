@@ -461,7 +461,7 @@ int  max_1d_index(int * array, int begin, int end){
 
 
 
-// Otheer versions of matrix inverse:
+// Other versions of matrix inverse:
 
 void Crout(int d,fp_t*S,fp_t*D){
    for(int k=0;k<d;++k){
