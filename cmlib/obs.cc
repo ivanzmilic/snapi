@@ -60,6 +60,8 @@ observable::~observable(void){
     delete[] (mask+1);
   }
   delete []w_stokes;
+  if (n_spsf)
+    delete[] (spsf+1);
 }
 
 int32_t observable::size(io_class &io_in){
@@ -70,6 +72,8 @@ int32_t observable::size(io_class &io_in){
   sz += 2*nlambda*sizeof(fp_t); // lambda,mask
   sz += nx*ny*nlambda*ns*sizeof(fp_t); // actual observation
   sz += 4*sizeof(fp_t); // weights for stokes;
+  sz += sizeof(int); // n_spsf
+  sz += n_spsf*sizeof(fp_t); // spsf
   return sz;
 }
 
@@ -93,6 +97,8 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::pack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
+  offs+=::pack(buf+offs,n_spsf,do_swap);
+  offs+=::pack(buf+offs,spsf,1,n_spsf,do_swap);
 
   return offs;
 }
@@ -124,8 +130,13 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::unpack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::unpack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
 
-  return offs;
+  offs+=::unpack(buf+offs,n_spsf,do_swap);
+  if (n_spsf){
+    spsf = new fp_t [n_spsf];
+    offs+=::unpack(buf+offs,spsf,1,n_spsf,do_swap);
+  }
 
+  return offs;
 }
 
 void observable::add(fp_t *S_in,fp_t lambda_in)
@@ -156,12 +167,21 @@ void observable::set(fp_t **** S_in){
   memcpy(S[1][1][1]+1,S_in[1][1][1]+1,nx*ny*ns*nlambda*sizeof(fp_t));
 }
 
-void observable::setlambda(fp_t * lambda_in){
+void observable::set_lambda(fp_t * lambda_in){
   memcpy(lambda+1,lambda_in+1,nlambda*sizeof(fp_t));
 }
 
-void observable::setmask(fp_t * mask_in){
+void observable::set_mask(fp_t * mask_in){
   memcpy(mask+1,mask_in+1,nlambda*sizeof(fp_t));
+}
+
+void observable::set_n_spsf(int n_spsf_in){
+  n_spsf = n_spsf_in;
+  spsf = new fp_t [n_spsf] - 1;
+}
+
+void observable::set_spsf(fp_t* spsf_in){
+  memcpy(spsf+1,spsf_in+1,n_spsf*sizeof(fp_t));
 }
 
 void observable::set_inv_parameters(fp_t sl_in, fp_t sb_in, fp_t obs_qs_in, fp_t synth_qs_in){
@@ -283,6 +303,15 @@ fp_t observable::get_spectral_broadening(){
   return spectral_broadening;
 }
 
+int observable::get_n_spsf(){
+  return n_spsf;
+}
+
+fp_t * observable::get_spsf(){
+  fp_t * spsf_copy = new fp_t [n_spsf] -1;
+  memcpy(spsf_copy+1, spsf+1, n_spsf * sizeof(fp_t));
+}
+
 fp_t observable::get_synth_qs(){
   return synth_qs;
 }
@@ -337,14 +366,19 @@ observable * observable::extract(int xl,int xh, int yl, int yh, int ll, int lh){
   fp_t * lambda_small = new fp_t [nln]-1;
   for (int l=ll;l<=lh;++l)
     lambda_small[l-ll+1] = lambda[l];
-  obs_small->setlambda(lambda_small);
+  obs_small->set_lambda(lambda_small);
   delete[](lambda_small+1);
   obs_small->set_inv_parameters(scattered_light,spectral_broadening,obs_qs,synth_qs);
 
   fp_t * mask_small = new fp_t [nln]-1;
   for (int l=ll;l<=lh;++l)
     mask_small[l-ll+1] = mask[l];
-  obs_small->setmask(mask_small);
+  obs_small->set_mask(mask_small);
+
+  // PSF:
+  obs_small->set_n_spsf(n_spsf);
+  obs_small->set_spsf(spsf);
+
   delete[](mask_small+1);
   return obs_small;
 

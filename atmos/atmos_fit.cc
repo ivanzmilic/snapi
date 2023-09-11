@@ -23,21 +23,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // observable * spectrum_to_fit : observable object to fit, contains stokes vector in physical units and the 
   //                                wavelenght grid 
   // fp_t theta, phi              : angles, theta for off-center observations, phi rarely used                                    
-  // model * model_to_fit         : model object that will be used to construct the atmosphere, and where the solution:
+  // model * model_to_fit         : model object that will be used to construct the atmosphere, to store the solution:
   //                              : the values of parameters at the nodes will be packed. 
-  
-  // New version from 14/06/2023. The idea is to: 
-  // a) Minimize the creation of the new atmospheres, thus minimize the allocation / deallocation 
-  // b) Do not "squish" the spectum that is to be fit. Use all the wavelengths until you get 
-  //    to the momen where you are calculating the Hessian. This costs a bit more calculation, but should 
-  //    make it EXTREMELY more easy to invert uneven Fabry-Perot data.
-  // 
-  // Continuing to work on this 29/08/2023. It was hard two months
-  
   // ------------------------------------------------------------------------------------------------------------------
 
   // First extract the spectrum, number of wavelengths and the wavelength grid 
   // from the observation:
+  
   fp_t ** S_to_fit = spectrum_to_fit->get_S(1,1);
   int nlambda = spectrum_to_fit->get_n_lambda();
   fp_t * lambda = spectrum_to_fit->get_lambda();
@@ -55,40 +47,29 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t metric = 0.0;
   // Iteration counter:
   int iter = 0;
-  // Whether we use Jaime's method to look for optimum starting lambda:
-  int search_for_optimum_lambda = 0;
   // Get what is maximum number of iterations: 
   int MAX_ITER = spectrum_to_fit->get_no_iterations();
-  
-  // If maximum number of iterations specified is negative, it is a crude command 
-  // for asking the code to search for the optimal starting lambda:
-  if (MAX_ITER < 0){
-    MAX_ITER = -MAX_ITER;
-    search_for_optimum_lambda = 1;
-  }
-  
+    
   // At which chi-squared to we stop iterating:
   fp_t stopping_chisq = spectrum_to_fit->get_stopping_chisq();
 
   // Auxiliary variables that tell us when to terminate the iteration:
   fp_t * chi_to_track = 0;
   int n_chi_to_track = 0;
-  int corrected = 1; // At the start we assume the state of the atmosphere has been corrected ->
-                     // i.e. RF has to be recalculated
+  int corrected = 1; // At the start we assume the state of the atmosphere has been corrected -> RF has to be recalculated
   int to_break = 0;
 
-  // weights for Stokes parameters. They enter like this in response scaling, and 
-  // quadratically in chi_sq. basically they adjust the noise  
+  // weights for Stokes parameters. They act like noise, linearly affect RFs and quadratically chisquared
   fp_t * ws = spectrum_to_fit->get_w_stokes();
   // wavelenght weights / mask 
   fp_t * wl = spectrum_to_fit->get_mask();
 
   // other fitting parameters
-  fp_t scattered_light = spectrum_to_fit->get_scattered_light(); // This is probably obsolete
   fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening(); // This needs to be changed to that we can 
                                                                          // have different PSFs for different observables
   fp_t qs_level = spectrum_to_fit->get_synth_qs();
  
+  
   fp_t noise_level = 1E-3*S_to_fit[1][1]; // The magnitude does not really matter. But keep it at something realistic.
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
@@ -96,17 +77,13 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   fp_t *noise = new fp_t[nlambda]-1;
   for (int l=1;l<=nlambda;++l)
     noise[l] = noise_level * noise_scaling[l];
-  // This is ok. Perhaps we can just input it from the outside, but ok.
-
+  
   observable * current_obs;
   fp_t *** derivatives_to_parameters; // [i, s, l], dS_{s,l} / d M_i
   fp_t ** S_current; // dS_{s,l}
 
   int N_parameters = model_to_fit->get_N_nodes_total();
   model_to_fit->bracket_parameter_values(); // This puts them in physical limits
-
-  //fprintf(stderr, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
-  //io.msg(IOL_INFO, "atmosphere::stokes_lm_fit : entering iterative procedure\n");
 
   for (iter=1;iter<=MAX_ITER;++iter){
 
@@ -116,10 +93,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       derivatives_to_parameters = ft3dim(1,N_parameters,1,nlambda,1,4);     
       memset(derivatives_to_parameters[1][1]+1,0,N_parameters*nlambda*4*sizeof(fp_t));
 
-      // Calculate the spectrum and the responses and apply degradation to it:      
+      // Calculate the spectrum and the responses:     
       current_obs = obs_stokes_responses_to_nodes(model_to_fit, theta, phi, lambda, nlambda, derivatives_to_parameters, 0); 
       
-      current_obs->add_scattered_light(scattered_light,qs_level); // We will keep this at zero in practice
+      // Apply spectral broadening if necessary:
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
@@ -127,7 +104,6 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
 
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,wl);
       S_current = current_obs->get_S(1,1);
-      //fprintf(stderr, "atmosphere::calculated the spectra and the responses. scaled rfs etc\n");
     }
 
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda, ws, wl);
@@ -146,52 +122,48 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     fp_t ** J_transpose = transpose(J,4*nlambda,N_parameters);
     fp_t ** JTJ = multiply_with_transpose(J, 4*nlambda, N_parameters);
     fp_t * rhs = multiply_vector(J_transpose, residual, N_parameters, 4*nlambda);    
-    regularize_hessian(JTJ,rhs,model_to_fit); // What is going on in this one?
+    regularize_hessian(JTJ,rhs,model_to_fit);
 
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
     fp_t * correction = solve(JTJ, rhs, 1, N_parameters); 
     scale_corrections(correction,model_to_fit,N_parameters);
+
+    // Reset the Hessian to it's original value in case it stays the same and our LM parameter changes:
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
 
-    //fprintf(stderr, "atmosphere::corrections proposed\n");
-  
     // Apply the correction:
     model * test_model = clone(model_to_fit);
     test_model->correct(correction);
     test_model->bracket_parameter_values(); // polish
-
-
-
+    
+    // Check if the corrected model is better:
     build_from_nodes(test_model);
-    // Compare again:
-    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
+    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda,ws,wl);
 
-    //fprintf(stderr, "atmosphere::test model assessed \n");
-    
-    if (metric_reference < metric){
+    if (metric_reference < metric){ // If the solution is better:
 
       model_to_fit->cpy_values_from(test_model);
       lm_parameter /= lm_multiplicator;
-      if (lm_parameter <= 1E-5) lm_parameter = 1E-5;
-      
+      if (lm_parameter <= 1E-5) lm_parameter = 1E-5; // not sure if necessary
       corrected=1;
+      
+      // Tracked values of chisquared
       chi_to_track = add_to_1d_array(chi_to_track,n_chi_to_track,metric);
       if (n_chi_to_track >=3){
         fp_t change = fabs((chi_to_track[n_chi_to_track-2] - chi_to_track[n_chi_to_track-1]) / chi_to_track[n_chi_to_track-1]);
-        if (change < DELTA)
+        if (change < DELTA) // This implies that our change is very small
           to_break = 1;
       }
     }
-    else{
+    else{ // Else the solution is worse and we are going toward the gradient decent:
       lm_parameter *= lm_multiplicator;
       corrected = 0;
     }
 
-    if(corrected || to_break || iter==MAX_ITER){
-      
+    if(corrected || to_break || iter==MAX_ITER){     
       del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
       delete current_obs;
       del_ft2dim(S_current,1,4,1,nlambda);
@@ -208,29 +180,27 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     delete [](correction+1);
     metric = 0.0;
 
-    //fprintf(stderr, "atmosphere::iteration complete \n");
-
     if (to_break)
       break;
   }
   
-  // Clean-up:
+  // Clean-up these temporary ones
   del_ft2dim(S_to_fit,1,4,1,nlambda);
   delete[](lambda+1);
   if (chi_to_track)
     delete[]chi_to_track;
 
-  // Full version:
   lambda = spectrum_to_fit->get_lambda();
   nlambda = spectrum_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
-  observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
-   
+  observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening);
   model_to_fit->polish_angles();   
+  
   delete[](lambda+1);
   delete[]ws;
   delete[](wl+1);
-
+  delete[](noise+1);
+  
   return obs_to_return;
 }
 
@@ -1494,7 +1464,7 @@ observable *atmosphere::obs_stokes_responses_to_nodes(model * atmos_model, fp_t 
     delete[](lambda_fine+1);
     observable * o = new observable(1,1,4,nlambda); 
     o->set(S);
-    o->setlambda(lambda);
+    o->set_lambda(lambda);
     del_ft4dim(S,1,1,1,1,1,4,1,nlambda);
     delete o_fine;
     return o;

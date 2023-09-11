@@ -67,6 +67,7 @@ int main(int argc,char *argv[])
   ji.az=new fp_t [ji.no];
   ji.el=new fp_t [ji.no];
   ji.nlambda=new int [ji.no];
+  ji.n_spsf=new int [ji.no];
   ji.to_invert = new int [ji.no];
   ji.return_model = new int [ji.no];
   ji.return_atmos = new int [ji.no];
@@ -79,6 +80,7 @@ int main(int argc,char *argv[])
   ji.obs_qs = new fp_t [ji.no];
   ji.synth_qs = new fp_t [ji.no];
   ji.lambda=new fp_t* [ji.no];
+  ji.spsf=new fp_t* [ji.no];
   ji.weights=new fp_t* [ji.no];
   ji.w_stokes = new fp_t*[ji.no];
   ji.name=new char* [ji.no];
@@ -105,8 +107,17 @@ int main(int argc,char *argv[])
       ji.starting_lambda[o] = cfg.obs[o]->starting_lambda;
       ji.stopping_chisq[o] = cfg.obs[o]->stopping_chisq;
     }
+    
     ji.lambda[o]=new fp_t [ji.nlambda[o]];
-    memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));
+    memcpy(ji.lambda[o],cfg.obs[o]->lambda,ji.nlambda[o]*sizeof(fp_t));   
+    ji.n_spsf[o]=cfg.obs[o]->n_spsf;
+    if (ji.n_spsf[o]){
+      ji.spsf[o] = new fp_t [ji.n_spsf[o]];
+      memcpy(ji.spsf[o],cfg.obs[o]->spsf,ji.n_spsf[o]*sizeof(fp_t));
+    }
+    else 
+      ji.spsf[o] = 0;
+
     ji.weights[o] = new fp_t [ji.nlambda[o]];
     if (cfg.obs[o]->weight)
       memcpy(ji.weights[o],cfg.obs[o]->weight,ji.nlambda[o]*sizeof(fp_t));

@@ -312,8 +312,8 @@ int job_class::start(void)
 
         obs = new observable(n4,n3,n2,n1);
         obs->set(test);
-        obs->setlambda(ji.lambda[o]-1);
-        obs->setmask(ji.weights[o]-1);
+        obs->set_lambda(ji.lambda[o]-1);
+        obs->set_mask(ji.weights[o]-1);
         del_ft4dim(test,1,n1,1,n2,1,n3,1,n4);
         obs->set_inv_parameters(ji.scattered_light[o],ji.spectral_broadening[o],ji.obs_qs[o],ji.synth_qs[o]);
         obs->normalize();
@@ -389,7 +389,7 @@ int job_class::start(void)
         		
         		class observable * mini_obs;
         		mini_obs = new observable(1,1,1,ji.nlambda[o]);
-        		mini_obs->setlambda(ji.lambda[o]-1);
+        		mini_obs->set_lambda(ji.lambda[o]-1);
         		mini_obs->set_viewing_angle(ji.el[o],ji.az[o]);
         		mini_obs->set_to_invert(0);
         		

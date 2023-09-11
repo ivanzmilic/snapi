@@ -36,6 +36,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     offs+=unpack(data+offs,az=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,el=new fp_t [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,nlambda=new int [no],0,no-1,swap_endian);
+    offs+=unpack(data+offs,n_spsf=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,to_invert=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_model=new int [no],0,no-1,swap_endian);
     offs+=unpack(data+offs,return_atmos=new int [no],0,no-1,swap_endian);
@@ -59,6 +60,10 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     name=new char* [no];
     for(int o=0;o<no;++o){
       offs+=unpack(data+offs,lambda[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
+      if (n_spsf[o])
+        offs+=unpack(data+offs,spsf[o]=new fp_t [n_spsf[o]],0,n_spsf[o]-1,swap_endian);
+      else 
+        spsf[o] = 0;
       offs+=unpack(data+offs,weights[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
       offs+=unpack(data+offs,w_stokes[o]=new fp_t [4],0,3,swap_endian);
       offs+=unpack(data+offs,name[o]);
@@ -138,6 +143,7 @@ jnfo::~jnfo(void)
     if (no_iterations) delete []no_iterations;
     if (starting_lambda) delete []starting_lambda;
     if (stopping_chisq) delete []stopping_chisq;
+    if (spsf) for (int o=0;o<no;++o) if (spsf[o]) delete[] spsf[o];
   }
   if(uname) delete[] uname;
   
@@ -158,8 +164,10 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     usize+=2*no*sizeof(int);    // nlambda,no_iterations
     usize+=no*10*sizeof(int);   // to_invert,return_model,return_atmos
                                 // extra_settings, xl,xh,yl,yh,ll,lh
+    usize+=no*sizeof(int);      // n_spsf
     for(int o=0;o<no;++o){
       usize+=2*nlambda[o]*sizeof(fp_t);  // lambda,weights
+      usize+=n_spsf[o]*sizeof(fp_t);
       usize+=4*sizeof(fp_t); // w_stokes
       usize+=strlen(name[o])+1;        // file name
     }
@@ -188,6 +196,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,az,0,no-1,swap_endian);
     offs+=pack(data+offs,el,0,no-1,swap_endian);
     offs+=pack(data+offs,nlambda,0,no-1,swap_endian);
+    offs+=pack(data+offs,n_spsf,0,no-1,swap_endian);
     offs+=pack(data+offs,to_invert,0,no-1,swap_endian);
     offs+=pack(data+offs,return_model,0,no-1,swap_endian);
     offs+=pack(data+offs,return_atmos,0,no-1,swap_endian);
@@ -207,6 +216,7 @@ byte *jnfo::compress(int &size,int level,byte swap_endian,io_class &io)
     offs+=pack(data+offs,stopping_chisq,0,no-1,swap_endian);
     for(int o=0;o<no;++o){
       offs+=pack(data+offs,lambda[o],0,nlambda[o]-1,swap_endian);
+      offs+=pack(data+offs,spsf[o],0,n_spsf[o]-1,swap_endian);
       offs+=pack(data+offs,weights[o],0,nlambda[o]-1,swap_endian);
       offs+=pack(data+offs,w_stokes[o],0,3,swap_endian);
       offs+=pack(data+offs,name[o]);

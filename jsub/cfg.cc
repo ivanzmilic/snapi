@@ -98,38 +98,66 @@ ocfg::ocfg(char *odata,struct gcfg &gdata,io_class &io)
   }
   //
   if (to_invert == 1){ // read inversion parameters only if we are in the invert mode
+    
     if(char *tmp_str=get_arg(odata,"SCATTERED_LIGHT",0)){
       get_number(tmp_str,scattered_light);
       delete[] tmp_str;
     }else scattered_light = 0.0;//default
-    if(char *tmp_str=get_arg(odata,"SPECTRAL_BROADENING",0)){
+    
+    if(char *tmp_str=get_arg(odata,"SPECTRAL_BROADENING",0)){ // Gauss profile, we pass only the width.
       get_number(tmp_str,spectral_broadening);
-      delete[] tmp_str;
       spectral_broadening *= 1E-11;//convert to cm from mA
       spectral_broadening /= 2.35; // convert from FWHM to sigma
-    }else spectral_broadening = 0;
+      n_spsf = 0;
+      spsf = 0;
+    }
+    else if (char *tmp_str2=get_arg(odata,"SPECTRAL_PSF",0)){
+      spectral_broadening = 0;
+      FILE * tmpinpt = fopen(tmp_str2,"r");
+      n_spsf = 0;
+      if (fscanf(tmpinpt,"%d", &n_spsf)!=EOF){
+        spsf = new fp_t [n_spsf];
+      }
+      else spsf = 0; // SHOULD BE ERROR
+      fp_t tmp;
+      for (int i=0;i<n_spsf;++i)
+        if (fscanf(tmpinpt,"%lf",&tmp)!=EOF){
+          spsf[i] = tmp;
+        }
+    }
+    else{
+      spectral_broadening = 0;
+      n_spsf = 0;
+      spsf = 0;
+    }
+    
     if(char *tmp_str=get_arg(odata,"OBSERVED_CONTINUUM",0)){
       get_number(tmp_str,obs_qs);
       delete[] tmp_str;
     } else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting observed continuum level\n",id);
+    
     if(char *tmp_str=get_arg(odata,"CGS_CONTINUUM",0)){
       get_number(tmp_str,synth_qs);
       delete[] tmp_str;
     } else io.msg(IOL_ERROR|IOL_FATAL,"obs \"%s\" config: error extracting calculated continuum level\n",id);
+    
     if(char *tmp_str=get_arg(odata,"ITERATIONS",0)){
       fp_t n_iter; // temp
       get_number(tmp_str,n_iter);
       no_iterations = int(n_iter);
       delete[] tmp_str;
     } else no_iterations = 10;
+    
     if(char *tmp_str=get_arg(odata,"STARTING_LM",0)){
       get_number(tmp_str,starting_lambda);
       delete[] tmp_str;
     } else starting_lambda=1E3;
+    
     if(char *tmp_str=get_arg(odata,"STOPPING_CHISQ",0)){
       get_number(tmp_str,stopping_chisq);
       delete[] tmp_str;
     } else stopping_chisq=1.0;
+    
     int m = 0;
     if(char *val_str=get_arg(odata,"STOKES_WEIGHTS",0)){
       if(get_numbers(val_str,w_stokes,m)<0){
@@ -263,6 +291,7 @@ ocfg::~ocfg(void)
 {
   if(id) delete[] id;
   if(lambda) delete[] lambda;
+  if(spsf) delete[] spsf;
   if(name) delete[] name;
   if(weight) delete[]weight;
   delete []w_stokes;

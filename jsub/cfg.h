@@ -10,18 +10,26 @@
 struct gcfg;
 
 struct ocfg{                  // configuration per object ("color")
+  
   char *id;
+  
   fp_t az,el;
+  
   fp_t *lambda;
-  char *name;
   int nlambda;
+  
+  fp_t spectral_broadening; // If you want a simple gaussian broadening, just use fixed width
+  fp_t *spsf; // Spectral psf, presumed given on the equidistant grid with the spacing same as the wavelength
+  int n_spsf; // number of wavelength points for the spectral psf 
+  
+  char *name;
+  
   int to_invert;
   int xl,xh,yl,yh,ll,lh;
   fp_t * weight; // what are the weights for the fitting
   int return_model; // After inverting, should we return model? 
   int return_atmos; // After inverting, should we return full atmosphere?
   fp_t scattered_light; // percentage of gray, scattered light in the image.
-  fp_t spectral_broadening; // spectral broadening due to the instrument
   fp_t obs_qs; // observed quiet sun intensity (in observed units)
   fp_t synth_qs; // quiet sun resulting from falc (or other) model
   int  no_iterations; // maximum number of iterations for the inversion

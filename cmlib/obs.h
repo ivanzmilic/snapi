@@ -10,6 +10,10 @@ class observable{
   fp_t ****S,*lambda,*mask; // Stokes vector (N_stokes components x N_wvl)
   int ns,nlambda,nx,ny;
   fp_t scattered_light,spectral_broadening,obs_qs,synth_qs;
+  
+  int n_spsf; // Number of psf point is psf is externally prescribed
+  fp_t * spsf; // actual psf file
+  
   fp_t el,az;
   int to_invert;
   int no_iterations; // number of L-M iterations to use
@@ -29,12 +33,14 @@ public:
   virtual int32_t unpack(uint08_t*,uint08_t,io_class&);
 
   void add(fp_t*,fp_t); // Maybe we will not use this, maybe something like 'set' is better?
+  
+  // Sets:
   void set(fp_t, int,int,int,int);
   void set(fp_t *,fp_t,int,int,int);
   void set(fp_t **,int,int);
   void set(fp_t ****);
-  void setlambda(fp_t *);
-  void setmask(fp_t*);
+  void set_lambda(fp_t *);
+  void set_mask(fp_t*);
   void set_inv_parameters(fp_t,fp_t,fp_t,fp_t);
   void set_viewing_angle(fp_t, fp_t);
   void set_to_invert(int);
@@ -42,6 +48,9 @@ public:
   void set_start_lambda(fp_t);
   void set_stopping_chisq(fp_t);
   void set_w_stokes(fp_t *);
+  void set_n_spsf(int);
+  void set_spsf(fp_t *);
+  
   int get_to_invert();
   void write(const char*,io_class&,int,int);
   void write(const char*,io_class&){}; // This is the "full" one
@@ -66,6 +75,8 @@ public:
   fp_t get_start_lambda();
   fp_t get_stopping_chisq();
   fp_t * get_w_stokes();
+  int get_n_spsf();
+  fp_t * get_spsf();
 
   void normalize();
   void add_scattered_light(fp_t, fp_t);
