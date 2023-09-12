@@ -58,6 +58,7 @@ jnfo::jnfo(byte *buf,byte swap_endian,io_class &io)
     weights = new fp_t*[no];
     w_stokes = new fp_t*[no];
     name=new char* [no];
+    spsf = new  fp_t*[no];
     for(int o=0;o<no;++o){
       offs+=unpack(data+offs,lambda[o]=new fp_t [nlambda[o]],0,nlambda[o]-1,swap_endian);
       if (n_spsf[o])

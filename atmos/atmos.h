@@ -273,7 +273,7 @@ public:
   virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
-  virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening);
+  virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening, int, fp_t *);
   virtual fp_t * calc_residual(fp_t **, fp_t **, int, fp_t *, fp_t *);
   virtual fp_t calc_chisq(fp_t **, fp_t **, int, fp_t *, fp_t *);
   virtual int look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_parameters,

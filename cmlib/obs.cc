@@ -124,15 +124,13 @@ int32_t observable::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   mask = new fp_t [nlambda]-1;
   S=ft4dim(1,nx,1,ny,1,ns,1,nlambda);
   w_stokes = new fp_t [4];
-
   offs+=::unpack(buf+offs,lambda,1,nlambda,do_swap);
   offs+=::unpack(buf+offs,mask,1,nlambda,do_swap);
   offs+=::unpack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::unpack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
-
   offs+=::unpack(buf+offs,n_spsf,do_swap);
   if (n_spsf){
-    spsf = new fp_t [n_spsf];
+    spsf = new fp_t [n_spsf]-1;
     offs+=::unpack(buf+offs,spsf,1,n_spsf,do_swap);
   }
 
@@ -308,8 +306,12 @@ int observable::get_n_spsf(){
 }
 
 fp_t * observable::get_spsf(){
-  fp_t * spsf_copy = new fp_t [n_spsf] -1;
-  memcpy(spsf_copy+1, spsf+1, n_spsf * sizeof(fp_t));
+  if (n_spsf){
+    fp_t * spsf_copy = new fp_t [n_spsf] -1;
+    memcpy(spsf_copy+1, spsf+1, n_spsf * sizeof(fp_t));
+    return spsf_copy;
+  }
+  else return 0;
 }
 
 fp_t observable::get_synth_qs(){
@@ -423,6 +425,13 @@ void observable::add_scattered_light(fp_t fraction, fp_t continuum_level){
 void observable::spectral_convolve(fp_t width, int i, int j){
 
   convolve_spectra_with_gauss(S[i][j],lambda,nlambda,width);
+}
+
+// ================================================================================================
+void observable::psf_convolve(int n_spf_in, fp_t * spsf_in, int i, int j){
+
+  // In principle could also convolve with it's own psf, but I guess it's fine to provide externally
+  convolve_spectra_with_psf(S[i][j],lambda,nlambda,n_spf_in,spsf_in);
 }
 
 

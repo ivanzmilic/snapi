@@ -81,6 +81,7 @@ public:
   void normalize();
   void add_scattered_light(fp_t, fp_t);
   void spectral_convolve(fp_t,int,int);
+  void psf_convolve(int,fp_t*,int,int);
 };
 
 observable * obs_new(int nx,int ny,int ns,int nlambda);

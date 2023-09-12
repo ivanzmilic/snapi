@@ -1405,6 +1405,50 @@ int convolve_spectra_with_gauss(fp_t ** S, fp_t * lambda,int N, fp_t width){
 
 // ================================================================================================
 
+int convolve_spectra_with_psf(fp_t ** S, fp_t * lambda,int N, int n_spsf, fp_t* spsf){
+
+  // This function takes Stokes spectra, and the given PSF and the convolves them. 
+  // This assumes that the spectra and the psf are on the same, equidistant grid, and that the
+  // spectrum has points outside of the region of interest, to avoid the interpolation
+  // fp_t ** S        - input stokes spectra
+  // fp_t * lambda    - input lambda corresponding to the spectra, actually unnecessary
+  // int N            - number of wavelength points 
+  // int n_spsf       - number of the points in the psf
+  // fp_t * spsf      - psf, not necessarily normalized
+
+  
+  fp_t ** S_convolved;
+  S_convolved = ft2dim(1,4,1,N);
+  memset(S_convolved[1]+1,0,4*N*sizeof(fp_t));
+
+  // Find the norm of the psf 
+  fp_t norm = 0;
+  for (int i=1; i<=n_spsf;++i)
+    norm += spsf[i];
+
+  // Then perform a very basic convolution:
+  for (int l=1;l<=N;++l){ // for each lambda, convolve
+
+    int start = l-(n_spsf-1)/2;
+    if (start < 1) start = 1;
+    int end = l+(n_spsf-1)/2;
+    if (end > N) end = N;
+    // Multiply:
+    for (int s=1;s<=4;++s){
+      for (int ll=start;ll<=end;++ll){
+        S_convolved[s][l] += S[s][ll] * spsf[ll-start] / norm;
+      } // each lambda'
+    } // each stokes component
+  } // each lambda
+  memcpy(S[1]+1,S_convolved[1]+1,4*N*sizeof(fp_t));
+  //cleanup:
+  del_ft2dim(S_convolved,1,4,1,N);
+  
+  return 0;
+}
+
+// ================================================================================================
+
 int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, 
   fp_t width){
 
@@ -1429,6 +1473,34 @@ int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_paramet
   del_ft2dim(S_temp,1,4,1,N_lambda);
   return 0;
 }
+
+// ================================================================================================
+
+int convolve_response_with_psf(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, int n_spsf, fp_t* spsf){
+
+  // This function convolves responses to nodes with the given psf. It uses above convolve_spectra_with_psf
+  // The awkward moment is that the ordering is differnet and hence we need to 'transpose' first
+
+  fp_t ** S_temp = ft2dim(1,4,1,N_lambda);
+
+  for (int p=1;p<=N_parameters;++p){
+    
+    for (int s=1;s<=4;++s)
+      for (int l=1;l<=N_lambda;++l)
+        S_temp[s][l] = response[p][l][s];
+
+    convolve_spectra_with_psf(S_temp,lambda,N_lambda,n_spsf,spsf);
+
+    for (int s=1;s<=4;++s)
+      for (int l=1;l<=N_lambda;++l)
+        response[p][l][s] = S_temp[s][l];
+  } // each parameter
+  
+  del_ft2dim(S_temp,1,4,1,N_lambda);
+  return 0;
+}
+
+// ================================================================================================
 
 int convolve_response_with_gauss_tau(fp_t *** response, int x3l, int x3h, fp_t * taugrid, int nlambda, fp_t sigma){
   

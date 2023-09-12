@@ -15,7 +15,7 @@
 
 #define DELTA 1E-3
 
-observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
+observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t phi, model * model_to_fit){
 
   // ------------------------------------------------------------------------------------------------------------------
 
@@ -30,16 +30,16 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // First extract the spectrum, number of wavelengths and the wavelength grid 
   // from the observation:
   
-  fp_t ** S_to_fit = spectrum_to_fit->get_S(1,1);
-  int nlambda = spectrum_to_fit->get_n_lambda();
-  fp_t * lambda = spectrum_to_fit->get_lambda();
+  fp_t ** S_to_fit = obs_to_fit->get_S(1,1);
+  int nlambda = obs_to_fit->get_n_lambda();
+  fp_t * lambda = obs_to_fit->get_lambda();
 
   // Grid has to be set to be tau (in principle this can be changed):
   set_grid(1);
   
   // Set initial value of Levenberg-Marquardt parameter
   // Here we also hardcode how big changes we make in the LM jumps
-  fp_t lm_parameter = spectrum_to_fit->get_start_lambda();
+  fp_t lm_parameter = obs_to_fit->get_start_lambda();
   fp_t lm_multiplicator = sqrt(10.0); // This is so technical, makes sense to have it hard-coded
 
   
@@ -48,10 +48,10 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   // Iteration counter:
   int iter = 0;
   // Get what is maximum number of iterations: 
-  int MAX_ITER = spectrum_to_fit->get_no_iterations();
+  int MAX_ITER = obs_to_fit->get_no_iterations();
     
   // At which chi-squared to we stop iterating:
-  fp_t stopping_chisq = spectrum_to_fit->get_stopping_chisq();
+  fp_t stopping_chisq = obs_to_fit->get_stopping_chisq();
 
   // Auxiliary variables that tell us when to terminate the iteration:
   fp_t * chi_to_track = 0;
@@ -60,16 +60,21 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   int to_break = 0;
 
   // weights for Stokes parameters. They act like noise, linearly affect RFs and quadratically chisquared
-  fp_t * ws = spectrum_to_fit->get_w_stokes();
+  fp_t * ws = obs_to_fit->get_w_stokes();
   // wavelenght weights / mask 
-  fp_t * wl = spectrum_to_fit->get_mask();
+  fp_t * wl = obs_to_fit->get_mask();
 
   // other fitting parameters
-  fp_t spectral_broadening = spectrum_to_fit->get_spectral_broadening(); // This needs to be changed to that we can 
+  fp_t spectral_broadening = obs_to_fit->get_spectral_broadening(); // This needs to be changed to that we can 
                                                                          // have different PSFs for different observables
-  fp_t qs_level = spectrum_to_fit->get_synth_qs();
- 
   
+  int n_spsf = obs_to_fit->get_n_spsf();
+  fp_t * spsf = 0;
+  if (n_spsf)
+    spsf = obs_to_fit->get_spsf();
+  
+  fp_t qs_level = obs_to_fit->get_synth_qs();
+ 
   fp_t noise_level = 1E-3*S_to_fit[1][1]; // The magnitude does not really matter. But keep it at something realistic.
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
@@ -100,6 +105,11 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
       if (spectral_broadening){
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
+      } 
+      // Then check if you need F-P too (in principle both are allowed).
+      else if (n_spsf){ 
+        current_obs->psf_convolve(n_spsf,spsf,1,1);
+        convolve_response_with_psf(derivatives_to_parameters,lambda,N_parameters,nlambda,n_spsf,spsf);   
       }
 
       scale_rf(derivatives_to_parameters,model_to_fit,nlambda,N_parameters,ws,wl);
@@ -139,7 +149,7 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
     
     // Check if the corrected model is better:
     build_from_nodes(test_model);
-    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening); 
+    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening,n_spsf, spsf); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda,ws,wl);
 
@@ -190,16 +200,18 @@ observable * atmosphere::stokes_lm_fit(observable * spectrum_to_fit, fp_t theta,
   if (chi_to_track)
     delete[]chi_to_track;
 
-  lambda = spectrum_to_fit->get_lambda();
-  nlambda = spectrum_to_fit->get_n_lambda();
+  lambda = obs_to_fit->get_lambda();
+  nlambda = obs_to_fit->get_n_lambda();
   build_from_nodes(model_to_fit);
-  observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening);
+  observable *obs_to_return = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening,n_spsf, spsf);
   model_to_fit->polish_angles();   
   
   delete[](lambda+1);
   delete[]ws;
   delete[](wl+1);
   delete[](noise+1);
+  if (n_spsf)
+    delete[](spsf+1);
   
   return obs_to_return;
 }
@@ -274,7 +286,7 @@ int atmosphere::look_for_best_lambda(fp_t &lm_parameter, fp_t ** JTJ, int N_para
     model_test->bracket_parameter_values();
     build_from_nodes(model_test);
     // Compare again:
-    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening); 
+    observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t * residual_test = calc_residual(S_to_fit,S_reference,nlambda, ws, wl);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda, ws, wl);
@@ -453,7 +465,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     polish_extreme_values();    
     enforce_hequilibrium();
-    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0);
     S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
     BIC = metric_reference + (NT+NV)*log(nlambda)*amplify;
@@ -470,7 +482,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     polish_extreme_values();    
     enforce_hequilibrium();
-    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0);
     S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference_TP = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
     BIC_TP = metric_reference_TP + (NT+NV)*log(nlambda)*amplify;
@@ -488,7 +500,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     polish_extreme_values();    
     enforce_hequilibrium();
-    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0);
     S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference_VP = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
     BIC_VP = metric_reference_VP + (NT+NV)*log(nlambda)*amplify;
@@ -515,7 +527,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     polish_extreme_values();    
     enforce_hequilibrium();
-    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0);
     S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference_TM = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
     BIC_TM = metric_reference_TM + (NT+NV)*log(nlambda)*amplify;
@@ -543,7 +555,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
     }
     polish_extreme_values();    
     enforce_hequilibrium();
-    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening);
+    reference_obs = forward_evaluate(theta,phi,lambda,nlambda,scattered_light,qs_level,spectral_broadening,0,0);
     S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference_VM = chi_sqr(S_to_fit,S_reference,noise,nlambda,stokes_to_fit,n_stokes_to_fit,ws);
     BIC_VM = metric_reference_VM + (NT+NV)*log(nlambda)*amplify;
@@ -693,7 +705,7 @@ observable * atmosphere::stokes_lm_nodeless_fit(observable * spectrum_to_fit, fp
 // ========================================================================================================================================
 
 observable* atmosphere::forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,
-    fp_t scattered_light, fp_t qs, fp_t spectral_broadening){
+    fp_t scattered_light, fp_t qs, fp_t spectral_broadening, int n_spsf, fp_t * spsf){
 
   // proceduralized version which performs, in turn
   // 1) Stokes synthesis from current atmosphere
@@ -703,7 +715,13 @@ observable* atmosphere::forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, in
   observable *reference_obs = obs_stokes(theta, phi, lambda, nlambda);
   reference_obs->add_scattered_light(scattered_light,qs);
   if (spectral_broadening)
-    reference_obs->spectral_convolve(spectral_broadening,1,1);  
+    reference_obs->spectral_convolve(spectral_broadening,1,1);
+    reference_obs->set_n_spsf(0);
+  if (n_spsf){
+    reference_obs->set_n_spsf(n_spsf);
+    reference_obs->set_spsf(spsf);
+    reference_obs->psf_convolve(n_spsf, spsf, 1, 1);
+  }
   
   return reference_obs;
 }
@@ -1469,7 +1487,6 @@ observable *atmosphere::obs_stokes_responses_to_nodes(model * atmos_model, fp_t 
     delete o_fine;
     return o;
   }
-  // If there is no filter, everything is the same as before:
   else{
     observable *o = obs_stokes_responses(theta, phi, lambda, nlambda, response_to_parameters,atmos_model,0);
     return o;

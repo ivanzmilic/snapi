@@ -73,8 +73,12 @@ fp_t * airtovac(fp_t *, int);
 fp_t * vactoair(fp_t *, int);
 
 int convolve_spectra_with_gauss(fp_t **, fp_t *,int, fp_t);
+int convolve_spectra_with_psf(fp_t **, fp_t *,int, int, fp_t *);
+
 int convolve_response_with_gauss(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, fp_t);
+int convolve_response_with_psf(fp_t *** response, fp_t * lambda, int N_parameters, int N_lambda, int, fp_t*);
 int convolve_response_with_gauss_tau(fp_t ***, int, int, fp_t *, int, fp_t);
+
 int convolve_with_gauss(fp_t *,fp_t *, int,fp_t with);
 
 int set_to_zero_except(fp_t * x, int N, int to_keep);

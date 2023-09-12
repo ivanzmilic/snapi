@@ -47,8 +47,8 @@ struct jnfo{
   fp_t * starting_lambda;
   fp_t * stopping_chisq;
   fp_t ** w_stokes;
-  int * n_spsf;
-  fp_t ** spsf;
+  int  *n_spsf;
+  fp_t **spsf;
 //
   uid_t uid;
   gid_t gid;
