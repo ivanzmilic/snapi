@@ -75,7 +75,7 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
   
   fp_t qs_level = obs_to_fit->get_synth_qs();
  
-  fp_t noise_level = 1E-3*S_to_fit[1][1]; // The magnitude does not really matter. But keep it at something realistic.
+  fp_t noise_level = 1E-3*qs_level; // The magnitude does not really matter. But keep it at something realistic.
   fp_t *noise_scaling = new fp_t [nlambda]-1; // wavelength dependent noise
   for (int l=1;l<=nlambda;++l)
     noise_scaling[l] = sqrt(S_to_fit[1][l]/S_to_fit[1][1]);
@@ -118,6 +118,7 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
 
     fp_t * residual = calc_residual(S_to_fit,S_current,nlambda, ws, wl);
     metric = calc_chisq(S_to_fit, S_current, nlambda, ws, wl);
+    //fprintf(stderr, "atmosphere::stokes_lm_fit: current chi-squared =  %e, \n", metric/4.0/nlambda/noise_level/noise_level);
     
     if (metric < stopping_chisq)
       to_break = 1;
@@ -152,6 +153,8 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
     observable *reference_obs = forward_evaluate(theta,phi,lambda,nlambda,0,qs_level,spectral_broadening,n_spsf, spsf); 
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda,ws,wl);
+
+    //fprintf(stderr, "atmosphere::stokes_lm_fit: test chi-squared = %e, \n", metric/4.0/nlambda/noise_level/noise_level);
 
     if (metric_reference < metric){ // If the solution is better:
 

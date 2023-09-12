@@ -17,6 +17,8 @@ observable::observable(int ns_in):ns(ns_in)
   nlambda=0;
   nx=0;ny=0;
   w_stokes = new fp_t[4];
+  n_spsf = 0;
+  spsf = 0;
 }
 
 observable::observable(int nx_in,int ny_in,int ns_in)
@@ -26,6 +28,8 @@ observable::observable(int nx_in,int ny_in,int ns_in)
   ns=ns_in;
   nx=nx_in;ny=ny_in;
   w_stokes = new fp_t[4];
+  n_spsf = 0;
+  spsf = 0;
 }
 observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
 {
@@ -46,6 +50,8 @@ observable::observable(int nx_in,int ny_in,int ns_in, int nlambda_in)
   to_invert=0;no_iterations=0;start_lambda=1.0;
   w_stokes = new fp_t [4];
   memset(w_stokes,0,4*sizeof(fp_t));
+  n_spsf = 0;
+  spsf = 0;
 }
 
 observable::observable(uint08_t *buf,int32_t &offs,uint08_t do_swap,io_class &io_in){
@@ -98,7 +104,8 @@ int32_t observable::pack(uint08_t *buf,uint08_t do_swap,io_class &io_in){
   offs+=::pack(buf+offs,w_stokes,0,3,do_swap);
   offs+=::pack(buf+offs,S,1,nx,1,ny,1,ns,1,nlambda,do_swap);
   offs+=::pack(buf+offs,n_spsf,do_swap);
-  offs+=::pack(buf+offs,spsf,1,n_spsf,do_swap);
+  if (n_spsf)
+    offs+=::pack(buf+offs,spsf,1,n_spsf,do_swap);
 
   return offs;
 }
