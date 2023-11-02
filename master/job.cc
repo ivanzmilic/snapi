@@ -495,14 +495,14 @@ int job_class::stop(void)
             class model * mod;
             if (ji.to_invert[o])
             	mod=model_new(data,offs,0,*io);
-            delete[] data;
-//
+
             int32_t user,sys,clock;
             offs+=unpack(data+offs,user,0);
             offs+=unpack(data+offs,sys,0);
             offs+=unpack(data+offs,clock,0);
             if(offs!=size) io->msg(IOL_WARN,"job_class::stop: unpacked %d bytes, but buffer was %d!\n",offs,size);
-//          
+            delete[] data;
+
             u_time+=chunks[x][y]->u_time;
             s_time+=chunks[x][y]->s_time;
             byte found=0;
@@ -540,6 +540,7 @@ int job_class::stop(void)
             	test_cube->add_model(mod,x,y);
             	delete mod;
             }
+
             fp_t ** atm_array = atmos->return_as_array();
             for (int p =1;p<=NP;++p)
               memcpy(fitted_atmos[p][x][y]+1,atm_array[p]+1,ND*sizeof(fp_t));
@@ -551,7 +552,7 @@ int job_class::stop(void)
               memcpy(fitted_atmos_pops[x][y][1]+1, temp_atm_pops[1]+1, ND*n_levels_total*sizeof(fp_t));
               del_ft2dim(temp_atm_pops,1,ND,1,n_levels_total);
             }
-
+        
             delete atmos;
          }
        }else{

@@ -425,7 +425,6 @@ int32_t atmosphere::unpack(uint08_t *buf,uint08_t do_swap,io_class &io_in)
   if (use_atm_lvls == 2 && n_lvls) // Only unpack if it it alocated
     offs+=::unpack(buf+offs, atm_lvl_pops=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls),x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls, do_swap);
   
-  
   for (int a = 0; a<natm; ++a)
     atml[a]->set_parent_atmosphere(this);
   return offs;
