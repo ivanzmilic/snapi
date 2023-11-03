@@ -1982,7 +1982,8 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
     pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
     if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
       //printf("%d %d %e \n", x3i, i, pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
-      zeros = true;
+      //exit(0);
+      //zeros = true;
     }
   }
   /*if (zeros){
@@ -2004,10 +2005,10 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   // If there were negative populations, try a gentler solution
 
   if (zeros && alo) // if there were zeros, and we were doing ALO then re-do using the regular lambda iteration
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,1.0);
+    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,0.0);
   else if (zeros && !alo){ // if we tried lambda iteration, and it still does not work revert to old. // Can this be done better?
                           // old in this case means do the lambda iteration with 0.0 relaxation, in order not to change anything
-    //fprintf(stderr,"Going LTE. \n");
+    fprintf(stderr,"Keeping the same. \n");
     delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,-1.0);
   }
 
