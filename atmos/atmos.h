@@ -175,7 +175,7 @@ protected:
   uint08_t chemeq(class atmol**,int,fp_t,fp_t,fp_t&,int32_t,int32_t,int32_t);  
 // atmos_pop.cc: populations
   
-  fp_t newpops(fp_t***,fp_t***,fp_t***,fp_t*,int32_t); // it returns the greatest relative difference between new and old pops
+  fp_t newpops(fp_t***,fp_t***,fp_t***,fp_t*,int32_t, int); // it returns the greatest relative difference between new and old pops
   int nltepops(void);
   int nltepops_taugrid(void);
   void ltepops(void);

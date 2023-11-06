@@ -73,6 +73,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
 // Start by initializing everything to lte pops
   ltepops();
+  int outcome = 0;
 
   fp_t *lambda;
   int32_t nlambda=0;
@@ -193,15 +194,20 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
       }
 
-    relative_change = newpops(T,Nt,Ne,lambda,nlambda);
+    relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
 
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
     printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
     if (relative_change < 0.0){
-      fprintf(stderr, "negative population change\n");
-      exit(1);
+      fprintf(stderr, "negative population change. doing lambda iteration... \n");
+      relative_change = newpops(T,Nt,Ne,lambda,nlambda,0);      
+
+      if (relative_change < 0.0)
+        // The populations are negative. What do we do here?
+        break;
     }
-    if (relative_change < 2E-2)
+
+    if (relative_change < 1E-2)
       break; 
   }
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
@@ -417,7 +423,7 @@ int atmosphere::nltepops_taugrid(void){
 
       }
     
-    relative_change = newpops(T,Nt,Ne,lambda,nlambda);
+    relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
 
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);   
 
@@ -440,7 +446,7 @@ int atmosphere::nltepops_taugrid(void){
   return 0;
 }
 
-fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda)
+fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda, int alo)
 
 // *************************************************************************
 // * solve the NLTE populations consistently with the chemical equilibrium *
@@ -457,6 +463,8 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
   memset(convergence[1][1]+1, 0, (x3h - x3l+1)*sizeof(fp_t));
 
   uint08_t grv=0,rv;
+  fp_t r_c = 1.0;
+  
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient. Milic: It is probably more efficient because you do not "wait" for all the points to finish.
@@ -465,12 +473,13 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
         memset(changes, 0, natm*sizeof(fp_t));
           
         for(int a=0;a<natm;++a){
-          changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,1, 1.0); // solve the rate equations for each atom
-          //if (atml[a]->check_if_nlte())
-          //  //fprintf(stderr, "atom index a = %d, change = %e \n", a, changes[a]);
-          //  if (changes[a] < 0.0){
-          //    fprintf(stderr, "!!!! %d \n", x3i);
-          //  }
+          changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,alo, 1.0); // solve the rate equations for each atom
+          if (atml[a]->check_if_nlte())
+            //fprintf(stderr, "atom index a = %d, change = %e \n", a, changes[a]);
+            if (changes[a] < 0.0){
+              //fprintf(stderr, "!!!! %d %e \n", x3i, changes[a] );
+              r_c = -1.0;
+            }
             
         }
         convergence[1][1][x3i] = max_1d(changes, 0, natm-1);
@@ -479,7 +488,8 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
           
       //}while(rv&EC_POP_ION_DEFECT); // chemical consistency when ionization fraction is consistent
   }
-  fp_t r_c = max_1d(convergence[1][1], x3l, x3h);
+  if (r_c > 0)
+    r_c = max_1d(convergence[1][1], x3l, x3h);
   //int max_index = max_1d_index(convergence[1][1], x3l, x3h);
 
   del_ft3dim(convergence, 1, 1, 1, 1, x3l, x3h);
