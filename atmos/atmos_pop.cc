@@ -34,7 +34,7 @@ void atmosphere::ltepops(void) // compute the populations in LTE
 // * Compute the LTE populations consistently with the chemical equilibrium *
 // **************************************************************************
 {
-  for(int x1i=x1l;x1i<=x1h;++x1i)
+  for(int x1i=x1l;x1i<=x1h;++x1i) // Saha + Molecular 
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){
         chemeq(atml,natm,T[x1i][x2i][x3i],Nt[x1i][x2i][x3i],Ne[x1i][x2i][x3i],x1i,x2i,x3i); 
@@ -43,9 +43,7 @@ void atmosphere::ltepops(void) // compute the populations in LTE
     atml[a]->lte(T,Ne); // Boltzmann
 
   io.msg(IOL_INFO,"atmosphere::ltepops:\n");  
-  for(int a=0;a<natm;++a) atml[a]->info();
-
-  // If the switch is on, write these in the atmosphere  
+  for(int a=0;a<natm;++a) atml[a]->info(); // Not sure this is needed but why not
 }
 
 fp_t atmosphere::ne_derivative(int x1i, int x2i, int x3i){
@@ -73,18 +71,12 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
 // Start by initializing everything to lte pops
   ltepops();
-  int outcome = 0;
+  int outcome = 0; // Returns 0 for all good, 1 for negative pops
 
   fp_t *lambda;
   int32_t nlambda=0;
-  if (nlambda){
-    lambda=new fp_t [nlambda];           // wavelengths for NLTE calculations, these are @ several pre-defined positions, for the continuum. 
-    for (int l=0;l<nlambda;++l)
-      lambda[l] = 500E-7 + (460E-7 - 50E-7) / (nlambda-1) * l;
-  }
-  if(nlambda == 1)lambda[0] = 500E-7;
-  // Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
-  //printf("atmos::nltepops () Line 81 works. \n");
+  
+  // Set-up transitions and get the lambda grid for the transitions
   for(int a=0;a<natm;++a) atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
   for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
   
@@ -132,8 +124,11 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   for (int a=0;a<natm;++a){
     atml[a]->compute_active_population(T, Ne);
   }
+  
   int32_t iter = 0;
 
+  // We treat the background opacity as constant. By background opacity we mean the
+  // Sp
   fp_t ***** op_background;
   fp_t ***** em_background;
   op_background = new fp_t****[ntp]-1;
@@ -194,17 +189,15 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
       }
 
+    // Update according to ALI
     relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
-
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
     printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    
     if (relative_change < 0.0){
-      fprintf(stderr, "negative population change. doing lambda iteration... \n");
-      relative_change = newpops(T,Nt,Ne,lambda,nlambda,0);      
-
-      if (relative_change < 0.0)
-        // The populations are negative. What do we do here?
-        break;
+      // The populations are negative. Stop and return the error
+      outcome = 1;
+      break;
     }
 
     if (relative_change < 1E-2)
@@ -238,7 +231,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
 
   io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
-  return 0;
+  return outcome;
 }
 
   //int atm_pop_setup(void);

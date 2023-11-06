@@ -83,6 +83,7 @@ protected:
   
 // Populations:
   struct pps ***pop;
+  struct pps ***pop_old; 
 
 // List of transitions is needed? It is needed, in a way.
 // This is transition related stuff:
@@ -369,6 +370,7 @@ public:
   virtual void compute_profile_norm(fp_t, fp_t, fp_t *, fp_t *, fp_t ***, int);
  
   virtual fp_t pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int, fp_t);
+  virtual fp_t * newpops(int32_t,int32_t,int32_t, int);
   
   // New one:
   virtual void add(fp_t***, fp_t***, fp_t ***, fp_t, fp_t, fp_t);
@@ -385,7 +387,6 @@ public:
 //
   virtual void info(void);
 
-// New ones: Milic, February 2015
   virtual fp_t get_total_pop(int x1i, int x2i, int x3i){
     return pop[x1i][x2i][x3i].Nt;
   }

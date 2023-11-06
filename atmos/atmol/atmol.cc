@@ -210,3 +210,8 @@ fp_t atmol::pops(atmol**,uint16_t,fp_t,fp_t,int32_t,int32_t,int32_t, int, fp_t)
 {
   return 0;
 }
+
+fp_t * atmol::newpops(int32_t,int32_t,int32_t, int)
+{
+  return 0;
+}
