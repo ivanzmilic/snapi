@@ -290,6 +290,8 @@ public:
     return 0;
   };
 
+  virtual void print_atmos();
+
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   

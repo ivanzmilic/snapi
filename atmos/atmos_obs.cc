@@ -373,6 +373,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   this->set_grid(tau_grid);
   boundary_condition_for_rt = -1; 
   popsetup(); // 
+
+  //this->print_atmos();
+  //exit(0);
+  
   compute_op_referent();
   if (!tau_grid)
     compute_tau_referent();

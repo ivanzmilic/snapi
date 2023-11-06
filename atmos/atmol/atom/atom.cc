@@ -1978,14 +1978,21 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   
   // Check if the population is negative: 
   bool zeros = false;
+  fp_t * n_updated = new fp_t [nmap];
+  
   for (int i = 0; i<nmap; ++i){
-    pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
-    if (pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] < 0){
-      //printf("%d %d %e \n", x3i, i, pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]]);
-      //exit(0);
-      //zeros = true;
+
+    // Reminder: default relaxation factor is 1.0
+    fp_t n_updated_i = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] * (1.0 - relaxation_factor) + solution[i] * relaxation_factor;
+    
+    if (n_updated_i < 0){
+      zeros = true;
     }
+    else
+      pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]] = n_updated_i; 
   }
+  delete []n_updated;
+  
   /*if (zeros){
     for (int i=0; i<nmap; ++i){
       for (int ii=0; ii<nmap; ++ii)
@@ -2002,18 +2009,12 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   delete []b;
   delete []solution;
 
-  // If there were negative populations, try a gentler solution
+  // If there were negative populations, return error.
 
-  if (zeros && alo) // if there were zeros, and we were doing ALO then re-do using the regular lambda iteration
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,0.0);
-  else if (zeros && !alo){ // if we tried lambda iteration, and it still does not work revert to old. // Can this be done better?
-                          // old in this case means do the lambda iteration with 0.0 relaxation, in order not to change anything
-    fprintf(stderr,"Keeping the same. \n");
-    delta = pops(atm,natm,Temp,ne,x1i,x2i,x3i,0,-1.0);
-  }
-
-  return delta;
-
+  if (zeros)
+    return -1.0;
+  else 
+    return delta;
   }
 return 0.0; // If not (J && NLTE)
 }

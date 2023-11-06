@@ -598,3 +598,19 @@ int atmosphere::build_from_nodes(model *){
 int atmosphere::interpolate_from_nodes(model *){
   return 0;
 }
+
+// ----------------------------------------------------------------------------------
+
+// Some additional useful i/o:
+
+void atmosphere::print_atmos(){
+
+  // Prints a 1D atmosphere or a first column of a 3D atmosphere on a stderr
+
+  for (int x3i=x3l; x3i<=x3h; ++x3i)
+
+    fprintf(stderr, "%1.5e %1.5e %1.5e %1.5e %1.5e \n",x3[x3i] , T[x1l][x2l][x3i],
+      Nt[x1l][x2l][x3i], Vz[x1l][x2l][x3i], Vt[x1l][x2l][x3i]);
+
+
+}

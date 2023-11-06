@@ -184,12 +184,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
           }  
           if (tau_grid) de_normalize(op,em);  
 
-          /*fprintf(stderr, "%d %d %e %e %e \n", tp, l, th[tp], lambda[l], S[x1l][x2l][6]); 
-
-          if (tp==1 && l==251)
-            for (int x3i=x3l; x3i<=x3h;++x3i)
-              fprintf(stderr, "%d %e %e \n", x3i, op[x1l][x2l][x3i], em[x1l][x2l][x3i]);*/
-         
           for(int a=0;a<natm;++a) atml[a]->add(S, L, op, lambda[l], lambda_w[l], bin[tp]); // give each species access to radiation field, that is, add the radiation field to the mean intensity
           del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
           del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
@@ -202,8 +196,11 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     relative_change = newpops(T,Nt,Ne,lambda,nlambda);
 
     io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    //printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
-
+    printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    if (relative_change < 0.0){
+      fprintf(stderr, "negative population change\n");
+      exit(1);
+    }
     if (relative_change < 2E-2)
       break; 
   }
@@ -464,25 +461,26 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
     for(int x2i=x2l;x2i<=x2h;++x2i)
       for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient. Milic: It is probably more efficient because you do not "wait" for all the points to finish.
         
-        do{
-          fp_t * changes = new fp_t [natm];
-          memset(changes, 0, natm*sizeof(fp_t));
+        fp_t * changes = new fp_t [natm];
+        memset(changes, 0, natm*sizeof(fp_t));
           
-          for(int a=0;a<natm;++a)
-            changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,1, 1.0); // solve the rate equations for each atom
+        for(int a=0;a<natm;++a){
+          changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,1, 1.0); // solve the rate equations for each atom
+          //if (atml[a]->check_if_nlte())
+          //  //fprintf(stderr, "atom index a = %d, change = %e \n", a, changes[a]);
+          //  if (changes[a] < 0.0){
+          //    fprintf(stderr, "!!!! %d \n", x3i);
+          //  }
+            
+        }
+        convergence[1][1][x3i] = max_1d(changes, 0, natm-1);
+        rel_change_index[x3i] = x3i;
+        delete []changes;
           
-
-          convergence[1][1][x3i] = max_1d(changes, 0, natm-1);
-          rel_change_index[x3i] = x3i;
-          delete []changes;
-
-          rv = 0.0;
-          
-        }while(rv&EC_POP_ION_DEFECT); // chemical consistency when ionization fraction is consistent
-      }
-
+      //}while(rv&EC_POP_ION_DEFECT); // chemical consistency when ionization fraction is consistent
+  }
   fp_t r_c = max_1d(convergence[1][1], x3l, x3h);
-  int max_index = max_1d_index(convergence[1][1], x3l, x3h);
+  //int max_index = max_1d_index(convergence[1][1], x3l, x3h);
 
   del_ft3dim(convergence, 1, 1, 1, 1, x3l, x3h);
   delete [] (rel_change_index+x3l);
