@@ -419,6 +419,16 @@ int multiply_4x4(fp_t ** A, fp_t * B, fp_t * result){
   return 0;
 }
 
+
+fp_t min_1d(fp_t * array, int begin, int end){
+  fp_t min = array[begin];
+  for (int i = begin+1; i<=end; ++i)
+    if (array[i] < min) min = array[i];
+
+  return min;
+}
+
+
 fp_t max_1d(fp_t * array, int begin, int end){
   fp_t max = array[begin];
   for (int i = begin+1; i<=end; ++i)
@@ -427,12 +437,23 @@ fp_t max_1d(fp_t * array, int begin, int end){
   return max;
 }
 
-fp_t min_1d(fp_t * array, int begin, int end){
-  fp_t min = array[begin];
-  for (int i = begin+1; i<=end; ++i)
-    if (array[i] < min) min = array[i];
+
+fp_t min_2d(fp_t ** array, int beginx, int endx, int beginy, int endy){
+  fp_t min = array[beginx][beginy];
+  for (int i = beginx; i<=endx; ++i)
+    for (int j = beginy; j<=endy;++j)
+      if (array[i][j] < min) min = array[i][j];
 
   return min;
+}
+
+fp_t max_2d(fp_t ** array, int beginx, int endx, int beginy, int endy){
+  fp_t max = array[beginx][beginy];
+  for (int i = beginx; i<=endx; ++i)
+    for (int j = beginy; j<=endy;++j)
+      if (array[i][j] > max) max = array[i][j];
+
+  return max;
 }
 
 int  max_1d_index(fp_t * array, int begin, int end){

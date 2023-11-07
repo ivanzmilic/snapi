@@ -83,8 +83,7 @@ protected:
   
 // Populations:
   struct pps ***pop;
-  struct pps ***pop_old; 
-
+  
 // List of transitions is needed? It is needed, in a way.
 // This is transition related stuff:
   uint32_t ***tmap,ntr;
@@ -393,6 +392,7 @@ public:
 
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int index_ion);
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int index_ion, int index_lvl);
+  virtual fp_t get_mapped_pop(int, int, int, int);
   virtual fp_t get_active_pop(int x1i, int x2i, int x3i);
   virtual fp_t get_partf(int z, fp_t T, fp_t Ne);
 

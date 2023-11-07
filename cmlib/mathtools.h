@@ -31,8 +31,11 @@ fp_t gamma_f(fp_t arg); // No real nneed, it will be used seldom enough that bui
 
 fp_t max_1d(fp_t * array, int begin, int end);
 fp_t min_1d(fp_t * array, int begin, int end);
+fp_t max_2d(fp_t ** array, int beginx, int endx, int beginy, int endy);
+fp_t min_2d(fp_t ** array, int beginx, int endx, int beginy, int endy);
 int max_1d_index(fp_t * array, int begin, int end);
 int max_1d_index(int * array, int begin, int end);
+
 fp_t aps(fp_t); // Why is abs always so problematic?
 
 void Crout(int d,fp_t*S,fp_t*D);

@@ -275,6 +275,26 @@ int atmosphere::atm_pop_fill(){
   return 0;
 }
 
+int atmosphere::atm_pop_invfill(){
+
+  if (1){ // dangerous, has to be fixed
+    for (int x1i=x1l; x1i<=x1h; ++x1i)
+      for (int x2i=x2l; x2i<=x2h; ++x2i)
+        for (int x3i=x3l; x3i<=x3h; ++x3i){
+            int i = 1;
+            for (int a=0;a<natm;++a)
+              for (int z=0; z<atml[a]->get_no_ions(); ++z)
+                for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
+                  atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z,n);
+                  atml[a]->
+                  i++;
+                }
+            atm_lvl_pops[x1i][x2i][x3i][n_lvls] = Ne[x1i][x2i][x3i];
+    }
+  }
+  return 0;
+}
+
 int atmosphere::atm_pop_output(){ // Posibbillity to output directly the data?
 
   if (use_atm_lvls == 2 && n_lvls){
@@ -451,44 +471,59 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 // MvN has a good point here. But are still not there. We currently solve ONLY NLTE populations
 
 {
-  fp_t *** convergence = ft3dim(1, 1, 1, 1, x3l, x3h);
-  int * rel_change_index = new int [x3h-x3l+1] - x3l;
-  memset(convergence[1][1]+1, 0, (x3h - x3l+1)*sizeof(fp_t));
+  //fp_t *** convergence = ft3dim(1, 1, 1, 1, x3l, x3h);
+  //int * rel_change_index = new int [x3h-x3l+1] - x3l;
+  //memset(convergence[1][1]+1, 0, (x3h - x3l+1)*sizeof(fp_t));
 
-  uint08_t grv=0,rv;
-  fp_t r_c = 1.0;
+  if (n_lvls){
+
+    uint08_t grv=0,rv;
+    fp_t r_c = 1.0;
+
+    fp_t **** relative_changes = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+
+    // Allocate this to be filled with the proposal of the populations:
+    atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+
+    bool negative = false; 
   
-  for(int x1i=x1l;x1i<=x1h;++x1i)
-    for(int x2i=x2l;x2i<=x2h;++x2i)
-      for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient. Milic: It is probably more efficient because you do not "wait" for all the points to finish.
+    for(int x1i=x1l;x1i<=x1h;++x1i)
+      for(int x2i=x2l;x2i<=x2h;++x2i)
+        for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient. Milic: It is probably more efficient because you do not "wait" for all the points to finish.
         
-        fp_t * changes = new fp_t [natm];
-        memset(changes, 0, natm*sizeof(fp_t));
+          int lvl_counter = 1;
           
-        for(int a=0;a<natm;++a){
-          changes[a] = atml[a]->pops(atml,natm,T_in[x1i][x2i][x3i],Ne_in[x1i][x2i][x3i],x1i,x2i,x3i,alo, 1.0); // solve the rate equations for each atom
-          if (atml[a]->check_if_nlte())
-            //fprintf(stderr, "atom index a = %d, change = %e \n", a, changes[a]);
-            if (changes[a] < 0.0){
-              //fprintf(stderr, "!!!! %d %e \n", x3i, changes[a] );
-              r_c = -1.0;
+          for(int a=0;a<natm;++a){
+          
+            fp_t * new_pops_a = atml[a]->newpops(x1i, x2i, x3i, alo);
+            for (int i=0; i<atml[a]->get_total_lvls();++i){
+              atm_lvl_pops[x1i][x2i][x3i][lvl_counter] = new_pops_a[i];
+              fp_t relative_change = new_pops_a[i] / atml[a]->get_mapped_pop(x1i,x2i,x3i,i) - 1.0;
+              
+              if (relative_change < -1.0) negative = true;
+              relative_changes[x1i][x2i][x3i][lvl_counter] = fabs(relative_change);
+              lvl_counter ++;
             }
-            
-        }
-        convergence[1][1][x3i] = max_1d(changes, 0, natm-1);
-        rel_change_index[x3i] = x3i;
-        delete []changes;
-          
-      //}while(rv&EC_POP_ION_DEFECT); // chemical consistency when ionization fraction is consistent
-  }
-  if (r_c > 0)
-    r_c = max_1d(convergence[1][1], x3l, x3h);
-  //int max_index = max_1d_index(convergence[1][1], x3l, x3h);
+            delete []new_pops_a;
+          }
+    }
+    if (negative){ // If there are negative populations return error and tell the above the stop
+      fprintf(stderr, "atmos::newpops: negative population. stopping...\n");
+      return -1; 
+    } 
 
-  del_ft3dim(convergence, 1, 1, 1, 1, x3l, x3h);
-  delete [] (rel_change_index+x3l);
-  //return grv; // return flags concerning any remaining defects
-  return r_c;
+    fp_t max_rel_change = max_2d(relative_changes[x1l][x2l],x3l,x3h,1,n_lvls);
+
+    fprintf(stderr, "atmos::newpops: max relative change is %e \n", max_rel_change);
+
+    // Copy stuff:
+
+    del_ft4dim(atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+    del_ft4dim(relative_changes,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+
+    return max_rel_change;
+  }
+  return 0;
 }
 
 fp_t atmosphere::get_pop(int x1i, int x2i, int x3i, int species, int z, int i){
