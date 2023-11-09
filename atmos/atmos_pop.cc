@@ -116,7 +116,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
 
 // NLTE population loop
-  int32_t max_iter = 100;
+  int32_t max_iter = 1;
   fp_t relative_change = 1.0;
   
   if (tau_grid) compute_op_referent();
@@ -277,20 +277,16 @@ int atmosphere::atm_pop_fill(){
 
 int atmosphere::atm_pop_invfill(){
 
-  if (1){ // dangerous, has to be fixed
-    for (int x1i=x1l; x1i<=x1h; ++x1i)
-      for (int x2i=x2l; x2i<=x2h; ++x2i)
-        for (int x3i=x3l; x3i<=x3h; ++x3i){
-            int i = 1;
-            for (int a=0;a<natm;++a)
-              for (int z=0; z<atml[a]->get_no_ions(); ++z)
-                for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
-                  atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z,n);
-                  atml[a]->
-                  i++;
-                }
-            atm_lvl_pops[x1i][x2i][x3i][n_lvls] = Ne[x1i][x2i][x3i];
-    }
+  for (int x1i=x1l; x1i<=x1h; ++x1i)
+    for (int x2i=x2l; x2i<=x2h; ++x2i)
+      for (int x3i=x3l; x3i<=x3h; ++x3i){
+        int i = 1; // Counts the levels
+          for (int a=0;a<natm;++a)
+            for (int z=0; z<atml[a]->get_no_ions(); ++z)
+              for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
+                atml[a]->set_pop(x1i,x2i,x3i,z,n, atm_lvl_pops[x1i][x2i][x3i][i]);
+                i++;
+              }
   }
   return 0;
 }
@@ -310,9 +306,6 @@ fp_t ** atmosphere::get_atm_pop(){
 
     fp_t ** output = ft2dim(1,x3h-x3l+1,1,n_lvls);
     memcpy(output[1]+1,atm_lvl_pops[x1l][x2l][x3l]+1,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t));
-    //fprintf(stderr,"get_atm_pop %e \n", atm_lvl_pops[x1l][x2l][x3l][1]);
-    //fprintf(stderr,"get_atm_pop %e \n", output[1][1]);
-
     return output;
   }
   return 0;
@@ -471,16 +464,12 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 // MvN has a good point here. But are still not there. We currently solve ONLY NLTE populations
 
 {
-  //fp_t *** convergence = ft3dim(1, 1, 1, 1, x3l, x3h);
-  //int * rel_change_index = new int [x3h-x3l+1] - x3l;
-  //memset(convergence[1][1]+1, 0, (x3h - x3l+1)*sizeof(fp_t));
-
   if (n_lvls){
 
-    uint08_t grv=0,rv;
-    fp_t r_c = 1.0;
+    fprintf(stderr, "atmosphere:newpops: level of atoms that are considered is: %d \n", n_lvls);
 
     fp_t **** relative_changes = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+    memset(relative_changes[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t));
 
     // Allocate this to be filled with the proposal of the populations:
     atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
@@ -489,7 +478,7 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
   
     for(int x1i=x1l;x1i<=x1h;++x1i)
       for(int x2i=x2l;x2i<=x2h;++x2i)
-        for(int x3i=x3l;x3i<=x3h;++x3i){ // the do-loop may be done as outer loop also, but this may be more efficient. Milic: It is probably more efficient because you do not "wait" for all the points to finish.
+        for(int x3i=x3l;x3i<=x3h;++x3i){ 
         
           int lvl_counter = 1;
           
@@ -499,28 +488,34 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
             for (int i=0; i<atml[a]->get_total_lvls();++i){
               atm_lvl_pops[x1i][x2i][x3i][lvl_counter] = new_pops_a[i];
               fp_t relative_change = new_pops_a[i] / atml[a]->get_mapped_pop(x1i,x2i,x3i,i) - 1.0;
-              
               if (relative_change < -1.0) negative = true;
               relative_changes[x1i][x2i][x3i][lvl_counter] = fabs(relative_change);
+              fprintf(stderr,"%d %d %d %e \n",x3i, a, i, relative_change);
               lvl_counter ++;
             }
             delete []new_pops_a;
           }
     }
-    if (negative){ // If there are negative populations return error and tell the above the stop
-      fprintf(stderr, "atmos::newpops: negative population. stopping...\n");
-      return -1; 
-    } 
-
     fp_t max_rel_change = max_2d(relative_changes[x1l][x2l],x3l,x3h,1,n_lvls);
-
     fprintf(stderr, "atmos::newpops: max relative change is %e \n", max_rel_change);
 
     // Copy stuff:
-
+    if (conserve_charge){
+      //fprintf(stderr, "%e \n", Ne[x1l][x2l][44]);
+      fprintf(stderr, "atmos::newpops: attempting to conserve charge...\n");
+      enforce_conserve_charge();
+      //fprintf(stderr, "%e \n", Ne[x1l][x2l][44]);
+    }
+    if (!negative){
+      fprintf(stderr, "atmos::newpops: populations seem fine, updating...\n");
+      atm_pop_invfill();
+    }
     del_ft4dim(atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
     del_ft4dim(relative_changes,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
-
+    if (negative){ // If there are negative populations return error and tell the above the stop
+      fprintf(stderr, "atmos::newpops: negative population. stopping...\n");
+      return -1;
+    }
     return max_rel_change;
   }
   return 0;
@@ -543,5 +538,27 @@ fp_t atmosphere::get_Ne(int x1i, int x2i, int x3i){
 
 fp_t atmosphere::set_Ne(int x1i, int x2i, int x3i, fp_t input){
   Ne[x1i][x2i][x3i] = input;
+  return 0;
+}
+
+int atmosphere::enforce_conserve_charge(){
+
+  // Adjust electron populations according to the old and the new level populations
+
+  for (int x1i=x1l; x1i<=x1h; ++x1i)
+    for (int x2i=x2l; x2i<=x2h; ++x2i)
+      for (int x3i=x3l; x3i<=x3h; ++x3i){
+        int i = 1; // Counts the levels
+          for (int a=0;a<natm;++a)
+            for (int z=0; z<atml[a]->get_no_ions(); ++z) 
+              for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
+                // atm_lvl_pops are the new ones, the other ones are the old ones
+                fp_t ne_diff = z*(atm_lvl_pops[x1i][x2i][x3i][i] - atml[a]->get_pop(x1i,x2i,x3i,z,n));
+                Ne[x1i][x2i][x3i] += ne_diff;
+                //fprintf(stderr,"%d %d %d %d %d %e \n", x1i,x2i,x3i,z,n,ne_diff);
+                i++;
+              }
+
+  }
   return 0;
 }

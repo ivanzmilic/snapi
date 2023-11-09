@@ -63,7 +63,7 @@ fp_t * atom::newpops(int32_t x1i,int32_t x2i,int32_t x3i, int alo){
         else
           Radiative_rates = R_ij(z,l,ll,JJ);
         fp_t Collisional_rates = C_ij(z, l, ll, Temp, ne);
-        if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
+        //if (Z==1) Collisional_rates += C_ij_H(z, l, ll, Temp, fetch_population(x1i, x2i, x3i, 0, 0)); // Modify for H collisions
         
         M[i+1][i+1] -= (Radiative_rates + Collisional_rates); 
         
@@ -73,7 +73,7 @@ fp_t * atom::newpops(int32_t x1i,int32_t x2i,int32_t x3i, int alo){
         else 
           Radiative_rates = R_ij(z,ll,l,JJ);
         Collisional_rates = C_ij(z, ll, l, Temp, ne);
-        if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
+        //if (Z==1) Collisional_rates += C_ij_H(z, ll, l, Temp, fetch_population(x1i, x2i, x3i, 0, 0));
         int dl = ll - l;
 
         M[i+1][i+1+dl] += (Radiative_rates + Collisional_rates);  
@@ -134,7 +134,14 @@ fp_t * atom::newpops(int32_t x1i,int32_t x2i,int32_t x3i, int alo){
   
     return solution; // If not (J && NLTE)
   }
-  return 0;
+  else{ // Else it's a LTE thing, so it might have levels
+
+    fp_t * old_pops = new fp_t [nmap]; //i indexes from zero
+    for (int i=0; i<nmap;++i)
+      old_pops[i] = pop[x1i][x2i][x3i].n[zmap[i]][lmap[i]];
+
+    return old_pops;
+  }
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -149,3 +156,15 @@ fp_t atom::get_mapped_pop(int x1i, int x2i, int x3i, int i){
   }
   return 0;
 }
+
+// -----------------------------------------------------------------------------------------------------------------
+
+int atom::set_pop(int x1i, int x2i, int x3i, int z, int l, fp_t pop_in){
+
+  pop[x1i][x2i][x3i].n[z][l] = pop_in;
+
+  return 0; // Still can't make up my mind about void vs int
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+

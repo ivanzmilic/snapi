@@ -2274,15 +2274,6 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
   }
   delete []n_updated;
   
-  /*if (zeros){
-    for (int i=0; i<nmap; ++i){
-      for (int ii=0; ii<nmap; ++ii)
-        fprintf(stderr, "%e , ", M[i+1][ii+1]);
-      fprintf(stderr, "%e \n", b[i]);
-    }
-    exit(0);
-  }*/
-
   // Free the memory:
 
   del_ft2dim(M,1,nmap,1,nmap);

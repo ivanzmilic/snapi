@@ -183,11 +183,13 @@ protected:
   void popclean(void);
   void respsetup(void);
   void respclean(void);
+
   fp_t ne_derivative(int, int, int);
   void ne_lte_derivatives();
   void clear_ne_lte_derivatives();
   int atm_pop_setup(void);
   int atm_pop_fill(void);
+  int atm_pop_invfill(void);
   int atm_pop_clean(void);
 
 // atmos_rts.cc: radiative transfer solver[s]
@@ -347,6 +349,7 @@ public:
   virtual fp_t get_opacity_fudge(fp_t lambda);
   void set_conserve_charge(int);
   int get_conserve_charge();
+  int enforce_conserve_charge();
 //
 // ----------------------------------------------------------------------------------------------------------------
 // -------------- RESPONSE FUNCTIONS RELATED FUNCTIONS --------------------------------------------------------------

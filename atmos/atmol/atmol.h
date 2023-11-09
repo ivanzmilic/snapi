@@ -200,9 +200,12 @@ public:
   virtual fp_t get_pop(int x1i, int x2i, int x3i, int, int){
     return 0; // As this is the atmol, not atom, nor molecule (nor H- molecule as a matter of fact), do not return anything
   }
-   virtual fp_t get_mapped_pop(int, int, int, int){
+  virtual fp_t get_mapped_pop(int, int, int, int){
     return 0;
-   }
+  }
+  virtual int set_pop(int, int, int, int, int, fp_t){
+    return 0;
+  }
 
   
   virtual fp_t get_J(int, int, int, int){
