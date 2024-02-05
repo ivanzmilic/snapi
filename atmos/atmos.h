@@ -177,7 +177,6 @@ protected:
   
   fp_t newpops(fp_t***,fp_t***,fp_t***,fp_t*,int32_t, int); // it returns the greatest relative difference between new and old pops
   int nltepops(void);
-  int nltepops_taugrid(void);
   void ltepops(void);
   void popsetup(void);
   void popclean(void);
@@ -215,8 +214,6 @@ protected:
   virtual int formal_with_responses_full(fp_t *, fp_t ****,fp_t ***,fp_t *****,fp_t ****, fp_t *****, fp_t ****, fp_t ****, fp_t ,fp_t , fp_t )
   {return 0;};
 
-  virtual int formal_pert_analytical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
-  virtual int formal_pert_numerical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****,fp_t ***, fp_t ****, fp_t, fp_t, fp_t){return 0;};
 // atmos_fio.cc: file I/O
   int08_t read_atmos(const char*,const char*,uint08_t,io_class*);
   int08_t read_spinor(const char*,const char*,io_class*);
@@ -256,10 +253,6 @@ public:
   virtual observable *obs_scalar_num_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **); // The same as before,except it will also return the derivatives to nodes (written in the last argument)
   virtual observable *obs_scalar_responses_to_nodes(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **);
 
-// Duplicated, where tau is an independent variable:
-  virtual observable *obs_scalar_tau(fp_t,fp_t,fp_t*,int32_t);
-  virtual observable *obs_scalar_num_responses_tau(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
-  virtual observable *obs_scalar_responses_tau(fp_t,fp_t,fp_t*,int32_t, fp_t ***);
 // Responses to nodes:
   virtual observable *obs_scalar_num_responses_to_nodes_tau(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **); // The same as before,except it will also return the derivatives to nodes (written in the last argument)
   virtual observable *obs_scalar_responses_to_nodes_tau(model *, fp_t, fp_t, fp_t *, int32_t, fp_t **);
@@ -272,7 +265,6 @@ public:
   virtual int scale_rf(fp_t ***, model*, int, int, fp_t *, fp_t *);
   virtual int scale_corrections(fp_t *, model*, int);                                                                                                      // hence the 3D vector in last argument
 //
-  virtual fp_t *test_stokes(fp_t,fp_t,fp_t*,int32_t); // Keep this for debugging purposes. In the end you can delete it.
   virtual observable *obs_stokes(fp_t,fp_t,fp_t*,int32_t); // Same as the obs_scalar
   virtual observable *obs_stokes_responses(fp_t,fp_t,fp_t*,int32_t, fp_t ****); // Same as obs_scalar_responses, except it works for full Stokes vector
   virtual observable *forward_evaluate(fp_t theta, fp_t phi, fp_t * lambda, int nlambda,fp_t scattered_light, fp_t qs, fp_t spectral_broadening, int, fp_t *);
@@ -363,10 +355,6 @@ void compute_lte_population_responses(){
 int compute_nlte_population_responses(int lvl_of_approximation);
 void compute_nlte_population_responses_numerical(int from, int to);
 void compute_anisotropy_responses();
-
-void compute_nlte_population_responses_taugrid(int lvl_of_approximation);
-void compute_nlte_population_responses_numerical_taugrid(int from, int to);
-
 
 fp_t **** compute_intensity_response_numerical(int from, int to, fp_t theta, fp_t phi, fp_t lambda);
 };

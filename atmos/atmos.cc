@@ -116,13 +116,10 @@ atmosphere::atmosphere(acfg *cfg,io_class &io_in):grid(io_in),flags(ATMOS_FLAG_M
   conserve_charge = cfg->conserve_charge;
   tau_grid = cfg->tau_grid;
   use_atm_lvls = cfg->use_atm_lvls;
-  n_lvls = 0; // Still not calculated 
-
-  if (use_atm_lvls){
-    for (int a=0; a<natm; ++a)
+  n_lvls = 0; // We are going to calculate the amount of atomic levels either way
+  for (int a=0; a<natm; ++a)
       n_lvls += atml[a]->get_total_lvls();
-    n_lvls += 1; // This is for electrons 
-  }
+  n_lvls += 1; // This is for electrons 
 
   atm_lvl_pops = 0; // Still not allocated
 //

@@ -3,7 +3,7 @@ MAKEFILE      = Makefile
 OPTFLAGS      = -O4 -O5 -ffast-math
 WARNFLAGS     = -Wshadow
 DBGFLAGS      = -g3
-XTRAFLAGS     = -fsigned-char # -fno-stack-protector
+XTRAFLAGS     = -fsigned-char -Wno-free-nonheap-object# -fno-stack-protector
 # global variables
 AR	      = @AR@
 COMPILER      = @COMPILER@

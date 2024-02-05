@@ -107,12 +107,6 @@ int atmosphere::formal_pert_analytical(fp_t **** dS, fp_t *** op, fp_t *** em, f
   return 0;
 }
 
-
-int atmosphere::formal_pert_analytical_taugrid(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){
-
-  return 0;
-}
-
 int atmosphere::formal_pert_jcdti(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){
 
   return 0;

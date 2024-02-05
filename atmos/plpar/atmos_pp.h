@@ -21,7 +21,6 @@ protected:
   
   virtual int formal_pert_numerical(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
   virtual int formal_pert_analytical(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
-  virtual int formal_pert_analytical_taugrid(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
   virtual int formal_pert_jcdti(fp_t ****, fp_t ***, fp_t ***, fp_t ****, fp_t ****, fp_t, fp_t, fp_t);
 public:
   atmos_pp(acfg*,io_class&);

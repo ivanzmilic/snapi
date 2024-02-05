@@ -298,7 +298,7 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
 // * conservation perhaps it should be treated separately in that regime...?
 // **********************************************************************************
     iter++;
-    if (iter > 20){
+    if (iter > 100){
       //fprintf(stderr, "Too much iterations man. \n");
       break;
     }

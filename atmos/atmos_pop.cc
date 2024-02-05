@@ -98,7 +98,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   fp_t *bin=anglesetup(th,ph,ntp); // bin - integration weights
                                    // th - theta
                                    // ph - phi
-                                   // ntp - number of angles, now as this is 1D, unpolarized case, it is actually only number of theta points. In general case it is N_theta x N_phi
+                                   // ntp - number of angles, now as this is 1D, unpolarized case, it is the number of theta points. In general case it is N_theta x N_phi
 
   io.msg(IOL_INFO,"atmosphere::nltepops: lambda=%E .. %E nlambda = %d \n",lambda[0],lambda[nlambda-1], nlambda);
   
@@ -116,7 +116,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
 
 // NLTE population loop
-  int32_t max_iter = 1;
+  int32_t max_iter = 100;
   fp_t relative_change = 1.0;
   
   if (tau_grid) compute_op_referent();
@@ -127,8 +127,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   
   int32_t iter = 0;
 
-  // We treat the background opacity as constant. By background opacity we mean the
-  // Sp
+  // We treat the background opacity as constant, it is still wavelength and angle dependent:
   fp_t ***** op_background;
   fp_t ***** em_background;
   op_background = new fp_t****[ntp]-1;
@@ -158,6 +157,8 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
             op_background[tp][l] = opacity_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
             em_background[tp][l] = emissivity_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
           }
+
+          // This now implies that the opacity and emissivity are 1D only, and scalar:
           fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
           fp_t ***em = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
           memcpy(op[x1l][x2l]+x3l,op_background[tp][l][x1l][x2l]+x3l,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
@@ -191,13 +192,18 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
     // Update according to ALI
     relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
-    io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    printf("atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);  
+    io.msg(IOL_INFO, "\n atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
+    fprintf(stderr, "atmosphere::nltepops : relative change after iteration %d is %.5e \n", iter, relative_change);  
     
     if (relative_change < 0.0){
-      // The populations are negative. Stop and return the error
-      outcome = 1;
-      break;
+      // The populations are negative. Try normal lambda iteration:
+      fprintf(stderr, "atmosphere::nltepops : found negative populations. trying lambda iteration...");
+      relative_change = newpops(T,Nt,Ne,lambda,nlambda,0);
+      if (relative_change < 0.0){ // If it is still bad:
+        fprintf(stderr, "atmosphere::nltepops : found negative populations. could not fix. exiting...");
+        outcome = -1;
+        break;
+      }
     }
 
     if (relative_change < 1E-2)
@@ -206,7 +212,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
   
   for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
-// cleanup background opacity
+  // cleanup background opacity
   for (int tp=1;tp<=ntp;++tp){
     for (int l=0;l<nlambda;++l){
       del_ft3dim(op_background[tp][l],x1l,x1h,x2l,x2h,x3l,x3h);
@@ -234,8 +240,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   return outcome;
 }
 
-  //int atm_pop_setup(void);
-  //int atm_pop_clean(void);
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int atmosphere::atm_pop_setup(){
 
@@ -328,130 +333,6 @@ int atmosphere::get_atm_pop_switch(){
   return use_atm_lvls;
 }
 
-int atmosphere::nltepops_taugrid(void){
-  
-  // radiative quantities
-  fp_t ***S=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h); // Monochromatic intensity in given direction
-  fp_t ***L=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h); // Monochromatic approximate operator for a given direction
-
-//
-  int32_t nlambda=10;
-  fp_t *lambda=new fp_t [nlambda];           // wavelengths for NLTE calculations, these are several pre-defined positions, for the continuum. 
-  for (int l=0;l<nlambda;++l)
-    lambda[l] = 300E-7 + (2000E-7 - 300E-7) / (nlambda-1) * l;
-
-// setup geometry specific angular quadrature, which is in 1D case gaussian quadrature, typically with 3 directions from 0 to 1.
-  int ntp;
-  fp_t *th,*ph;
-  fp_t *bin=anglesetup(th,ph,ntp); // bin - integration weights
-                                   // th - theta
-                                   // ph - phi
-                                   // ntp - number of angles, now as this is 1D, unpolarized case, it is actually only number of theta points. In general case it is N_theta x N_phi
-
-  io.msg(IOL_INFO,"atmosphere::nltepops_taugrid:\n");
-
-  //Now we have some setup phase, where we pick wavelengths etc, that is, we try to cleverly sort out the wavelength grid required for our computations. For the moment it looks nice.
-  for(int a=0;a<natm;++a) atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h); // initialize angular/wavelength redist/integration
-  for(int a=0;a<natm;++a) lambda=atml[a]->getlambda(lambda,nlambda,T[x1l][x2l][x3h],Nt[x1l][x2l][x3h],Ne[x1l][x2l][x3h]); // compute wavelength grid for NLTE populations
- 
-  io.msg(IOL_INFO,"atmosphere::nltepops: lambda=%E .. %E nlambda = %d \n",lambda[0],lambda[nlambda-1], nlambda);
-  
-  // Set up integrating weights for the wavelength
-  fp_t * lambda_w = new fp_t [nlambda];
-  lambda_w[0] = (lambda[1] - lambda[0]) * 0.5;
-  lambda_w[nlambda - 1] = (lambda[nlambda-1] - lambda[nlambda-2]) * 0.5;
-  for (int l = 1; l<nlambda-1; ++l)
-    lambda_w[l] = (lambda[l+1] - lambda[l-1]) * 0.5;
-  
-  io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
-
-// NLTE population loop
-  int32_t max_iter = 300;
-  int32_t iter = 0;
-  fp_t relative_change = 1.0;
-  
-  ltepops();
-  compute_op_referent();
-
-  for (int a=0;a<natm;++a){
-    atml[a]->compute_active_population(T, Ne);
-  }
-  
-  for (iter = 0; iter<max_iter; ++iter){
-      
-    for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each atom
-
-    // You need to compute relevant opacity, but not the tau. We want tau to be independent
-    
-    for(int tp=1;tp<=ntp;++tp){                        // angular loop (loop over the "wavefronts")
-        
-        fp_t ***Vr=project(Vx,Vy,Vz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h);   // LOS projected velocity
-        fp_t ****B=transform(Bx,By,Bz,th[tp],ph[tp],x1l,x1h,x2l,x2h,x3l,x3h); // transform to (B,Inc,Az) representation
-
-        for(int l=0;l<nlambda;++l){
-
-          for (int a = 0; a<natm; ++a)
-            atml[a]->prof_init();
-
-          fp_t ***op=opacity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]); // angle dependent in the scalar case -> NO, at leasst not at the moment. 
-          fp_t ***em=emissivity(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
-
-          fp_t *** op_norm = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-          fp_t *** em_norm = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-          for (int x1i=x1l;x1i<=x1h;++x1i)
-            for (int x2i=x2l;x2i<=x2h;++x2i)
-              for (int x3i=x3l;x3i<=x3h;++x3i){
-                op_norm[x1i][x2i][x3i] = op[x1i][x2i][x3i] / op_referent[x1i][x2i][x3i];
-                em_norm[x1i][x2i][x3i] = em[x1i][x2i][x3i] / op_referent[x1i][x2i][x3i];
-              }
-          
-          if(int rv=formal(tau_referent[x1l][x2l], S,L,op_norm, em_norm,th[tp],ph[tp], boundary_condition_for_rt)){ // solution and approximate operator
-            io.msg(IOL_ERROR,"atmosphere::nltepops: for angle (%d), wavelength %d\n",tp,l);
-            del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(op_norm,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(em_norm,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(S,x1l,x1h,x2l,x2h,x3l,x3h);
-            del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
-            return rv; // pass error to parent level
-          }   
-          
-          for(int a=0;a<natm;++a) atml[a]->add(S, L, op, lambda[l], lambda_w[l], bin[tp]); // give each species access to radiation field, that is, add the radiation field to the mean intensity
-          del_ft3dim(em,x1l,x1h,x2l,x2h,x3l,x3h); // cannot be reused due to projections
-          del_ft3dim(op,x1l,x1h,x2l,x2h,x3l,x3h);
-          del_ft3dim(op_norm,x1l,x1h,x2l,x2h,x3l,x3h);
-          del_ft3dim(em_norm,x1l,x1h,x2l,x2h,x3l,x3h);
-        }
-        del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
-        del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
-
-      }
-    
-    relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
-
-    io.msg(IOL_INFO, "atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change);   
-
-    if (relative_change < 1E-5)
-      break; 
-  }
-  
-  for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
-  delete[] lambda;
-// cleanup angular quadrature arrays
-  delete[] (bin+1);
-  delete[] (ph+1);
-  delete[] (th+1);
-  delete[]lambda_w;
-// 
-  del_ft3dim(S,x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
-
-  io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
-  return 0;
-}
-
 fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,int32_t nlambda, int alo)
 
 // *************************************************************************
@@ -468,12 +349,14 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 
     fprintf(stderr, "atmosphere:newpops: level of atoms that are considered is: %d \n", n_lvls);
 
+    // Keeps relative changes - memory is cheap:
     fp_t **** relative_changes = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
     memset(relative_changes[x1l][x2l][x3l]+1,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*n_lvls*sizeof(fp_t));
 
-    // Allocate this to be filled with the proposal of the populations:
+    // Using atm_lvl_pops to keep the proposed new values:
     atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
 
+    // This checks if we have negative populations.
     bool negative = false; 
   
     for(int x1i=x1l;x1i<=x1h;++x1i)
@@ -484,13 +367,17 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
           
           for(int a=0;a<natm;++a){
           
+            // Get new populations for specific species:
             fp_t * new_pops_a = atml[a]->newpops(x1i, x2i, x3i, alo);
+            
             for (int i=0; i<atml[a]->get_total_lvls();++i){
+              // Propose that new pop
               atm_lvl_pops[x1i][x2i][x3i][lvl_counter] = new_pops_a[i];
+              // Calculate the relative change:
               fp_t relative_change = new_pops_a[i] / atml[a]->get_mapped_pop(x1i,x2i,x3i,i) - 1.0;
+              // Check for negative populations:
               if (relative_change < -1.0) negative = true;
               relative_changes[x1i][x2i][x3i][lvl_counter] = fabs(relative_change);
-              fprintf(stderr,"%d %d %d %e \n",x3i, a, i, relative_change);
               lvl_counter ++;
             }
             delete []new_pops_a;

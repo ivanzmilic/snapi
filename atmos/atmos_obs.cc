@@ -13,6 +13,86 @@
 #include "obs.h"
 #include "mathtools.h"
 
+observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
+
+  // calculate the observable from the given atmosphere atmosphere model 
+  // Model is given with tau or z, T, pgas, v_los, B, theta, phi 
+  // (vlos, B, theta, phi can be zero, but have to be specified) 
+
+  // Assign z or tau as the default scale: 
+  this->set_grid(tau_grid);
+  // Harcoded lowerboundary condition:
+  boundary_condition_for_rt = -1; 
+  // Allocate and setup the atomic and molecular populations:
+  popsetup(); //   
+  compute_op_referent();
+  if (!tau_grid)
+    compute_tau_referent();
+  nltepops();
+
+  atm_pop_setup();
+  atm_pop_fill();
+  
+  fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
+  fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
+  fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+
+  
+  for (int a=0;a<natm;++a){
+    atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h);
+    atml[a]->zeeman_setup();
+  }
+  
+  class observable *o=new observable(1,1,4,nlambda);
+
+  fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
+  lambda_vacuum -=1;
+
+  fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
+  
+  // DEBUG
+  /*FILE * opem; 
+  opem = fopen("op_em.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i)
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opem,"%e %e %e %e \n",rt_grid[x3i],lambda[l],
+        op_vector[l][x1l][x2l][x3i][1][1],em_vector[l][x1l][x2l][x3i][1]);
+  fclose(opem);*/
+
+  for (int l = 1; l<=nlambda; ++l){
+
+    if (tau_grid) normalize_to_referent_opacity(op_vector[l], em_vector[l]);
+
+    formal(rt_grid, S,0,op_vector[l],em_vector[l],theta,phi,boundary_condition_for_rt); 
+
+    o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);
+  }
+  
+  del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
+  del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
+  del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
+  delete[](lambda_vacuum+1);
+  for (int a=0;a<natm;++a){
+    atml[a]->rtclean(0,0,x1l,x1h,x2l,x2h,x3l,x3h);
+    atml[a]->zeeman_clear();
+  }
+
+  // This is where we deal with the populations:
+
+  popclean();
+
+  io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");
+
+  return o;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda)
   // You have to write this down or you will forget. 
   // This function ONLY does the synthesis of the spectra. 
@@ -76,12 +156,12 @@ observable *atmosphere::obs_scalar(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   popclean(); // all done
   delete[](lambda_vacuum+1);
   io.msg(IOL_INFO,"atmosphere::obs: observable synthesized...\n");
-
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   
   return o;
 
 }
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 observable *atmosphere::obs_scalar_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t *** intensity_responses)
   // This function synthesises the spectrum, and computes the response functions of the 
@@ -362,87 +442,6 @@ observable *atmosphere::obs_scalar_num_responses(fp_t theta,fp_t phi,fp_t *lambd
 
 }
 
-
-fp_t *atmosphere::test_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){return 0;}
-
-// Same version as the above. This one however returns the observable, as intended
-
-observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda){
-
-  // The similar one as the the atmosphere::obs:
-  this->set_grid(tau_grid);
-  boundary_condition_for_rt = -1; 
-  popsetup(); // 
-
-  //this->print_atmos();
-  //exit(0);
-  
-  compute_op_referent();
-  if (!tau_grid)
-    compute_tau_referent();
-  nltepops();
-
-  atm_pop_setup();
-  atm_pop_fill();
-  
-  fp_t ***Vr=project(Vx,Vy,Vz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h);  // radial projection
-  fp_t ****B=transform(Bx,By,Bz,theta,phi,x1l,x1h,x2l,x2h,x3l,x3h); // radial projection
-  fp_t ****S=ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-
-  
-  for (int a=0;a<natm;++a){
-    atml[a]->rtsetup(x1l,x1h,x2l,x2h,x3l,x3h);
-    atml[a]->zeeman_setup();
-  }
-  
-  class observable *o=new observable(1,1,4,nlambda);
-
-  fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
-  lambda_vacuum -=1;
-
-  fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-  fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  op_em_vector(Vr,B,theta,phi,lambda_vacuum,nlambda,op_vector,em_vector);
-  
-  /*FILE * opem;
-  opem = fopen("op_em.dat","w");
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    for (int l=1;l<=nlambda;++l)
-      fprintf(opem,"%e %e %e %e \n",rt_grid[x3i],lambda[l],
-        op_vector[l][x1l][x2l][x3i][1][1],em_vector[l][x1l][x2l][x3i][1]);
-  fclose(opem);*/
-
-  for (int l = 1; l<=nlambda; ++l){
-
-    if (tau_grid) normalize_to_referent_opacity(op_vector[l], em_vector[l]);
-
-    formal(rt_grid, S,0,op_vector[l],em_vector[l],theta,phi,boundary_condition_for_rt); 
-
-    o->set(S[x1l][x2l][x3l],lambda[l],1,1,l);
-  }
-  
-  del_ft4dim(S,x1l, x1h, x2l, x2h, x3l, x3h, 1, 4);
-  del_ft4dim(B,1,3,x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(Vr,x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft6dim(op_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
-  del_ft5dim(em_vector,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
-  delete[](lambda_vacuum+1);
-  for (int a=0;a<natm;++a){
-    atml[a]->rtclean(0,0,x1l,x1h,x2l,x2h,x3l,x3h);
-    atml[a]->zeeman_clear();
-  }
-
-  // This is where we deal with the populations:
-
-  popclean();
-
-
-  io.msg(IOL_INFO,"atmosphere::obs: polarized observable synthesized...\n");
-
-  // ------------------------------------------------------------------------------------------------------------
-
-  return o;
-}
 
 observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlambda, fp_t **** intensity_responses)
   // This function synthesises the spectrum, and computes the response functions of the 

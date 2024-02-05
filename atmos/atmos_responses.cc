@@ -356,95 +356,6 @@ void atmosphere::compute_nlte_population_responses_numerical(int from, int to){
 	io.msg(IOL_INFO, "nlte population responses::responses of the population to the pertubations have been computed using finite differences.\n");
 }
 
-// Same version but in taugrid:
-
-void atmosphere::compute_nlte_population_responses_numerical_taugrid(int from, int to){
-//
-	// This does the same as the function above but using numerical quadratures. This is easy but long computation. However, we have to do it in order to be able to 
-	// compare! 
-
-	io.msg(IOL_INFO, "nlte population responses::computing level population responses using finite difference approach, from point %d to point %d\n", from, to);
-	
-	// You should reset this before beggingin:
-	for(int a=0;a<natm;++a) atml[a]->responses_init(); 
-
-	// Compute lte ones:
-	for (int a=0;a<natm;++a)
-		if (!atml[a]->check_if_nlte())
-			atml[a]->compute_lte_population_responses();
-	
-	io.msg(IOL_INFO, "responses initialized \n");
-		
-	for (int x3i = from; x3i<=to; ++x3i){
-
-		// Temperature response:
-		fp_t T_step = delta_T; //
-
-		T[x1l][x2l][x3i] += T_step * 0.5;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->add_pops_to_response(x3i,1);
-
-		T[x1l][x2l][x3i] -= T_step;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->subtract_pops_from_response(x3i,1);
-
-		for (int a=0;a<natm;++a)
-			atml[a]->divide_responses_by_step(x3i,1, T_step);
-
-		T[x1l][x2l][x3i] += T_step * 0.5;
-
-		// Density response:
-		fp_t Nt_step = 1E-3 * Nt[x1l][x2l][x3i];
-		Nt[x1l][x2l][x3i] += Nt_step * 0.5;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->add_pops_to_response(x3i,2);
-
-		Nt[x1l][x2l][x3i] -= Nt_step;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->subtract_pops_from_response(x3i,2);
-
-		for (int a=0;a<natm;++a)
-			atml[a]->divide_responses_by_step(x3i,2, Nt_step);
-
-		Nt[x1l][x2l][x3i] += Nt_step * 0.5;
-
-		// Vt response:
-		Vt[x1l][x2l][x3i] += delta_vt;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->add_pops_to_response(x3i,3);
-
-		Vt[x1l][x2l][x3i] -= delta_vt;
-		nltepops_taugrid();
-
-		for (int a=0;a<natm;++a)
-			atml[a]->subtract_pops_from_response(x3i,3);
-
-		for (int a=0;a<natm;++a)
-			atml[a]->divide_responses_by_step(x3i,3, delta_vt);
-
-		Vt[x1l][x2l][x3i] += delta_vt * 0.5;
-
-		
-		io.msg(IOL_INFO, "computed population responses with respect to pertrubation at point # %d\n", x3i);
-	}
-	nltepops_taugrid();
-
-	for (int a=0;a<natm;++a)
-		atml[a]->print_population_responses("responses_numerical.txt", from, to);
-	
-	io.msg(IOL_INFO, "nlte population responses::responses of the population to the pertubations have been computed using finite differences.\n");
-}
-
 
 fp_t **** atmosphere::compute_intensity_response_numerical(int from, int to, fp_t theta, fp_t phi, fp_t lambda){
 	return 0;
@@ -548,7 +459,4 @@ void atmosphere::delete_op_referent_derivative(){
 	del_ft5dim(op_referent_derivative,1,7,x3l,x3h,x1l,x1h,x2l,x2h,x3l,x3h);
 }
 
-
-// Obsolete:
-void atmosphere::compute_nlte_population_responses_taugrid(int lvl_of_approximation){}
 

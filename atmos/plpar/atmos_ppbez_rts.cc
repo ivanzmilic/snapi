@@ -838,76 +838,6 @@ int atmos_ppbez::formal_pert_numerical(fp_t **** dS, fp_t *** op, fp_t *** em, f
   
 }
 
-int atmos_ppbez::formal_pert_numerical_taugrid(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, 
-  fp_t*** op_ref, fp_t**** op_referent_pert, fp_t theta, fp_t phi, fp_t boundary){
-
-  // I sugggest we first do one formal solution with extraction of the full lambda operator.
-  fp_t ** lambda_full = ft2dim(x3l,x3h,x3l,x3h);
-  fp_t *** Intensity = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-  fp_t *** alo_temp = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-    
-  // Then we perform a formal solution:
-  formal(tau_referent[x1l][x2l], Intensity, alo_temp, op, em, theta, phi, boundary);
-  memset(dS[x3l][x1l][x2l]+x3l,0,(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-
-  // We need, in addition the referent intensity derivatives.
-  
-  // At the moment we do it in the numerical way:
-  
-  fp_t *** Intensity_perturbed = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-  fp_t *** opacity_perturbed = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-  fp_t *** emissivity_perturbed = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-
-    
-  for (int x3k=x3l;x3k<=x3h;++x3k){
-
-    for (int x1i=x1l;x1i<=x1h;++x1i)
-      for (int x2i=x2l;x2i<=x2h;++x2i)
-        for (int x3i=x3l;x3i<=x3h;++x3i){
-          opacity_perturbed[x1i][x2i][x3i] = 0.5*op_pert[x3k][x1i][x2i][x3i]+op[x1i][x2i][x3i];
-          emissivity_perturbed[x1i][x2i][x3i] = 0.5*em_pert[x3k][x1i][x2i][x3i]+em[x1i][x2i][x3i];
-
-          opacity_perturbed[x1i][x2i][x3i] /= (op_ref[x1i][x2i][x3i] + 0.5 * op_referent_pert[x3k][x1i][x2i][x3i]);
-          emissivity_perturbed[x1i][x2i][x3i] /= (op_ref[x1i][x2i][x3i]+ 0.5 * op_referent_pert[x3k][x1i][x2i][x3i]);
-        }
-    formal(tau_referent[x1l][x2l], Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
-
-    for (int x1i=x1l;x1i<=x1h;++x1i)
-      for (int x2i=x2l;x2i<=x2h;++x2i)
-        for (int x3i=x3l;x3i<=x3h;++x3i)
-          dS[x3k][x1i][x2i][x3i] = Intensity_perturbed[x1i][x2i][x3i];
-
-    for (int x1i=x1l;x1i<=x1h;++x1i)
-      for (int x2i=x2l;x2i<=x2h;++x2i)
-        for (int x3i=x3l;x3i<=x3h;++x3i){
-          opacity_perturbed[x1i][x2i][x3i] = -0.5*op_pert[x3k][x1i][x2i][x3i]+op[x1i][x2i][x3i];
-          emissivity_perturbed[x1i][x2i][x3i] = -0.5*em_pert[x3k][x1i][x2i][x3i]+em[x1i][x2i][x3i];
-
-          opacity_perturbed[x1i][x2i][x3i] /= (op_ref[x1i][x2i][x3i] - 0.5 * op_referent_pert[x3k][x1i][x2i][x3i]);
-          emissivity_perturbed[x1i][x2i][x3i] /= (op_ref[x1i][x2i][x3i] - 0.5 * op_referent_pert[x3k][x1i][x2i][x3i]);
-        }
-    formal(tau_referent[x1l][x2l], Intensity_perturbed, alo_temp, opacity_perturbed, emissivity_perturbed, theta, phi, boundary);
-
-    for (int x1i=x1l;x1i<=x1h;++x1i)
-      for (int x2i=x2l;x2i<=x2h;++x2i)
-        for (int x3i=x3l;x3i<=x3h;++x3i)
-          dS[x3k][x1i][x2i][x3i] -= Intensity_perturbed[x1i][x2i][x3i];
-    
-
-  }
-  del_ft3dim(Intensity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(opacity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(emissivity_perturbed, x1l,x1h,x2l,x2h,x3l,x3h);
-  
-
-  del_ft2dim(lambda_full, x3l,x3h,x3l,x3h);
-  del_ft3dim(Intensity, x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(alo_temp, x1l,x1h,x2l,x2h,x3l,x3h);
-
-
-  return 0;
-  
-}
 
 int atmos_ppbez::formal_pert_analytical(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){
 
@@ -938,47 +868,6 @@ int atmos_ppbez::formal_pert_analytical(fp_t **** dS, fp_t *** op, fp_t *** em, 
   
 }
 
-int atmos_ppbez::formal_pert_analytical_taugrid(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){
-
-  // I sugggest we first do one formal solution with extraction of the full lambda operator.
-  fp_t ** response_to_op = ft2dim(x3l,x3h,x3l,x3h);
-  fp_t ** response_to_em = ft2dim(x3l,x3h,x3l,x3h);
-  fp_t *** Intensity = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-
-  memset(dS[x3l][x1l][x2l]+x3l,0,(x3h-x3l+1)*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  
-    
-  // Then we perform a formal solution:
-  formal_with_responses(tau_referent[x1l][x2l], Intensity, 0, response_to_op, response_to_em, op, em, theta, phi, boundary);
-
-  /*fp_t Intensity_ref = 0;
-  for (int x3i=x3l;x3i<=x3h;++x3i){
-    Intensity_ref = 0.0;
-    for (int x3ii=x3l;x3ii<=x3h;++x3ii)
-      Intensity_ref += response_to_em[x3i][x3ii] * em[x1l][x2l][x3ii];
-    printf("%e %e \n", Intensity[x1l][x2l][x3i], Intensity_ref);
-  }
-
-  printf("Blingling\n");
-  exit(1);*/
- 
-  // For each perturbation:
-  for (int x3k=x3l;x3k<=x3h;++x3k){
-
-    // Perturbation of intensity at each point:
-    for (int x3i=x3l;x3i<=x3h;++x3i)
-      for (int x3ii=x3l;x3ii<=x3h;++x3ii){
-        dS[x3k][x1l][x2l][x3i] += response_to_em[x3i][x3ii] * em_pert[x3k][x1l][x2l][x3ii] + response_to_op[x3i][x3ii] * op_pert[x3k][x1l][x2l][x3ii];
-      }
-
-  }
-
-  del_ft2dim(response_to_op, x3l,x3h,x3l,x3h);
-  del_ft2dim(response_to_em, x3l,x3h,x3l,x3h);
-  del_ft3dim(Intensity, x1l,x1h,x2l,x2h,x3l,x3h);
-  return 0;
-  
-}
 
 int atmos_ppbez::formal_pert_jcdti(fp_t **** dS, fp_t *** op, fp_t *** em, fp_t **** op_pert, fp_t **** em_pert, fp_t theta, fp_t phi, fp_t boundary){
 
