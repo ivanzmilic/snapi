@@ -386,6 +386,17 @@ int job_class::start(void)
 
         nx=ji.xh[o]-ji.xl[o]+1;
        	ny=ji.yh[o]-ji.yl[o]+1;
+
+        // Check if nx and ny are too large...
+        if (nx > ji.atmos[a]->get_nx1()){
+          io->msg(IOL_INFO,"master::job : provided nx larger than the model, reducing... to %d \n", ji.atmos[a]->get_nx1());
+          nx = ji.atmos[a]->get_nx1();
+        }
+        if (nx > ji.atmos[a]->get_nx2()){
+          io->msg(IOL_INFO,"master::job : provided ny larger than the model, reducing... to %d \n", ji.atmos[a]->get_nx2());
+          nx = ji.atmos[a]->get_nx2();
+        }
+
        	for(int x=1,n=1;x<=nx;++x)
         	for(int y=1;y<=ny;++y,++n){ // Cut the piece
         		

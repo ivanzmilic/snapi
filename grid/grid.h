@@ -24,6 +24,10 @@ public:
   virtual int32_t pack(uint08_t*,uint08_t,io_class&);
   virtual int32_t unpack(uint08_t *,uint08_t,io_class&);
   virtual grid* extract_grid(int i, int j, io_class&);
+  virtual int32_t get_nx1(){return x1h-x1l+1;};
+  virtual int32_t get_nx2(){return x2h-x2l+1;};
+  virtual int32_t get_nx3(){return x3h-x3l+1;};
+
 //
 };
 
