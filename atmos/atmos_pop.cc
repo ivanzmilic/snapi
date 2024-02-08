@@ -16,7 +16,6 @@
 #include "atmos.h"
 #include "mathtools.h"
 
-
 #include "../cmlib/fits_read.h"
 
 void atmosphere::popsetup(void) // setup essential quantities
@@ -192,15 +191,15 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
     // Update according to ALI
     relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
-    io.msg(IOL_INFO, "\n atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
-    fprintf(stderr, "atmosphere::nltepops : relative change after iteration %d is %.5e \n", iter, relative_change);  
+    //io.msg(IOL_INFO, "\n atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
+    //fprintf(stderr, "atmosphere::nltepops : relative change after iteration %d is %.5e \n", iter, relative_change);  
     
     if (relative_change < 0.0){
       // The populations are negative. Try normal lambda iteration:
-      fprintf(stderr, "atmosphere::nltepops : found negative populations. trying lambda iteration...");
+      //fprintf(stderr, "atmosphere::nltepops : found negative populations. trying lambda iteration...");
       relative_change = newpops(T,Nt,Ne,lambda,nlambda,0);
       if (relative_change < 0.0){ // If it is still bad:
-        fprintf(stderr, "atmosphere::nltepops : found negative populations. could not fix. exiting...");
+        //fprintf(stderr, "atmosphere::nltepops : found negative populations. could not fix. exiting...");
         outcome = -1;
         break;
       }
@@ -272,7 +271,11 @@ int atmosphere::atm_pop_fill(){
               for (int z=0; z<atml[a]->get_no_ions(); ++z)
                 for (int n=0; n<atml[a]->get_no_lvls(z); ++n){
                   atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z,n);
+                  //if (x3i==x3h)
+                  //  fprintf(stderr, "%d %d %d %e %e \n",z,n,i, atm_lvl_pops[x1i][x2i][x3i][i], atml[a]->get_pop(x1i,x2i,x3i,z));
                   i++;
+                  //if (z==0 && n==0)
+                  //  atm_lvl_pops[x1i][x2i][x3i][i] = atml[a]->get_pop(x1i,x2i,x3i,z);
                 }
             atm_lvl_pops[x1i][x2i][x3i][n_lvls] = Ne[x1i][x2i][x3i];
     }
@@ -347,7 +350,7 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 {
   if (n_lvls){
 
-    fprintf(stderr, "atmosphere:newpops: level of atoms that are considered is: %d \n", n_lvls);
+    //fprintf(stderr, "atmosphere:newpops: level of atoms that are considered is: %d \n", n_lvls);
 
     // Keeps relative changes - memory is cheap:
     fp_t **** relative_changes = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
@@ -384,23 +387,23 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
           }
     }
     fp_t max_rel_change = max_2d(relative_changes[x1l][x2l],x3l,x3h,1,n_lvls);
-    fprintf(stderr, "atmos::newpops: max relative change is %e \n", max_rel_change);
+    //fprintf(stderr, "atmos::newpops: max relative change is %e \n", max_rel_change);
 
     // Copy stuff:
     if (conserve_charge){
       //fprintf(stderr, "%e \n", Ne[x1l][x2l][44]);
-      fprintf(stderr, "atmos::newpops: attempting to conserve charge...\n");
+      //fprintf(stderr, "atmos::newpops: attempting to conserve charge...\n");
       enforce_conserve_charge();
       //fprintf(stderr, "%e \n", Ne[x1l][x2l][44]);
     }
     if (!negative){
-      fprintf(stderr, "atmos::newpops: populations seem fine, updating...\n");
+      //fprintf(stderr, "atmos::newpops: populations seem fine, updating...\n");
       atm_pop_invfill();
     }
     del_ft4dim(atm_lvl_pops,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
     del_ft4dim(relative_changes,x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
     if (negative){ // If there are negative populations return error and tell the above the stop
-      fprintf(stderr, "atmos::newpops: negative population. stopping...\n");
+      //fprintf(stderr, "atmos::newpops: negative population. stopping...\n");
       return -1;
     }
     return max_rel_change;
