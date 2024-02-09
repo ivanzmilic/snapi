@@ -42,7 +42,7 @@ lambda_max = spectra1[0,-1]
 
 plt.figure(figsize=[8,6])
 
-print(spectra1[0,:]+shiftcomp)
+#print(spectra1[0,:]+shiftcomp)
 
 plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = file1)
 if (file1 != file2):

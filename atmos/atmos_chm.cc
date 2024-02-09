@@ -302,7 +302,7 @@ uint08_t atmosphere::chemeq(class atmol **atml_in,int natm_in,fp_t T_in,fp_t Nt_
       //fprintf(stderr, "Too much iterations man. \n");
       break;
     }
-  }while(!converged(1E-8  ,N,d,natoms));
+  }while(!converged(1E-4  ,N,d,natoms));
 //
   io.msg(IOL_XNFO,"atmosphere::chemeq: final values: T=%E, Nt=%E:\n",T_in,Nt_in);
   Ne_in=N[0];
