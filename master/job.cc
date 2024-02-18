@@ -392,9 +392,9 @@ int job_class::start(void)
           io->msg(IOL_INFO,"master::job : provided nx larger than the model, reducing... to %d \n", ji.atmos[a]->get_nx1());
           nx = ji.atmos[a]->get_nx1();
         }
-        if (nx > ji.atmos[a]->get_nx2()){
+        if (ny > ji.atmos[a]->get_nx2()){
           io->msg(IOL_INFO,"master::job : provided ny larger than the model, reducing... to %d \n", ji.atmos[a]->get_nx2());
-          nx = ji.atmos[a]->get_nx2();
+          ny = ji.atmos[a]->get_nx2();
         }
 
        	for(int x=1,n=1;x<=nx;++x)
