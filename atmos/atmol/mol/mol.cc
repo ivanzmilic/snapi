@@ -382,15 +382,19 @@ int h_minus_mol::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t
   // This is function which computes opacity and emissivity at wavelengths simultaneously assuming H- opacity is flat. 
   // (There is no real jump as we assume that F-F opacity is sort of off-seting that)
 
-  fp_t lambda_m = (lambda[nlambda] + lambda[1]) * 0.5;
-
-  fp_t *** op_scalar = opacity(T,Ne,Vlos,Vt,B,theta,phi,lambda_m);
+  // This created problems. 
+  //fp_t lambda_m = (lambda[nlambda] + lambda[1]) * 0.5;
+  fp_t **** op_scalar = new fp_t*** [nlambda] - 1;
+  for (int l=1;l<=nlambda;++l)
+    op_scalar[l] = opacity(T,Ne,Vlos,Vt,B,theta,phi,lambda[l]);
+  //fp_t *** op_scalar = opacity(T,Ne,Vlos,Vt,B,theta,phi,lambda_m);
   // For emissivity we assume it is in LTE with opacity
-  fp_t *** em_scalar = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
-  for (int x1i = x1l; x1i <= x1h; ++x1i)
-    for (int x2i = x2l; x2i <= x2h; ++x2i)
-      for (int x3i = x3l; x3i <= x3h; ++x3i)
-        em_scalar[x1i][x2i][x3i] = op_scalar[x1i][x2i][x3i] * Planck_f(lambda_m,T[x1i][x2i][x3i]);
+  fp_t **** em_scalar = ft4dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  for (int l=1;l<=nlambda;++l)
+    for (int x1i = x1l; x1i <= x1h; ++x1i)
+      for (int x2i = x2l; x2i <= x2h; ++x2i)
+        for (int x3i = x3l; x3i <= x3h; ++x3i)
+          em_scalar[l][x1i][x2i][x3i] = op_scalar[l][x1i][x2i][x3i] * Planck_f(lambda[l],T[x1i][x2i][x3i]);
   
 
   // Now we just copy scalar, monochromatic opacity to our vector:
@@ -398,11 +402,11 @@ int h_minus_mol::op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, fp_t
     for (int x1i = x1l; x1i <= x1h; ++x1i)
       for (int x2i = x2l; x2i <= x2h; ++x2i)
         for (int x3i = x3l; x3i <= x3h; ++x3i){
-          op_vector[l][x1i][x2i][x3i][1][1] += op_scalar[x1i][x2i][x3i];
-          em_vector[l][x1i][x2i][x3i][1]    += em_scalar[x1i][x2i][x3i];
+          op_vector[l][x1i][x2i][x3i][1][1] += op_scalar[l][x1i][x2i][x3i];
+          em_vector[l][x1i][x2i][x3i][1]    += em_scalar[l][x1i][x2i][x3i];
   }
-  del_ft3dim(op_scalar,x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft3dim(em_scalar,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(op_scalar,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(em_scalar,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
 
   return 0;
 }

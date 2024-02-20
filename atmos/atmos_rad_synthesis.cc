@@ -31,6 +31,7 @@ int atmosphere::op_em_vector(fp_t *** Vlos, fp_t **** B, fp_t theta,fp_t phi,fp_
   // First we account for electron opacity and emissivity. Thomson scattering is very weakly dependent on wavelength
   // so we will just compute it for the middle wavelenght here:
 
+  // This is, in principle, not good.
   fp_t lambda_m = (lambda[nlambda] + lambda[1]) * 0.5;
   //memset input arrays to zero:
   memset(op_vector[1][x1l][x2l][x3l][1]+1,0,nlambda*(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*16*sizeof(fp_t));
