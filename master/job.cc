@@ -331,7 +331,7 @@ int job_class::start(void)
        	delete obs;
 
         fp_t **** S_to_save = obs_to_fit->get_S();
-        write_file((char*)"mag_test.f0",S_to_save,nx,ny,4,nl,*io);
+        write_file((char*)"cube_to_invert.f0",S_to_save,nx,ny,4,nl,*io);
         del_ft4dim(S_to_save,1,nx,1,ny,1,4,1,nl);
         
         // Write down lambda

@@ -103,11 +103,13 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
       
       // Apply spectral broadening if necessary:
       if (spectral_broadening){
+        //fprintf(stderr,"atmosphere::stokes_lm_fit: convolving with gaussian psf");
         current_obs->spectral_convolve(spectral_broadening,1,1);
         convolve_response_with_gauss(derivatives_to_parameters,lambda,N_parameters,nlambda,spectral_broadening);   
       } 
       // Then check if you need F-P too (in principle both are allowed).
       else if (n_spsf){ 
+        //fprintf(stderr,"atmosphere::stokes_lm_fit: convolving with given psf");
         current_obs->psf_convolve(n_spsf,spsf,1,1);
         convolve_response_with_psf(derivatives_to_parameters,lambda,N_parameters,nlambda,n_spsf,spsf);   
       }
@@ -175,6 +177,8 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
       lm_parameter *= lm_multiplicator;
       corrected = 0;
     }
+
+    //model_to_fit->print();
 
     if(corrected || to_break || iter==MAX_ITER){     
       del_ft3dim(derivatives_to_parameters,1,N_parameters,1,nlambda,1,4);
