@@ -103,7 +103,7 @@ int08_t atmosphere::read_spinor3d(const char *wd,const char *filename,io_class *
     for (int x2i=1;x2i<=ny;++x2i)
       for (int x3i=1;x3i<=nz;++x3i){
         tau_referent[x1i][x2i][x3i] = -pow(10.0,atmoscube[1][x1i][x2i][x3i]);
-        T[x1i][x2i][x3i] = atmoscube[3][x1i][x2i][x3i];
+        T[x1i][x2i][x3i] = atmoscube[3][x1i][x2i][x3i] > 3200.0 ? atmoscube[3][x1i][x2i][x3i] : 3200.0;
         Nt[x1i][x2i][x3i] = atmoscube[4][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
         Ne[x1i][x2i][x3i] = atmoscube[5][x1i][x2i][x3i]/(k*T[x1i][x2i][x3i]);
         rho[x1i][x2i][x3i] = atmoscube[6][x1i][x2i][x3i];
