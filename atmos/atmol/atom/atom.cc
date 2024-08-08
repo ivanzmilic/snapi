@@ -1312,7 +1312,7 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
     //  tmplamb=new fp_t [nnlambda];         // compute sorted wavelength array
     fp_t fct=me*c/(8.0*pi*pi*e*e);             // common factor for line transitions
     
-// add points, avoiding overlap and duplicates
+// add points, avoiding overlap and duplicates (are we really avoiding overlaps and duplicates)
     for(int z=0;z<Z;++z)
       for(int ii=0;ii<nl[z];++ii){ // lower level
 // b-f frequency points?
@@ -1323,9 +1323,9 @@ fp_t *atom::getlambda(fp_t *lambda,int32_t &nlambda,fp_t Temp_in,fp_t Nt_in,fp_t
 // b-b frequency points
         for(int i=ii+1;i<nl[z];++i){                           // for each upper level
           
-          fp_t lam=h*c/(ee[z][i]-ee[z][ii]);                   // transition wavelength: may be shifted by the local velocity, which we did not account for here!
+          fp_t lam=h*c/(ee[z][i]-ee[z][ii]);                   // transition wavelength: may be shifted by the local velocity, which we did not account for here
           
-          fp_t gf=((fp_t)(g[z][i]) / g[z][ii])*fct*lam*lam*A[z][i][ii]; // Oscillator strength which we need why ? 
+          fp_t gf=((fp_t)(g[z][i]) / g[z][ii])*fct*lam*lam*A[z][i][ii]; // Oscillator strength which we need why - well might calculate it here as well
           if (A[z][i][ii] > 1.0){
             osc_str[z][i][ii] = osc_str[z][ii][i] = gf;
             

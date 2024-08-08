@@ -31,6 +31,7 @@ struct pps{
 #define FL_LTE  0x02
 
 class atom:public atmol{
+
 protected:
   uint08_t Z;          // 0..Z
   fp_t abund;          // abundance
@@ -71,6 +72,8 @@ protected:
   class pf **partf;
   class bfcs ***bf;    // bound-free cross-section
   class colr ****cr;   // collisional rates
+
+// -----------------------------------------------------------------------------------------------------------------
 //
 // space variant variables
 // The rate matrix scales as n^2, for 50 levels at 288*288*200 points this is approximately 1GB
@@ -79,7 +82,8 @@ protected:
 // This leads to off-diagonal elements in the density matrix (uses lots of memory)
 // We want to describe this somehow in a blocked form, to avoid a big matrix with many zero elements
 //
-  int32_t x1l,x1h,x2l,x2h,x3l,x3h;
+// -----------------------------------------------------------------------------------------------------------------
+  int32_t x1l,x1h,x2l,x2h,x3l,x3h; //Not sure these are necessary, but good for the atom to have dimensions handy
   
 // Populations:
   struct pps ***pop;
@@ -93,15 +97,19 @@ protected:
 
   fp_t ****Jb; // angular and frequency integrated intensity up->down
   fp_t ****Ju; // angular and frequency integrated intensity down-up
-  // Random thoughts in the morning (02/06/2015): These are not "frequency and angle integrated intensities." It is better to think of them as terms which contain 
-  // rates, or simple as radiative rates themselves. It turns out that in the expressions this really has the dimension of the intensity, but it is already 
+  // ----------------------------------------------------------------------------------------------------------------
+  // Random thoughts in the morning (02/06/2015): These are not "frequency and angle integrated intensities." 
+  // It is better to think of them as terms which contain rates, or simple as radiative rates themselves. 
+  // It turns out that in the expressions this really has the dimension of the intensity, but it is already 
   // annoying me with number of missunderstandings. The other think is that the rates themselves 
+  // 08/08/2024 - Boy this sure makes sense
+  // ----------------------------------------------------------------------------------------------------------------
 
-  // Oom estimates for scattering polarization.
-
+  // Oom estimates for scattering polarization -> WIP:
   fp_t **** J_02; // J_02 component of radiation tensor, which most directly influences emergent scattering polarization.
   fp_t **** J_02_responses; // Responses, just 1D in space, 6D array is too much
   fp_t **** J_00_responses; // Responses for J
+  // ----------------------------------------------------------------------------------------------------------------------------
   
   fp_t ****Ls; // approximate lambda operator
   fp_t ****current_profile; // This saves the value of the current profile function for each transition @ each point
@@ -122,6 +130,9 @@ protected:
   // These are the reponses themselves:
   fp_t *** level_responses;
   fp_t *** ionization_stage_responses; 
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Private methods:
 
   fp_t* add(fp_t*,fp_t*,int32_t);
   fp_t*** add(fp_t***,fp_t***,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);

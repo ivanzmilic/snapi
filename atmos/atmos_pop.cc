@@ -196,10 +196,10 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     
     if (relative_change < 0.0){
       // The populations are negative. Try normal lambda iteration:
-      //fprintf(stderr, "atmosphere::nltepops : found negative populations. trying lambda iteration...");
+      //fprintf(stderr, "atmosphere::nltepops : found negative populations. trying lambda iteration... \n");
       relative_change = newpops(T,Nt,Ne,lambda,nlambda,0);
       if (relative_change < 0.0){ // If it is still bad:
-        //fprintf(stderr, "atmosphere::nltepops : found negative populations. could not fix. exiting...");
+        //fprintf(stderr, "atmosphere::nltepops : found negative populations. could not fix. exiting...\n");
         outcome = -1;
         break;
       }
@@ -235,7 +235,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   del_ft3dim(S,x1l,x1h,x2l,x2h,x3l,x3h);
   del_ft3dim(L,x1l,x1h,x2l,x2h,x3l,x3h);
 
-  io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %6d iterations. Relative change is: %e \n", iter, relative_change); 
+  io.msg(IOL_INFO, "atmosphere::nltepops : solution converged in %5d iterations. Relative change is: %e \n", iter, relative_change); 
   return outcome;
 }
 

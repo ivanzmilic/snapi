@@ -7,9 +7,6 @@
 
 #include "atmos_pp.h"
 
-// ADDED BY MILIC FOR DEBUGGING PURPOSES
-#include <iostream>
-
 fp_t *atmos_pp::anglesetup(fp_t *&th,fp_t *&ph,int &ntp)
 //
 // angle points (ang) and weights (wmu) for the standard double-Gauss angular quadrature
