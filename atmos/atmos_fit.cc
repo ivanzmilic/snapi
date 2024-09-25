@@ -139,15 +139,17 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
 
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] *= (lm_parameter + 1.0);
     // Now correct
-    fp_t * correction = solve(JTJ, rhs, 1, N_parameters); 
-    scale_corrections(correction,model_to_fit,N_parameters);
+    //fp_t * correction = solve(JTJ, rhs, 1, N_parameters); 
+    fp_t ** correction = solve_svd(JTJ, &rhs-1, 1, N_parameters, 1);
+
+    scale_corrections(correction[1],model_to_fit,N_parameters);
 
     // Reset the Hessian to it's original value in case it stays the same and our LM parameter changes:
     for (int i=1;i<=N_parameters;++i) JTJ[i][i] /= (lm_parameter + 1.0);
 
     // Apply the correction:
     model * test_model = clone(model_to_fit);
-    test_model->correct(correction);
+    test_model->correct(correction[1]);
     test_model->bracket_parameter_values(); // polish
     
     // Check if the corrected model is better:
@@ -194,7 +196,8 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
     del_ft2dim(S_reference,1,4,1,nlambda);
     delete reference_obs;
     delete [](rhs+1);
-    delete [](correction+1);
+    del_ft2dim(correction,1,1,1,N_parameters);
+    //delete [](correction+1);
     metric = 0.0;
 
     if (to_break)
