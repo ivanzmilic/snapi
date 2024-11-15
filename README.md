@@ -13,7 +13,9 @@ Download cfitsio from https://heasarc.gsfc.nasa.gov/fitsio/
 The installation instructions are given in the README file of cfitsio, but for most Unix-like systems unpacking, and running the following from the unpacked directory should work: 
 
 ./configure
+
 make 
+
 make install 
 
 ### Installing fft3w 
@@ -23,7 +25,9 @@ Similarly to the previous one, you will want to download it from: https://www.ff
 And do:
 
 ./configure
+
 make
+
 make install
 
 ### Installing snapi 
@@ -51,6 +55,7 @@ Typical reason for this to fail is that the script cannot find cfitsio. As the c
 If that goes through fine, the only thing that remains to be done is: 
 
 make clean
+
 make (optionally with, say, -j8 to compile in parallel)
 
 After that, you are ready to use the code. 
