@@ -1,0 +1,15 @@
+info: job ID = 000002
+info: atmosphere::atmosphere: ID=Simple Atmosphere
+info: atmosphere::atmosphere: FILE=falc_1000.dat
+info: atmosphere::read_spinor: /home/milic/codes/snapi/test/falc_1000.dat
+info: atmosphere::read_spinor: 57 depth points
+info: master::job : invert mode is : 0 
+info: master::job : synthesizing the data from : falc_1000G_5250.dat 
+info: master::job : synthesizing from the input atmosphere
+[ 1, 1]
+warning: job_class::stop: done. writing the data...
+warning: job_class::writing out the atmospheric model ...
+total reduction time: 0-00:00:01
+breakdown by slave:
+chappie.[10471]: user 0.040s (100.0%) system 0.000s ( -nan%)   1 subfield  (100.0%)
+
