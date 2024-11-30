@@ -9,7 +9,7 @@ info: master::job : synthesizing from the input atmosphere
 [ 1, 1]
 warning: job_class::stop: done. writing the data...
 warning: job_class::writing out the atmospheric model ...
-total reduction time: 0-00:00:14
+total reduction time: 0-00:00:01
 breakdown by slave:
-chappie.[10471]: user 5.530s (100.0%) system 0.000s ( -nan%)   1 subfield  (100.0%)
+chappie.[10998]: user 0.040s (100.0%) system 0.000s ( -nan%)   1 subfield  (100.0%)
 
