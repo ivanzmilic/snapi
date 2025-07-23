@@ -4,7 +4,7 @@ pkill imaster
 sleep 0.5
 ../master/imaster -v &
 sleep 1
-mpirun -n 32 ../slave/islave &
+mpirun -n 4 ../slave/islave &
 sleep 1
 ../jsub/jsub -v -cfg synth_cube.cfg
 echo "All should be running now!"
