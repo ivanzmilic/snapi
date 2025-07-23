@@ -70,7 +70,7 @@ Open three instances of terminal, or use screen command in terminal to keep thin
 
 2) Enter snapi/cfg directory in the second terminal. Run
 
-../jsub/jsuv -c -cfg synth.cfg 
+../jsub/jsub -c -cfg synth.cfg 
 
 If that goes through fine, do: 
 
