@@ -10,6 +10,7 @@ output = sys.argv[3]
 v_macro = float(sys.argv[4])
 scaling = float(sys.argv[5])
 shiftcomp = float(sys.argv[6]) #in angstrom
+scatteredlight = float(sys.argv[7]) # in fraction
 
 spectra1 = np.loadtxt(file1, unpack = True)
 spectra2 = np.loadtxt(file2, unpack = True)
@@ -40,13 +41,13 @@ lambda_max = max([spectra1[0,-1],spectra2[0,-1]])
 lambda_min = spectra1[0,0]
 lambda_max = spectra1[0,-1]
 
-plt.figure(figsize=[8,6])
+plt.figure(figsize=[14,6])
 
 #print(spectra1[0,:]+shiftcomp)
 
 plt.plot(spectra1[0,:]+shiftcomp, spectra1[1,:], color = 'red', label = file1)
 if (file1 != file2):
-	plt.plot(spectra2[0,:], spectra2[1,:]*scaling,color = 'blue', label = file2)
+	plt.plot(spectra2[0,:], (spectra2[1,:] - np.max(spectra2[1,:])*scatteredlight)*scaling,color = 'blue', label = file2)
 	plt.legend()
 
 plt.xlim([lambda_min,lambda_max])
