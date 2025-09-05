@@ -43,6 +43,8 @@ public:
   virtual int get_no_ions(){return 0;};
   virtual int get_no_lvls(int){return 0;};
   virtual int get_total_lvls(){return 0;};
+  virtual fp_t get_level_energy(int, int){return 0;};
+  //
   int08_t has_id(uint64_t numid_in){ return numid==numid_in; };
   int08_t has_id(const char *id_in){ return !strcmp(id,id_in); };
 // opacity sources
@@ -169,6 +171,11 @@ public:
   fp_t fetch_vt(int x1i, int x2i, int x3i);
   fp_t * fetch_magnetic_field(int x1i, int x2i, int x3i);
   fp_t fetch_Nt(int x1i, int x2i, int x3i);
+
+  // More get functions that we are writing to output the needed line parameters:
+  virtual fp_t get_total_line_damping(int x1i, int x2i, int x3i, int z, int i, int ii){return 0;}; // returns 'a' for the given line
+  virtual fp_t get_C_ij(int x1i, int x2i, int x3i, int z, int i, int ii){return 0;}; // Rating inelastic collisional rate for the given line
+  virtual fp_t get_damp_col(int x1i, int x2i, int x3i, int z, int i, int ii){return 0;}; // Returns damping collision rate for the given line
 
 // *************************************************************************************
 // * routines needed for the new combined chemical/ionization equilibrium calculations *

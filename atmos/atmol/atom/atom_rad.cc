@@ -602,6 +602,12 @@ fp_t atom::compute_a_scalar(int x1i, int x2i, int x3i, int z, int i, int ii, fp_
   return a;
 }
 
+ // More get functions that we are writing to output the needed line parameters:
+fp_t atom::get_total_line_damping(int x1i, int x2i, int x3i, int z, int i, int ii){
+  fp_t a = compute_a_scalar(x1i, x2i, x3i, z, i, ii, 5000E-8, NULL);
+  return a;
+}
+
 int atom::compute_xa_der_scalar(int x1i, int x2i, int x3i, int z, int i, int ii, fp_t lambda, fp_t *** vlos, fp_t&x, fp_t &a, 
   fp_t * der_x, fp_t * der_a, fp_t * der_dld){
 
@@ -1801,6 +1807,14 @@ fp_t atom::C_ij(int z, int from, int to, fp_t T, fp_t Ne){
   q_ij = (from < to) ? q_ij : q_ij * exp(u_0) * fp_t(g[z][to]) / fp_t(g[z][from]);
 
 	return (from != to) ? q_ij * Ne  : 0.0;
+}
+
+fp_t atom::get_C_ij(int x1i, int x2i, int x3i, int z, int from, int to){
+
+  fp_t T = fetch_temperature(x1i,x2i,x3i);
+  fp_t Ne = fetch_Ne(x1i,x2i,x3i);
+  
+  return C_ij(z, from, to, T, Ne);
 }
 
 fp_t atom::C_ij_H(int z, int from, int to, fp_t T, fp_t N_partner){

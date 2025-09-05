@@ -306,6 +306,8 @@ public:
   virtual int get_no_ions();
   virtual int get_no_lvls(int z_in);
   virtual int get_total_lvls();
+  virtual fp_t get_level_energy(int z, int i);
+
 //
 // radiative properties
 //
@@ -412,6 +414,11 @@ public:
   virtual fp_t get_L(int x1i, int x2i, int x3i, int transition);
   virtual fp_t get_norm(int x1i, int x2i, int x3i, int transition);
 
+   // More get functions that we are writing to output the needed line parameters:
+  virtual fp_t get_total_line_damping(int x1i, int x2i, int x3i, int z, int i, int ii); // returns 'a' for the given line
+  virtual fp_t get_C_ij(int x1i, int x2i, int x3i, int z, int i, int ii);
+  virtual fp_t get_damp_col(int x1i, int x2i, int x3i, int z, int i, int ii);
+ 
   virtual void print_radiation_field_tensor();
 
   // -----------------------------------------------------------------------------------------------------------------------------------

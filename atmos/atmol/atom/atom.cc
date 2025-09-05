@@ -565,6 +565,13 @@ int atom::get_total_lvls(){
   return n_levels;
 }
 
+fp_t atom::get_level_energy(int z_in, int l_in){
+  if (z_in > Z || l_in >= nl[z_in]){
+    return NAN;
+  }
+  return ee[z_in][l_in];
+}
+
 // 
 fp_t *atom::rayleigh_em(fp_t *lambda,int32_t nlambda)
 // *************************************************************************
@@ -950,6 +957,12 @@ fp_t atom::damp_col(int ix1, int ix2, int ix3, int z, int i_from, int i_to, fp_t
   fp_t w = fetch_population(ix1, ix2, ix3, 0, 0) * vmean * pow(vmean/1E6, -alpha) * col_dam_cross_section[z][i_from][i_to];
 
   return w;
+}
+
+fp_t atom::get_damp_col(int x1i, int x2i, int x3i, int z, int i_from, int i_to){
+  fp_t T = fetch_temperature(x1i, x2i, x3i);
+  fp_t Ne = fetch_Ne(x1i, x2i, x3i);
+  return damp_col(x1i, x2i, x3i, z, i_from, i_to, T, Ne, 0.0);
 }
 
 fp_t atom::damp_col_der_T(int ix1, int ix2, int ix3, int z, int i_from, int i_to, fp_t Temp, fp_t Ne, fp_t lambda_0){
