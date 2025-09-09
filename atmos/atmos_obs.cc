@@ -61,12 +61,12 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   }
 
   // Output the background opacities and emissivities for inspection:
-  FILE * opfile;
+  /*FILE * opfile;
   opfile = fopen("opacity_background.dat","w");
   for (int x3i=x3l;x3i<=x3h;++x3i)
     for (int l=1;l<=nlambda;++l)
       fprintf(opfile,"%e %e \n", op_background[l][x1l][x2l][x3i], em_background[l][x1l][x2l][x3i]);
-  fclose(opfile);
+  fclose(opfile);*/
   
   
   
