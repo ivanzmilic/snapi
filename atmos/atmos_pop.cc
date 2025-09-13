@@ -212,6 +212,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
   // Hard-coding the output of the Ca I 4227 line populations and other parameters for testing purposes / needed by Gioele:
   
+  /* # TODO: put this all in a single method that can be called when needed, not always
   FILE * ftest = fopen("atmosphere_ca4227_lineparams.dat","w");
   for (int x3i=x3l; x3i<=x3h; ++x3i){
     fprintf(ftest, "%d ", x3i);
@@ -237,6 +238,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
   // Close the file
   fclose(ftest);
+  */
   
 
    // Write down opacity at a fixed direction for inspection, as a txt file:

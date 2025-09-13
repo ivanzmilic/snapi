@@ -47,9 +47,11 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
 
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
   lambda_vacuum -=1;
-
+  /*
   // Here we want to calculate the background (so all LTE) opacities, but wavelength-dependent so that 
   // we can output them for synthesis by Gioele and others: 
+  // TODO: put this in a single method so that it can be called when needed instead of 
+  // commenting this whole block
   
   fp_t **** op_background;
   fp_t **** em_background;
@@ -59,7 +61,6 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     op_background[l] = opacity_custom(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
     em_background[l] = emissivity_custom(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
   }
-
   // Output the background opacities and emissivities for inspection:
   FILE * opfile;
   opfile = fopen("opacity_background_nlte.dat","w");
@@ -68,6 +69,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
       fprintf(opfile,"%e %e \n", op_background[l][x1l][x2l][x3i], em_background[l][x1l][x2l][x3i] * //
         lambda_vacuum[l] * lambda_vacuum[l] / c);
   fclose(opfile);
+  */
   
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
