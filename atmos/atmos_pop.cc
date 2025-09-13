@@ -211,7 +211,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
 
   // Hard-coding the output of the Ca I 4227 line populations and other parameters for testing purposes / needed by Gioele:
-  /*
+  
   FILE * ftest = fopen("atmosphere_ca4227_lineparams.dat","w");
   for (int x3i=x3l; x3i<=x3h; ++x3i){
     fprintf(ftest, "%d ", x3i);
@@ -237,7 +237,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
   // Close the file
   fclose(ftest);
-  */
+  
 
    // Write down opacity at a fixed direction for inspection, as a txt file:
   /*
