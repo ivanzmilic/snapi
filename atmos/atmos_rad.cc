@@ -253,7 +253,8 @@ fp_t ***atmosphere::opacity_custom(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t 
   fp_t ***op=thomson_sc(Ne_in,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering, will NOT memset to 0
   for(int a=0;a<natm;++a)
     // If it's not 'Ca', add the contribution to the opacity:
-    if (strcmp(atml[a]->get_frm(), "Ca")) 
+    //if (strcmp(atml[a]->get_frm(), "Ca") && strcmp(atml[a]->get_frm(), "Fe") && strcmp(atml[a]->get_frm(), "Ti"))
+    if (!strcmp(atml[a]->get_frm(), "Ca"))
       op=add(atml[a]->opacity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
   return op;
 }

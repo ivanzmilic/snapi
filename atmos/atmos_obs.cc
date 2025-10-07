@@ -61,8 +61,9 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
     op_background[l] = opacity_custom(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
     em_background[l] = emissivity_custom(T,Ne,Vr,Vt,B,theta,phi,lambda_vacuum[l]);
   }
+  
   // Output the background opacities and emissivities for inspection:
-  /*FILE * opfile;
+  FILE * opfile;
   opfile = fopen("op_nlte.dat","w");
   for (int x3i=x3l;x3i<=x3h;++x3i){
     for (int l=1;l<=nlambda;++l)
@@ -78,7 +79,10 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
         lambda_vacuum[l] * lambda_vacuum[l] / c);
     fprintf(emfile,"\n");
   }
-  fclose(emfile);*/
+  fclose(emfile);
+  // Remember to delete the output:
+  del_ft4dim(op_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(em_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
   
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);
