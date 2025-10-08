@@ -238,15 +238,9 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     fprintf(ftest, "%e %e\n", Ne[x1l][x2l][x3i], atml[0]->get_pop(x1l,x2l,x3i,0,0)); // Electron density and ground level Hydrogen
   }
   // Close the file
-  fclose(ftest);
+  fclose(ftest);*/
 
-   // Write down opacity at a fixed direction for inspection, as a txt file:
-  FILE * opfile;
-  opfile = fopen("opacity_background.dat","w");
-  for (int x3i=x3l;x3i<=x3h;++x3i)
-    for (int l=0;l<nlambda;++l)
-      fprintf(opfile,"%e %e \n", op_background[1][l][x1l][x2l][x3i], em_background[1][l][x1l][x2l][x3i]);
-  fclose(opfile);
+
 
   for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
   // cleanup background opacity

@@ -1,0 +1,72 @@
+MAKEFILE      = Makefile
+# local variables
+OPTFLAGS      = -O4 -O5 -ffast-math
+WARNFLAGS     = -Wshadow
+DBGFLAGS      = -g3
+XTRAFLAGS     = -fsigned-char -Wno-free-nonheap-object# -fno-stack-protector
+# global variables
+AR	      = ar
+COMPILER      = g++
+RANLIB        = ranlib
+INCLUDE       = -I../include -I../atmos -I../grid -I.  -I/home/milic/Downloads/cfitsio-4.2.0/ -I/home/milic/Downloads/cfitsio-4.2.0//include 
+COMPFLAGS     = $(OPTFLAGS) $(WARNFLAGS) $(DBGFLAGS) $(XTRAFLAGS) $(TYPE_DEF)
+# export global variables
+export MAKE
+export COMPILER
+export INCLUDE
+export COMPFLAGS
+
+DEST	      = .
+SHELL         = /bin/sh
+
+CC	      = $(COMPILER)
+CCFLAGS	      = $(COMPFLAGS) $(INCLUDE)
+
+OBJS          = net.o uts.o mem.o fdset.o cmdln.o io.o pack.o compress.o \
+		jnfo.o cfguts.o flags.o struts.o mathtools.o\
+                anacompress.o anadecompress.o ana_read.o ana_write.o fileio.o idl_read.o fits_read.o imgtools.o\
+                profiles.o obs.o
+
+#SUBDIRS       = atmos
+#LIB_LIBS      = atmos/libatmos.a
+                
+LIBRARY       = libcm.a
+
+.cc.o:
+		$(CC) -c $(CCFLAGS) $<
+
+.SUFFIXES:	.o .cc
+	
+all:            
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) all -C $$subdir; done
+		$(MAKE) $(OBJS) ${LIBS} ${MAKEFILE}
+		@echo "Creating $(LIBRARY) ..."
+		@$(AR) cru $(LIBRARY) $(OBJS)
+		@echo -n "$(AR) cru $(LIBRARY) $(OBJS) "
+		@list='$(LIB_LIBS)' ; for lib in $$list ; do\
+                  echo -n `$(AR) t $$lib`" ";\
+                  $(AR) x $$lib;\
+                  $(AR) ru $(LIBRARY) `$(AR) t $$lib`;\
+                  $(RM) -f `$(AR) t $$lib`;\
+                done
+		@echo ""
+		$(RANLIB) $(LIBRARY)
+		@echo "done"
+
+clean:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) clean -C $$subdir; done
+		rm -f $(OBJS) core $(LIBRARY)
+
+distclean:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) distclean -C $$subdir; done
+		rm -f $(OBJS) core $(LIBRARY) $(MAKEFILE)
+
+dep:		depend
+
+depend:
+		@list='$(SUBDIRS)' ; for subdir in $$list ; do $(MAKE) depend -C $$subdir; done
+		@makedepend -f $(MAKEFILE) $(SRCS)
+
+update:		$(DEST)/$(LIBRARY) 
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
