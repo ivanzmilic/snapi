@@ -424,6 +424,13 @@ int atom::boundbound_op_em_vector(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt, 
             	gc = damp_col(x1i, x2i, x3i, z, i, ii, T[x1i][x2i][x3i], Ne[x1i][x2i][x3i], lam);
               fp_t a=sf*(ar+gc*turn_on_damping)/dld;
 
+              // Check if the line is the one we need
+              /*if (strcmp(id, "Ca")==0){
+                if (z==0 && ii==0 && i ==2)
+                fprintf(stderr,"CaI 4227A: x3i=%d a_here =%e a_other = %e\n",
+                  x3i, a, get_total_line_damping(x1l,x2l,x3i,0,0,2));
+              }*/
+
             	fp_t op_loc = (pop[x1i][x2i][x3i].n[z][ii]*Blu - pop[x1i][x2i][x3i].n[z][i]*Bul)*h*c/lam/4.0/pi;
             	fp_t em_loc = pop[x1i][x2i][x3i].n[z][i]*Aul*h*c/lam/4.0/pi;
 

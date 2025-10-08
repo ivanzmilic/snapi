@@ -105,13 +105,20 @@ protected:
   fp_t ***project(fp_t***,fp_t***,fp_t***,fp_t,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ****transform(fp_t***,fp_t***,fp_t***,fp_t,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   void transform_responses(fp_t ****, fp_t, fp_t, int, int);
-// atmos_rad.cc: radiative quantities
-// frequency-by-frequency
+  
+  // atmos_rad.cc: radiative quantities
+  // frequency-by-frequency
+
+  // Most of these functions take in unnecessary quantities given that they are atmosphere methods and already
+  // Have access to the Temperature, electron density, etc. #TODO
   fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
   fp_t ***opacity_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***emissivity_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+  fp_t ***opacity_custom(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***emissivity_custom(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
   fp_t ***opacity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***emissivity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
