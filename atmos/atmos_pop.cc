@@ -214,7 +214,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   
   // TODO: put this all in a single method that can be called when needed, not always
   
-  /*FILE * ftest = fopen("atmosphere_ca4227_lineparams.dat","w");
+  FILE * ftest = fopen("atmosphere_ca4227_lineparams.dat","w");
   for (int x3i=x3l; x3i<=x3h; ++x3i){
     fprintf(ftest, "%d ", x3i);
     // Needed atmospheric parameters
@@ -238,7 +238,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
     fprintf(ftest, "%e %e\n", Ne[x1l][x2l][x3i], atml[0]->get_pop(x1l,x2l,x3i,0,0)); // Electron density and ground level Hydrogen
   }
   // Close the file
-  fclose(ftest);*/
+  fclose(ftest);
 
 
 

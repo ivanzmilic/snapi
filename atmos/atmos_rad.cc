@@ -252,9 +252,12 @@ fp_t ***atmosphere::opacity_custom(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp_t 
 {
   fp_t ***op=thomson_sc(Ne_in,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering, will NOT memset to 0
   for(int a=0;a<natm;++a)
-    // If it's not 'Ca', add the contribution to the opacity:
+    // If it's not 'Ca', Fe or Ti, add the contribution to the opacity, that should be continuum:
     //if (strcmp(atml[a]->get_frm(), "Ca") && strcmp(atml[a]->get_frm(), "Fe") && strcmp(atml[a]->get_frm(), "Ti"))
-    if (!strcmp(atml[a]->get_frm(), "Ca"))
+    // If it is specifically Ca 
+    //if (!strcmp(atml[a]->get_frm(), "Ca"))
+    // If it is specifically Fe or Co
+    if (!strcmp(atml[a]->get_frm(), "Fe") || !strcmp(atml[a]->get_frm(), "Co"))
       op=add(atml[a]->opacity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
   return op;
 }
@@ -271,7 +274,11 @@ fp_t ***atmosphere::emissivity_custom(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp
 
   for(int a=0;a<natm;++a)
     // If it's not 'Ca', add the contribution to the opacity:
-    if (strcmp(atml[a]->get_frm(), "Ca")) 
+    //if (strcmp(atml[a]->get_frm(), "Ca") && strcmp(atml[a]->get_frm(), "Fe") && strcmp(atml[a]->get_frm(), "Ti"))
+    // If it is specifically Ca
+    //if (!strcmp(atml[a]->get_frm(), "Ca")) 
+    // If it is specifically Fe or Co
+    if (!strcmp(atml[a]->get_frm(), "Fe") || !strcmp(atml[a]->get_frm(), "Co"))
       em=add(atml[a]->emissivity(T_in,Ne_in,Vlos,Vt_in, B, theta,phi,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
   return em;
 }
@@ -665,6 +672,45 @@ fp_t atmosphere::get_opacity_fudge(fp_t lambda){
 
   fudge*=(1.0+0.666667*lb_coeff);
   return fudge;
+}
+
+void atmosphere::print_custom_opacity(const char *op_out, const char *em_out, fp_t ***Vlos, fp_t ****B, fp_t theta, fp_t phi, fp_t *lambda, int32_t nlambda){
+
+  // Here we want to calculate the background (so all LTE) opacities, but wavelength-dependent so that 
+  // we can output them for synthesis by Gioele and others: 
+  
+  fp_t **** op_background;
+  fp_t **** em_background;
+  op_background = new fp_t***[nlambda]-1;
+  em_background = new fp_t***[nlambda]-1;
+  for (int l=1; l<=nlambda; ++l){
+    op_background[l] = opacity_custom(T,Ne,Vlos,Vt,B,theta,phi,lambda[l]);
+    em_background[l] = emissivity_custom(T,Ne,Vlos,Vt,B,theta,phi,lambda[l]);
+  }
+  
+  // Output the background opacities and emissivities for inspection:
+  
+  FILE * opfile;
+  opfile = fopen(op_out,"w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opfile,"%e ", op_background[l][x1l][x2l][x3i]);
+    fprintf(opfile,"\n");
+  }
+  fclose(opfile);
+  FILE * emfile;
+  emfile = fopen(em_out,"w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(emfile,"%e ", em_background[l][x1l][x2l][x3i] * //
+        lambda[l] * lambda[l] / c);
+    fprintf(emfile,"\n");
+  }
+  fclose(emfile);
+  // Remember to delete the output:
+  del_ft4dim(op_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(em_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+
 }
 
 

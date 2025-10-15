@@ -293,6 +293,8 @@ public:
 
   virtual void print_atmos();
 
+  virtual void print_custom_opacity(const char *, const char *, fp_t ***, fp_t ****, fp_t, fp_t, fp_t*, int32_t);
+
 // atmos_fit.cc various fitting examples, routines and testing:
   virtual observable *stokes_lm_fit(observable *, fp_t, fp_t, model *); // Function which performs a levenberg-marquard fit
   
