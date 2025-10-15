@@ -48,8 +48,9 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   fp_t * lambda_vacuum = airtovac(lambda+1,nlambda);
   lambda_vacuum -=1;
   
-  // Debug line:
-  print_custom_opacity("opacity.dat","emissivity.dat",Vr,B,theta,phi,lambda_vacuum,nlambda);
+  //Debug line:
+  //print_custom_opacity("opacity.dat","emissivity.dat",Vr,B,theta,phi,lambda_vacuum,nlambda);
+  //print_line_parameters("atmosphere_ca4227_lineparams.dat", "Ca", 0, 0, 2); // Filename, element, ion, lower level, upper level
 
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
   fp_t *****  em_vector = ft5dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4);

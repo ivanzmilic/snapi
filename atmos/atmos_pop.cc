@@ -210,38 +210,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
 
-  // Hard-coding the output of the Ca I 4227 line populations and other parameters for testing purposes / needed by Gioele:
-  
-  // TODO: put this all in a single method that can be called when needed, not always
-  
-  FILE * ftest = fopen("atmosphere_ca4227_lineparams.dat","w");
-  for (int x3i=x3l; x3i<=x3h; ++x3i){
-    fprintf(ftest, "%d ", x3i);
-    // Needed atmospheric parameters
-    fprintf(ftest, "%e %e %e ", x3[x3i]/1E5, T[x1l][x2l][x3i], Vt[x1l][x2l][x3i]);
-    // Line parameters
-    for(int a=0;a<natm;++a)
-      if (!strcmp(atml[a]->get_frm(),"Ca")){
-        // We need the lower and upper level of the transition:
-        int l_l = 0; // Lower level of the Ca I 4227 line
-        int l_u = 2; // Upper level of the Ca I 4227 line
-        // Get the damping from the dedicated function:
-        fprintf(ftest, "%e ", atml[a]->get_total_line_damping(x1l,x2l,x3i,0,l_l,l_u)); // Damping of the Ca I 4227 line
-        // Need to fetch the populations of the lower and upper level of the 4227 line, which are 0 and 2 in the current ordering
-        fprintf(ftest, "%e %e ", atml[a]->get_pop(x1l,x2l,x3i,0,l_l), atml[a]->get_pop(x1l,x2l,x3i,0,l_u)); // Ground and upper level of Ca I 4227
-        // Need to fetch the collisional rates between the two levels:
-        fprintf(ftest, "%e ", atml[a]->get_C_ij(x1l,x2l,x3i,0,l_u,l_l));
-        // What is Qel? Could be damping due to elastic collisions? # TODO
-        fprintf(ftest, "%e ", atml[a]->get_damp_col(x1l,x2l,x3i,0,l_l,l_u));
-      }
-    // Finally we output the electron density and ground level Hydrogen density
-    fprintf(ftest, "%e %e\n", Ne[x1l][x2l][x3i], atml[0]->get_pop(x1l,x2l,x3i,0,0)); // Electron density and ground level Hydrogen
-  }
-  // Close the file
-  fclose(ftest);
-
-
-
   for(int a=0;a<natm;++a) atml[a]->rtclean(ntp,nlambda,x1l,x1h,x2l,x2h,x3l,x3h); // uninitialize angular/wavelength redist/integration
   // cleanup background opacity
   for (int tp=1;tp<=ntp;++tp){
