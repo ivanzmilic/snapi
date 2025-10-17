@@ -5,9 +5,9 @@ import pyana
 
 # Load an atmosphere to get the T and N
 atmosfile = str(sys.argv[2])
-#atmos = np.loadtxt(atmosfile, unpack=True, skiprows=1) # might want to load this differently if you have a 3D model
-atmos = pyana.fzread(atmosfile)["data"]
-atmos = atmos[:,0,0,:] # just take the first column
+atmos = np.loadtxt(atmosfile, unpack=True, skiprows=1) # might want to load this differently if you have a 3D model
+#atmos = pyana.fzread(atmosfile)["data"]
+#atmos = atmos[:,0,0,:] # just take the first column
 
 T = atmos[2]
 p = atmos[3]
@@ -65,3 +65,12 @@ plt.colorbar()
 plt.title("RF to the pressure with const T")
 plt.tight_layout()
 plt.savefig("myrf.png",bbox_inches='tight')
+
+# Now let's plot spectrum
+plt.figure(figsize=[7,5])
+plt.plot(spectrum[0,:]*1E8,spectrum[1,:])
+plt.xlabel("Wavelength [A]")
+plt.ylabel("Intensity [erg/s/cm2/ster/cm]")
+plt.title("Spectrum")
+plt.tight_layout()
+plt.savefig("spectrum.png",bbox_inches='tight')
