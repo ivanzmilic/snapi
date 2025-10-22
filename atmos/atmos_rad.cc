@@ -283,6 +283,55 @@ fp_t ***atmosphere::emissivity_custom(fp_t ***T_in,fp_t ***Ne_in,fp_t ***Vlos,fp
   return em;
 }
 
+// ---------------------------------------------------------------------------------------------------------------------------
+// A bit more meaningful functions for opacity and emissivity of individual spectral lines:
+fp_t ***atmosphere::opacity_line_for_element(fp_t ***Vlos, fp_t ****B,fp_t theta,fp_t phi,fp_t lambda, const char* atom_symbol){
+  
+  // Better to start from zero, and add contributions so the code can return 0 if atom is not present
+  fp_t ***op=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+  memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  
+  for(int a=0;a<natm;++a)
+    // If it is specifically the requested atom
+    if (!strcmp(atml[a]->get_frm(), atom_symbol))
+      op=add(atml[a]->boundbound_op(T,Ne,Vlos,Vt, B, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
+  return op;
+}
+
+fp_t ***atmosphere::emissivity_line_for_element(fp_t ***Vlos, fp_t ****B,fp_t theta,fp_t phi,fp_t lambda, const char* atom_symbol){
+  
+  // Better to start from zero, and add contributions so the code can return 0 if atom is not present
+  fp_t ***em=ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
+  memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
+  
+  for(int a=0;a<natm;++a)
+    // If it is specifically the requested atom
+    if (!strcmp(atml[a]->get_frm(), atom_symbol))
+      em=add(atml[a]->boundbound_em(T,Ne,Vlos,Vt, B, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
+  return em;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// And two more functions for everything else:
+fp_t ***atmosphere::opacity_continuum(fp_t ***Vlos, fp_t ****B,fp_t theta,fp_t phi,fp_t lambda){
+  
+  fp_t ***op=thomson_sc(Ne,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering
+  for(int a=0;a<natm;++a) op=add(atml[a]->continuum_op(T, Ne, Vlos, Vt, B, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
+  return op;
+}
+
+fp_t ***atmosphere::emissivity_continuum(fp_t ***Vlos, fp_t ****B,fp_t theta,fp_t phi,fp_t lambda){
+
+  fp_t ***em=thomson_em(Ne,lambda,x1l,x1h,x2l,x2h,x3l,x3h); // electron scattering
+  for(int a=0;a<natm;++a) em=add(atml[a]->continuum_em(T, Ne, Vlos, Vt, B, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
+  return em;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// These below now have different form and at some point if you will have to make this consistent. 
+// Today is not the day.
+
+
 fp_t atmosphere::opacity_continuum(fp_t T_in, fp_t Ne_in, fp_t lambda, int x1i, int x2i, int x3i){
   // An ad-hoc function which computes continuum opacity for given point, and given frequency
   fp_t op_cont = 6.65E-25 * Ne_in;
@@ -674,42 +723,112 @@ fp_t atmosphere::get_opacity_fudge(fp_t lambda){
   return fudge;
 }
 
-void atmosphere::print_custom_opacity(const char *op_out, const char *em_out, fp_t ***Vlos, fp_t ****B, fp_t theta, fp_t phi, fp_t *lambda, int32_t nlambda){
+void atmosphere::print_custom_opacity(fp_t ***Vlos, fp_t ****B, fp_t theta, fp_t phi, fp_t *lambda, int32_t nlambda){
 
-  // Here we want to calculate the background (so all LTE) opacities, but wavelength-dependent so that 
+  // Here we put a bunch of hard-coded stuff that is needed by our colleagues for calculations and debugging:
   // we can output them for synthesis by Gioele and others: 
   
-  fp_t **** op_background;
-  fp_t **** em_background;
-  op_background = new fp_t***[nlambda]-1;
-  em_background = new fp_t***[nlambda]-1;
+  fp_t **** op_to_print;
+  fp_t **** em_to_print;
+  op_to_print = new fp_t***[nlambda]-1;
+  em_to_print = new fp_t***[nlambda]-1;
+
+  // Here we hard-code stuff:
+  // CALCIUM:
   for (int l=1; l<=nlambda; ++l){
-    op_background[l] = opacity_custom(T,Ne,Vlos,Vt,B,theta,phi,lambda[l]);
-    em_background[l] = emissivity_custom(T,Ne,Vlos,Vt,B,theta,phi,lambda[l]);
+    op_to_print[l] = opacity_line_for_element(Vlos,B,theta,phi,lambda[l], "Ca");
+    em_to_print[l] = emissivity_line_for_element(Vlos,B,theta,phi,lambda[l], "Ca");
   }
-  
   // Output the background opacities and emissivities for inspection:
-  
   FILE * opfile;
-  opfile = fopen(op_out,"w");
+  opfile = fopen("op_ca.dat","w");
   for (int x3i=x3l;x3i<=x3h;++x3i){
     for (int l=1;l<=nlambda;++l)
-      fprintf(opfile,"%e ", op_background[l][x1l][x2l][x3i]);
+      fprintf(opfile,"%e ", op_to_print[l][x1l][x2l][x3i]);
     fprintf(opfile,"\n");
   }
   fclose(opfile);
   FILE * emfile;
-  emfile = fopen(em_out,"w");
+  emfile = fopen("em_ca.dat","w");
   for (int x3i=x3l;x3i<=x3h;++x3i){
     for (int l=1;l<=nlambda;++l)
-      fprintf(emfile,"%e ", em_background[l][x1l][x2l][x3i] * //
+      fprintf(emfile,"%e ", em_to_print[l][x1l][x2l][x3i] * //
         lambda[l] * lambda[l] / c);
     fprintf(emfile,"\n");
   }
   fclose(emfile);
+
+  // Here we hard-code stuff:
+  // IRON
+  for (int l=1; l<=nlambda; ++l){
+    op_to_print[l] = opacity_line_for_element(Vlos,B,theta,phi,lambda[l], "Fe");
+    em_to_print[l] = emissivity_line_for_element(Vlos,B,theta,phi,lambda[l], "Fe");
+  }
+  // Output the background opacities and emissivities for inspection:
+  opfile = fopen("op_fe.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opfile,"%e ", op_to_print[l][x1l][x2l][x3i]);
+    fprintf(opfile,"\n");
+  }
+  fclose(opfile);
+  emfile = fopen("em_fe.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(emfile,"%e ", em_to_print[l][x1l][x2l][x3i] * //
+        lambda[l] * lambda[l] / c);
+    fprintf(emfile,"\n");
+  }
+  fclose(emfile);
+
+  // Here we hard-code stuff:
+  // TITANIUM
+  for (int l=1; l<=nlambda; ++l){
+    op_to_print[l] = opacity_line_for_element(Vlos,B,theta,phi,lambda[l], "Ti");
+    em_to_print[l] = emissivity_line_for_element(Vlos,B,theta,phi,lambda[l], "Ti");
+  }
+  // Output the background opacities and emissivities for inspection:
+  opfile = fopen("op_ti.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opfile,"%e ", op_to_print[l][x1l][x2l][x3i]);
+    fprintf(opfile,"\n");
+  }
+  fclose(opfile);
+  emfile = fopen("em_ti.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(emfile,"%e ", em_to_print[l][x1l][x2l][x3i] * //
+        lambda[l] * lambda[l] / c);
+    fprintf(emfile,"\n");
+  }
+  fclose(emfile);
+  
+  // PUT CONTINUUM OPACITY HERE
+  for (int l=1; l<=nlambda; ++l){
+    op_to_print[l] = opacity_continuum(Vlos,B,theta,phi,lambda[l]);
+    em_to_print[l] = emissivity_continuum(Vlos,B,theta,phi,lambda[l]);
+  }
+  // Output the background opacities and emissivities for inspection:
+  opfile = fopen("op_c.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opfile,"%e ", op_to_print[l][x1l][x2l][x3i]);
+    fprintf(opfile,"\n");
+  }
+  fclose(opfile);
+  emfile = fopen("em_c.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(emfile,"%e ", em_to_print[l][x1l][x2l][x3i] * //
+        lambda[l] * lambda[l] / c);
+    fprintf(emfile,"\n");
+  }
+  fclose(emfile);
+
   // Remember to delete the output:
-  del_ft4dim(op_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
-  del_ft4dim(em_background,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(op_to_print,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
+  del_ft4dim(em_to_print,1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h);
 
 }
 

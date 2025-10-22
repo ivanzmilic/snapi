@@ -123,17 +123,27 @@ protected:
   fp_t ***opacity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***emissivity_active_only(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
 
+  // But Here we can have functions that are in a reasonable form, no unnecessary arguments:
+
   // Active opacity/emissivity. All wavelengths simultaneously.
   // Written taking into account that this is a method, so we don't have
   // to pass everything.
+  // Only spectral line contributions to opacity and emissivity, line by line:
+  fp_t ***opacity_line_for_element(fp_t***,fp_t****,fp_t,fp_t,fp_t, const char*);
+  fp_t ***emissivity_line_for_element(fp_t***,fp_t****,fp_t,fp_t,fp_t, const char*);
   
+  // Everything else:
+  fp_t ***opacity_continuum(fp_t***,fp_t****,fp_t,fp_t,fp_t);
+  fp_t ***emissivity_continuum(fp_t***,fp_t****,fp_t,fp_t,fp_t);
+
+  // More 'localized' versions:
   fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
   fp_t ** opacity_continuum_derivative(fp_t, fp_t, fp_t, int, int, int);
 
-  
   fp_t ***thomson_sc(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ***thomson_em(fp_t***,fp_t,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
-// And then their corresponding sister functions:
+
+  // And then their corresponding sister functions:
   fp_t ***** opacity_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***** emissivity_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
   fp_t ***** opacity_pert_lte(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****,fp_t,fp_t,fp_t);
@@ -293,7 +303,7 @@ public:
 
   virtual void print_atmos();
 
-  virtual void print_custom_opacity(const char *, const char *, fp_t ***, fp_t ****, fp_t, fp_t, fp_t*, int32_t);
+  virtual void print_custom_opacity(fp_t ***, fp_t ****, fp_t, fp_t, fp_t*, int32_t);
   virtual void print_line_parameters(const char *, const char *, int, int, int);
 
 // atmos_fit.cc various fitting examples, routines and testing:

@@ -236,7 +236,7 @@ fp_t ***** h_minus_mol::add(fp_t *****src, fp_t *****dst, int32_t ll1, int32_t u
 // And now the ones for the opacity and emissivity:
 
 fp_t *** h_minus_mol::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,fp_t lambda){
-  //return 0;
+
   fp_t *** em = opacity(T, Ne, Vlos, Vt, B, theta, phi, lambda);
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
@@ -247,10 +247,35 @@ fp_t *** h_minus_mol::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, f
 }
 
 fp_t *** h_minus_mol::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,fp_t lambda){
+  
   fp_t *** op = boundfree_op(Vlos, lambda);
   op = add(freefree_op(T, Ne, Vlos, lambda), op, x1l, x1h, x2l, x2h, x3l, x3h);
   return op;
 }
+
+// ------------------------------------------------------------------------------------------------------------------------------------
+
+// And now the ones that return the continuum only, which means they are identifal to the ones above, I will just c/p:
+
+fp_t *** h_minus_mol::continuum_op(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt,fp_t**** B, fp_t lambda){
+  
+  fp_t *** op = boundfree_op(Vlos, lambda);
+  op = add(freefree_op(T, Ne, Vlos, lambda), op, x1l, x1h, x2l, x2h, x3l, x3h);
+  return op;
+}
+
+fp_t *** h_minus_mol::continuum_em(fp_t*** T,fp_t*** Ne,fp_t*** Vlos,fp_t*** Vt,fp_t**** B, fp_t lambda){
+  
+  fp_t *** em = continuum_op(T, Ne, Vlos, Vt, B, lambda);
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+      for(int x3i=x3l;x3i<=x3h;++x3i){
+       em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
+  }
+  return em;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 fp_t ***** h_minus_mol::emissivity_pert(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B, fp_t theta,fp_t phi,fp_t lambda){
   fp_t ***** em_pert = opacity_pert(T, Ne, Vlos, Vt, B, theta, phi, lambda);

@@ -34,9 +34,7 @@
 fp_t ***atom::opacity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_vec, fp_t theta,fp_t phi,fp_t lambda)
 {
   fp_t ***op=freefree_op(T,Ne,Vlos,lambda); // free-free opacity
-  op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);
-  //memset(op[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));
-  
+  op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h); // Rayleigh scattering  
   op=add(boundfree_op(Vlos,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);          // bound-free ionization
   op=add(boundbound_op(T,Ne,Vlos,Vt, B_vec, lambda),op,x1l,x1h,x2l,x2h,x3l,x3h); // bound-bound transitions
   
@@ -52,14 +50,40 @@ fp_t ***atom::emissivity(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t ****
   for(int x1i=x1l;x1i<=x1h;++x1i)
     for(int x2i=x2l;x2i<=x2h;++x2i)
         for(int x3i=x3l;x3i<=x3h;++x3i)
-            em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
-  //memset(em[x1l][x2l]+x3l,0,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));  
-  
+            em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]); // Assumes that free-free and rayleigh are in LTE (wrong but ok)
   em=add(boundfree_em(Vlos,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
   em=add(boundbound_em(T,Ne,Vlos,Vt, B_vec, lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
 
   return em;
 }
+
+// Same like these but just the continuum:
+
+fp_t ***atom::continuum_op(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_vec, fp_t lambda)
+{
+  fp_t ***op=freefree_op(T,Ne,Vlos,lambda); // free-free opacity
+  op=add(rayleigh_op(lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);  
+  op=add(boundfree_op(Vlos,lambda),op,x1l,x1h,x2l,x2h,x3l,x3h);          // bound-free ionization
+  
+  return op;
+}
+
+
+fp_t ***atom::continuum_em(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_vec, fp_t lambda)
+{
+  fp_t ***em=freefree_op(T,Ne,Vlos,lambda);
+  em=add(rayleigh_op(lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
+  
+  for(int x1i=x1l;x1i<=x1h;++x1i)
+    for(int x2i=x2l;x2i<=x2h;++x2i)
+        for(int x3i=x3l;x3i<=x3h;++x3i)
+            em[x1i][x2i][x3i] *= Planck_f(lambda, T[x1i][x2i][x3i]);
+  em=add(boundfree_em(Vlos,lambda),em,x1l,x1h,x2l,x2h,x3l,x3h);
+
+  return em;
+}
+
+// ------------- POLARIZED VERSIONS ---------------------------------------------------------------------------------------------
 
 fp_t ***atom::emissivity_polarized_dummy(fp_t ***T,fp_t ***Ne,fp_t ***Vlos,fp_t ***Vt, fp_t **** B_vec, fp_t theta,fp_t phi,fp_t lambda, fp_t)
 {
