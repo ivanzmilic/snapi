@@ -49,7 +49,7 @@ observable *atmosphere::obs_stokes(fp_t theta,fp_t phi,fp_t *lambda,int32_t nlam
   lambda_vacuum -=1;
   
   //Debug line:
-  //print_custom_opacity("opacity.dat","emissivity.dat",Vr,B,theta,phi,lambda_vacuum,nlambda);
+  //print_custom_opacity(Vr,B,theta,phi,lambda_vacuum,nlambda);
   //print_line_parameters("atmosphere_ca4227_lineparams.dat", "Ca", 0, 0, 2); // Filename, element, ion, lower level, upper level
 
   fp_t ****** op_vector = ft6dim(1,nlambda,x1l,x1h,x2l,x2h,x3l,x3h,1,4,1,4);
@@ -545,7 +545,7 @@ observable *atmosphere::obs_stokes_responses(fp_t theta,fp_t phi,fp_t *lambda,in
   
   end = clock();
   time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("Time spent on op/em + pert = %f \n", time_spent);
+  //printf("Time spent on op/em + pert = %f \n", time_spent);
 
   // This should transform responses
   transform_responses(d_obs_a, theta, phi, 1, nlambda);
@@ -656,7 +656,7 @@ observable *atmosphere::obs_stokes_num_responses(fp_t theta,fp_t phi,fp_t *lambd
     T[x1l][x2l][x3i] += 0.5 * d_T;
     
     // Density finite difference perturbations:
-    
+    /*
     fp_t d_Nt = delta_Nt_frac * Nt[x1l][x2l][x3i];
     Nt[x1l][x2l][x3i] += 0.5 * d_Nt;
 

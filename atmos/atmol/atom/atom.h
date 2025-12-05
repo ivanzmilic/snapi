@@ -134,6 +134,7 @@ protected:
   // -------------------------------------------------------------------------------------------------------------------
   // Private methods:
 
+  // Add, probably unnecessary, but ok:
   fp_t* add(fp_t*,fp_t*,int32_t);
   fp_t*** add(fp_t***,fp_t***,int32_t,int32_t,int32_t,int32_t,int32_t,int32_t);
   fp_t ****add(fp_t ****, fp_t ****, int32_t,int32_t,int32_t,int32_t,int32_t,int32_t, int32_t, int32_t);
@@ -141,6 +142,8 @@ protected:
   fp_t****** add(fp_t******, fp_t******, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
   fp_t******* add(fp_t*******, fp_t*******, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
 //
+// -----------------------------------------------------------------------------------------------------------------
+  // Old versions which calculated all the wavelengths at once - deprecated: #TODO
   fp_t *rayleigh_em(fp_t *lambda,int32_t nlambda);
   fp_t *rayleigh_op(fp_t *lambda,int32_t nlambda);
   virtual fp_t *freefree_op(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
@@ -150,6 +153,9 @@ protected:
   fp_t *boundbound_em(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
   fp_t *boundbound_op(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
 //
+// -----------------------------------------------------------------------------------------------------------------
+  // These are the functions which compute the opacity and emissivity contributions from different processes. 
+  // These are the ones we use to converge the NLTE populations
   virtual fp_t ***freefree_op(fp_t***,fp_t***,fp_t***,fp_t);
   virtual fp_t ***freefree_em(fp_t***,fp_t***,fp_t***,fp_t);
   virtual fp_t ***boundfree_op(fp_t***,fp_t);
@@ -162,13 +168,13 @@ protected:
   virtual fp_t ***** boundfree_op_pert(fp_t***,fp_t);
   virtual fp_t ***** boundfree_em_pert(fp_t***,fp_t);
   
-  fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
-  fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t);
+  fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t); // depreciated? 
+  fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t); // depreciated?
 //
-  // Overloaded versions of b-b functions, which also take magnetic field. 
+  // Then we would have overloaded versions of b-b functions, which also take magnetic field. 
   // Oringally they took the concentration of the collisional partner but we have dumped them. 
-  fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t);                       // |
-  fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
+  // But now we moved them to public
+  
   fp_t ***** boundbound_em_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t);                       // |
   fp_t ***** boundbound_op_pert(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
 
@@ -190,6 +196,8 @@ protected:
 
   // Now the boundbound, boundfree, freefree and Raileygh scattering functions. These ones compute the 
   // opacity and emissivity at once.
+  // ARE THESE EVER USED? #TODO
+// Maybe they are used in the final solution of the polarized case. THIS IS BAD PRACTICE, WE SHOULD HAVE CONSISTENT INTERFACES!!! #TODO
   virtual int rayleigh_op_em_scalar(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
   virtual int freefree_op_em_scalar(fp_t***,fp_t***,fp_t***, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
   virtual int boundbound_op_em_scalar(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****);
@@ -293,7 +301,12 @@ protected:
   fp_t boundbound_op(uint08_t,uint16_t,uint16_t,fp_t,fp_t,fp_t,fp_t,fp_t,struct pps&);
   fp_t boundfree_op(uint08_t,uint16_t,fp_t,fp_t,struct pps&); // absorption
   fp_t **weight(fp_t,fp_t,fp_t,fp_t,fp_t,struct pps&,fp_t,fp_t,fp_t);
-public:
+
+// ------- END OF PRIVATE METHODS --------------------------------------------------------------- |
+// --------PUBLIC METHODS ----------------------------------------------------------------------- |
+
+  public:
+  
   atom(atmcfg*,io_class&);
   atom(uint08_t*,int32_t&,uint08_t,io_class&);
   virtual ~atom(void);
@@ -314,19 +327,21 @@ public:
   virtual fp_t *opacity(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
   virtual fp_t *emissivity(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
   virtual fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+  virtual fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+                     
+  fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
+  fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t);  
+  fp_t ***continuum_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
+  fp_t ***continuum_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
   
   virtual fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
   virtual fp_t ** opacity_continuum_pert(fp_t, fp_t, fp_t, int, int, int);
-  
-  virtual fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   
   virtual fp_t ***emissivity_polarized_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t);
   virtual fp_t *****emissivity_polarized_perturbation_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t);
   
   virtual fp_t ***** opacity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ***** emissivity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-//  virtual fp_t *****opacity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t,fp_t);
-//  virtual fp_t ****emissivity(fp_t***,fp_t***,fp_t***,fp_t***,fp_t,fp_t,fp_t);
 //
 // vector quantities:
   virtual fp_t *****opacity_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);

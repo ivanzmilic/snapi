@@ -47,35 +47,39 @@ public:
   //
   int08_t has_id(uint64_t numid_in){ return numid==numid_in; };
   int08_t has_id(const char *id_in){ return !strcmp(id,id_in); };
-// opacity sources
+  // opacity sources
   virtual fp_t *opacity(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
   virtual fp_t *emissivity(fp_t,fp_t,fp_t*,int32_t,int32_t,int32_t,int32_t);
-// we are using these two:
+  // we are using these two:
   virtual fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-  virtual fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int){
-    return 0;
-  };
-  virtual fp_t ** opacity_continuum_pert(fp_t, fp_t, fp_t, int, int, int){
-    return 0;
-  };
   virtual fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-  virtual fp_t ***emissivity_polarized_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t){
-    return 0;
-  };
-  virtual fp_t *****emissivity_polarized_perturbation_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t){
-    return 0;
-  };
-// and then their perturbations
+  
+  virtual fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int){return 0;};
+  virtual fp_t ** opacity_continuum_pert(fp_t, fp_t, fp_t, int, int, int){return 0;};
+  
+  // These are now public for debug purposes:
+  virtual fp_t ***boundbound_em(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t){return 0;};                       
+  virtual fp_t ***boundbound_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t){return 0;};
+  virtual fp_t ***continuum_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t){return 0;};
+  virtual fp_t ***continuum_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t){return 0;};
+
+  
+  virtual fp_t ***emissivity_polarized_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t){return 0;};
+  virtual fp_t *****emissivity_polarized_perturbation_dummy(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t, fp_t){return 0;};
+
+  // and then their perturbations
   virtual fp_t ***** opacity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ***** emissivity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
-// vector quantities:
+
+  // vector quantities:
   virtual fp_t *****opacity_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t ****emissivity_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+  
   // perturbations of vector quantities:
   virtual fp_t ******* opacity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
   virtual fp_t ******  emissivity_vector_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t){return 0;};
   
-  // Merged version with all wavelength points at once:
+  // Merged version with all wavelength points at once: // Do we ever use these? #TODO
   virtual int op_em_scalar(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ****, fp_t ****){return 0;};
   virtual int op_em_vector(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,fp_t ******, fp_t *****){return 0;};
   virtual int op_em_vector_plus_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t*,int,

@@ -86,10 +86,3 @@ plt.xlim(5892.0, 5898.0)
 plt.ylim(h[-1],1100)
 plt.tight_layout()
 plt.savefig("myrf.png",bbox_inches='tight')
-plt.savefig("Na_D1_rfs_falc.eps",bbox_inches='tight')
-
-# Alsoo plot the spectrum just in case:
-plt.clf()
-plt.figure(figsize=[8,5])
-plt.plot(spectrum[0,:]*1E8,spectrum[1,:])
-plt.savefig("spectrum.png",bbox_inches='tight')

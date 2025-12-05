@@ -157,7 +157,6 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
             em_background[tp][l] = emissivity_lte(T,Ne,Vr,Vt,B,th[tp],ph[tp],lambda[l]);
           }
 
-          // This now implies that the opacity and emissivity are 1D only, and scalar:
           fp_t ***op = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
           fp_t ***em = ft3dim(x1l,x1h,x2l,x2h,x3l,x3h);
           memcpy(op[x1l][x2l]+x3l,op_background[tp][l][x1l][x2l]+x3l,(x1h-x1l+1)*(x2h-x2l+1)*(x3h-x3l+1)*sizeof(fp_t));

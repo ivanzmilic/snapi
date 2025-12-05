@@ -88,9 +88,13 @@ public:
 
   // Now the ones which deal with opacity and emissivity:
   virtual fp_t ***opacity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+  virtual fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+  fp_t ***continuum_op(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
+  fp_t ***continuum_em(fp_t***,fp_t***,fp_t***,fp_t***,fp_t****, fp_t);
+  
   virtual fp_t opacity_continuum(fp_t, fp_t, fp_t, int, int, int);
   virtual fp_t ** opacity_continuum_pert(fp_t, fp_t, fp_t, int, int, int);
-  virtual fp_t ***emissivity(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
+ 
 
   virtual fp_t ***** opacity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
   virtual fp_t *****  emissivity_pert(fp_t***,fp_t***,fp_t***,fp_t***, fp_t****, fp_t,fp_t,fp_t);
