@@ -1,0 +1,20 @@
+info: job ID = 000001
+info: atmosphere::atmosphere: ID=Simple Atmosphere
+info: atmosphere::atmosphere: FILE=falc_61.dat
+info: atmosphere::read_spinor: /home/milic/codes/snapi/test_inv/falc_61.dat
+info: atmosphere::read_spinor: 61 depth points
+info: master::job : invert mode is : 1 
+info: master::job : return_model mode is : 1 
+info: master::job : return_atmos mode is : 1 
+info: master::job : inverting datacube: /home/milic/codes/snapi/test_inv/mock_spectrum.f0 
+info: reading ANA file "/home/milic/codes/snapi/test_inv/mock_spectrum.f0"
+info: master::job : cube properly read. dimensions: nx = 1 ny = 1 ns = 4  nlambda = 51 
+info: master::job : input lambda array has 51 wavelengths. 
+info: master::job : inverting subfield with xrange = 1, 1; yrange = 1, 1; lrange = 11, 51 
+[ 1, 1]
+warning: job_class::stop: done. writing the data...
+warning: job_class::writing out the atmospheric model ...
+total reduction time: 0-00:00:16
+breakdown by slave:
+ron.leibniz-kis.de[1568473]: user 13.770s (100.0%) system 0.370s (100.0%)   1 subfield  (100.0%)
+
