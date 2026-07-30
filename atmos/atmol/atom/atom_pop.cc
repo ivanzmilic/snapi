@@ -104,6 +104,18 @@ fp_t * atom::newpops(int32_t x1i,int32_t x2i,int32_t x3i, int alo){
       }
     }
   
+    // Before the solution of the system and before we replace one of the equatiosn with the conservation equation, we want to 
+    // output the whole rate matrix to a file for debugging purposes.
+    // Append all to one file
+    FILE * output;
+    output = fopen("rate_matrix.dat","a");
+    fprintf(output,"z_index = %d \n", x3i);
+    for (int i=0;i<nmap;++i){
+      for (int ii=0;ii<nmap;++ii)
+        fprintf(output,"%e ",M[i+1][ii+1]);
+      fprintf(output,"\n");
+    }
+    fclose(output);
 
     // Pick which level to replace with the conservation equation:
     // Default is the last one, but that is the poor choice, you want to replace one with the largest population.

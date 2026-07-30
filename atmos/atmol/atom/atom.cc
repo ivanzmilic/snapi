@@ -235,10 +235,11 @@ atom::atom(atmcfg *cfg,io_class &io_in):atmol(cfg->name,cfg->id,io_in)
       for(int ll=0;ll<lu;++ll){ // lower level
         fp_t lam=h*c/(ee[z][lu]-ee[z][ll]);
         A[z][lu][ll]=cfg->ion[z]->level[lu]->A[ll]; // Aul
+        // This are Einstein relations for the B that takes into account the intensity per Hz
         B[z][lu][ll]=((lam*lam*lam)/(2.0*h*c))*A[z][lu][ll]; // Bul
         B[z][ll][lu]=((fp_t)(g[z][lu])/(fp_t)(g[z][ll]))*B[z][lu][ll]; // Blu
 
-        // Modifications in order to have B in proper units.
+        // Modifications in order to have B in proper units, that is to have it for the intensity per cm
         B[z][lu][ll] *= lam * lam / c;
         B[z][ll][lu] *= lam * lam / c;
         //
@@ -571,6 +572,24 @@ fp_t atom::get_level_energy(int z_in, int l_in){
   }
   return ee[z_in][l_in];
 }
+
+int atom::get_no_transitions(){
+  return ntr;
+}
+
+uint32_t** atom::get_inverse_tmap(){
+  uint32_t ** itmpcpy =  ui32t2dim(1, ntr, 1, 4);
+  memcpy(itmpcpy, inverse_tmap, ntr*4*sizeof(uint32_t));
+  return itmpcpy;
+}
+
+uint32_t atom::get_inverse_tmap_element(int tr, int element){
+  if (tr < 1 || tr > ntr || element < 1 || element > 4){
+    return -1; // basically an error as it cannot be -1
+  }
+  return inverse_tmap[tr][element];
+}
+
 
 // 
 fp_t *atom::rayleigh_em(fp_t *lambda,int32_t nlambda)
@@ -2145,6 +2164,9 @@ fp_t atom::pops(atmol **atm,uint16_t natm,fp_t Temp,fp_t ne,int32_t x1i,int32_t 
 
 // In this particular function we do it by means of MALI as given in Rybicki & Hummer. Equations 
 // of SE are linear with respect to level populations.
+
+// IMPORTANT: THIS FUNCTION IS ACTUALLY DEPRECATED. WE USE atom::newpops(...) FROM THE ATOM_POPS.CC FILE.
+// TODO: Remove this function and all its references from the code. WTF
 
 {
 

@@ -115,7 +115,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   io.msg(IOL_INFO, "atmosphere::nltepops: rt setup performed\n");
 
 // NLTE population loop
-  int32_t max_iter = 100;
+  int32_t max_iter = 300;
   fp_t relative_change = 1.0;
   
   if (tau_grid) compute_op_referent();
@@ -138,6 +138,19 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
   }
 
   for (iter = 0; iter<max_iter; ++iter){
+
+    // Output the iteration # in our debug files:
+    FILE * output;
+    output = fopen("rate_matrix.dat","a");
+    fprintf(output, "Iteration %d \n", iter);
+    fclose(output);
+    output = fopen("atm_lvl_pops.dat","a");
+    fprintf(output, "Iteration %d \n", iter);
+    fclose(output);
+     output = fopen("debug_quantities_comprehensive.dat","a");
+    fprintf(output, "Iteration %d \n", iter);
+    fclose(output);
+
       
     for(int a=0;a<natm;++a) atml[a]->rtinit();         // clear transition parameters for each atom
     
@@ -188,6 +201,27 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
 
       }
 
+    // Here we want to output the things:
+    FILE * out;
+    out = fopen("debug_quantities_comprehensive.dat", "a");
+    // Loop throough depths:
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fprintf(out,"z = %1.10e \n", x3[x3i]);
+      for(int a=0;a<natm;++a){
+        if (atml[a]->check_if_nlte()){
+          // Print the name of the atom:
+          fprintf(out,"Atom = %s \n", atml[a]->get_frm());
+          
+          // Now you need to loop through the *transitions* and print the J, L, norm
+          for (int tr=1; tr<=atml[a]->get_no_transitions(); ++tr){
+            //fprintf(out,"%1.10e %1.10e %1.10e ", atml[a]->get_Jb(tr,x3i), atml[a]->get_Ls(tr,x3i), atml[a]->get_norm(tr,x3i));
+            fprintf(out, "Transition = %d ll = %d ul = %d J = %1.10e L = %1.10e norm = %1.10e \n", tr, atml[a]->get_inverse_tmap_element(tr,3), atml[a]->get_inverse_tmap_element(tr,4),
+              atml[a]->get_J(x1l, x2l, x3i, tr), atml[a]->get_L(x1l, x2l, x3i, tr), atml[a]->get_norm(x1l, x2l, x3i, tr));
+          }
+        }
+      }
+    }
+    fclose(out);
     // Update according to ALI
     relative_change = newpops(T,Nt,Ne,lambda,nlambda,1);
     //io.msg(IOL_INFO, "\n atmosphere::nltepops : relative change after iteration %d is %.10e \n", iter, relative_change); 
@@ -204,7 +238,7 @@ int atmosphere::nltepops(void) // compute the NLTE populations (polarization fre
       }
     }
 
-    if (relative_change < 1E-2)
+    if (relative_change < 1E-3)
       break; 
   }
   io.msg(IOL_INFO, "atmosphere::nltepops : converged\n"); 
@@ -357,6 +391,18 @@ fp_t atmosphere::newpops(fp_t ***T_in,fp_t ***Nt_in,fp_t ***Ne_in,fp_t *lambda,i
 
     // Using atm_lvl_pops to keep the proposed new values:
     atm_lvl_pops = ft4dim(x1l,x1h,x2l,x2h,x3l,x3h,1,n_lvls);
+
+    // For the debug purposes, copy the current values of the level populations to the atm_lvl_pops array:
+    atm_pop_fill();
+    // Brute force write the level populations to a file:
+    FILE * output;
+    output = fopen("atm_lvl_pops.dat","a");
+    for (int x3i=x3l;x3i<=x3h;++x3i){
+      fprintf(output, "z = %1.10e \n", x3[x3i]);
+      for (int i=1;i<=n_lvls;++i)
+        fprintf(output, "%d %e \n", i, atm_lvl_pops[x1l][x2l][x3i][i]);
+    }
+    fclose(output);
 
     // This checks if we have negative populations.
     bool negative = false; 

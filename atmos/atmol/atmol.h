@@ -44,6 +44,9 @@ public:
   virtual int get_no_lvls(int){return 0;};
   virtual int get_total_lvls(){return 0;};
   virtual fp_t get_level_energy(int, int){return 0;};
+  virtual int get_no_transitions(){return 0;}; // General particle has no transitions but atoms and molecules might
+  virtual uint32_t** get_inverse_tmap(){return 0;}; // Again, no inverse transition map for general particle, but atoms and molecules might have it
+  virtual uint32_t get_inverse_tmap_element(int, int){return 0;}; // Trying to see if this is neater
   //
   int08_t has_id(uint64_t numid_in){ return numid==numid_in; };
   int08_t has_id(const char *id_in){ return !strcmp(id,id_in); };

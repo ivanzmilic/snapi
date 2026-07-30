@@ -723,6 +723,18 @@ fp_t atmosphere::get_opacity_fudge(fp_t lambda){
   return fudge;
 }
 
+void atmosphere::print_total_opacity_emissivity(fp_t ****** op_vector, fp_t ***** em_vector, fp_t * lambda, int x3l, int x3h, int32_t nlambda){
+
+  FILE * opfile;
+  opfile = fopen("op_em_total.dat","w");
+  for (int x3i=x3l;x3i<=x3h;++x3i){
+    for (int l=1;l<=nlambda;++l)
+      fprintf(opfile,"%1.7e %1.7e %1.7e \n", lambda[l], op_vector[l][1][1][x3i][1][1], em_vector[l][1][1][x3i][1]);
+    fprintf(opfile,"\n");
+  }
+  fclose(opfile);
+}
+
 void atmosphere::print_custom_opacity(fp_t ***Vlos, fp_t ****B, fp_t theta, fp_t phi, fp_t *lambda, int32_t nlambda){
 
   // Here we put a bunch of hard-coded stuff that is needed by our colleagues for calculations and debugging:

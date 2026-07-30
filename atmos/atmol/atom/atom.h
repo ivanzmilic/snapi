@@ -96,7 +96,7 @@ protected:
 
 
   fp_t ****Jb; // angular and frequency integrated intensity up->down
-  fp_t ****Ju; // angular and frequency integrated intensity down-up
+  fp_t ****Ju; // angular and frequency integrated intensity down->up
   // ----------------------------------------------------------------------------------------------------------------
   // Random thoughts in the morning (02/06/2015): These are not "frequency and angle integrated intensities." 
   // It is better to think of them as terms which contain rates, or simple as radiative rates themselves. 
@@ -114,7 +114,7 @@ protected:
   fp_t ****Ls; // approximate lambda operator
   fp_t ****current_profile; // This saves the value of the current profile function for each transition @ each point
   fp_t ****norm; // This is intended to normalize the wavelength integration
-  fp_t *****norm_derivative; // This is the derivative of the 
+  fp_t *****norm_derivative; // This is the derivative of the norm
 
   fp_t *****Broyden; // Inverse broyden matrix <--- At the moment un-necesary.
 
@@ -319,6 +319,9 @@ protected:
   virtual int get_no_ions();
   virtual int get_no_lvls(int z_in);
   virtual int get_total_lvls();
+  virtual int get_no_transitions();
+  virtual uint32_t** get_inverse_tmap();
+  virtual uint32_t get_inverse_tmap_element(int tr, int index);
   virtual fp_t get_level_energy(int z, int i);
 
 //

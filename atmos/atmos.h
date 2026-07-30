@@ -303,6 +303,7 @@ public:
 
   virtual void print_atmos();
 
+  virtual void print_total_opacity_emissivity(fp_t ******, fp_t *****, fp_t *, int, int, int32_t);
   virtual void print_custom_opacity(fp_t ***, fp_t ****, fp_t, fp_t, fp_t*, int32_t);
   virtual void print_line_parameters(const char *, const char *, int, int, int);
 

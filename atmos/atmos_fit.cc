@@ -158,7 +158,7 @@ observable * atmosphere::stokes_lm_fit(observable * obs_to_fit, fp_t theta, fp_t
     fp_t ** S_reference = reference_obs->get_S(1,1);
     fp_t metric_reference = calc_chisq(S_to_fit,S_reference,nlambda,ws,wl);
     test_model->print();
-    fprintf(stderr, "atmosphere::stokes_lm_fit: test chi-squared = %e, \n", metric/4.0/nlambda/noise_level/noise_level);
+    //fprintf(stderr, "atmosphere::stokes_lm_fit: test chi-squared = %e, \n", metric/4.0/nlambda/noise_level/noise_level);
 
     if (metric_reference < metric){ // If the solution is better:
 
